@@ -650,7 +650,7 @@ function partida(ev, esporte, liga, comp) {
     inicio: inicio ? inicio.toISOString() : null,
     data: dataBrDe(inicio),
     estado,
-    status: statusTexto(cfg.esporte, status, (ev.season || {}).type),
+    status: statusTexto(cfg.esporte, status, (ev.season || {}).type ?? (ev.seasonType || {}).type),
     relogio: status.displayClock || null,
     periodo: status.period || null,
     casa: competidor(casa, estado),
@@ -742,7 +742,10 @@ async function buscarDatas(esporte, liga) {
       if (atual === null && fim >= agora) atual = semanas.length - 1;
     }
   }
-  return { tipo: semanas.length ? "semanas" : "dias", datas: [...datas].sort(), semanas, atual };
+  const liga0 = (dados.leagues || [{}])[0] || {};
+  // na MLB o calendário lista os dias SEM jogo
+  const dias = liga0.calendarIsWhitelist === false ? diasDoCalendario(liga0) : [...datas].sort();
+  return { tipo: semanas.length ? "semanas" : "dias", datas: dias, semanas, atual };
 }
 
 function estatisticasTimes(dados, jogo) {
@@ -900,7 +903,8 @@ async function buscarResumo(esporte, liga, eventoId) {
   }
   const header = dados.header || {};
   const comp = (header.competitions || [{}])[0];
-  const jogo = partida({ id: eventoId, week: header.week }, esporte, liga, comp);
+  const jogo = partida({ id: eventoId, week: header.week, season: header.season }, esporte, liga, comp);
+  jogo.nota = notaDoJogo(comp, header.gameNote) || jogo.nota; // no resumo, a série vem em lista e o nome em gameNote
   const info = dados.gameInfo || {};
   if (!jogo.local) jogo.local = localDe(info.venue);
   const esc = escalacoes(dados);

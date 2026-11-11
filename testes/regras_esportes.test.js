@@ -83,3 +83,29 @@ test("lancesPontuacao de outro esporte ou sem jogadas devolve null", () => {
   assert.equal(R.lancesPontuacao("football", []), null);
   assert.deepEqual(R.lancesPontuacao("hockey", undefined), []);
 });
+
+/* ---------- Correções da revisão final ---------- */
+
+test("diasDoCalendario: na MLB o calendário é a lista de dias SEM jogo", () => {
+  const dias = R.diasDoCalendario(amostra("mlb_calendario"));
+  assert.ok(dias.includes("2026-10-28"), "jogo 5 da World Series");
+  assert.ok(dias.includes("2026-10-23"), "jogo 1 da World Series");
+  assert.ok(!dias.includes("2026-10-20"), "dia sem jogo");
+  assert.ok(!dias.includes("2026-10-29"), "depois do fim");
+  assert.ok(!dias.includes("2026-07-13"), "folga do All-Star");
+  assert.equal(dias[0], "2026-02-20");
+  assert.deepEqual(dias, [...dias].sort());
+});
+
+test("diasDoCalendario: lista normal (NHL, NBA) devolve os próprios dias", () => {
+  const liga = { calendarIsWhitelist: true, calendar: ["2026-11-12T07:00Z", "2026-11-11T07:00Z", "2026-11-11T08:00Z"] };
+  assert.deepEqual(R.diasDoCalendario(liga), ["2026-11-11", "2026-11-12"]);
+  assert.deepEqual(R.diasDoCalendario({}), []);
+});
+
+test("notaDoJogo no formato do resumo do jogo: gameNote e a série dos playoffs", () => {
+  const h = amostra("mlb_ws_jogo5_resumo");
+  assert.equal(R.notaDoJogo(h.competitions[0], h.gameNote), "World Series - Game 5 · MIL ganhou a série 4-1");
+  const soTemporada = { series: [{ type: "current", summary: "TB ganhou a série 3-2" }, { type: "season", summary: "MIL ganhou a série 2-1" }] };
+  assert.equal(R.notaDoJogo(soTemporada), null, "fora dos playoffs não mostra série");
+});

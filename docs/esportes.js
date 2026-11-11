@@ -765,7 +765,7 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
     if (id === "jogadores") return jogadoresNFL(esp, liga, r.jogadores);
     if (id === "pre") return preJogoEspn(esp, liga, r);
     const blocos = [];
-    if (r.lances.length) blocos.push(secao(futebol ? "Lances" : "Pontuações", listaLances(r.lances, ladoDe, futebol, esp.id === "nfl")));
+    if (r.lances.length) blocos.push(secao(futebol ? "Lances" : "Pontuações", listaLances(r.lances, ladoDe, futebol, ["nfl", "mlb", "nhl"].includes(esp.id))));
     else if (j.estado === 1) blocos.push(secao(null, h("p", { class: "nota" }, "Os lances aparecem aqui quando o jogo começar.")));
     blocos.push(secao("Onde assistir no Brasil", blocoTransmissao(j.transmissao)));
     const info = [

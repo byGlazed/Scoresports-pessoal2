@@ -35,12 +35,41 @@ function statusAoVivo(esporteEspn, status) {
   return "Pênaltis";
 }
 
-/** "World Series - Game 5 · MIL ganhou a série 4-1": o nome do jogo e a situação da série, quando há. */
-function notaDoJogo(comp) {
+/**
+ * "World Series - Game 5 · MIL ganhou a série 4-1": o nome do jogo e a situação da série, quando há.
+ * Na lista de jogos a ESPN manda "series" como objeto; no resumo do jogo, como lista (current, season,
+ * playoff), e o nome do jogo vem em header.gameNote. Só a série dos playoffs interessa.
+ */
+function notaDoJogo(comp, gameNote = null) {
   if (!comp) return null;
-  const titulo = ((comp.notes || []).find((n) => n && n.headline) || {}).headline || null;
-  const serie = (comp.series && comp.series.summary) || null;
+  const titulo = ((comp.notes || []).find((n) => n && n.headline) || {}).headline || gameNote || null;
+  let serie = null;
+  if (Array.isArray(comp.series)) serie = (comp.series.find((s) => s && s.type === "playoff") || {}).summary || null;
+  else if (comp.series) serie = comp.series.summary || null;
   return [titulo, serie].filter(Boolean).join(" · ") || null;
+}
+
+const DIA_MS = 86400000;
+
+/**
+ * Dias (AAAA-MM-DD) da competição a partir do "calendar" da ESPN. Em geral ele lista os dias com jogo;
+ * na MLB (calendarIsWhitelist false) lista os dias SEM jogo, entre calendarStartDate e calendarEndDate.
+ */
+function diasDoCalendario(liga) {
+  liga = liga || {};
+  const dia = (iso) => new Date(Date.parse(iso)).toISOString().slice(0, 10);
+  const listados = (liga.calendar || []).filter((c) => typeof c === "string" && !Number.isNaN(Date.parse(c))).map(dia);
+  if (liga.calendarIsWhitelist !== false) return [...new Set(listados)].sort();
+  const ini = Date.parse(liga.calendarStartDate);
+  const fim = Date.parse(liga.calendarEndDate) - DIA_MS / 2; // o fim vem às 07:59Z do dia seguinte
+  if (Number.isNaN(ini) || Number.isNaN(fim)) return [];
+  const sem = new Set(listados);
+  const dias = [];
+  for (let t = Date.parse(dia(new Date(ini).toISOString()) + "T12:00:00Z"); t <= fim + DIA_MS / 2; t += DIA_MS) {
+    const d = new Date(t).toISOString().slice(0, 10);
+    if (d <= dia(new Date(fim).toISOString()) && !sem.has(d)) dias.push(d);
+  }
+  return dias;
 }
 
 /** Nomes das categorias de líderes que mudam de sentido conforme o esporte ("wins", "goals", "points"). */
@@ -104,5 +133,5 @@ function lancesPontuacao(esporteEspn, jogadas) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao };
+  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario };
 }
