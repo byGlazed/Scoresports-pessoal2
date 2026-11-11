@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 import boxe
 import cache
 import espn_dados
+import espn_extra
 import nba_dados
 
 logger = logging.getLogger("uvicorn.error")
@@ -30,12 +31,20 @@ def raiz():
     return FileResponse(PASTA_STATIC / "index.html")
 
 
-def _obter(chave, ttl, buscar, fonte="NBA"):
+def _motivo(erro):
+    """Resumo curto do erro, para aparecer na página (o detalhe completo fica no terminal)."""
+    texto = str(erro) or type(erro).__name__
+    if not isinstance(erro, espn_dados.ErroESPN):
+        texto = f"{type(erro).__name__}: {texto}"
+    return texto[:220]
+
+
+def _obter(chave, ttl, buscar, fonte="NBA", estavel=None):
     try:
-        return cache.obter(chave, ttl, buscar)
-    except Exception:
+        return cache.obter(chave, ttl, buscar, estavel=estavel)
+    except Exception as erro:
         logger.exception("Falha ao obter '%s'", chave)
-        raise HTTPException(status_code=502, detail=f"Não foi possível obter dados da {fonte} agora.")
+        raise HTTPException(status_code=502, detail=f"Não foi possível obter dados da {fonte} agora. Motivo: {_motivo(erro)}")
 
 
 def _opcional(chave, ttl, buscar):
@@ -105,7 +114,10 @@ def jogos(data: str | None = None):
 
 @app.get("/jogos/{game_id}/boxscore")
 def boxscore(game_id: str):
-    return _obter(f"boxscore_v5:{game_id}", TTL_AO_VIVO, lambda: nba_dados.buscar_boxscore(game_id))
+    # jogo encerrado não muda mais: fica guardado no banco
+    return _obter(
+        f"boxscore_v5:{game_id}", TTL_AO_VIVO, lambda: nba_dados.buscar_boxscore(game_id), estavel=lambda b: b.get("estado") == 3
+    )
 
 
 @app.get("/jogos/{game_id}/arremessos/{player_id}")
@@ -202,11 +214,14 @@ def espn_jogos(esporte: str, liga: str, de: str | None = None, ate: str | None =
         de, ate = ate, de
     if (date.fromisoformat(ate) - date.fromisoformat(de)).days > 14:
         raise HTTPException(status_code=400, detail="Escolha um período de até 15 dias.")
+    passado = ate < _hoje()
     return _obter(
         f"espn_jogos_v1:{esporte}:{liga}:{de}:{ate}",
         _ttl_por_data(de, ate),
         lambda: espn_dados.buscar_partidas(esporte, liga, de, ate),
         "ESPN",
+        # dia que já passou e com todos os jogos encerrados não muda mais
+        estavel=lambda jogos: passado and all(j["estado"] == 3 or j["status"] in ("Adiado", "Cancelado") for j in jogos),
     )
 
 
@@ -225,6 +240,7 @@ def espn_resumo(esporte: str, liga: str, evento_id: str):
         TTL_AO_VIVO,
         lambda: espn_dados.buscar_resumo(esporte, liga, evento_id),
         "ESPN",
+        estavel=lambda r: r["jogo"]["estado"] == 3,
     )
 
 
@@ -248,7 +264,7 @@ def espn_elenco(esporte: str, liga: str, time_id: str):
 def espn_atleta(esporte: str, liga: str, atleta_id: str):
     _config(esporte, liga)
     return _obter(
-        f"espn_atleta_v1:{esporte}:{liga}:{atleta_id}", 21600, lambda: espn_dados.buscar_atleta(esporte, liga, atleta_id), "ESPN"
+        f"espn_atleta_v1:{esporte}:{liga}:{atleta_id}", 86400, lambda: espn_dados.buscar_atleta(esporte, liga, atleta_id), "ESPN"
     )
 
 
@@ -273,9 +289,83 @@ def espn_evento(esporte: str, liga: str, evento_id: str, data: str | None = None
         )
     except LookupError as erro:
         raise HTTPException(status_code=404, detail=str(erro))
-    except Exception:
+    except Exception as erro:
         logger.exception("Falha ao obter evento %s", evento_id)
-        raise HTTPException(status_code=502, detail="Não foi possível obter dados da ESPN agora.")
+        raise HTTPException(status_code=502, detail=f"Não foi possível obter dados da ESPN agora. Motivo: {_motivo(erro)}")
+
+
+@app.get("/e/{esporte}/{liga}/lideres")
+def espn_lideres(esporte: str, liga: str):
+    """Top 10 de cada estatística (artilharia, assistências, cartões, jardas...)."""
+    _config(esporte, liga)
+    return _obter(
+        f"espn_lideres_v1:{esporte}:{liga}", 3 * 3600, lambda: espn_extra.buscar_lideres(esporte, liga), "ESPN"
+    )
+
+
+@app.get("/e/{esporte}/{liga}/ranking")
+def espn_ranking(esporte: str, liga: str):
+    """Ranking das categorias de peso (só UFC)."""
+    cfg, _ = _config(esporte, liga)
+    if cfg["tipo"] != "luta":
+        raise HTTPException(status_code=404, detail="Ranking só existe para o UFC.")
+    return _obter("ufc_ranking_v1", 6 * 3600, espn_extra.buscar_ranking_ufc, "ESPN")
+
+
+@app.get("/e/{esporte}/{liga}/atletas/{atleta_id}/historico")
+def espn_historico(esporte: str, liga: str, atleta_id: str):
+    """Carreira temporada por temporada (futebol) ou histórico de lutas (UFC)."""
+    cfg, _ = _config(esporte, liga)
+    if cfg["tipo"] == "luta":
+        return _obter(f"ufc_lutas_v1:{atleta_id}", 6 * 3600, lambda: espn_extra.buscar_lutas(atleta_id), "ESPN")
+    if cfg["esporte"] == "soccer":
+        return _obter(
+            f"futebol_carreira_v1:{liga}:{atleta_id}",
+            12 * 3600,
+            lambda: espn_extra.buscar_carreira_futebol(liga, atleta_id),
+            "ESPN",
+        )
+    return {"tipo": "nenhum"}
+
+
+# ---------- Busca e campeões ----------
+
+@app.get("/busca")
+def busca(q: str = Query("", max_length=60)):
+    """Procura jogadores, times e competições em todos os esportes."""
+    texto = q.strip()
+    if len(texto) < 2:
+        return {"ligas": [], "jogadores": [], "times": [], "falhas": []}
+    extras = [
+        {"esporte": "nba", "liga": "nba", "nome": "NBA", "tipo_esporte": "nba"},
+        {"esporte": "boxe", "liga": "boxe", "nome": "Boxe", "tipo_esporte": "boxe"},
+    ]
+    ligas = espn_extra.procurar_ligas(texto, extras)
+    falhas = []
+    lista_nba = _opcional("lista_jogadores_v1", 86400, nba_dados.buscar_jogadores_lista) or []
+    jogadores = [
+        {**p, "esporte": "nba", "liga": "nba", "descricao": "NBA" + ("" if p["ativo"] else ", aposentado")}
+        for p in nba_dados.procurar_jogadores(lista_nba, texto, limite=8)
+    ]
+    times = []
+    espn = _opcional(f"busca_espn_v1:{espn_extra._sem_acento(texto)}", 6 * 3600, lambda: espn_extra.buscar_espn(texto))
+    if espn is None:
+        falhas.append("ESPN")
+    else:
+        jogadores += espn["jogadores"]
+        times += espn["times"]
+    return {"ligas": ligas, "jogadores": jogadores, "times": times, "falhas": falhas}
+
+
+@app.get("/campeoes")
+def campeoes():
+    return espn_extra.campeoes()
+
+
+@app.get("/banco")
+def banco():
+    """Quanto está guardado no banco local (cache.db)."""
+    return cache.estatisticas()
 
 
 # ---------- Boxe (arquivo boxe_eventos.json) ----------

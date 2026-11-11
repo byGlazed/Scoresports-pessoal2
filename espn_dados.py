@@ -17,6 +17,7 @@ FUSO_BRASILIA = ZoneInfo("America/Sao_Paulo")
 BASE = "https://site.api.espn.com/apis/site/v2/sports"
 BASE_CLASSIFICACAO = "https://site.api.espn.com/apis/v2/sports"
 BASE_ATLETA = "https://site.web.api.espn.com/apis/common/v3/sports"
+BASE_CORE = "https://sports.core.api.espn.com/v2/sports"
 IDIOMA = {"lang": "pt", "region": "br"}
 CABECALHOS = {
     "User-Agent": (
@@ -47,6 +48,13 @@ ESPORTES = {
             {"id": "fra.1", "nome": "Ligue 1"},
             {"id": "por.1", "nome": "Liga Portugal"},
             {"id": "usa.1", "nome": "MLS"},
+            {"id": "fifa.friendly", "nome": "Amistosos de seleções", "selecao": True},
+            {"id": "fifa.worldq.conmebol", "nome": "Eliminatórias (América do Sul)", "selecao": True},
+            {"id": "fifa.worldq.uefa", "nome": "Eliminatórias (Europa)", "selecao": True},
+            {"id": "uefa.nations", "nome": "Liga das Nações", "selecao": True},
+            {"id": "fifa.world", "nome": "Copa do Mundo", "selecao": True},
+            {"id": "conmebol.america", "nome": "Copa América", "selecao": True},
+            {"id": "uefa.euro", "nome": "Eurocopa", "selecao": True},
         ],
     },
     "nfl": {
@@ -70,13 +78,30 @@ ESPORTES = {
 }
 
 
+_LIGA_VALIDA = re.compile(r"^[a-z0-9_]+(\.[a-z0-9_]+){0,3}$")
+
+
 def config(esporte, liga):
-    """Devolve (esporte, liga) da configuração ou levanta KeyError."""
+    """Devolve (esporte, liga) da configuração ou levanta KeyError.
+
+    No futebol, uma liga fora da lista também é aceita (a busca pode achar um jogador
+    da liga saudita, por exemplo): ela entra com o próprio código como nome.
+    """
     cfg = ESPORTES[esporte]
     for l in cfg["ligas"]:
         if l["id"] == liga:
             return cfg, l
+    if esporte == "futebol" and _LIGA_VALIDA.match(str(liga or "")):
+        return cfg, {"id": liga, "nome": liga}
     raise KeyError(liga)
+
+
+def nome_da_liga(liga):
+    for cfg in ESPORTES.values():
+        for l in cfg["ligas"]:
+            if l["id"] == liga:
+                return l["nome"]
+    return liga
 
 
 def lista_esportes():
@@ -86,10 +111,33 @@ def lista_esportes():
     ]
 
 
+class ErroESPN(RuntimeError):
+    """Falha ao falar com a ESPN, com uma mensagem curta que aparece na página."""
+
+
+def _pedir(url, params):
+    try:
+        return requests.get(url, params=params, headers=CABECALHOS, timeout=20)
+    except requests.exceptions.SSLError as erro:
+        raise ErroESPN("erro de certificado (SSL) ao acessar a ESPN; redes com filtro ou proxy costumam causar isso") from erro
+    except requests.exceptions.ConnectionError as erro:
+        raise ErroESPN("sem conexão com site.api.espn.com; a internet ou o firewall desta rede pode estar bloqueando a ESPN") from erro
+    except requests.exceptions.Timeout as erro:
+        raise ErroESPN("a ESPN demorou demais para responder") from erro
+
+
 def _get(url, params=None):
-    resp = requests.get(url, params={**IDIOMA, **(params or {})}, headers=CABECALHOS, timeout=20)
-    resp.raise_for_status()
-    return resp.json()
+    extra = params or {}
+    resp = _pedir(url, {**IDIOMA, **extra})
+    if 400 <= resp.status_code < 500:
+        # alguns endpoints recusam idioma e região: tenta de novo sem eles
+        resp = _pedir(url, extra)
+    if resp.status_code >= 400:
+        raise ErroESPN(f"a ESPN respondeu com erro {resp.status_code} em {url.split('/sports/')[-1]}")
+    try:
+        return resp.json()
+    except ValueError as erro:
+        raise ErroESPN("a resposta da ESPN não veio em JSON; algum filtro de rede pode estar trocando a página") from erro
 
 
 # ---------- Datas e horários ----------
@@ -417,20 +465,48 @@ def _partida(ev, esporte, liga, comp=None):
     return jogo
 
 
+def _eventos_periodo(url, d0, d1, info=None):
+    """Eventos do placar da ESPN entre os dias d0 e d1 (datas dos EUA), sem repetir.
+
+    A ESPN não aceita mais intervalo ('20261109-20261111'): responde erro 400. Ela aceita
+    um dia ('20261110'), um mês ('202611') ou um ano. Períodos curtos vão dia a dia
+    (respostas pequenas, boas para o placar ao vivo); os longos vão mês a mês.
+    """
+    dias = (d1 - d0).days + 1
+    if dias <= 4:
+        chaves = [_yyyymmdd(d0 + timedelta(days=i)) for i in range(dias)]
+    else:
+        chaves = sorted({(d0 + timedelta(days=i)).strftime("%Y%m") for i in range(dias)})
+    eventos, vistos = [], set()
+    for chave in chaves:
+        dados = _get(url, {"dates": chave, "limit": 1000})
+        if info is not None and not info.get("logo"):
+            logos = ((dados.get("leagues") or [{}])[0]).get("logos") or []
+            info["logo"] = logos[0].get("href") if logos and isinstance(logos[0], dict) else None
+        for ev in dados.get("events") or []:
+            ident = str(ev.get("id"))
+            if ident not in vistos:
+                vistos.add(ident)
+                eventos.append(ev)
+    return eventos
+
+
 def buscar_partidas(esporte, liga, de, ate=None):
     """Jogos entre as datas `de` e `ate` (AAAA-MM-DD, dias de Brasília)."""
     cfg, _ = config(esporte, liga)
     ate = ate or de
     d0, d1 = date.fromisoformat(de), date.fromisoformat(ate)
-    # a ESPN agrupa os dias pelo horário dos EUA: pede um dia a mais de cada lado e filtra
-    intervalo = f"{_yyyymmdd(d0 - timedelta(days=1))}-{_yyyymmdd(d1 + timedelta(days=1))}"
-    dados = _get(f"{BASE}/{cfg['esporte']}/{liga}/scoreboard", {"dates": intervalo, "limit": 1000})
+    # a ESPN agrupa os dias pelo horário dos EUA, que está atrás do de Brasília:
+    # um jogo à 0h30 de Brasília aparece no dia anterior de lá, por isso entra o dia antes
+    info = {}
+    eventos = _eventos_periodo(f"{BASE}/{cfg['esporte']}/{liga}/scoreboard", d0 - timedelta(days=1), d1, info)
     jogos = []
-    for ev in dados.get("events") or []:
+    for ev in eventos:
         try:
             jogo = _partida(ev, esporte, liga)
         except Exception:
             continue
+        jogo["liga_logo"] = info.get("logo")
         if jogo["data"] and de <= jogo["data"] <= ate:
             jogos.append(jogo)
     jogos.sort(key=lambda j: (j["inicio"] or "", j["id"]))
@@ -904,6 +980,7 @@ def _perfil_atleta(a):
         "pais": a.get("citizenship") or (a.get("flag") or {}).get("alt"),
         "posicao": _texto(a.get("position")),
         "time": _texto(a.get("team")),
+        "time_id": (a.get("team") or {}).get("id") if isinstance(a.get("team"), dict) else None,
         "camisa": a.get("jersey"),
         "idade": a.get("age"),
         "nascimento": nascimento,
@@ -974,8 +1051,15 @@ def buscar_atleta(esporte, liga, atleta_id):
     """Perfil e estatísticas da carreira, temporada por temporada, de qualquer atleta da ESPN."""
     cfg, _ = config(esporte, liga)
     base = f"{BASE_ATLETA}/{cfg['esporte']}/{liga}/athletes/{atleta_id}"
-    bio = _get(base).get("athlete") or {}
+    try:
+        bio = _get(base).get("athlete") or {}
+    except ErroESPN:
+        # o perfil comum não existe para alguns esportes (UFC): usa o Core API
+        bio = _get(f"{BASE_CORE}/{cfg['esporte']}/leagues/{liga}/athletes/{atleta_id}")
     carreira, falhas = [], []
+    if cfg["tipo"] in ("luta", "corrida") or cfg["esporte"] == "soccer":
+        # sem estatísticas por temporada no formato comum: o histórico vem de /historico
+        return {"perfil": _perfil_atleta(bio), "carreira": [], "falhas": []}
     try:
         carreira = _categorias_stats(_get(f"{base}/stats"))
     except Exception:
@@ -1084,7 +1168,8 @@ def _luta(comp):
         bandeira = a.get("flag") or {}
         lutadores.append(
             {
-                "id": a.get("id") or c.get("id"),
+                # no MMA a ESPN usa o id do competidor como id do lutador
+                "id": c.get("id") or a.get("id"),
                 "nome": a.get("displayName") or a.get("fullName"),
                 "foto": (a.get("headshot") or {}).get("href"),
                 "bandeira": bandeira.get("href"),
@@ -1120,9 +1205,8 @@ def buscar_evento(esporte, liga, evento_id, data=None):
         cal = buscar_eventos(esporte, liga)
         achado = next((e for e in cal["eventos"] if e["id"] == str(evento_id)), None)
         d = date.fromisoformat(achado["data"]) if achado and achado["data"] else date.today()
-    intervalo = f"{_yyyymmdd(d - timedelta(days=2))}-{_yyyymmdd(d + timedelta(days=5))}"
-    dados = _get(f"{BASE}/{cfg['esporte']}/{liga}/scoreboard", {"dates": intervalo})
-    ev = next((e for e in dados.get("events") or [] if str(e.get("id")) == str(evento_id)), None)
+    eventos = _eventos_periodo(f"{BASE}/{cfg['esporte']}/{liga}/scoreboard", d - timedelta(days=2), d + timedelta(days=5))
+    ev = next((e for e in eventos if str(e.get("id")) == str(evento_id)), None)
     if ev is None:
         raise LookupError("Evento não encontrado nessas datas.")
     nome = ev.get("name") or ev.get("shortName") or ""

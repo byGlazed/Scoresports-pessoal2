@@ -6,6 +6,17 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 
 ## Funcionalidades
 
+### Interface
+- Três colunas, no estilo do Sofascore e do Flashscore: **barra lateral** com as seções do esporte e as competições agrupadas (Brasil, América do Sul, Europa, Seleções), **lista de jogos** e **detalhe** do jogo escolhido.
+- **Faixa de dias** com ontem, hoje e amanhã, setas e calendário. Na NBA e numa competição escolhida, os dias sem jogo ficam apagados.
+- **Filtros** Todos, Ao vivo, Encerrados e Próximos, com a contagem de cada um.
+- Busca sempre à mão no topo (atalho: tecla `/`).
+- Em telas menores a barra lateral vira uma gaveta (botão ☰); no celular a lista e o detalhe ocupam a tela inteira.
+
+### Início e Pesquisa
+- **Favoritos:** a estrela ☆ ao lado de times, jogadores e competições guarda o favorito no navegador. A aba **Início** junta, no dia escolhido, os jogos de todos os favoritos (de qualquer esporte), com placar ao vivo e onde assistir.
+- **Pesquisa:** procura jogadores (inclusive aposentados da NBA), times, seleções, lutadores, pilotos e competições. Cada competição mostra atalhos para jogos, classificação e estatísticas, e os **últimos campeões**.
+
 ### NBA
 - **Jogos por dia:** navegação por setas ou calendário, da primeira rodada ao fim da temporada.
 - **Placar ao vivo:** a página se atualiza sozinha a cada 20 segundos enquanto há jogo em andamento.
@@ -19,7 +30,9 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **Classificação, líderes da temporada e corridas pelo MVP e pelo calouro do ano.**
 
 ### Futebol e NFL
-- **Futebol:** 14 competições (Brasileirão A e B, Copa do Brasil, Libertadores, Sul-Americana, Champions, Liga Europa, Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Liga Portugal e MLS). Dá para ver todos os jogos do dia juntos ou uma competição só.
+- **Futebol:** 14 competições de clubes (Brasileirão A e B, Copa do Brasil, Libertadores, Sul-Americana, Champions, Liga Europa, Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Liga Portugal e MLS) e 7 de seleções (amistosos, Eliminatórias da América do Sul e da Europa, Liga das Nações, Copa do Mundo, Copa América e Eurocopa). Dá para ver todos os jogos do dia juntos ou uma competição só.
+- **Artilharia e cartões (futebol) e Líderes (NFL):** top 10 de cada estatística da temporada atual. Torneios fora de época (Eurocopa, Copa América) mostram a última edição que tiver números, ou um aviso.
+- **Carreira de jogadores de futebol:** temporada por temporada, em todas as competições que a ESPN registra (jogos, gols, assistências, cartões).
 - **NFL:** navegação por semana da temporada.
 - **Detalhe da partida:** lances, estatísticas comparadas, escalações (futebol), estatísticas individuais (NFL), retrospecto, desfalques e onde assistir.
 - **Classificação** com as zonas de classificação e rebaixamento.
@@ -27,7 +40,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 
 ### Fórmula 1, UFC e boxe
 - **F1:** calendário da temporada, horários e resultados de cada sessão, classificação de pilotos.
-- **UFC:** eventos da temporada com o card completo, cartel dos lutadores e resultado de cada luta.
+- **UFC:** eventos da temporada com o card completo, cartel dos lutadores e resultado de cada luta; **ranking** de cada categoria de peso (e o peso por peso) e o **histórico de lutas** de cada lutador.
 - **Boxe:** agenda das principais noites de luta, lida do arquivo `boxe_eventos.json`.
 
 ### Onde assistir no Brasil
@@ -77,11 +90,13 @@ Scoresports-pessoal/
 ├── api.py              # rotas da API (FastAPI) e entrega da página
 ├── nba_dados.py        # busca e formata os dados da NBA (inclui carreira e busca de jogadores)
 ├── espn_dados.py       # futebol, NFL, F1 e UFC pela API pública da ESPN
+├── espn_extra.py      # líderes, ranking do UFC, lutas, carreira no futebol e busca
 ├── boxe.py             # lê a agenda de boxe
 ├── transmissoes.py     # decide onde cada jogo passa no Brasil
 ├── cache.py            # cache em SQLite com tempo de validade
 ├── transmissoes.json   # grade de transmissões (editável)
 ├── boxe_eventos.json   # agenda de boxe (editável)
+├── campeoes.json      # últimos campeões de cada competição (editável)
 ├── placar_nba.py       # script de terminal: placar do dia
 ├── box_score.py        # script de terminal: box score de um jogo
 ├── classificacao.py    # script de terminal: classificação das conferências
@@ -90,7 +105,8 @@ Scoresports-pessoal/
     ├── index.html
     ├── style.css
     ├── app.js          # base do site e módulo da NBA
-    └── esportes.js     # futebol, NFL, F1, UFC e boxe
+    ├── esportes.js     # futebol, NFL, F1, UFC e boxe
+    └── inicio.js       # aba Início (favoritos) e Pesquisa
 ```
 
 ## Rotas da API
@@ -126,18 +142,26 @@ Scoresports-pessoal/
 | `GET /e/{esporte}/{liga}/atletas/{id}` | Perfil e carreira de um atleta | 6 h |
 | `GET /e/{esporte}/{liga}/eventos` | Calendário de GPs (F1) ou eventos (UFC) | 1 h |
 | `GET /e/{esporte}/{liga}/eventos/{id}?data=` | Sessões e resultados (F1) ou card completo (UFC) | 30 s |
+| `GET /e/{esporte}/{liga}/lideres` | Top 10 de cada estatística (futebol e NFL) | 3 h |
+| `GET /e/{esporte}/{liga}/ranking` | Ranking das categorias de peso (UFC) | 6 h |
+| `GET /e/{esporte}/{liga}/atletas/{id}/historico` | Carreira por temporada (futebol) ou histórico de lutas (UFC) | 6 a 12 h |
+| `GET /busca?q=` | Jogadores, times e competições de todos os esportes | 6 h (parte da ESPN) |
+| `GET /campeoes` | Últimos campeões de cada competição | sem cache |
+| `GET /banco` | Quantos registros o banco local guarda e o tamanho do arquivo | sem cache |
 | `GET /boxe/eventos` | Agenda de boxe | sem cache |
 
 ## Como funciona
 
 ```
-navegador  ->  API (FastAPI)  ->  cache (SQLite)  ->  NBA (nba_api) / ESPN / arquivos JSON
+navegador  ->  API (FastAPI)  ->  banco local (SQLite, cache.db)  ->  NBA (nba_api) / ESPN / arquivos JSON
 ```
 
 1. O navegador só conversa com a API do próprio projeto.
-2. A API pede os dados ao `cache.py`. Se o dado salvo ainda está dentro do tempo de validade, ele volta na hora.
-3. Se venceu, o módulo do esporte busca na fonte, o resultado é salvo no banco (`cache.db`) e devolvido.
-4. Se a fonte falhar e houver um dado antigo salvo, ele é usado no lugar e a página continua funcionando.
+2. A API pede os dados ao `cache.py`, que guarda tudo num banco SQLite (`cache.db`). Se o dado guardado ainda vale, ele volta na hora, sem chamar API nenhuma.
+3. Cada dado tem uma validade de acordo com o quanto ele muda: placar ao vivo, 15 segundos; classificação, 30 minutos; perfil de atleta, 1 dia; dados de atleta e time do Core API da ESPN, 7 dias.
+4. **O que não muda mais fica guardado de vez (30 dias):** jogo encerrado, dia que já passou com todos os jogos encerrados. Abrir de novo um jogo de ontem não chama API nenhuma.
+5. Se a fonte falhar e houver um dado guardado, mesmo vencido, ele é usado no lugar e a página continua funcionando.
+6. Dados vencidos há mais de 60 dias são apagados quando o servidor liga, para o arquivo não crescer sem parar. `GET /banco` mostra quantos registros estão guardados.
 
 ## Mantendo as transmissões em dia
 
@@ -157,6 +181,10 @@ Salve e atualize a página. Não precisa reiniciar o servidor.
 
 Cada noite de lutas é um item em `boxe_eventos.json`. Depois da luta, preencha `vencedor` (com o nome do lutador, igual ao da lista `lutadores`) e `resultado` (por exemplo, "Nocaute técnico no 7º round").
 
+## Mantendo os campeões em dia
+
+Quando uma competição terminar, acrescente o novo campeão no topo da lista dela em `campeoes.json`, por exemplo `{"temporada": "2026", "campeao": "Palmeiras"}`.
+
 ## Configuração
 
 A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-27"`) no início do `nba_dados.py`. O `classificacao.py` tem a sua própria. Quando uma nova temporada começar, é só atualizar esse valor. Os outros esportes acompanham a temporada atual da ESPN sozinhos.
@@ -168,6 +196,9 @@ A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-2
 - A ESPN não publica estatísticas de carreira de todos os atletas; quando falta, o painel avisa.
 - A Globo transmite só 15 dos 24 GPs de F1 em TV aberta, e quais são varia. O padrão aponta SporTV e Globoplay, que passam todos.
 - O boxe depende do arquivo `boxe_eventos.json`, atualizado à mão.
+- Os favoritos ficam guardados no navegador: em outro navegador ou celular eles começam vazios.
+- Líderes, ranking do UFC, lutas e carreira no futebol usam o Core API da ESPN, que entrega os dados em vários pedaços. A primeira abertura de cada tela pode levar alguns segundos; depois fica no cache.
+- Em algumas competições a ESPN não publica cartões entre os líderes; a página avisa quando isso acontece.
 - A pré-temporada não aparece no calendário.
 
 ## Próximos passos
