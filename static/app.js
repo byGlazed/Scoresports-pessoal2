@@ -429,7 +429,7 @@ function barraData({ data, anterior, proximo, hoje, min, max, aoMudar, temJogo }
   const rotulo = (d) => {
     if (d === hoje) return "Hoje";
     if (d === somarDias(hoje, -1)) return "Ontem";
-    if (d === somarDias(hoje, 1)) return "Amanhã";
+    // amanhã aparece pelo dia da semana: "Amanhã" não cabe na coluna com a letra do celular aumentada
     return formatoSemana.format(meioDia(d)).replace(".", "");
   };
   const calendario = h("input", {

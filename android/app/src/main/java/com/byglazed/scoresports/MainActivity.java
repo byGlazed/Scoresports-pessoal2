@@ -55,6 +55,8 @@ public class MainActivity extends Activity {
         config.setAllowContentAccess(false);
         config.setMediaPlaybackRequiresUserGesture(true);
         config.setUserAgentString(config.getUserAgentString() + " ScoresportsApp/1.0");
+        // respeita o tamanho de letra do celular até +15%; acima disso o layout quebra
+        config.setTextZoom(Math.min(Math.round(getResources().getConfiguration().fontScale * 100), 115));
 
         web.setWebViewClient(new WebViewClient() {
             @Override

@@ -222,3 +222,4 @@ __marimo__/
 # Scoresports
 .venv/
 cache.db
+.superpowers/

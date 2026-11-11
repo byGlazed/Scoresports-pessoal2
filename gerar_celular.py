@@ -38,6 +38,7 @@ def main():
 
     for nome in TELAS:
         shutil.copy(RAIZ / "static" / nome, DOCS / nome)
+    shutil.copytree(RAIZ / "static" / "fontes", DOCS / "fontes")  # fonte Inter embutida
     for arquivo in (RAIZ / "celular").iterdir():
         if arquivo.is_file() and arquivo.name != "android.js":
             shutil.copy(arquivo, DOCS / arquivo.name)

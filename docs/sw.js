@@ -1,12 +1,13 @@
 /* Service worker: guarda o app no celular para ele abrir rápido e até sem internet.
    Os dados das partidas ficam no banco do navegador (IndexedDB), cuidado pelo direto.js. */
 
-const VERSAO = "20261110-175422"; // o gerar_celular.py troca por data e hora a cada geração
+const VERSAO = "20261111-154300"; // o gerar_celular.py troca por data e hora a cada geração
 const CACHE = `scoresports-${VERSAO}`;
 const ARQUIVOS = [
   "./",
   "./index.html",
   "./style.css",
+  "./fontes/inter.woff2",
   "./app.js",
   "./esportes.js",
   "./inicio.js",
@@ -38,22 +39,6 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET") return;
 
-  // fontes do Google: usa a guardada e atualiza por trás
-  if (url.hostname.endsWith("fonts.googleapis.com") || url.hostname.endsWith("fonts.gstatic.com")) {
-    e.respondWith(
-      caches.open(CACHE).then(async (c) => {
-        const guardada = await c.match(e.request);
-        const rede = fetch(e.request)
-          .then((r) => {
-            if (r.ok) c.put(e.request, r.clone());
-            return r;
-          })
-          .catch(() => guardada);
-        return guardada || rede;
-      })
-    );
-    return;
-  }
   if (url.origin !== self.location.origin) return; // ESPN e Wikipédia: o direto.js cuida
 
   // arquivos de dados (transmissões, boxe, campeões): tenta a rede primeiro para pegar a versão nova

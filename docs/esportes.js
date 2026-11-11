@@ -1076,7 +1076,7 @@ function caixaData(iso) {
   return h(
     "div",
     { class: "evento-data" },
-    h("div", { class: "dia" }, d.getUTCDate()),
+    h("div", { class: "dia-evento" }, d.getUTCDate()),
     h("div", { class: "mes" }, d.toLocaleDateString("pt-BR", { timeZone: "UTC", month: "short" }).replace(".", ""))
   );
 }
