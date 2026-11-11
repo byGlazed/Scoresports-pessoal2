@@ -979,17 +979,7 @@ async function buscarClassificacao(esporte, liga) {
 
 const GRUPOS_ELENCO_PT = { offense: "Ataque", defense: "Defesa", specialteam: "Times especiais", "special teams": "Times especiais", goalkeeper: "Goleiros", defender: "Defensores", midfielder: "Meio-campistas", forward: "Atacantes" };
 
-function atletaCurto(a) {
-  return {
-    id: a.id,
-    nome: a.displayName || a.fullName,
-    camisa: a.jersey || null,
-    posicao: (a.position || {}).abbreviation || (a.position || {}).name || null,
-    idade: a.age ?? null,
-    foto: (a.headshot || {}).href || null,
-    pais: a.citizenship || (a.flag || {}).alt || null,
-  };
-}
+// atletaCurto fica em time_dados.js (carregado antes deste arquivo)
 
 async function buscarElenco(esporte, liga, timeId) {
   const [cfg] = dConfig(esporte, liga);

@@ -1,7 +1,7 @@
 /* Service worker: guarda o app no celular para ele abrir rápido e até sem internet.
    Os dados das partidas ficam no banco do navegador (IndexedDB), cuidado pelo direto.js. */
 
-const VERSAO = "20261111-154300"; // o gerar_celular.py troca por data e hora a cada geração
+const VERSAO = "20261111-154640"; // o gerar_celular.py troca por data e hora a cada geração
 const CACHE = `scoresports-${VERSAO}`;
 const ARQUIVOS = [
   "./",
@@ -11,6 +11,7 @@ const ARQUIVOS = [
   "./app.js",
   "./esportes.js",
   "./inicio.js",
+  "./time_dados.js",
   "./direto.js",
   "./registrar.js",
   "./manifest.webmanifest",
