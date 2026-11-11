@@ -109,3 +109,19 @@ test("notaDoJogo no formato do resumo do jogo: gameNote e a série dos playoffs"
   const soTemporada = { series: [{ type: "current", summary: "TB ganhou a série 3-2" }, { type: "season", summary: "MIL ganhou a série 2-1" }] };
   assert.equal(R.notaDoJogo(soTemporada), null, "fora dos playoffs não mostra série");
 });
+
+test("estatisticasJogoBeisebol: achata os grupos da ESPN e traduz os números principais", () => {
+  const time = amostra("mlb_ws_jogo5_boxscore").teams[0];
+  const l = R.estatisticasJogoBeisebol(time.statistics);
+  const rotulos = l.map((x) => x.label);
+  assert.ok(rotulos.includes("Rebatidas"));
+  assert.ok(rotulos.includes("Erros"));
+  const rebatidas = time.statistics.find((g) => g.name === "batting").stats.find((s) => s.name === "hits").displayValue;
+  assert.equal(l.find((x) => x.label === "Rebatidas").displayValue, rebatidas);
+  assert.ok(l.every((x) => x.name && x.displayValue !== undefined));
+});
+
+test("estatisticasJogoBeisebol: lista sem grupos aninhados devolve null", () => {
+  assert.equal(R.estatisticasJogoBeisebol([{ name: "goals", displayValue: "3" }]), null);
+  assert.equal(R.estatisticasJogoBeisebol(undefined), null);
+});

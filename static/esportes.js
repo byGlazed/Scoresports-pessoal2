@@ -772,7 +772,7 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
       ["Local", r.info.local],
       ["Público", r.info.publico ? Number(r.info.publico).toLocaleString("pt-BR") : null],
       ["Arbitragem", r.info.arbitragem.join(", ")],
-      ["Rodada", j.nota || (j.semana ? `Semana ${j.semana}` : null)],
+      [["mlb", "nhl"].includes(esp.id) ? "Jogo" : "Rodada", j.nota || (j.semana ? `Semana ${j.semana}` : null)],
     ].filter(([, v]) => v);
     if (info.length) blocos.push(secao("Informações", h("ul", { class: "lista-simples" }, info.map(([k, v]) => h("li", null, h("span", { class: "sub" }, k), h("span", null, v))))));
     return blocos;

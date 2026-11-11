@@ -754,7 +754,7 @@ function estatisticasTimes(dados, jogo) {
   for (const t of times) {
     const time = t.team || {};
     const lado = t.homeAway ? (t.homeAway === "home" ? "casa" : "fora") : String(time.id) === String(jogo.casa.id) ? "casa" : "fora";
-    porLado[lado] = t.statistics || [];
+    porLado[lado] = estatisticasJogoBeisebol(t.statistics) || t.statistics || []; // beisebol vem em grupos
   }
   const linhas = [];
   const vistos = {};
@@ -768,7 +768,7 @@ function estatisticasTimes(dados, jogo) {
       vistos[chave][lado] = st.displayValue ?? null;
     }
   }
-  return linhas;
+  return linhas.filter((l) => l.casa !== null || l.fora !== null);
 }
 
 function jogadoresBox(dados) {
@@ -998,7 +998,7 @@ function gruposClassificacao(no, nomePai, saida) {
       };
     });
     if (linhas.some((l) => l.rank !== null && l.rank !== undefined)) linhas = linhas.sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999));
-    saida.push({ nome: no.name || nomePai, colunas, linhas });
+    saida.push({ nome: no.name || nomePai, pai: no.name ? nomePai : "", colunas, linhas });
   }
   for (const filho of no.children || []) gruposClassificacao(filho, no.name || nomePai, saida);
   return saida;
@@ -1006,8 +1006,12 @@ function gruposClassificacao(no, nomePai, saida) {
 
 async function buscarClassificacao(esporte, liga) {
   const [cfg] = dConfig(esporte, liga);
-  const dados = await espnGet(`${D_BASE_CLASS}/${cfg.esporte}/${liga}/standings`);
+  // MLB e NHL: até o nível das divisões
+  const dados = await espnGet(`${D_BASE_CLASS}/${cfg.esporte}/${liga}/standings`, ["mlb", "nhl"].includes(esporte) ? { level: 3 } : {});
   const grupos = gruposClassificacao(dados, "", []);
+  // nomes repetidos ("Leste" nas duas ligas da MLB) levam o nome do grupo de cima
+  const repetidos = new Set(grupos.map((g) => g.nome).filter((n, i, todos) => todos.indexOf(n) !== i));
+  for (const g of grupos) if (repetidos.has(g.nome) && g.pai) g.nome = `${g.pai} · ${g.nome}`;
   Indice.registrar(grupos.flatMap((g) => g.linhas.map((l) => ({ tipo: l.tipo, esporte, liga, id: l.id, nome: l.nome, descricao: cfg.nome, imagem: l.tipo === "time" ? l.logo : null }))));
   return { grupos };
 }

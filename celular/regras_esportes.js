@@ -132,6 +132,37 @@ function lancesPontuacao(esporteEspn, jogadas) {
     });
 }
 
+/** Números do jogo de beisebol que entram na comparação dos times: [grupo da ESPN, nome, rótulo]. */
+const ESTATISTICAS_JOGO_BEISEBOL = [
+  ["batting", "runs", "Corridas"],
+  ["batting", "hits", "Rebatidas"],
+  ["batting", "homeRuns", "Home runs"],
+  ["batting", "RBIs", "Corridas impulsionadas"],
+  ["batting", "walks", "Bases por bolas"],
+  ["batting", "strikeouts", "Strikeouts sofridos"],
+  ["batting", "stolenBases", "Bases roubadas"],
+  ["batting", "runnersLeftOnBase", "Corredores deixados em base"],
+  ["pitching", "strikeouts", "Strikeouts dos arremessadores"],
+  ["pitching", "pitches", "Arremessos"],
+  ["fielding", "errors", "Erros"],
+];
+
+/**
+ * No beisebol a ESPN manda as estatísticas do time em grupos (batting, pitching, fielding), cada um com
+ * a própria lista. Achata nos números principais, no formato plano dos outros esportes ({name, label,
+ * displayValue}). Lista que não é agrupada: null (quem chama usa a lista como está).
+ */
+function estatisticasJogoBeisebol(grupos) {
+  if (!Array.isArray(grupos) || !grupos.some((g) => g && Array.isArray(g.stats))) return null;
+  const saida = [];
+  for (const [grupo, nome, rotulo] of ESTATISTICAS_JOGO_BEISEBOL) {
+    const g = grupos.find((x) => x && x.name === grupo);
+    const s = g && (g.stats || []).find((x) => x && x.name === nome);
+    if (s && s.displayValue != null && s.displayValue !== "") saida.push({ name: `${grupo}.${nome}`, label: rotulo, displayValue: s.displayValue });
+  }
+  return saida;
+}
+
 if (typeof module !== "undefined") {
-  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario };
+  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol };
 }
