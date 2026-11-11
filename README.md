@@ -11,6 +11,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **Faixa de dias** com ontem, hoje e amanhã, setas e calendário. Na NBA e numa competição escolhida, os dias sem jogo ficam apagados.
 - **Filtros** Todos, Ao vivo, Encerrados e Próximos, com a contagem de cada um.
 - Busca sempre à mão no topo (atalho: tecla `/`).
+- Fonte **Inter** embutida no app (`static/fontes/`), igual com ou sem internet. No Android, o app acompanha o tamanho de letra do celular até +15%.
 - Em telas menores a barra lateral vira uma gaveta (botão ☰); no celular a lista e o detalhe ocupam a tela inteira.
 
 ### Início e Pesquisa
@@ -36,7 +37,8 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **NFL:** navegação por semana da temporada.
 - **Detalhe da partida:** lances, estatísticas comparadas, escalações (futebol), estatísticas individuais (NFL), retrospecto, desfalques e onde assistir.
 - **Classificação** com as zonas de classificação e rebaixamento.
-- **Elenco e carreira:** clicar num time abre o elenco; clicar num atleta abre a carreira temporada por temporada.
+- **Página do time** (no app e na pasta `docs/`): clicar num time abre, como no Sofascore, as abas **Jogos** (últimos, com V/E/D, e próximos), **Elenco** por posição (goleiros, defensores, meias e atacantes no futebol; armadores, alas e pivôs na NBA; ataque, defesa e times especiais na NFL) com o técnico, **Detalhes** (estádio, cidade, técnico, posição e campanha), **Classificação** com o time destacado e **Estatísticas** da temporada. No site do PC pelo servidor Python, clicar num time mostra só o elenco.
+- **Carreira:** clicar num atleta abre a carreira temporada por temporada.
 
 ### Fórmula 1, UFC e boxe
 - **F1:** calendário da temporada, horários e resultados de cada sessão, classificação de pilotos.
@@ -95,6 +97,7 @@ Mudou alguma tela ou um arquivo de dados (`transmissoes.json`, `boxe_eventos.jso
 
 ### O que muda em relação ao PC
 - A NBA vem da ESPN, como os outros esportes. Ficam de fora só o mapa de arremessos, o pré-jogo próprio da NBA e as corridas pelo MVP e pelo calouro (os servidores da NBA não aceitam pedidos de navegador).
+- A página do time (jogos, elenco por posição, detalhes, classificação e estatísticas) só existe aqui, no app e na pasta `docs/`. O técnico vem do elenco da ESPN e, nos clubes de futebol, do Wikidata. Quando o nome do clube é ambíguo, o técnico não aparece, para não mostrar o técnico de outro time.
 - Os favoritos e o banco de dados ficam no celular, separados dos do PC.
 - Sem internet, o app abre e mostra o que já estava guardado.
 
@@ -161,12 +164,16 @@ Scoresports-pessoal2/
     ├── index.html
     ├── style.css
     ├── app.js          # base do site e módulo da NBA
-    ├── esportes.js     # futebol, NFL, F1, UFC e boxe
-    └── inicio.js       # aba Início (favoritos) e Pesquisa
+    ├── esportes.js     # futebol, NFL, F1, UFC, boxe e a página do time
+    ├── inicio.js       # aba Início (favoritos) e Pesquisa
+    └── fontes/         # fonte Inter (licença SIL OFL)
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
+├── time_dados.js      # regras da página do time (elenco por posição, jogos, estatísticas, técnico)
 ├── sw.js, registrar.js, manifest.webmanifest, ícones
 ├── android.js         # botão voltar do Android (só no APK)
+testes/                # testes das regras da página do time, com amostras reais da ESPN e do Wikidata
+planejamento/          # especificações e planos de cada parte
 docs/                  # versão do celular pronta (gerada pelo gerar_celular.py)
 android/               # projeto do app Android (o GitHub Actions monta o APK)
 .github/workflows/apk.yml  # automação que monta e publica o APK
@@ -255,6 +262,14 @@ Cada noite de lutas é um item em `boxe_eventos.json`. Depois da luta, preencha 
 ## Mantendo os campeões em dia
 
 Quando uma competição terminar, acrescente o novo campeão no topo da lista dela em `campeoes.json`, por exemplo `{"temporada": "2026", "campeao": "Palmeiras"}`.
+
+## Testes
+
+As regras da página do time têm testes automáticos. Com o Node 18 ou superior instalado, rode na pasta do projeto:
+
+```
+node --test testes/*.test.js
+```
 
 ## Configuração
 
