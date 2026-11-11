@@ -48,6 +48,59 @@ Cada jogo mostra os canais. A informação vem do `transmissoes.json`, em duas c
 1. **Grade confirmada:** jogos anotados um a um, a partir das grades que as emissoras divulgam (aparece com o selo "Grade confirmada").
 2. **Padrão da competição:** quando o jogo não está na grade, vale o padrão (por exemplo, todo jogo da NBA está no League Pass e todo evento do UFC está no Paramount+). As regras do padrão podem depender do dia da semana e do horário (na NFL, quinta e domingo à noite no SporTV, segunda na ESPN).
 
+## App Android (APK)
+
+A pasta `android/` é um app Android que leva as telas dentro dele e busca os dados da ESPN e da Wikipédia direto pelo celular. Funciona com o PC desligado, abre sem internet (mostrando o que já estava guardado) e não sofre bloqueio de acesso, porque os pedidos saem do Android, não do navegador.
+
+### Gerar o APK (o GitHub monta para você)
+Não precisa instalar Android Studio. O arquivo `.github/workflows/apk.yml` faz o GitHub montar o APK na nuvem, de graça, a cada push:
+
+1. Faça commit e push do projeto inteiro (inclusive as pastas `android/`, `celular/`, `docs/` e `.github/`).
+2. No GitHub, abra a aba **Actions**. Vai aparecer **Gerar APK** rodando; leva uns 5 minutos.
+3. Quando ficar verde, o APK está publicado em **Releases**, com um link fixo:
+   `https://github.com/byGlazed/Scoresports-pessoal/releases/latest/download/Scoresports.apk`
+
+Se quiser gerar sem mudar nada, em **Actions > Gerar APK** clique em **Run workflow**.
+
+### Instalar no celular
+1. No celular, abra o link acima e baixe o `Scoresports.apk`.
+2. Abra o arquivo baixado. Na primeira vez o Android pede para **permitir instalar apps desta fonte** (do navegador ou do app de arquivos): permita.
+3. Se o Play Protect avisar que o app não é conhecido, toque em **Mais detalhes > Instalar mesmo assim**. O aviso aparece porque o app não veio da Play Store.
+
+### Atualizar
+Mudou alguma coisa? Rode `python gerar_celular.py`, faça commit e push. Quando o Actions terminar, baixe o APK de novo pelo mesmo link e instale por cima: os favoritos e os dados guardados continuam.
+
+### Se o Actions falhar
+- **Erro 403 ao publicar:** em **Settings > Actions > General > Workflow permissions**, marque **Read and write permissions** e rode de novo.
+- **Outro erro:** abra a execução que falhou, copie as últimas linhas do passo vermelho e me mande.
+
+A chave que assina o APK (`android/scoresports.keystore`) fica no repositório para todo APK novo ter a mesma assinatura e instalar por cima do anterior. Para um app pessoal, fora da Play Store, isso é o suficiente.
+
+## Versão do celular pelo navegador (alternativa ao APK)
+
+A pasta `docs/` é uma versão do app que roda inteira no navegador do celular: ela pede os dados direto à ESPN (e à Wikipédia, para o boxe), guarda tudo no banco do próprio celular e pode ser instalada na tela inicial como um app. Não precisa do Python nem do PC ligado.
+
+### Publicar (uma vez só)
+1. Faça commit e push do projeto, com a pasta `docs/`, para o GitHub.
+2. No repositório, abra **Settings > Pages**.
+3. Em **Build and deployment**, escolha **Deploy from a branch**, branch `main`, pasta `/docs`, e clique em **Save**.
+4. Em um ou dois minutos o endereço aparece no topo da página, algo como `https://byglazed.github.io/Scoresports-pessoal/` (com o seu usuário).
+
+### Instalar no celular
+- **Android (Chrome):** abra o endereço, toque nos três pontinhos e em **Instalar app** (ou **Adicionar à tela inicial**).
+- **iPhone (Safari):** abra o endereço, toque em **Compartilhar** e em **Adicionar à Tela de Início**.
+
+### Atualizar
+Mudou alguma tela ou um arquivo de dados (`transmissoes.json`, `boxe_eventos.json`, `campeoes.json`)? Rode `python gerar_celular.py`, faça commit e push. O app do celular pega a versão nova sozinho na próxima vez que abrir com internet.
+
+### O que muda em relação ao PC
+- A NBA vem da ESPN, como os outros esportes. Ficam de fora só o mapa de arremessos, o pré-jogo próprio da NBA e as corridas pelo MVP e pelo calouro (os servidores da NBA não aceitam pedidos de navegador).
+- Os favoritos e o banco de dados ficam no celular, separados dos do PC.
+- Sem internet, o app abre e mostra o que já estava guardado.
+
+### Se aparecer "acesso bloqueado"
+Se a ESPN recusar os pedidos vindos do navegador, crie um repasse gratuito na Cloudflare com o arquivo `repasse_cloudflare.js` (o passo a passo está no começo do arquivo) e abra o app uma vez com `?repasse=ENDEREÇO-DO-REPASSE/?url=` no fim do link. O endereço fica guardado no celular.
+
 ## Tecnologias
 
 - **Python 3.10 ou superior**
@@ -91,6 +144,9 @@ Scoresports-pessoal/
 ├── nba_dados.py        # busca e formata os dados da NBA (inclui carreira e busca de jogadores)
 ├── espn_dados.py       # futebol, NFL, F1 e UFC pela API pública da ESPN
 ├── espn_extra.py      # líderes, ranking do UFC, lutas, carreira no futebol e busca
+├── indice.py          # índice local da busca (todo atleta e time que o app viu)
+├── gerar_celular.py   # monta a versão do celular em docs/ e as telas do APK
+├── repasse_cloudflare.js  # repasse gratuito, só se a ESPN bloquear o celular
 ├── boxe.py             # lê a agenda de boxe
 ├── transmissoes.py     # decide onde cada jogo passa no Brasil
 ├── cache.py            # cache em SQLite com tempo de validade
@@ -107,6 +163,13 @@ Scoresports-pessoal/
     ├── app.js          # base do site e módulo da NBA
     ├── esportes.js     # futebol, NFL, F1, UFC e boxe
     └── inicio.js       # aba Início (favoritos) e Pesquisa
+celular/
+├── direto.js          # faz no celular o que o Python faz no PC
+├── sw.js, registrar.js, manifest.webmanifest, ícones
+├── android.js         # botão voltar do Android (só no APK)
+docs/                  # versão do celular pronta (gerada pelo gerar_celular.py)
+android/               # projeto do app Android (o GitHub Actions monta o APK)
+.github/workflows/apk.yml  # automação que monta e publica o APK
 ```
 
 ## Rotas da API
@@ -149,6 +212,7 @@ Scoresports-pessoal/
 | `GET /campeoes` | Últimos campeões de cada competição | sem cache |
 | `GET /banco` | Quantos registros o banco local guarda e o tamanho do arquivo | sem cache |
 | `GET /boxe/eventos` | Agenda de boxe | sem cache |
+| `GET /boxe/lutador?nome=` | Perfil de um boxeador (Wikipédia) e as lutas dele na agenda | 7 dias |
 
 ## Como funciona
 
@@ -159,9 +223,16 @@ navegador  ->  API (FastAPI)  ->  banco local (SQLite, cache.db)  ->  NBA (nba_a
 1. O navegador só conversa com a API do próprio projeto.
 2. A API pede os dados ao `cache.py`, que guarda tudo num banco SQLite (`cache.db`). Se o dado guardado ainda vale, ele volta na hora, sem chamar API nenhuma.
 3. Cada dado tem uma validade de acordo com o quanto ele muda: placar ao vivo, 15 segundos; classificação, 30 minutos; perfil de atleta, 1 dia; dados de atleta e time do Core API da ESPN, 7 dias.
-4. **O que não muda mais fica guardado de vez (30 dias):** jogo encerrado, dia que já passou com todos os jogos encerrados. Abrir de novo um jogo de ontem não chama API nenhuma.
-5. Se a fonte falhar e houver um dado guardado, mesmo vencido, ele é usado no lugar e a página continua funcionando.
-6. Dados vencidos há mais de 60 dias são apagados quando o servidor liga, para o arquivo não crescer sem parar. `GET /banco` mostra quantos registros estão guardados.
+4. **O que não muda mais só é perguntado de novo depois de 30 dias:** jogo encerrado, dia que já passou com todos os jogos encerrados. Abrir de novo um jogo de ontem não chama API nenhuma.
+5. **Nada é apagado.** Cada dado fica guardado e só é substituído quando a API traz uma versão mais nova. A "validade" diz quando vale a pena perguntar de novo, não quando jogar fora.
+6. Se a fonte falhar, o dado guardado (mesmo antigo) é usado no lugar e a página continua funcionando.
+7. `GET /banco` mostra quantos registros estão guardados e o tamanho do arquivo.
+
+### Busca universal
+Todo atleta, lutador, piloto e time que passa pelo app (elencos, escalações, líderes, rankings, cards do UFC, classificações, agenda de boxe) entra num índice no banco. A busca procura nesse índice, na lista completa da NBA e na busca da ESPN. Uma vez por semana o servidor também completa o índice em segundo plano: times de todas as competições, elencos da NFL, do Brasileirão e da Premier League, ranking do UFC e pilotos da F1.
+
+### Boxe
+O boxe não tem fonte aberta na ESPN. A agenda vem de `boxe_eventos.json` e o perfil de cada lutador vem da Wikipédia: cartel (vitórias, nocautes, derrotas, empates), categoria, altura, envergadura, base, nacionalidade, foto e um resumo em português quando existir.
 
 ## Mantendo as transmissões em dia
 
@@ -195,7 +266,7 @@ A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-2
 - Os recordes da temporada consideram apenas a **temporada regular**. Na carreira, há números de temporada regular e de playoffs.
 - A ESPN não publica estatísticas de carreira de todos os atletas; quando falta, o painel avisa.
 - A Globo transmite só 15 dos 24 GPs de F1 em TV aberta, e quais são varia. O padrão aponta SporTV e Globoplay, que passam todos.
-- O boxe depende do arquivo `boxe_eventos.json`, atualizado à mão.
+- A agenda de boxe depende do arquivo `boxe_eventos.json`, atualizado à mão; o perfil dos lutadores depende de a Wikipédia ter uma página sobre eles.
 - Os favoritos ficam guardados no navegador: em outro navegador ou celular eles começam vazios.
 - Líderes, ranking do UFC, lutas e carreira no futebol usam o Core API da ESPN, que entrega os dados em vários pedaços. A primeira abertura de cada tela pode levar alguns segundos; depois fica no cache.
 - Em algumas competições a ESPN não publica cartões entre os líderes; a página avisa quando isso acontece.

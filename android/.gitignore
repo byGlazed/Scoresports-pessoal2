@@ -1,0 +1,6 @@
+.gradle/
+build/
+app/build/
+local.properties
+# as telas são copiadas pelo gerar_celular.py
+app/src/main/assets/www/

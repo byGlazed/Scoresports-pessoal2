@@ -1,0 +1,50 @@
+plugins {
+    id "com.android.application"
+}
+
+// O GitHub Actions passa o número da execução: cada APK novo tem versão maior,
+// então ele instala por cima do anterior sem precisar desinstalar.
+def numeroVersao = (project.findProperty("versionCode") ?: "1").toInteger()
+
+android {
+    namespace "com.byglazed.scoresports"
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.byglazed.scoresports"
+        minSdk 24
+        targetSdk 34
+        versionCode numeroVersao
+        versionName "1.0.${numeroVersao}"
+    }
+
+    signingConfigs {
+        // chave fixa do projeto: sem ela, cada APK gerado teria uma assinatura diferente
+        // e o Android não deixaria atualizar o app (só desinstalando antes)
+        scoresports {
+            storeFile file("../scoresports.keystore")
+            storePassword "scoresports"
+            keyAlias "scoresports"
+            keyPassword "scoresports"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.scoresports
+        }
+        debug {
+            signingConfig signingConfigs.scoresports
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation "androidx.webkit:webkit:1.11.0"
+}
