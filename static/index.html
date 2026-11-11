@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Scoresports</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-interno">
+      <h1 class="marca">Scoresports</h1>
+      <nav class="abas" aria-label="Seções">
+        <button class="aba ativa" data-aba="jogos">Jogos</button>
+        <button class="aba" data-aba="classificacao">Classificação</button>
+        <button class="aba" data-aba="lideres">Líderes</button>
+        <button class="aba" data-aba="corridas">MVP e calouro</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="datas" id="barra-datas">
+      <button class="seta" id="dia-anterior" aria-label="Dia anterior">‹</button>
+      <div class="faixa" id="faixa-datas"></div>
+      <button class="seta" id="dia-seguinte" aria-label="Próximo dia">›</button>
+      <input type="date" id="seletor-data" aria-label="Escolher uma data">
+      <button class="seta texto" id="hoje">Hoje</button>
+    </div>
+
+    <section id="jogos"></section>
+    <section id="classificacao" hidden></section>
+
+    <section id="lideres" hidden>
+      <div class="segmentos compacto" id="modo-lideres">
+        <button class="ativo" data-modo="media">Por jogo</button>
+        <button data-modo="total">Total da temporada</button>
+      </div>
+      <p class="nota" id="nota-lideres"></p>
+      <div class="lideres-grade" id="lideres-grade"></div>
+    </section>
+
+    <section id="corridas" hidden></section>
+  </main>
+
+  <p id="atualizado"></p>
+
+  <dialog id="jogador-dialogo">
+    <div class="painel">
+      <button class="fechar" id="fechar-jogador" aria-label="Fechar">✕</button>
+      <div id="jogador-conteudo"></div>
+    </div>
+  </dialog>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
