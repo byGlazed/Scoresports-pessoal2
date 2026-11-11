@@ -8,7 +8,9 @@ cache.obter(chave, ttl, buscar, estavel=None, ttl_estavel=...):
   - se `buscar()` falhar e houver um dado antigo, devolve o antigo (a página continua funcionando);
   - se falhar e não houver nada salvo, repassa o erro.
 
-Dados vencidos há mais de 60 dias são apagados quando o servidor liga.
+Nada é apagado sozinho: cada dado fica guardado e só é substituído quando a API traz uma
+versão mais nova (placar ao vivo, classificação atualizada...). "Validade" aqui quer dizer
+"quando vale a pena perguntar de novo à API", não "quando jogar fora".
 """
 
 import json
@@ -19,7 +21,6 @@ from pathlib import Path
 
 ARQUIVO = Path(__file__).parent / "cache.db"
 TRINTA_DIAS = 30 * 86400
-LIMPAR_APOS = 60 * 86400
 
 _preparado = False
 _trava = threading.Lock()
@@ -39,8 +40,7 @@ def _conectar():
                     "salvo_em REAL NOT NULL, vale_ate REAL NOT NULL)"
                 )
                 con.execute("CREATE INDEX IF NOT EXISTS dados_vale_ate ON dados (vale_ate)")
-                con.execute("DELETE FROM dados WHERE vale_ate < ?", (time.time() - LIMPAR_APOS,))
-                con.execute("DROP TABLE IF EXISTS cache")  # tabela da versão anterior
+                con.execute("DROP TABLE IF EXISTS cache")  # tabela da primeira versão, sem uso
                 con.commit()
                 _preparado = True
     return con
@@ -116,7 +116,7 @@ def estatisticas():
 
 
 def limpar():
-    """Apaga tudo. Também dá para simplesmente apagar o arquivo cache.db com o servidor desligado."""
+    """Apaga tudo (só se você chamar à mão). Também dá para apagar o arquivo cache.db com o servidor desligado."""
     try:
         con = _conectar()
         try:

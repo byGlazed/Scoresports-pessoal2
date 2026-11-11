@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 
+import indice
 import transmissoes
 
 FUSO_BRASILIA = ZoneInfo("America/Sao_Paulo")
@@ -306,6 +307,24 @@ def _traduz_peso(texto):
     return texto or None
 
 
+_BASES = {
+    "orthodox": "Destro (ortodoxo)",
+    "ortodoxo": "Destro (ortodoxo)",
+    "destro": "Destro",
+    "detro": "Destro",  # a ESPN em português escreve assim
+    "southpaw": "Canhoto",
+    "canhoto": "Canhoto",
+    "switch": "Troca de base",
+    "open stance": "Base aberta",
+    "sideways": "Lateral",
+}
+
+
+def _traduz_base(texto):
+    t = str(texto or "").strip().lower()
+    return _BASES.get(t, texto) if t else None
+
+
 def _traduz_resultado(texto):
     t = str(texto or "").lower()
     if not t:
@@ -510,6 +529,13 @@ def buscar_partidas(esporte, liga, de, ate=None):
         if jogo["data"] and de <= jogo["data"] <= ate:
             jogos.append(jogo)
     jogos.sort(key=lambda j: (j["inicio"] or "", j["id"]))
+    indice.registrar(
+        [
+            {"tipo": "time", "esporte": esporte, "liga": liga, "id": t["id"], "nome": t["nome"], "descricao": cfg["nome"], "imagem": t["logo"]}
+            for j in jogos
+            for t in (j["casa"], j["fora"])
+        ]
+    )
     return jogos
 
 
@@ -825,6 +851,21 @@ def buscar_resumo(esporte, liga, evento_id):
         for o in info.get("officials") or []
         if o.get("displayName") or o.get("fullName")
     ]
+    escalacoes = _escalacoes(dados)
+    jogadores_box = _jogadores_box(dados)
+    indice.registrar(
+        [
+            {"esporte": esporte, "liga": liga, "id": p["id"], "nome": p["nome"], "descricao": e["time"]["nome"]}
+            for e in escalacoes
+            for p in e["titulares"] + e["reservas"]
+        ]
+        + [
+            {"esporte": esporte, "liga": liga, "id": a["id"], "nome": a["nome"], "descricao": t["time"]["nome"]}
+            for t in jogadores_box
+            for g in t["grupos"]
+            for a in g["atletas"]
+        ]
+    )
     return {
         "jogo": jogo,
         "info": {
@@ -833,8 +874,8 @@ def buscar_resumo(esporte, liga, evento_id):
             "arbitragem": arbitragem[:4],
         },
         "estatisticas": _estatisticas_times(dados, jogo),
-        "jogadores": _jogadores_box(dados),
-        "escalacoes": _escalacoes(dados),
+        "jogadores": jogadores_box,
+        "escalacoes": escalacoes,
         "lances": _lances(dados, cfg["esporte"]),
         "forma": _forma(dados),
         "confronto": _confronto(dados),
@@ -902,7 +943,15 @@ def _grupos_classificacao(no, nome_pai=""):
 def buscar_classificacao(esporte, liga):
     cfg, _ = config(esporte, liga)
     dados = _get(f"{BASE_CLASSIFICACAO}/{cfg['esporte']}/{liga}/standings")
-    return {"grupos": list(_grupos_classificacao(dados))}
+    grupos = list(_grupos_classificacao(dados))
+    indice.registrar(
+        [
+            {"tipo": l["tipo"], "esporte": esporte, "liga": liga, "id": l["id"], "nome": l["nome"], "descricao": cfg["nome"], "imagem": l["logo"] if l["tipo"] == "time" else None}
+            for g in grupos
+            for l in g["linhas"]
+        ]
+    )
+    return {"grupos": grupos}
 
 
 # ---------- Elenco e atletas ----------
@@ -943,7 +992,16 @@ def buscar_elenco(esporte, liga, time_id):
     else:
         grupos.append({"nome": "Elenco", "atletas": [_atleta_curto(a) for a in atletas]})
     time = dados.get("team") or {}
-    return {"time": {"id": time.get("id") or time_id, "nome": time.get("displayName"), "logo": _logo(time)}, "grupos": grupos}
+    resultado = {"time": {"id": time.get("id") or time_id, "nome": time.get("displayName"), "logo": _logo(time)}, "grupos": grupos}
+    indice.registrar(
+        [{"tipo": "time", "esporte": esporte, "liga": liga, "id": resultado["time"]["id"], "nome": resultado["time"]["nome"], "imagem": resultado["time"]["logo"]}]
+        + [
+            {"esporte": esporte, "liga": liga, "id": a["id"], "nome": a["nome"], "descricao": resultado["time"]["nome"], "imagem": a["foto"]}
+            for g in grupos
+            for a in g["atletas"]
+        ]
+    )
+    return resultado
 
 
 def _texto(v):
@@ -961,7 +1019,7 @@ def _perfil_atleta(a):
         ("Categoria", _traduz_peso(_texto(a.get("weightClass")))),
         ("Equipe", _texto(a.get("association"))),
         ("Envergadura", a.get("displayReach")),
-        ("Base", _texto(a.get("stance"))),
+        ("Base", _traduz_base(_texto(a.get("stance")))),
         ("Draft", a.get("displayDraft")),
         ("Experiência", a.get("displayExperience")),
         ("Faculdade", _texto(a.get("college"))),
@@ -1057,9 +1115,11 @@ def buscar_atleta(esporte, liga, atleta_id):
         # o perfil comum não existe para alguns esportes (UFC): usa o Core API
         bio = _get(f"{BASE_CORE}/{cfg['esporte']}/leagues/{liga}/athletes/{atleta_id}")
     carreira, falhas = [], []
+    perfil = _perfil_atleta(bio)
+    indice.registrar([{"esporte": esporte, "liga": liga, "id": perfil["id"] or atleta_id, "nome": perfil["nome"], "descricao": perfil["time"], "imagem": perfil["foto"]}])
     if cfg["tipo"] in ("luta", "corrida") or cfg["esporte"] == "soccer":
         # sem estatísticas por temporada no formato comum: o histórico vem de /historico
-        return {"perfil": _perfil_atleta(bio), "carreira": [], "falhas": []}
+        return {"perfil": perfil, "carreira": [], "falhas": []}
     try:
         carreira = _categorias_stats(_get(f"{base}/stats"))
     except Exception:
@@ -1069,7 +1129,7 @@ def buscar_atleta(esporte, liga, atleta_id):
             carreira = _categorias_overview(_get(f"{base}/overview"))
         except Exception:
             falhas.append("overview")
-    return {"perfil": _perfil_atleta(bio), "carreira": carreira, "falhas": falhas}
+    return {"perfil": perfil, "carreira": carreira, "falhas": falhas}
 
 
 # ---------- Fórmula 1 e UFC: eventos da temporada ----------
@@ -1218,8 +1278,18 @@ def buscar_evento(esporte, liga, evento_id, data=None):
     if cfg["tipo"] == "corrida":
         sessoes = [_sessao(c, nome, liga) for c in ev.get("competitions") or []]
         sessoes.sort(key=lambda s: s["inicio"] or "")
+        indice.registrar(
+            [{"esporte": esporte, "liga": liga, "id": r["id"], "nome": r["nome"], "descricao": r["equipe"] or "Fórmula 1"} for x in sessoes for r in x["resultados"]]
+        )
         return {**base, "sessoes": sessoes}
     lutas = [(i, _luta(c)) for i, c in enumerate(ev.get("competitions") or [])]
+    indice.registrar(
+        [
+            {"esporte": esporte, "liga": liga, "id": p["id"], "nome": p["nome"], "descricao": " ".join(x for x in ("UFC", l["categoria"] or "") if x), "imagem": p["foto"]}
+            for _, l in lutas
+            for p in l["lutadores"]
+        ]
+    )
     # a luta principal é a última da noite: mostra do fim para o começo
     lutas.sort(key=lambda x: (x[1]["inicio"] or "", x[0]), reverse=True)
     inicio_card = min((l["inicio"] for _, l in lutas if l["inicio"]), default=_iso(ini))

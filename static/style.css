@@ -994,6 +994,13 @@ select.campo-data { cursor: pointer; }
 }
 
 @media (max-width: 480px) {
+  .placar-grande { gap: 6px; padding: 16px 10px 12px; }
+  .placar-grande { grid-template-columns: minmax(0, 1fr) minmax(0, 38vw) minmax(0, 1fr); }
+  .placar-centro { min-width: 0; }
+  .placar-info { white-space: normal; text-align: center; font-size: 11px; }
+  .placar-time img, .placar-time .logo-vazio { width: 44px; height: 44px; }
+  .placar-time .nome { font-size: 13px; overflow-wrap: break-word; hyphens: auto; }
+  .placar-numeros { font-size: 36px; }
   .marca { font-size: 0; gap: 0; }
   .esporte { padding: 0 9px; font-size: 14px; }
   .jogo { grid-template-columns: 46px minmax(0, 1fr); gap: 8px; padding: 8px 10px; }
@@ -1001,27 +1008,80 @@ select.campo-data { cursor: pointer; }
 
 /* ---------- Favoritos ---------- */
 .estrela {
+  --cor-estrela: #f5b301;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
   border: 0;
+  border-radius: 50%;
   background: none;
   color: var(--texto-3);
-  font-size: 17px;
-  line-height: 1;
-  padding: 2px 4px;
-  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
 }
-.estrela:hover { color: var(--empate); background: var(--superficie-2); }
-.estrela[aria-pressed="true"] { color: var(--empate); }
+.estrela:hover { background: color-mix(in srgb, var(--cor-estrela) 14%, transparent); color: var(--cor-estrela); }
+.estrela-icone { width: 18px; height: 18px; overflow: visible; }
+.estrela-icone path {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  transition: fill 0.15s, stroke 0.15s;
+}
+.estrela[aria-pressed="true"] { color: var(--cor-estrela); }
+.estrela[aria-pressed="true"] .estrela-icone path { fill: var(--cor-estrela); stroke: var(--cor-estrela); }
+.estrela.acabou-de-marcar .estrela-icone { animation: estrela-pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1); }
+.estrela.acabou-de-marcar::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 2px solid var(--cor-estrela);
+  animation: estrela-onda 0.5s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes estrela-pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+@keyframes estrela-onda {
+  from { transform: scale(0.6); opacity: 0.9; }
+  to { transform: scale(1.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .estrela.acabou-de-marcar .estrela-icone, .estrela.acabou-de-marcar::after { animation: none; }
+}
+
+/* versão com texto: botão em forma de pílula */
 .estrela.com-texto {
+  width: auto;
+  height: 32px;
+  gap: 6px;
+  display: inline-flex;
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--linha);
+  background: var(--superficie);
+  color: var(--texto);
   font-size: 13px;
   font-weight: 600;
-  border: 1px solid var(--linha);
-  padding: 4px 10px;
-  border-radius: 999px;
   white-space: nowrap;
 }
-.estrela.com-texto[aria-pressed="true"] { border-color: var(--empate); }
+.estrela.com-texto .estrela-icone { width: 16px; height: 16px; color: var(--texto-3); }
+.estrela.com-texto:hover { border-color: var(--cor-estrela); background: color-mix(in srgb, var(--cor-estrela) 10%, var(--superficie)); }
+.estrela.com-texto:hover .estrela-icone { color: var(--cor-estrela); }
+.estrela.com-texto[aria-pressed="true"] {
+  border-color: var(--cor-estrela);
+  background: color-mix(in srgb, var(--cor-estrela) 16%, var(--superficie));
+  color: var(--texto);
+}
+.estrela.com-texto[aria-pressed="true"] .estrela-icone { color: var(--cor-estrela); }
+.estrela.com-texto.acabou-de-marcar::after { border-radius: 999px; inset: 0; }
 .perfil-acoes { margin-top: 8px; }
-.placar-time .estrela { margin-top: 2px; }
+.placar-time .estrela { margin-top: 0; }
 
 .rotulo-chips {
   align-self: center;
@@ -1092,3 +1152,7 @@ select.campo-data { cursor: pointer; }
 /* ---------- Cabeçalho das páginas largas ---------- */
 .cabeca-pagina { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 2px 0 14px; }
 .cabeca-pagina h2 { margin: 0; font-family: var(--fonte-placar); font-size: 28px; font-weight: 700; }
+
+/* ---------- Cartel do boxe ---------- */
+.numeros.cartel .numero-caixa.vitoria strong { color: var(--vitoria); }
+.numeros.cartel .numero-caixa.derrota strong { color: var(--derrota); }
