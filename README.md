@@ -31,7 +31,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **Classificação, líderes da temporada e corridas pelo MVP e pelo calouro do ano.**
 
 ### Futebol e NFL
-- **Futebol:** 14 competições de clubes (Brasileirão A e B, Copa do Brasil, Libertadores, Sul-Americana, Champions, Liga Europa, Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Liga Portugal e MLS) e 7 de seleções (amistosos, Eliminatórias da América do Sul e da Europa, Liga das Nações, Copa do Mundo, Copa América e Eurocopa). Dá para ver todos os jogos do dia juntos ou uma competição só.
+- **Futebol:** 15 ligas e copas de clubes (Brasileirão A e B, Copa do Brasil, Libertadores, Sul-Americana, Champions, Liga Europa, Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Liga Portugal, Eredivisie e MLS), 17 copas nacionais e supercopas no grupo **Copas** (Copa del Rey, FA Cup, Copa da Liga Inglesa, Community Shield, Copa da Alemanha, Coppa Italia, Copa da França, Taça de Portugal, Copa da Holanda, as supercopas da Espanha, Alemanha, Itália, França e Brasil, Recopa, Supercopa da UEFA e Mundial de Clubes) e 7 de seleções (amistosos, Eliminatórias da América do Sul e da Europa, Liga das Nações, Copa do Mundo, Copa América e Eurocopa). Dá para ver todos os jogos do dia juntos ou uma competição só.
 - **Artilharia e cartões (futebol) e Líderes (NFL):** top 10 de cada estatística da temporada atual. Torneios fora de época (Eurocopa, Copa América) mostram a última edição que tiver números, ou um aviso.
 - **Carreira de jogadores de futebol:** temporada por temporada, em todas as competições que a ESPN registra (jogos, gols, assistências, cartões).
 - **NFL:** navegação por semana da temporada.
@@ -39,6 +39,13 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **Classificação** com as zonas de classificação e rebaixamento.
 - **Página do time** (no app e na pasta `docs/`): clicar num time abre, como no Sofascore, as abas **Jogos** (últimos, com V/E/D, e próximos), **Elenco** por posição (goleiros, defensores, meias e atacantes no futebol; armadores, alas e pivôs na NBA; ataque, defesa e times especiais na NFL) com o técnico, **Detalhes** (estádio, cidade, técnico, posição e campanha), **Classificação** com o time destacado e **Estatísticas** da temporada. No site do PC pelo servidor Python, clicar num time mostra só o elenco.
 - **Carreira:** clicar num atleta abre a carreira temporada por temporada.
+
+### MLB e NHL (no app e na pasta `docs/`)
+- **Jogos dia a dia**, com o visitante primeiro, como nos EUA. Ao vivo, o beisebol mostra a entrada ("▲ 5ª entrada") e o hóquei, o período e o relógio ("2º período · 12:34"). Nos playoffs aparece a situação da série ("World Series - Game 5 · MIL ganhou a série 4-1").
+- **Detalhe do jogo:** corridas ou gols em ordem, estatísticas comparadas dos times e números dos jogadores.
+- **Classificação** por liga, conferência e divisão; **Líderes** (média de rebatidas, home runs, ERA, strikeouts; gols, pontos, +/−, defesas...).
+- **Página do time** com elenco por posição (arremessadores, receptores, defensores internos e externos; goleiros, defensores e atacantes) e o técnico.
+- Onde assistir: ESPN e Disney+ Premium. Últimos campeões da World Series e da Stanley Cup.
 
 ### Fórmula 1, UFC e boxe
 - **F1:** calendário da temporada, horários e resultados de cada sessão, classificação de pilotos.
@@ -170,6 +177,7 @@ Scoresports-pessoal2/
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
 ├── time_dados.js      # regras da página do time (elenco por posição, jogos, estatísticas, técnico)
+├── regras_esportes.js # regras de MLB e NHL (placar ao vivo, série, pontuações, líderes)
 ├── sw.js, registrar.js, manifest.webmanifest, ícones
 ├── android.js         # botão voltar do Android (só no APK)
 testes/                # testes das regras da página do time, com amostras reais da ESPN e do Wikidata
@@ -249,6 +257,7 @@ As emissoras divulgam a grade semana a semana. Para anotar um jogo, acrescente u
 {"esporte": "nba", "data": "2026-11-20", "times": ["LAL", "BOS"], "canais": ["Prime Video", "NBA League Pass"], "conferido_em": "2026-11-16", "fonte": "grade do Prime Video"}
 ```
 
+- `esporte` pode ser `nba`, `nfl`, `mlb`, `nhl` ou `futebol` (no futebol, informe também a `liga`, por exemplo `eng.fa`).
 - `data` é o dia em Brasília (um jogo à 1h da madrugada de quarta entra como quarta).
 - `times` aceita siglas ou nomes, em qualquer ordem.
 - Para F1, UFC e boxe, use `"evento": "UFC 335"` no lugar de `times`.
