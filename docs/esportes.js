@@ -439,9 +439,27 @@ const GRUPOS_LIGAS = {
   "ger.1": "Europa",
   "fra.1": "Europa",
   "por.1": "Europa",
+  "ned.1": "Europa",
+  "esp.copa_del_rey": "Copas",
+  "esp.super_cup": "Copas",
+  "eng.fa": "Copas",
+  "eng.league_cup": "Copas",
+  "eng.charity": "Copas",
+  "ger.dfb_pokal": "Copas",
+  "ger.super_cup": "Copas",
+  "ita.coppa_italia": "Copas",
+  "ita.super_cup": "Copas",
+  "fra.coupe_de_france": "Copas",
+  "fra.super_cup": "Copas",
+  "por.taca.portugal": "Copas",
+  "ned.cup": "Copas",
+  "bra.supercopa_do_brazil": "Copas",
+  "conmebol.recopa": "Copas",
+  "uefa.super_cup": "Copas",
+  "fifa.cwc": "Copas",
   "usa.1": "América do Norte",
 };
-const ORDEM_GRUPOS = ["Brasil", "América do Sul", "Europa", "América do Norte", "Seleções", "Outras"];
+const ORDEM_GRUPOS = ["Brasil", "América do Sul", "Europa", "Copas", "América do Norte", "Seleções", "Outras"];
 
 function grupoDaLiga(l) {
   return l.selecao ? "Seleções" : GRUPOS_LIGAS[l.id] || "Outras";

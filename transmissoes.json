@@ -86,6 +86,26 @@
       "observacao": "CazéTV e Xsports (3 jogos por rodada) dividem os jogos.",
       "conferido_em": "2026-11-09"
     },
+    "futebol:ned.1": {
+      "canais": ["ESPN", "Disney+ Premium"],
+      "observacao": "A ESPN tem a Eredivisie no Brasil de 2025 a 2030: todos os jogos no Disney+ e alguns nos canais ESPN.",
+      "conferido_em": "2026-11-11"
+    },
+    "futebol:eng.fa": {
+      "canais": ["ESPN", "Disney+ Premium"],
+      "observacao": "Na temporada 2025-26 os jogos passaram na ESPN e no Disney+ (fontes: MKT Esportivo, 90min). Confira a grade.",
+      "conferido_em": "2026-11-11"
+    },
+    "futebol:eng.league_cup": {
+      "canais": ["ESPN", "Disney+ Premium"],
+      "observacao": "A ESPN tem a Copa da Liga Inglesa na América Latina, com os jogos no Disney+. Confira a grade.",
+      "conferido_em": "2026-11-11"
+    },
+    "futebol:esp.copa_del_rey": {
+      "canais": ["ESPN", "Disney+ Premium"],
+      "observacao": "Na temporada 2025-26 os jogos passaram na ESPN e no Disney+ (final na ESPN 4). Alguns só no Disney+.",
+      "conferido_em": "2026-11-11"
+    },
     "futebol:usa.1": {
       "canais": ["Apple TV"],
       "observacao": "Todos os jogos estão no MLS Season Pass.",
