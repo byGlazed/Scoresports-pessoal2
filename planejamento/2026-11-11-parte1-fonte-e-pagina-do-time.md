@@ -44,7 +44,7 @@ Ela abre no `Painel` atual, então o botão voltar do Android e o empilhamento j
 - pesquisa;
 - favoritos.
 
-**Cabeçalho:** escudo, nome, liga, resumo da posição (`standingSummary` da ESPN, traduzido quando der: "1º no Brasileirão"), campanha (V-E-D) e a estrela de favoritar (`botaoFavorito`).
+**Cabeçalho:** escudo, nome, liga, resumo da posição (o número do `standingSummary` da ESPN, mostrado como "1º lugar · Brasileirão Série A"), campanha (V-E-D) e a estrela de favoritar (`botaoFavorito`).
 
 **Abas** (com `abasDetalhe`, que já existe em `app.js`). Cada aba carrega só quando é aberta e mostra o próprio erro sem derrubar as outras.
 
