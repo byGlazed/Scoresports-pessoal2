@@ -78,7 +78,10 @@ function nomeTecnico(roster) {
   return nome || null;
 }
 
-/** Elenco da ESPN agrupado por posição, mais o técnico quando a ESPN informa. */
+/** Esportes em que o técnico do elenco da ESPN é confiável. No futebol ele vem de anos atrás (Wenger no Arsenal). */
+const TECNICO_DO_ELENCO = ["nba", "nfl", "mlb", "nhl"];
+
+/** Elenco da ESPN agrupado por posição, mais o técnico quando a ESPN informa (e é confiável). */
 function agruparElenco(esporte, roster) {
   roster = roster || {};
   const atletas = roster.athletes || [];
@@ -94,31 +97,32 @@ function agruparElenco(esporte, roster) {
     for (const a of atletas) juntar(grupoDaPosicao(esporte, a.position), [atletaCurto(a)]);
   }
   const grupos = [...porNome].map(([nome, lista]) => ({ nome, atletas: lista }));
-  return { grupos: ordenarGrupos(esporte, grupos), tecnico: nomeTecnico(roster) };
+  return { grupos: ordenarGrupos(esporte, grupos), tecnico: TECNICO_DO_ELENCO.includes(esporte) ? nomeTecnico(roster) : null };
 }
 
 /* ---------- Jogos ---------- */
 
-/** V, E ou D do ponto de vista do time, ou null se o jogo não terminou ou o time não jogou. */
+const QUATRO_HORAS = 4 * 3600 * 1000;
+const SEM_DATA = ["Adiado", "Cancelado"];
+
+/** V, E ou D do ponto de vista do time, ou null se o jogo não terminou (adiado, cancelado, sem placar) ou o time não jogou. */
 function resultadoDoTime(jogo, timeId) {
-  if (!jogo || jogo.estado !== 3) return null;
+  if (!jogo || jogo.estado !== 3 || SEM_DATA.includes(jogo.status)) return null;
   const id = String(timeId);
   const [meu, outro] = String(jogo.casa.id) === id ? [jogo.casa, jogo.fora] : String(jogo.fora.id) === id ? [jogo.fora, jogo.casa] : [null, null];
-  if (!meu) return null;
+  if (!meu || meu.placar == null || outro.placar == null || meu.placar === "" || outro.placar === "") return null;
   const a = Number(meu.placar);
   const b = Number(outro.placar);
   if (Number.isNaN(a) || Number.isNaN(b)) return null;
+  if (a === b && (meu.vencedor || outro.vencedor)) return meu.vencedor ? "V" : "D"; // decidido nos pênaltis
   return a > b ? "V" : a < b ? "D" : "E";
 }
-
-const QUATRO_HORAS = 4 * 3600 * 1000;
-const SEM_DATA = ["Adiado", "Cancelado"];
 
 /** Últimos jogos (mais recente primeiro) e próximos (mais cedo primeiro). Adiados e cancelados ficam de fora. */
 function separarJogos(jogos, agoraIso, limite = 10) {
   const agora = Date.parse(agoraIso);
   const quando = (j) => Date.parse(j.inicio) || 0;
-  const ultimos = jogos.filter((j) => j.estado === 3).sort((a, b) => quando(b) - quando(a)).slice(0, limite);
+  const ultimos = jogos.filter((j) => j.estado === 3 && !SEM_DATA.includes(j.status)).sort((a, b) => quando(b) - quando(a)).slice(0, limite);
   const proximos = jogos
     .filter((j) => j.estado < 3 && !SEM_DATA.includes(j.status) && quando(j) >= agora - QUATRO_HORAS)
     .sort((a, b) => quando(a) - quando(b))
@@ -199,12 +203,11 @@ function escolherClube(resposta, paisQid = null) {
 /** QID do técnico atual (P286 sem data de fim), preferindo o rank "preferred". */
 function idTecnicoAtual(entidade) {
   const lista = (((entidade || {}).claims || {}).P286 || []).filter((a) => a.rank !== "deprecated" && !((a.qualifiers || {}).P582 || []).length);
-  const ordem = [...lista.filter((a) => a.rank === "preferred"), ...lista.filter((a) => a.rank !== "preferred")];
-  for (const a of ordem) {
-    const id = idDoValor(a);
-    if (id) return id;
-  }
-  return null;
+  const preferido = lista.filter((a) => a.rank === "preferred").map(idDoValor).find(Boolean);
+  if (preferido) return preferido;
+  // sem "preferred": só confia se houver um único técnico sem data de fim (vários = dados desatualizados)
+  const abertos = lista.map(idDoValor).filter(Boolean);
+  return abertos.length === 1 ? abertos[0] : null;
 }
 
 if (typeof module !== "undefined") {

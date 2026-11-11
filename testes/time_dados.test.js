@@ -168,3 +168,36 @@ test("escolherClube com país: descarta clube de outro país", () => {
   assert.equal(T.escolherClube(resposta, "Q155"), null);
   assert.equal(T.escolherClube(resposta), "Q1");
 });
+
+/* ---------- Correções da revisão final ---------- */
+
+test("agruparElenco futebol ignora o técnico do roster (a ESPN manda técnicos de anos atrás)", () => {
+  const roster = { ...amostra("roster_futebol"), coach: [{ firstName: "Arsene", lastName: "Wenger" }] };
+  assert.equal(T.agruparElenco("futebol", roster).tecnico, null);
+  assert.equal(T.agruparElenco("nba", { athletes: [], coach: [{ firstName: "Mike", lastName: "Brown" }] }).tecnico, "Mike Brown");
+});
+
+test("separarJogos: adiado como a ESPN manda (estado 3, placar 0-0) não entra em Últimos", () => {
+  const adiado = jogo("p", "2026-11-08T20:00:00Z", 3, "0", "0", { status: "Adiado" });
+  const cancelado = jogo("c", "2026-11-07T20:00:00Z", 3, "0", "0", { status: "Cancelado" });
+  assert.deepEqual(T.separarJogos([adiado, cancelado], "2026-11-11T12:00:00Z"), { ultimos: [], proximos: [] });
+});
+
+test("resultadoDoTime: sem resultado para adiado e para placar ausente", () => {
+  assert.equal(T.resultadoDoTime(jogo("p", "2026-11-08T20:00:00Z", 3, "0", "0", { status: "Adiado" }), "1"), null);
+  assert.equal(T.resultadoDoTime(jogo("n", "2026-11-08T20:00:00Z", 3, null, null), "1"), null);
+});
+
+test("resultadoDoTime: empate decidido nos pênaltis usa o vencedor", () => {
+  const j = jogo("pen", "2026-11-08T20:00:00Z", 3, "1", "1");
+  j.casa.vencedor = true;
+  j.fora.vencedor = false;
+  assert.equal(T.resultadoDoTime(j, "1"), "V");
+  assert.equal(T.resultadoDoTime(j, "2"), "D");
+});
+
+test("idTecnicoAtual: vários técnicos sem data de fim e nenhum preferred dá null", () => {
+  const tecnico = (id) => ({ mainsnak: { snaktype: "value", datavalue: { value: { id } } }, rank: "normal", qualifiers: {} });
+  assert.equal(T.idTecnicoAtual({ claims: { P286: [tecnico("Q1"), tecnico("Q2")] } }), null);
+  assert.equal(T.idTecnicoAtual({ claims: { P286: [tecnico("Q1")] } }), "Q1");
+});

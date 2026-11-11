@@ -1044,31 +1044,33 @@ function posicaoNaLiga(resumo, liga, futebol) {
 
 async function buscarTime(esporte, liga, timeId) {
   const [cfg] = dConfig(esporte, liga);
-  // o /schedule traz o resumo do time e, ao contrário do /teams/{id}, aceita pedidos do navegador
-  const d = await espnGet(`${D_BASE}/${cfg.esporte}/${liga}/teams/${timeId}/schedule`);
+  const futebol = cfg.esporte === "soccer";
+  // os pedidos independentes saem juntos; o /schedule traz o resumo do time e, ao contrário
+  // do /teams/{id}, aceita pedidos do navegador
+  const [d, venue, elenco] = await Promise.all([
+    espnGet(`${D_BASE}/${cfg.esporte}/${liga}/teams/${timeId}/schedule`),
+    (async () => {
+      try {
+        const [ano] = await temporadaAtual(cfg.esporte, liga);
+        const core = await espnGet(`${D_CORE}/${cfg.esporte}/leagues/${liga}/seasons/${ano}/teams/${timeId}`);
+        return (core.venue && core.venue.$ref ? await ref(core.venue.$ref) : core.venue) || {};
+      } catch (_) {
+        return {}; // sem estádio
+      }
+    })(),
+    obter(`espn_elenco_v2:${esporte}:${liga}:${timeId}`, 21600, () => buscarElenco(esporte, liga, timeId)).catch(() => null),
+  ]);
   const time = d.team || {};
-  const [ano] = await temporadaAtual(cfg.esporte, liga);
-  let venue = {};
-  try {
-    const core = await espnGet(`${D_CORE}/${cfg.esporte}/leagues/${liga}/seasons/${ano}/teams/${timeId}`);
-    venue = (core.venue && core.venue.$ref ? await ref(core.venue.$ref) : core.venue) || {};
-  } catch (_) {
-    /* sem estádio */
-  }
-  // técnico: o do elenco da ESPN quando vem (NBA, NFL, seleções...); no futebol de clubes, o Wikidata
-  let tecnico = null;
-  try {
-    tecnico = (await obter(`espn_elenco_v2:${esporte}:${liga}:${timeId}`, 21600, () => buscarElenco(esporte, liga, timeId))).tecnico;
-  } catch (_) {
-    /* sem elenco */
-  }
-  if (!tecnico && cfg.esporte === "soccer") tecnico = await tecnicoFutebol(time.displayName, timeId, liga);
+  // técnico: o do elenco da ESPN nos esportes em que ele é confiável; no futebol, só o Wikidata
+  // (o elenco da ESPN no futebol traz técnicos de anos atrás)
+  let tecnico = (elenco && elenco.tecnico) || null;
+  if (!tecnico && futebol) tecnico = await tecnicoFutebol(time.displayName, timeId, liga);
   return {
     id: String(time.id || timeId),
     nome: time.displayName || null,
     logo: logoDe(time),
     liga_nome: nomeDaLiga(liga),
-    posicao: posicaoNaLiga(time.standingSummary, liga, cfg.esporte === "soccer"),
+    posicao: posicaoNaLiga(time.standingSummary, liga, futebol),
     campanha: time.recordSummary || null,
     estadio: venue.fullName || null,
     cidade: (venue.address || {}).city || null,
@@ -1078,9 +1080,11 @@ async function buscarTime(esporte, liga, timeId) {
 
 async function buscarJogosTime(esporte, liga, timeId) {
   const [cfg] = dConfig(esporte, liga);
-  const url = `${D_BASE}/${cfg.esporte}/${liga}/teams/${timeId}/schedule`;
+  const futebol = cfg.esporte === "soccer";
+  // no futebol, "all" traz os jogos de todas as competições do time (liga, copas, continentais)
+  const url = `${D_BASE}/${cfg.esporte}/${futebol ? "all" : liga}/teams/${timeId}/schedule`;
   const pedidos = [espnGet(url)];
-  if (cfg.esporte === "soccer") pedidos.push(espnGet(url, { fixture: true }).catch(() => ({ events: [] }))); // o futebol só manda os próximos assim
+  if (futebol) pedidos.push(espnGet(url, { fixture: true }).catch(() => ({ events: [] }))); // o futebol só manda os próximos assim
   const respostas = await Promise.all(pedidos);
   const vistos = new Set();
   const jogos = [];
@@ -1088,7 +1092,15 @@ async function buscarJogosTime(esporte, liga, timeId) {
     const id = String(ev.id || "");
     if (!id || vistos.has(id)) continue;
     vistos.add(id);
-    jogos.push(partida(ev, esporte, liga));
+    const ligaDoJogo = (futebol && ev.league && ev.league.slug) || liga;
+    let j;
+    try {
+      j = partida(ev, esporte, ligaDoJogo);
+    } catch (_) {
+      continue; // competição com código que o app não entende
+    }
+    if (futebol && ev.league && ev.league.name && j.liga_nome === ligaDoJogo) j.liga_nome = ev.league.name;
+    jogos.push(j);
   }
   return separarJogos(jogos, new Date().toISOString());
 }

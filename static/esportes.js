@@ -28,7 +28,9 @@ function empilharAtleta(esporte, liga, id, nome) {
 
 function abrirTime(esporte, liga, timeId, nome) {
   if (!timeId) return;
-  Painel.abrir(nome || "Time", (corpo, ativo) => desenharTime(corpo, ativo, esporte, liga, timeId));
+  // a aba escolhida fica guardada aqui: ao voltar de um atleta, a página reabre na mesma aba
+  const lembrar = { aba: "jogos" };
+  Painel.abrir(nome || "Time", (corpo, ativo) => desenharTime(corpo, ativo, esporte, liga, timeId, nome, lembrar));
 }
 
 /** Da página do time para o detalhe do jogo, na tela do esporte. */
@@ -109,19 +111,12 @@ function linhaJogoDoTime(esporte, liga, timeId, j) {
       h("span", { class: "jogo-do-time-data" }, diaHora(j.inicio) || ""),
       resultado ? h("span", { class: `selo-resultado ${resultado.toLowerCase()}`, title: NOME_RESULTADO[resultado] }, resultado) : null
     ),
-    linhaPartida(esporteObj(esporte), j, () => abrirJogoDoTime(esporte, liga, j))
+    linhaPartida(esporteObj(esporte), j, () => abrirJogoDoTime(esporte, j.liga || liga, j))
   );
 }
 
-async function desenharTime(corpo, ativo, esporte, liga, timeId) {
-  if (!window.MODO_CELULAR) return desenharElencoSimples(corpo, ativo, esporte, liga, timeId);
-  const base = `/e/${esporte}/${liga}/times/${timeId}`;
-  const t = await api(base);
-  if (!ativo()) return;
-  const id = String(t.id || timeId);
-  $("#painel-titulo").textContent = t.nome || "Time";
-  const fav = { tipo: "time", esporte, liga, id, nome: t.nome || "Time", logo: t.logo };
-  const cabecalho = h(
+function cabecalhoTime(t, fav) {
+  return h(
     "div",
     { class: "perfil" },
     imgLogo(t.logo, "perfil-foto"),
@@ -133,6 +128,25 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId) {
       h("div", { class: "perfil-acoes" }, botaoFavorito(fav, { comTexto: true }))
     )
   );
+}
+
+async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, lembrar = { aba: "jogos" }) {
+  if (!window.MODO_CELULAR) return desenharElencoSimples(corpo, ativo, esporte, liga, timeId);
+  const base = `/e/${esporte}/${liga}/times/${timeId}`;
+  const id = String(timeId);
+  const fav = { tipo: "time", esporte, liga, id, nome: nomeInicial || "Time", logo: null };
+  // as abas aparecem na hora; o cabeçalho chega depois e, se falhar, as abas continuam funcionando
+  const cabecalho = h("div", null, cabecalhoTime({ nome: nomeInicial }, fav));
+  const pedidoCabecalho = api(base);
+  pedidoCabecalho
+    .then((info) => {
+      if (!ativo()) return;
+      $("#painel-titulo").textContent = info.nome || nomeInicial || "Time";
+      cabecalho.replaceChildren(cabecalhoTime(info, { ...fav, nome: info.nome || fav.nome, logo: info.logo }));
+    })
+    .catch(() => {
+      /* fica o cabeçalho com o nome; a aba Detalhes mostra o erro */
+    });
 
   const carregar = {
     jogos: async () => {
@@ -143,6 +157,7 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId) {
     },
     elenco: async () => secoesElenco(esporte, liga, await api(`${base}/elenco`)),
     detalhes: async () => {
+      const t = await pedidoCabecalho;
       const fatos = [
         ["Estádio", t.estadio],
         ["Cidade", t.cidade],
@@ -178,6 +193,7 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId) {
   let atual = null;
   const escolher = async (aba) => {
     atual = aba;
+    lembrar.aba = aba;
     barra.replaceChildren(abasDetalhe(ABAS_TIME, aba, escolher));
     area.replaceChildren(carregando());
     try {
@@ -190,7 +206,7 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId) {
     }
   };
   corpo.replaceChildren(cabecalho, barra, area);
-  escolher("jogos");
+  escolher(ABAS_TIME.some((a) => a.id === lembrar.aba) ? lembrar.aba : "jogos");
 }
 
 async function desenharAtleta(corpo, ativo, esporte, liga, id) {
