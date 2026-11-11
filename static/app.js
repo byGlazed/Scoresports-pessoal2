@@ -261,22 +261,35 @@ const Favoritos = {
 
 const ROTULO_FAVORITO = { time: "time", jogador: "jogador", liga: "competição" };
 
+const CAMINHO_ESTRELA = "M12 2.6l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.41l-5.8 3.05 1.11-6.46-4.7-4.58 6.49-.94z";
+
+function iconeEstrela() {
+  return s("svg", { class: "estrela-icone", viewBox: "0 0 24 24", "aria-hidden": "true" }, s("path", { d: CAMINHO_ESTRELA }));
+}
+
 /** Estrela para favoritar. `item` = {tipo: 'time'|'jogador'|'liga', esporte, liga, id, nome, logo?, time_id?}. */
 function botaoFavorito(item, { comTexto = false } = {}) {
   if (!item || item.id === undefined || item.id === null || item.id === "") return null;
   const rotulo = ROTULO_FAVORITO[item.tipo] || "item";
-  const botao = h("button", { class: `estrela${comTexto ? " com-texto" : ""}`, type: "button" });
+  const texto = h("span", { class: "estrela-texto" });
+  const botao = h("button", { class: `estrela${comTexto ? " com-texto" : ""}`, type: "button" }, iconeEstrela(), comTexto ? texto : null);
   const pintar = () => {
     const ativo = Favoritos.tem(item);
     botao.setAttribute("aria-pressed", String(ativo));
     botao.setAttribute("aria-label", `${ativo ? "Tirar dos" : "Pôr nos"} favoritos: ${item.nome}`);
     botao.title = ativo ? `Tirar ${rotulo} dos favoritos` : `Favoritar ${rotulo}`;
-    botao.textContent = comTexto ? `${ativo ? "★ Favorito" : "☆ Favoritar"}` : ativo ? "★" : "☆";
+    texto.textContent = ativo ? "Favorito" : "Favoritar";
   };
   botao.addEventListener("click", (e) => {
     e.stopPropagation();
-    Favoritos.alternar(item);
+    const ativo = Favoritos.alternar(item);
     pintar();
+    if (ativo) {
+      // pequena animação ao marcar (reinicia se clicar de novo)
+      botao.classList.remove("acabou-de-marcar");
+      void botao.offsetWidth;
+      botao.classList.add("acabou-de-marcar");
+    }
   });
   pintar();
   return botao;

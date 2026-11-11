@@ -108,10 +108,11 @@ function inicioVazio() {
 function abrirFavorito(f) {
   if (f.tipo === "liga") return abrirLiga(f.esporte, f.liga, undefined);
   if (f.tipo === "jogador") {
-    if (f.esporte === "nba") return abrirJogadorNBA(Number(f.id), f.nome, { time_id: f.time_id });
+    if (f.esporte === "boxe") return abrirBoxeador(f.nome);
+    if (f.esporte === "nba" && esporteObj("nba") && esporteObj("nba").tipo === "nba") return abrirJogadorNBA(Number(f.id), f.nome, { time_id: f.time_id });
     return abrirAtleta(f.esporte, f.liga, f.id, f.nome);
   }
-  if (f.esporte === "nba") return irPara("nba", "jogos");
+  if (f.esporte === "nba" && esporteObj("nba") && esporteObj("nba").tipo === "nba") return irPara("nba", "jogos");
   return abrirElenco(f.esporte, f.liga, f.id, f.nome);
 }
 
@@ -159,8 +160,8 @@ async function inicioDesenhar(silencioso) {
   const data = INICIO.data;
   const tarefas = [];
 
-  // NBA
-  if (plano.nba) {
+  // NBA (no modo servidor; no celular a NBA entra junto com os outros esportes de partidas)
+  if (plano.nba && esporteObj("nba") && esporteObj("nba").tipo === "nba") {
     const p = plano.nba;
     tarefas.push(
       api(`/jogos?data=${data}`).then((jogos) => {
@@ -172,7 +173,7 @@ async function inicioDesenhar(silencioso) {
   }
 
   // futebol e NFL: busca as competições necessárias e filtra pelos favoritos
-  for (const esporte of ["futebol", "nfl"]) {
+  for (const esporte of S.esportes.filter((e) => e.tipo === "partidas").map((e) => e.id)) {
     const p = plano[esporte];
     const esp = esporteObj(esporte);
     if (!p || !esp) continue;
@@ -189,7 +190,7 @@ async function inicioDesenhar(silencioso) {
           const escolhidos = jogos.filter((j) => inteira || p.times.has(String(j.casa.id)) || p.times.has(String(j.fora.id)));
           const nome = (esp.ligas.find((l) => l.id === liga) || {}).nome || liga;
           return {
-            titulo: esporte === "nfl" ? "NFL" : nome,
+            titulo: esp.ligas.length === 1 ? esp.nome : nome,
             logo: escolhidos.length ? escolhidos[0].liga_logo || null : null,
             jogos: escolhidos,
             linha: (j) => linhaPartida(esp, j, () => abrirPartida(esp, liga, j)),
@@ -428,7 +429,12 @@ async function pesquisaProcurar(texto, resultados) {
             descricao: p.descricao,
             esporte: p.esporte,
             imagem: p.imagem,
-            aoClicar: () => (p.esporte === "nba" ? abrirJogadorNBA(p.id, p.nome, { aba: p.ativo ? "temporada" : "carreira" }) : abrirAtleta(p.esporte, p.liga, p.id, p.nome)),
+            aoClicar: () =>
+              p.esporte === "boxe"
+                ? abrirBoxeador(p.nome)
+                : p.esporte === "nba" && esporteObj("nba").tipo === "nba"
+                  ? abrirJogadorNBA(Number(p.id), p.nome, { aba: p.ativo === false ? "carreira" : "temporada" })
+                  : abrirAtleta(p.esporte, p.liga, p.id, p.nome),
             favorito: { tipo: "jogador", esporte: p.esporte, liga: p.liga, id: String(p.id), nome: p.nome },
           })
         )
@@ -455,6 +461,16 @@ async function pesquisaProcurar(texto, resultados) {
     );
   }
   if (!partes.length) partes.push(vazio("Nada encontrado com esse nome."));
-  if (r.falhas && r.falhas.length) partes.push(h("p", { class: "nota" }, "A busca da ESPN não respondeu agora: aparecem só a NBA e as competições."));
+  if (r.falhas && r.falhas.length) partes.push(h("p", { class: "nota" }, "A busca da ESPN não respondeu agora: aparecem só os resultados do índice local."));
+  if (r.indice !== undefined) {
+    partes.push(
+      h(
+        "p",
+        { class: "nota" },
+        `O índice local tem ${Number(r.indice).toLocaleString("pt-BR")} atletas e times.`,
+        r.semeando ? " Ele está sendo completado agora em segundo plano; procure de novo em alguns minutos se não achar alguém." : " Todo atleta e time que aparece no app entra nele."
+      )
+    );
+  }
   resultados.replaceChildren(...partes);
 }

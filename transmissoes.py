@@ -63,13 +63,22 @@ def para_brasilia(inicio):
     return inicio.astimezone(FUSO_BRASILIA)
 
 
+# a ESPN e a NBA usam siglas diferentes para alguns times da NBA
+SIGLAS_EQUIVALENTES = {"wsh": "was", "gs": "gsw", "ny": "nyk", "sa": "sas", "no": "nop", "utah": "uta", "pho": "phx"}
+
+
+def _sigla(texto):
+    t = normalizar(texto)
+    return SIGLAS_EQUIVALENTES.get(t, t)
+
+
 def _bate_time(chave, candidatos):
     """A chave do arquivo ('DET', 'Palmeiras') bate com algum nome/sigla do time?"""
-    k = normalizar(chave)
+    k = _sigla(chave)
     if not k:
         return False
     for c in candidatos:
-        c = normalizar(c)
+        c = _sigla(c)
         if not c:
             continue
         if k == c:

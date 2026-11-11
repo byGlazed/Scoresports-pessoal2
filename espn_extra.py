@@ -18,6 +18,7 @@ from pathlib import Path
 
 import cache
 import espn_dados
+import indice
 
 CORE = "https://sports.core.api.espn.com/v2/sports"
 ARQUIVO_CAMPEOES = Path(__file__).parent / "campeoes.json"
@@ -271,6 +272,9 @@ def buscar_lideres(esporte, liga, limite=10):
             vistos.add(nome)
             saida.append({"chave": c.get("name"), "nome": nome, "lideres": lideres})
     saida.sort(key=lambda c: _ORDEM.index(c["nome"]) if c["nome"] in _ORDEM else 99)
+    indice.registrar(
+        [{"esporte": esporte, "liga": liga, "id": j["id"], "nome": j["nome"], "descricao": j["time"]} for c in saida for j in c["lideres"]]
+    )
     return {
         "categorias": saida,
         "faltando": [x for x in ESPERADOS.get(esporte, []) if x not in vistos],
@@ -322,6 +326,14 @@ def buscar_ranking_ufc():
         nome = r.get("name") or r.get("displayName") or r.get("shortName") or ""
         if lutadores:
             categorias.append({"nome": _nome_ranking(nome), "original": nome, "lutadores": lutadores})
+    indice.registrar(
+        [
+            {"esporte": "ufc", "liga": "ufc", "id": l["id"], "nome": l["nome"], "descricao": f"UFC, {c['nome']}"}
+            for c in categorias
+            for l in c["lutadores"]
+            if "peso por peso" not in c["nome"].lower()
+        ]
+    )
     return {"categorias": categorias}
 
 
@@ -388,6 +400,7 @@ def buscar_lutas(atleta_id, limite=30):
                 "tempo": status.get("displayClock"),
             }
         )
+    indice.registrar([{"esporte": "ufc", "liga": "ufc", "id": l["adversario_id"], "nome": l["adversario"], "descricao": "UFC"} for l in saida])
     cartel = {
         "vitorias": sum(1 for l in saida if l["resultado"] == "V"),
         "derrotas": sum(1 for l in saida if l["resultado"] == "D"),
@@ -473,30 +486,56 @@ def buscar_carreira_futebol(liga, atleta_id, limite=20):
 
 # ---------- Busca (jogadores, times e competições) ----------
 
-_SEGMENTO_ESPORTE = {"soccer": "futebol", "football": "futebol", "nfl": "nfl", "mma": "ufc", "f1": "f1", "racing": "f1"}
+_SEGMENTO_ESPORTE = {
+    "soccer": "futebol",
+    "futebol": "futebol",
+    "football": "futebol",
+    "nfl": "nfl",
+    "mma": "ufc",
+    "ufc": "ufc",
+    "f1": "f1",
+    "racing": "f1",
+}
+# o "uid" da ESPN começa com o id do esporte: s:600 futebol, s:20 futebol americano...
+_UID_ESPORTE = {"600": "futebol", "20": "nfl", "3301": "ufc", "2000": "f1"}
 _LIGA_PADRAO = {"futebol": "bra.1", "nfl": "nfl", "ufc": "ufc", "f1": "f1"}
 
 
 def _esporte_do_resultado(c):
+    uid = c.get("uid") or ""
+    m = re.match(r"s:(\d+)", uid)
+    if m and m.group(1) in _UID_ESPORTE:
+        return _UID_ESPORTE[m.group(1)]
     link = ((c.get("link") or {}).get("web")) or c.get("href") or ""
     m = re.search(r"espn\.[a-z.]+/([a-z0-9-]+)/", link)
-    segmento = m.group(1) if m else ""
-    if segmento in _SEGMENTO_ESPORTE:
-        return _SEGMENTO_ESPORTE[segmento]
-    esporte = _sem_acento(c.get("sport") or c.get("defaultSport") or "")
-    for chave, valor in (("soccer", "futebol"), ("football", "nfl"), ("mma", "ufc"), ("racing", "f1")):
-        if chave in esporte:
+    if m and m.group(1) in _SEGMENTO_ESPORTE:
+        return _SEGMENTO_ESPORTE[m.group(1)]
+    texto = _sem_acento(" ".join(str(c.get(k) or "") for k in ("sport", "defaultSport", "league", "description", "subtitle")))
+    for chave, valor in (("soccer", "futebol"), ("nfl", "nfl"), ("mma", "ufc"), ("ufc", "ufc"), ("formula 1", "f1"), ("f1", "f1")):
+        if chave in texto:
             return valor
     return None
 
 
-def buscar_espn(texto, limite=10):
+def _conteudos(dados):
+    """A busca da ESPN agrupa por tipo; cada grupo tem 'contents' (ou 'items')."""
+    for grupo in dados.get("results") or dados.get("items") or []:
+        tipo = _sem_acento(grupo.get("type") or grupo.get("displayName") or "")
+        for c in grupo.get("contents") or grupo.get("items") or []:
+            yield tipo, c
+
+
+def buscar_espn(texto, limite=12):
     """Jogadores e times de futebol, NFL, UFC e F1 pela busca da ESPN."""
-    dados = espn_dados._get("https://site.web.api.espn.com/apis/search/v2", {"query": texto, "limit": limite})
     jogadores, times = [], []
-    for grupo in dados.get("results") or []:
-        tipo = _sem_acento(grupo.get("type"))
-        for c in grupo.get("contents") or []:
+    vistos = set()
+    # em inglês a busca da ESPN acha mais atletas; em português, os times com nome local
+    for idioma in ({"lang": "en", "region": "us"}, {"lang": "pt", "region": "br"}):
+        try:
+            dados = espn_dados._get("https://site.web.api.espn.com/apis/search/v2", {"query": texto, "limit": limite, **idioma})
+        except espn_dados.ErroESPN:
+            continue
+        for tipo, c in _conteudos(dados):
             esporte = _esporte_do_resultado(c)
             if not esporte:
                 continue
@@ -510,17 +549,70 @@ def buscar_espn(texto, limite=10):
                 "liga": liga,
                 "nome": c.get("displayName") or c.get("name"),
                 "descricao": c.get("subtitle") or c.get("description"),
-                "imagem": imagem.get("default") if isinstance(imagem, dict) else None,
+                "imagem": imagem.get("default") if isinstance(imagem, dict) else (imagem if isinstance(imagem, str) else None),
             }
-            if tipo in ("player", "athlete") or "~a:" in uid:
-                m = re.search(r"a:(\d+)", uid)
-                if m:
-                    jogadores.append({**item, "id": m.group(1)})
-            elif tipo == "team" or "~t:" in uid:
-                m = re.search(r"t:(\d+)", uid)
-                if m:
-                    times.append({**item, "id": m.group(1)})
+            m_atleta = re.search(r"~a:(\d+)", uid) or (re.search(r"/id/(\d+)", str((c.get("link") or {}).get("web") or "")) if tipo in ("player", "athlete") else None)
+            m_time = re.search(r"~t:(\d+)", uid)
+            if m_atleta and (tipo in ("player", "athlete", "") or "~a:" in uid):
+                chave = ("jogador", esporte, m_atleta.group(1))
+                if chave not in vistos:
+                    vistos.add(chave)
+                    jogadores.append({**item, "id": m_atleta.group(1)})
+            elif m_time:
+                chave = ("time", esporte, m_time.group(1))
+                if chave not in vistos:
+                    vistos.add(chave)
+                    times.append({**item, "id": m_time.group(1)})
+    indice.registrar([{**j} for j in jogadores] + [{**t, "tipo": "time"} for t in times])
     return {"jogadores": jogadores[:limite], "times": times[:limite]}
+
+
+def semear():
+    """Enche o índice da busca: times de todas as competições, elencos e ranking do UFC."""
+    tarefas = []
+    for esporte, cfg in espn_dados.ESPORTES.items():
+        if cfg["tipo"] != "partidas":
+            continue
+        for l in cfg["ligas"]:
+            tarefas.append(("times", esporte, l["id"]))
+    tarefas.append(("ufc", None, None))
+    tarefas.append(("f1", None, None))
+
+    def times_da_liga(esporte, liga):
+        cfg, _ = espn_dados.config(esporte, liga)
+        dados = espn_dados._get(f"https://site.api.espn.com/apis/site/v2/sports/{cfg['esporte']}/{liga}/teams", {"limit": 500})
+        achados = []
+        for sp in dados.get("sports") or []:
+            for lg in sp.get("leagues") or []:
+                for t in lg.get("teams") or []:
+                    time_ = t.get("team") or t
+                    achados.append(
+                        {"tipo": "time", "esporte": esporte, "liga": liga, "id": time_.get("id"), "nome": time_.get("displayName"), "descricao": espn_dados.nome_da_liga(liga), "imagem": espn_dados._logo(time_)}
+                    )
+        indice.registrar(achados)
+        return achados
+
+    def rodar(tarefa):
+        tipo, esporte, liga = tarefa
+        try:
+            if tipo == "times":
+                achados = times_da_liga(esporte, liga)
+                # elencos completos das ligas mais procuradas
+                if liga in ("nfl", "bra.1", "eng.1"):
+                    for t in achados:
+                        try:
+                            espn_dados.buscar_elenco(esporte, liga, t["id"])
+                        except Exception:
+                            pass
+            elif tipo == "ufc":
+                buscar_ranking_ufc()
+            elif tipo == "f1":
+                espn_dados.buscar_classificacao("f1", "f1")
+        except Exception:
+            pass
+
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        list(ex.map(rodar, tarefas))
 
 
 _APELIDOS = {

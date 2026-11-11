@@ -214,11 +214,20 @@ const COLUNAS_CLASSIFICACAO = {
     ["streak", "Seq.", "Sequência"],
   ],
   f1: [["championshipPts", "Pts", "Pontos"]],
+  nba: [
+    ["wins", "V", "Vitórias"],
+    ["losses", "D", "Derrotas"],
+    ["winPercent", "%", "Aproveitamento"],
+    ["gamesBehind", "Atrás", "Jogos atrás do líder"],
+    ["homeRecord", "Casa", "Em casa"],
+    ["awayRecord", "Fora", "Fora de casa"],
+    ["streak", "Seq.", "Sequência"],
+  ],
 };
 
 /** Ordem dos times em cada esporte: no futebol o mandante vem primeiro; na NFL, o visitante. */
 function ordemTimes(esporteId, jogo) {
-  return esporteId === "nfl" ? [jogo.fora, jogo.casa] : [jogo.casa, jogo.fora];
+  return esporteId === "nfl" || esporteId === "nba" ? [jogo.fora, jogo.casa] : [jogo.casa, jogo.fora];
 }
 
 function statusPartidaLista(j) {
@@ -1266,7 +1275,7 @@ function boxeAbrir(esp, ev) {
     categoria: l.categoria,
     titulo: l.titulo,
     resultado: l.resultado,
-    lutadores: l.lutadores.map((nome) => ({ nome, vencedor: Boolean(l.vencedor) && l.vencedor === nome })),
+    lutadores: l.lutadores.map((nome, i) => ({ nome, id: (l.ids || [])[i] || nome, vencedor: Boolean(l.vencedor) && l.vencedor === nome })),
   }));
   detalhe().replaceChildren(
     botaoVoltarMobile(),
@@ -1275,7 +1284,92 @@ function boxeAbrir(esp, ev) {
       { class: "cartao" },
       h("div", { class: "secao" }, h("h2", { class: "perfil-nome", style: { fontSize: "28px" } }, ev.nome), h("p", { class: "nota" }, [ev.local, ev.inicio ? diaHora(ev.inicio) : dataLonga(ev.data)].filter(Boolean).join(", "))),
       secao("Onde assistir no Brasil", blocoTransmissao(ev.transmissao)),
-      ...lutas.map((l) => cartaoLuta(l, () => {}))
+      ...lutas.map((l) => cartaoLuta(l, (_, nome) => abrirBoxeador(nome)))
     )
   );
+}
+
+/* ---------- Perfil de boxeador (Wikipédia) ---------- */
+
+function abrirBoxeador(nome) {
+  Painel.abrir(nome, (corpo, ativo) => desenharBoxeador(corpo, ativo, nome));
+}
+
+async function desenharBoxeador(corpo, ativo, nome) {
+  const b = await api(`/boxe/lutador?nome=${encodeURIComponent(nome)}`);
+  if (!ativo()) return;
+  $("#painel-titulo").textContent = b.nome || nome;
+  const fav = { tipo: "jogador", esporte: "boxe", liga: "boxe", id: b.id, nome: b.nome || nome };
+  const blocos = [
+    h(
+      "div",
+      { class: "perfil" },
+      b.foto ? h("img", { class: "perfil-foto", src: b.foto, alt: "" }) : imgLogo(null, "perfil-foto"),
+      h(
+        "div",
+        null,
+        h("h3", { class: "perfil-nome" }, b.nome || nome),
+        h("div", { class: "perfil-sub" }, [b.apelido ? `"${b.apelido}"` : null, b.categoria].filter(Boolean).join(", ") || "Boxe"),
+        h("div", { class: "perfil-acoes" }, botaoFavorito(fav, { comTexto: true }))
+      )
+    ),
+  ];
+  if (b.cartel) {
+    const c = b.cartel;
+    const caixa = (valor, rotulo, classe) => h("div", { class: `numero-caixa ${classe || ""}` }, h("strong", null, valor ?? "–"), h("span", null, rotulo));
+    blocos.push(
+      secao(
+        "Cartel no boxe profissional",
+        h(
+          "div",
+          { class: "numeros cartel" },
+          caixa(c.vitorias, "Vitórias", "vitoria"),
+          caixa(c.nocautes, "Por nocaute"),
+          caixa(c.derrotas, "Derrotas", "derrota"),
+          caixa(c.empates, "Empates"),
+          c.lutas ? caixa(c.lutas, "Lutas") : null
+        )
+      )
+    );
+  }
+  const fatos = [
+    ["Nacionalidade", b.nacionalidade],
+    ["Nascimento", b.nascimento],
+    ["Categoria", b.categoria],
+    ["Altura", b.altura],
+    ["Envergadura", b.envergadura],
+    ["Base", b.base],
+  ].filter(([, v]) => v);
+  if (fatos.length) blocos.push(h("dl", { class: "fatos", style: { marginTop: "12px" } }, fatos.map(([r, v]) => h("div", { class: "fato" }, h("dt", null, r), h("dd", null, v)))));
+  if (b.resumo) {
+    blocos.push(
+      secao(
+        "Sobre",
+        h("p", { style: { margin: 0, lineHeight: 1.55 } }, b.resumo),
+        b.resumo_idioma === "en" ? h("p", { class: "nota" }, "Resumo em inglês: a Wikipédia em português não tem página deste lutador.") : null
+      )
+    );
+  }
+  if (!b.encontrado) blocos.push(secao(null, h("p", { class: "nota" }, "A Wikipédia não tem página deste lutador, então o perfil fica só com as lutas da agenda.")));
+  if (b.lutas_agenda.length) {
+    blocos.push(
+      secao(
+        "Lutas na agenda",
+        h(
+          "ul",
+          { class: "lista-simples" },
+          b.lutas_agenda.map((l) =>
+            h(
+              "li",
+              null,
+              h("span", null, "x ", h("button", { class: "botao-link", type: "button", onclick: () => Painel.empilhar(l.adversario, (c2, at2) => desenharBoxeador(c2, at2, l.adversario)) }, l.adversario), l.titulo ? h("span", { class: "sub" }, `, ${l.titulo}`) : null),
+              h("span", { class: "sub" }, l.resultado ? `${l.vencedor === (b.nome || nome) ? "Venceu" : "Resultado"}: ${l.resultado}` : dataCurta(l.data))
+            )
+          )
+        )
+      )
+    );
+  }
+  if (b.fonte) blocos.push(h("p", { class: "nota", style: { padding: "0 16px" } }, "Dados: ", h("a", { href: b.fonte, target: "_blank", rel: "noopener" }, "Wikipédia")));
+  corpo.replaceChildren(...blocos);
 }

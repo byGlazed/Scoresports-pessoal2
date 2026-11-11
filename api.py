@@ -12,6 +12,7 @@ import boxe
 import cache
 import espn_dados
 import espn_extra
+import indice
 import nba_dados
 
 logger = logging.getLogger("uvicorn.error")
@@ -332,10 +333,15 @@ def espn_historico(esporte: str, liga: str, atleta_id: str):
 
 @app.get("/busca")
 def busca(q: str = Query("", max_length=60)):
-    """Procura jogadores, times e competições em todos os esportes."""
+    """Procura jogadores, times e competições em todos os esportes.
+
+    Junta três fontes: a lista completa de jogadores da NBA, o índice local (todo atleta e
+    time que o app já viu, mais a semente semanal) e a busca da ESPN.
+    """
     texto = q.strip()
+    indice.semear_se_preciso(espn_extra.semear)
     if len(texto) < 2:
-        return {"ligas": [], "jogadores": [], "times": [], "falhas": []}
+        return {"ligas": [], "jogadores": [], "times": [], "falhas": [], "indice": indice.contar(), "semeando": indice.semeando()}
     extras = [
         {"esporte": "nba", "liga": "nba", "nome": "NBA", "tipo_esporte": "nba"},
         {"esporte": "boxe", "liga": "boxe", "nome": "Boxe", "tipo_esporte": "boxe"},
@@ -348,13 +354,35 @@ def busca(q: str = Query("", max_length=60)):
         for p in nba_dados.procurar_jogadores(lista_nba, texto, limite=8)
     ]
     times = []
-    espn = _opcional(f"busca_espn_v1:{espn_extra._sem_acento(texto)}", 6 * 3600, lambda: espn_extra.buscar_espn(texto))
+    vistos = {("jogador", "nba", str(p["id"])) for p in jogadores}
+
+    def juntar(item, tipo):
+        chave = (tipo, item["esporte"], str(item["id"]))
+        if chave in vistos:
+            return
+        vistos.add(chave)
+        (times if tipo == "time" else jogadores).append(item)
+
+    # a agenda de boxe entra no índice ao ser lida
+    _opcional("boxe_indexado_v1", 3600, lambda: len(boxe.buscar_eventos()))
+    for item in indice.procurar(texto):
+        juntar({k: item[k] for k in ("esporte", "liga", "id", "nome", "descricao", "imagem")}, item["tipo"])
+    espn = _opcional(f"busca_espn_v2:{espn_extra._sem_acento(texto)}", 6 * 3600, lambda: espn_extra.buscar_espn(texto))
     if espn is None:
         falhas.append("ESPN")
     else:
-        jogadores += espn["jogadores"]
-        times += espn["times"]
-    return {"ligas": ligas, "jogadores": jogadores, "times": times, "falhas": falhas}
+        for j in espn["jogadores"]:
+            juntar(j, "jogador")
+        for t in espn["times"]:
+            juntar(t, "time")
+    return {
+        "ligas": ligas,
+        "jogadores": jogadores[:40],
+        "times": times[:30],
+        "falhas": falhas,
+        "indice": indice.contar(),
+        "semeando": indice.semeando(),
+    }
 
 
 @app.get("/campeoes")
@@ -365,10 +393,20 @@ def campeoes():
 @app.get("/banco")
 def banco():
     """Quanto está guardado no banco local (cache.db)."""
-    return cache.estatisticas()
+    return {**cache.estatisticas(), "atletas_e_times_no_indice": indice.contar()}
 
 
 # ---------- Boxe (arquivo boxe_eventos.json) ----------
+
+@app.get("/boxe/lutador")
+def boxe_lutador(nome: str = Query(..., min_length=2, max_length=80)):
+    """Perfil de um boxeador (Wikipédia) e as lutas dele na agenda."""
+    try:
+        return cache.obter(f"boxe_lutador_v1:{indice.normalizar(nome)}", 7 * 86400, lambda: boxe.buscar_lutador(nome))
+    except Exception as erro:
+        logger.exception("Falha ao buscar o lutador %s", nome)
+        raise HTTPException(status_code=502, detail=f"Não foi possível buscar o perfil agora. Motivo: {_motivo(erro)}")
+
 
 @app.get("/boxe/eventos")
 def boxe_eventos():
