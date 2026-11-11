@@ -29,8 +29,14 @@ const GRUPOS_POSICAO = {
     "1b": "Defensores internos", "2b": "Defensores internos", "3b": "Defensores internos", ss: "Defensores internos", if: "Defensores internos",
     lf: "Defensores externos", cf: "Defensores externos", rf: "Defensores externos", of: "Defensores externos",
     dh: "Rebatedor designado",
+    // o elenco da MLB já vem em grupos com estes nomes
+    pitchers: "Arremessadores", catchers: "Receptores", infielders: "Defensores internos", outfielders: "Defensores externos", "designated hitter": "Rebatedor designado",
   },
-  nhl: { g: "Goleiros", d: "Defensores", c: "Atacantes", lw: "Atacantes", rw: "Atacantes", f: "Atacantes" },
+  nhl: {
+    g: "Goleiros", d: "Defensores", c: "Atacantes", lw: "Atacantes", rw: "Atacantes", f: "Atacantes",
+    // o elenco da NHL já vem em grupos com estes nomes
+    goalies: "Goleiros", defense: "Defensores", centers: "Atacantes", "left wings": "Atacantes", "right wings": "Atacantes", forwards: "Atacantes",
+  },
 };
 
 /** Ordem em que os grupos aparecem. "Outros" vem sempre por último. */

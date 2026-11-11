@@ -439,6 +439,8 @@ const D_ESPORTES = {
     ],
   },
   nfl: { nome: "NFL", esporte: "football", tipo: "partidas", ligas: [{ id: "nfl", nome: "NFL" }] },
+  mlb: { nome: "MLB", esporte: "baseball", tipo: "partidas", ligas: [{ id: "mlb", nome: "MLB" }] },
+  nhl: { nome: "NHL", esporte: "hockey", tipo: "partidas", ligas: [{ id: "nhl", nome: "NHL" }] },
   f1: { nome: "Fórmula 1", esporte: "racing", tipo: "corrida", ligas: [{ id: "f1", nome: "Fórmula 1" }] },
   ufc: { nome: "UFC", esporte: "mma", tipo: "luta", ligas: [{ id: "ufc", nome: "UFC" }] },
 };
@@ -538,7 +540,7 @@ function estadoEspn(status) {
   return [{ pre: 1, in: 2, post: 3 }[tipo.state] || 1, String(tipo.name || "").toUpperCase()];
 }
 
-function statusTexto(esporteEspn, status) {
+function statusTexto(esporteEspn, status, tipoTemporada = null) {
   const [estado, nome] = estadoEspn(status);
   status = status || {};
   const periodo = status.period || 0;
@@ -552,6 +554,8 @@ function statusTexto(esporteEspn, status) {
     return "Encerrado";
   }
   if (estado === 2) {
+    const especifico = statusAoVivo(esporteEspn, { ...status, _tipoTemporada: tipoTemporada }); // beisebol e hóquei
+    if (especifico) return especifico;
     if (nome.includes("HALFTIME")) return "Intervalo";
     if (esporteEspn === "soccer") {
       if (nome.includes("END_PERIOD") || nome.includes("END_OF_PERIOD")) return periodo >= 2 ? "Fim do tempo normal" : "Intervalo";
@@ -628,14 +632,14 @@ function partida(ev, esporte, liga, comp) {
     inicio: inicio ? inicio.toISOString() : null,
     data: dataBrDe(inicio),
     estado,
-    status: statusTexto(cfg.esporte, status),
+    status: statusTexto(cfg.esporte, status, (ev.season || {}).type),
     relogio: status.displayClock || null,
     periodo: status.period || null,
     casa: competidor(casa, estado),
     fora: competidor(fora, estado),
     local: localDe(comp.venue),
     semana: (ev.week || {}).number || null,
-    nota: notas[0] || null,
+    nota: notaDoJogo(comp) || notas[0] || null,
   };
   jogo.transmissao = ondeAssistir(esporte, {
     liga,
@@ -834,6 +838,8 @@ function lances(dados, esporteEspn) {
       })
       .filter(Boolean);
   }
+  const pontuacoes = lancesPontuacao(esporteEspn, dados.plays); // MLB e NHL vêm em "plays"
+  if (pontuacoes) return pontuacoes;
   return (dados.scoringPlays || []).map((p) => {
     const periodo = (p.period || {}).number;
     const relogio = (p.clock || {}).displayValue;
@@ -865,6 +871,15 @@ function jogoHistorico(e) {
 async function buscarResumo(esporte, liga, eventoId) {
   const [cfg] = dConfig(esporte, liga);
   const dados = await espnGet(`${D_BASE}/${cfg.esporte}/${liga}/summary`, { event: eventoId });
+  if (cfg.esporte === "hockey" && !(dados.plays || []).length) {
+    // em português a ESPN manda o jogo de hóquei sem as jogadas; sem o idioma elas vêm
+    try {
+      const r = await pedirUrl(montarUrl(`${D_BASE}/${cfg.esporte}/${liga}/summary`, { event: eventoId }));
+      if (r.ok) dados.plays = (await r.json()).plays || [];
+    } catch (_) {
+      /* fica sem os gols */
+    }
+  }
   const header = dados.header || {};
   const comp = (header.competitions || [{}])[0];
   const jogo = partida({ id: eventoId, week: header.week }, esporte, liga, comp);
@@ -1333,9 +1348,12 @@ const CATEGORIAS_LIDERES_PT = {
 const ORDEM_LIDERES = ["Artilharia", "Assistências", "Cartões amarelos", "Cartões vermelhos", "Pontos por jogo", "Rebotes por jogo", "Assistências por jogo",
   "Jardas de passe", "Touchdowns de passe", "Rating de quarterback", "Jardas de corrida", "Touchdowns de corrida", "Jardas recebidas", "Recepções",
   "Touchdowns recebidos", "Tackles", "Sacks", "Interceptações"];
-const ESPERADOS = { futebol: ["Artilharia", "Assistências", "Cartões amarelos", "Cartões vermelhos"], nfl: ["Jardas de passe", "Jardas de corrida", "Jardas recebidas", "Tackles", "Sacks", "Interceptações"] };
+const ESPERADOS = { futebol: ["Artilharia", "Assistências", "Cartões amarelos", "Cartões vermelhos"], nfl: ["Jardas de passe", "Jardas de corrida", "Jardas recebidas", "Tackles", "Sacks", "Interceptações"],
+  mlb: ["Média de rebatidas", "Home runs", "Corridas impulsionadas", "ERA", "Strikeouts"], nhl: ["Gols", "Assistências", "Pontos", "Defesas (%)"] };
 
-function nomeCategoria(c) {
+function nomeCategoria(c, esporte) {
+  const proprio = nomeLiderEsporte(esporte, c.name); // MLB e NHL: "wins" e "goals" mudam de sentido
+  if (proprio) return proprio;
   const interno = semAcento(c.name).replace(/ /g, "");
   if (CATEGORIAS_LIDERES_PT[interno]) return CATEGORIAS_LIDERES_PT[interno];
   const exibido = c.displayName || c.shortDisplayName || c.name || "";
@@ -1363,8 +1381,9 @@ async function temporadaAtual(sport, liga) {
 async function buscarLideres(esporte, liga, limite = 10) {
   const [cfg] = dConfig(esporte, liga);
   const [ano, tipo, nomeTemporada] = await temporadaAtual(cfg.esporte, liga);
-  const anos = esporte === "nfl" || esporte === "nba" ? [ano, ano - 1] : [ano, ano - 1, ano - 2];
-  const tipos = esporte === "nfl" || esporte === "nba" ? [2] : [...new Set([tipo || 1, null])];
+  const americano = ["nfl", "nba", "mlb", "nhl"].includes(esporte); // sempre a temporada regular
+  const anos = americano ? [ano, ano - 1] : [ano, ano - 1, ano - 2];
+  const tipos = americano ? [2] : [...new Set([tipo || 1, null])];
   let cats = [];
   let anoAchado = null;
   for (const a of anos) {
@@ -1392,7 +1411,9 @@ async function buscarLideres(esporte, liga, limite = 10) {
   const saida = [];
   const vistos = new Set();
   for (const c of cats) {
-    const nome = nomeCategoria(c);
+    // MLB e NHL: só as categorias traduzidas na tabela do esporte
+    if (LIDERES_POR_ESPORTE[esporte] && !nomeLiderEsporte(esporte, c.name)) continue;
+    const nome = nomeCategoria(c, esporte);
     if (vistos.has(nome)) continue;
     const lideres = (c.leaders || []).slice(0, limite).map((l, i) => {
       const at = expandir(l.athlete, resolvidos);
@@ -1404,7 +1425,8 @@ async function buscarLideres(esporte, liga, limite = 10) {
       saida.push({ chave: c.name, nome, lideres });
     }
   }
-  saida.sort((a, b) => (ORDEM_LIDERES.indexOf(a.nome) + 1 || 99) - (ORDEM_LIDERES.indexOf(b.nome) + 1 || 99));
+  const ordem = LIDERES_POR_ESPORTE[esporte] ? Object.values(LIDERES_POR_ESPORTE[esporte]) : ORDEM_LIDERES;
+  saida.sort((a, b) => (ordem.indexOf(a.nome) + 1 || 99) - (ordem.indexOf(b.nome) + 1 || 99));
   Indice.registrar(saida.flatMap((c) => c.lideres.map((j) => ({ esporte, liga, id: j.id, nome: j.nome, descricao: j.time }))));
   return {
     categorias: saida,
@@ -1544,9 +1566,9 @@ async function buscarCarreiraFutebol(liga, atletaId, limite = 20) {
 
 /* ---------- Busca ---------- */
 
-const UID_ESPORTE = { 600: "futebol", 20: "nfl", 40: "nba", 3301: "ufc", 2000: "f1" };
-const SEGMENTO_ESPORTE = { soccer: "futebol", futebol: "futebol", football: "futebol", nfl: "nfl", nba: "nba", mma: "ufc", ufc: "ufc", f1: "f1", racing: "f1" };
-const LIGA_PADRAO = { futebol: "bra.1", nfl: "nfl", nba: "nba", ufc: "ufc", f1: "f1" };
+const UID_ESPORTE = { 600: "futebol", 20: "nfl", 40: "nba", 1: "mlb", 70: "nhl", 3301: "ufc", 2000: "f1" };
+const SEGMENTO_ESPORTE = { soccer: "futebol", futebol: "futebol", football: "futebol", nfl: "nfl", nba: "nba", baseball: "mlb", mlb: "mlb", hockey: "nhl", nhl: "nhl", mma: "ufc", ufc: "ufc", f1: "f1", racing: "f1" };
+const LIGA_PADRAO = { futebol: "bra.1", nfl: "nfl", nba: "nba", mlb: "mlb", nhl: "nhl", ufc: "ufc", f1: "f1" };
 
 function esporteDoResultado(c) {
   const m = /^s:(\d+)/.exec(c.uid || "");
@@ -1555,7 +1577,7 @@ function esporteDoResultado(c) {
   const m2 = /espn\.[a-z.]+\/([a-z0-9-]+)\//.exec(link);
   if (m2 && SEGMENTO_ESPORTE[m2[1]]) return SEGMENTO_ESPORTE[m2[1]];
   const t = semAcento(["sport", "defaultSport", "league", "description", "subtitle"].map((k) => c[k] || "").join(" "));
-  for (const [k, v] of [["soccer", "futebol"], ["nfl", "nfl"], ["nba", "nba"], ["mma", "ufc"], ["ufc", "ufc"], ["formula 1", "f1"]]) if (t.includes(k)) return v;
+  for (const [k, v] of [["soccer", "futebol"], ["nfl", "nfl"], ["nba", "nba"], ["mlb", "mlb"], ["baseball", "mlb"], ["nhl", "nhl"], ["hockey", "nhl"], ["mma", "ufc"], ["ufc", "ufc"], ["formula 1", "f1"]]) if (t.includes(k)) return v;
   return null;
 }
 
@@ -1609,6 +1631,7 @@ const APELIDOS = {
   "ger.1": ["bundesliga", "alemanha", "campeonato alemao"], "fra.1": ["ligue 1", "franca", "campeonato frances"], "por.1": ["liga portugal", "portugal"],
   "usa.1": ["mls", "estados unidos"], "fifa.world": ["copa do mundo", "mundial"], "conmebol.america": ["copa america"], "uefa.euro": ["eurocopa", "euro"],
   "uefa.nations": ["liga das nacoes", "nations league"], "fifa.friendly": ["amistosos", "selecoes"], nba: ["basquete"], nfl: ["futebol americano"],
+  mlb: ["beisebol", "baseball", "liga de beisebol"], nhl: ["hoquei", "hockey", "hoquei no gelo"],
 };
 
 function procurarLigas(texto) {

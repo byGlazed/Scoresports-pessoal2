@@ -14,6 +14,20 @@
     {"temporada": "2022 (Super Bowl LVII)", "campeao": "Kansas City Chiefs"},
     {"temporada": "2021 (Super Bowl LVI)", "campeao": "Los Angeles Rams"}
   ],
+  "mlb": [
+    {"temporada": "2026", "campeao": "Milwaukee Brewers", "vice": "Tampa Bay Rays"},
+    {"temporada": "2025", "campeao": "Los Angeles Dodgers"},
+    {"temporada": "2024", "campeao": "Los Angeles Dodgers"},
+    {"temporada": "2023", "campeao": "Texas Rangers"},
+    {"temporada": "2022", "campeao": "Houston Astros"}
+  ],
+  "nhl": [
+    {"temporada": "2025-26", "campeao": "Carolina Hurricanes", "vice": "Vegas Golden Knights"},
+    {"temporada": "2024-25", "campeao": "Florida Panthers"},
+    {"temporada": "2023-24", "campeao": "Florida Panthers"},
+    {"temporada": "2022-23", "campeao": "Vegas Golden Knights"},
+    {"temporada": "2021-22", "campeao": "Colorado Avalanche"}
+  ],
   "f1": [
     {"temporada": "2025", "campeao": "Lando Norris", "extra": "Construtores: McLaren"},
     {"temporada": "2024", "campeao": "Max Verstappen", "extra": "Construtores: McLaren"},

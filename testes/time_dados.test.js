@@ -215,3 +215,17 @@ test("estatisticasDoTime nhl: Ataque, Defesa e Geral", () => {
   assert.deepEqual(r.map((g) => g.grupo), ["Ataque", "Defesa", "Geral"]);
   assert.equal(r[0].itens[0].rotulo, "Gols");
 });
+
+test("agruparElenco nhl: grupos da ESPN (Centers, Wings, Defense, Goalies) viram Atacantes, Defensores e Goleiros", () => {
+  const roster = amostra("roster_nhl");
+  const r = T.agruparElenco("nhl", roster);
+  assert.deepEqual(r.grupos.map((g) => g.nome), ["Goleiros", "Defensores", "Atacantes"]);
+  assert.equal(r.grupos.find((g) => g.nome === "Atacantes").atletas.length, 15);
+  assert.equal(r.tecnico, "Lindy Ruff");
+});
+
+test("agruparElenco mlb: Pitchers, Catchers, Infielders, Outfielders e DH traduzidos", () => {
+  const r = T.agruparElenco("mlb", amostra("roster_mlb"));
+  assert.deepEqual(r.grupos.map((g) => g.nome), ["Arremessadores", "Receptores", "Defensores internos", "Defensores externos", "Rebatedor designado"]);
+  assert.equal(r.tecnico, "Pat Murphy");
+});

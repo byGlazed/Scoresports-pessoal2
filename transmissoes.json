@@ -16,6 +16,16 @@
       "observacao": "Todos os jogos estão no NBA League Pass. ESPN 2/Disney+ Premium e Prime Video escolhem jogos toda semana; quando a grade sai, o jogo entra na lista 'jogos'.",
       "conferido_em": "2026-11-09"
     },
+    "mlb": {
+      "canais": ["ESPN", "Disney+ Premium"],
+      "observacao": "Confira a grade da ESPN: nem todo jogo passa na TV; o Disney+ Premium tem a maior parte.",
+      "conferido_em": "2026-11-11"
+    },
+    "nhl": {
+      "canais": ["ESPN", "Disney+ Premium"],
+      "observacao": "Confira a grade da ESPN: nem todo jogo passa na TV; o Disney+ Premium tem a maior parte.",
+      "conferido_em": "2026-11-11"
+    },
     "nfl": {
       "canais": ["NFL Game Pass (DAZN)"],
       "observacao": "Todos os jogos estão no NFL Game Pass. ESPN/Disney+ (dois jogos de domingo à tarde) e ge tv (um jogo grátis) escolhem a grade toda semana.",

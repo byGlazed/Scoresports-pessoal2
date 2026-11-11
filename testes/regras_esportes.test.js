@@ -60,3 +60,26 @@ test("nomeLiderEsporte traduz por esporte", () => {
   assert.equal(R.nomeLiderEsporte("nba", "goals"), null);
   assert.equal(R.nomeLiderEsporte("mlb", "naoExiste"), null);
 });
+
+test("lancesPontuacao hóquei: só os gols, com período, relógio e placar", () => {
+  const l = R.lancesPontuacao("hockey", amostra("nhl_jogadas").plays);
+  assert.equal(l.length, 9);
+  assert.equal(l[0].tempo, "1º P 3:33");
+  assert.equal(l[0].placar, "0 x 1");
+  assert.equal(l[0].time_id, "21");
+  assert.equal(l[0].tipo, "Gol");
+  assert.ok(l[0].texto.includes("Raddysh"));
+});
+
+test("lancesPontuacao beisebol: corridas com a parte da entrada", () => {
+  const l = R.lancesPontuacao("baseball", amostra("mlb_jogadas").plays);
+  assert.equal(l.length, 5);
+  assert.equal(l[0].tempo, "▲ 2ª");
+  assert.equal(l[0].placar, "1 x 0");
+  assert.equal(l[0].tipo, "Corrida");
+});
+
+test("lancesPontuacao de outro esporte ou sem jogadas devolve null", () => {
+  assert.equal(R.lancesPontuacao("football", []), null);
+  assert.deepEqual(R.lancesPontuacao("hockey", undefined), []);
+});

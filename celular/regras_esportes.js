@@ -73,6 +73,36 @@ function nomeLiderEsporte(esporte, nomeEspn) {
   return (mapa && mapa[nomeEspn]) || null;
 }
 
+/**
+ * Pontuações do jogo (gols no hóquei, corridas no beisebol), no formato dos "lances" das outras telas.
+ * A ESPN manda tudo em "plays" e marca as que valem ponto com scoringPlay. Outros esportes: null.
+ */
+function lancesPontuacao(esporteEspn, jogadas) {
+  if (esporteEspn !== "baseball" && esporteEspn !== "hockey") return null;
+  return (jogadas || [])
+    .filter((p) => p && p.scoringPlay)
+    .map((p) => {
+      const periodo = (p.period || {}).number;
+      let tempo = null;
+      if (esporteEspn === "hockey") {
+        const relogio = (p.clock || {}).displayValue;
+        tempo = periodo ? `${periodo}º P${relogio ? ` ${relogio}` : ""}` : relogio || null;
+      } else if (periodo) {
+        const parte = String((p.period || {}).type || "").toLowerCase();
+        tempo = `${parte.startsWith("top") ? "▲ " : parte.startsWith("bot") ? "▼ " : ""}${periodo}ª`;
+      }
+      const temPlacar = p.homeScore !== undefined && p.homeScore !== null;
+      return {
+        tempo,
+        tipo: esporteEspn === "hockey" ? "Gol" : "Corrida",
+        texto: p.text || "",
+        time_id: (p.team || {}).id || null,
+        placar: temPlacar ? `${p.awayScore} x ${p.homeScore}` : null,
+        jogadores: [],
+      };
+    });
+}
+
 if (typeof module !== "undefined") {
-  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE };
+  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao };
 }

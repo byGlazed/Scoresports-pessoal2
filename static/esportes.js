@@ -358,6 +358,23 @@ const COLUNAS_CLASSIFICACAO = {
     ["streak", "Seq.", "Sequência"],
   ],
   f1: [["championshipPts", "Pts", "Pontos"]],
+  mlb: [
+    ["wins", "V", "Vitórias"],
+    ["losses", "D", "Derrotas"],
+    ["winPercent", "%", "Aproveitamento"],
+    ["gamesBehind", "Atrás", "Jogos atrás do líder"],
+    ["streak", "Seq.", "Sequência"],
+  ],
+  nhl: [
+    ["gamesPlayed", "J", "Jogos"],
+    ["wins", "V", "Vitórias"],
+    ["losses", "D", "Derrotas"],
+    ["otLosses", "DP", "Derrotas na prorrogação"],
+    ["points", "Pts", "Pontos"],
+    ["pointsFor", "GP", "Gols pró"],
+    ["pointsAgainst", "GC", "Gols contra"],
+    ["differential", "SG", "Saldo de gols"],
+  ],
   nba: [
     ["wins", "V", "Vitórias"],
     ["losses", "D", "Derrotas"],
@@ -369,9 +386,9 @@ const COLUNAS_CLASSIFICACAO = {
   ],
 };
 
-/** Ordem dos times em cada esporte: no futebol o mandante vem primeiro; na NFL, o visitante. */
+/** Ordem dos times em cada esporte: no futebol o mandante vem primeiro; nos esportes americanos, o visitante. */
 function ordemTimes(esporteId, jogo) {
-  return esporteId === "nfl" || esporteId === "nba" ? [jogo.fora, jogo.casa] : [jogo.casa, jogo.fora];
+  return ["nfl", "nba", "mlb", "nhl"].includes(esporteId) ? [jogo.fora, jogo.casa] : [jogo.casa, jogo.fora];
 }
 
 function statusPartidaLista(j) {
