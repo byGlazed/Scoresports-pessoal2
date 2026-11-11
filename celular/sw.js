@@ -11,6 +11,7 @@ const ARQUIVOS = [
   "./app.js",
   "./esportes.js",
   "./inicio.js",
+  "./regras_esportes.js",
   "./time_dados.js",
   "./direto.js",
   "./registrar.js",

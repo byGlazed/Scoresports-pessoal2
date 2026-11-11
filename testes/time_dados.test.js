@@ -120,7 +120,7 @@ test("estatisticasDoTime nba e nfl: primeiro item é Pontos por jogo", () => {
 
 test("estatisticasDoTime sem dados ou esporte sem tabela devolve lista vazia", () => {
   assert.deepEqual(T.estatisticasDoTime("futebol", []), []);
-  assert.deepEqual(T.estatisticasDoTime("mlb", amostra("stats_nba").splits.categories), []);
+  assert.deepEqual(T.estatisticasDoTime("f1", amostra("stats_nba").splits.categories), []);
 });
 
 test("estatisticasDoTime pula estatística ausente e grupo vazio", () => {
@@ -200,4 +200,18 @@ test("idTecnicoAtual: vários técnicos sem data de fim e nenhum preferred dá n
   const tecnico = (id) => ({ mainsnak: { snaktype: "value", datavalue: { value: { id } } }, rank: "normal", qualifiers: {} });
   assert.equal(T.idTecnicoAtual({ claims: { P286: [tecnico("Q1"), tecnico("Q2")] } }), null);
   assert.equal(T.idTecnicoAtual({ claims: { P286: [tecnico("Q1")] } }), "Q1");
+});
+
+test("estatisticasDoTime mlb: Ataque, Arremesso e Defesa com os valores da ESPN", () => {
+  const cats = amostra("stats_mlb").splits.categories;
+  const r = T.estatisticasDoTime("mlb", cats);
+  assert.deepEqual(r.map((g) => g.grupo), ["Ataque", "Arremesso", "Defesa"]);
+  const hr = cats.find((c) => c.name === "batting").stats.find((s) => s.name === "homeRuns").displayValue;
+  assert.equal(r[0].itens.find((i) => i.rotulo === "Home runs").valor, hr);
+});
+
+test("estatisticasDoTime nhl: Ataque, Defesa e Geral", () => {
+  const r = T.estatisticasDoTime("nhl", amostra("stats_nhl").splits.categories);
+  assert.deepEqual(r.map((g) => g.grupo), ["Ataque", "Defesa", "Geral"]);
+  assert.equal(r[0].itens[0].rotulo, "Gols");
 });

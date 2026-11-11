@@ -149,6 +149,16 @@ const STATS_TIME = {
     ["Defesa", [["defensive.pointsAllowed", "Pontos sofridos"], ["defensive.yardsAllowed", "Jardas cedidas"], ["defensive.sacks", "Sacks"], ["defensiveInterceptions.interceptions", "Interceptações"], ["defensive.totalTackles", "Tackles"]]],
     ["Geral", [["miscellaneous.turnOverDifferential", "Saldo de turnovers"], ["miscellaneous.thirdDownConvPct", "3ª descida convertida (%)"], ["miscellaneous.redzoneScoringPct", "Aproveitamento na red zone (%)"], ["general.totalPenalties", "Faltas"]]],
   ],
+  mlb: [
+    ["Ataque", [["batting.runs", "Corridas"], ["batting.hits", "Rebatidas"], ["batting.homeRuns", "Home runs"], ["batting.avg", "Média de rebatidas"], ["batting.OPS", "OPS"], ["batting.stolenBases", "Bases roubadas"]]],
+    ["Arremesso", [["pitching.wins", "Vitórias"], ["pitching.losses", "Derrotas"], ["pitching.ERA", "ERA"], ["pitching.strikeouts", "Strikeouts"], ["pitching.saves", "Saves"]]],
+    ["Defesa", [["fielding.errors", "Erros"], ["fielding.fieldingPct", "Aproveitamento na defesa"]]],
+  ],
+  nhl: [
+    ["Ataque", [["offensive.goals", "Gols"], ["offensive.avgGoals", "Gols por jogo"], ["offensive.shotsTotal", "Chutes"], ["offensive.powerPlayPct", "Power play (%)"], ["offensive.shootingPct", "Aproveitamento dos chutes (%)"]]],
+    ["Defesa", [["defensive.goalsAgainst", "Gols sofridos"], ["defensive.avgGoalsAgainst", "Gols sofridos por jogo"], ["defensive.savePct", "Defesas (%)"], ["defensive.penaltyKillPct", "Penalty kill (%)"], ["defensive.shutouts", "Jogos sem sofrer gol"]]],
+    ["Geral", [["general.wins", "Vitórias"], ["general.losses", "Derrotas"], ["defensive.overtimeLosses", "Derrotas na prorrogação"], ["general.plusMinus", "+/−"], ["penalties.penaltyMinutes", "Minutos de penalidade"]]],
+  ],
 };
 
 /** Estatísticas da temporada do time, já traduzidas. Recebe splits.categories do Core API da ESPN. */
