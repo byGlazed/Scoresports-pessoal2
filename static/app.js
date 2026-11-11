@@ -154,6 +154,7 @@ const S = {
   aba: null,
   tkLista: 0,
   tkDetalhe: 0,
+  filtro: "todos",
   timers: {},
   abaDetalhe: {},
 };
@@ -218,6 +219,122 @@ function marcarAtual(raiz, id) {
     if (el.dataset.id === String(id)) el.setAttribute("aria-current", "true");
     else el.removeAttribute("aria-current");
   });
+}
+
+/* ---------- Favoritos (guardados no navegador) ---------- */
+
+const Favoritos = {
+  lista() {
+    try {
+      const l = JSON.parse(lembrar("favoritos") || "[]");
+      return Array.isArray(l) ? l : [];
+    } catch (_) {
+      return [];
+    }
+  },
+  chave(f) {
+    return `${f.tipo}:${f.esporte}:${f.id}`;
+  },
+  tem(f) {
+    const k = this.chave(f);
+    return this.lista().some((x) => this.chave(x) === k);
+  },
+  alternar(f) {
+    const k = this.chave(f);
+    const atual = this.lista();
+    const novo = atual.some((x) => this.chave(x) === k) ? atual.filter((x) => this.chave(x) !== k) : [...atual, { ...f, salvo_em: Date.now() }];
+    guardar("favoritos", JSON.stringify(novo));
+    this.avisar();
+    return novo.some((x) => this.chave(x) === k);
+  },
+  remover(f) {
+    const k = this.chave(f);
+    guardar("favoritos", JSON.stringify(this.lista().filter((x) => this.chave(x) !== k)));
+    this.avisar();
+  },
+  avisar() {
+    // a barra lateral mostra os favoritos: redesenha quando eles mudam
+    clearTimeout(this.espera);
+    this.espera = setTimeout(() => S.esporte && redesenharLateral(), 0);
+  },
+};
+
+const ROTULO_FAVORITO = { time: "time", jogador: "jogador", liga: "competição" };
+
+/** Estrela para favoritar. `item` = {tipo: 'time'|'jogador'|'liga', esporte, liga, id, nome, logo?, time_id?}. */
+function botaoFavorito(item, { comTexto = false } = {}) {
+  if (!item || item.id === undefined || item.id === null || item.id === "") return null;
+  const rotulo = ROTULO_FAVORITO[item.tipo] || "item";
+  const botao = h("button", { class: `estrela${comTexto ? " com-texto" : ""}`, type: "button" });
+  const pintar = () => {
+    const ativo = Favoritos.tem(item);
+    botao.setAttribute("aria-pressed", String(ativo));
+    botao.setAttribute("aria-label", `${ativo ? "Tirar dos" : "Pôr nos"} favoritos: ${item.nome}`);
+    botao.title = ativo ? `Tirar ${rotulo} dos favoritos` : `Favoritar ${rotulo}`;
+    botao.textContent = comTexto ? `${ativo ? "★ Favorito" : "☆ Favoritar"}` : ativo ? "★" : "☆";
+  };
+  botao.addEventListener("click", (e) => {
+    e.stopPropagation();
+    Favoritos.alternar(item);
+    pintar();
+  });
+  pintar();
+  return botao;
+}
+
+/* ---------- Últimos campeões (campeoes.json) ---------- */
+
+let CAMPEOES = null;
+
+async function campeoesDe(chave) {
+  if (!CAMPEOES) {
+    try {
+      CAMPEOES = await api("/campeoes");
+    } catch (_) {
+      CAMPEOES = {};
+    }
+  }
+  return CAMPEOES[chave] || [];
+}
+
+/** Lista dos últimos campeões; some sozinha se a competição não tiver dados. */
+function listaCampeoes(chave) {
+  const caixa = h("div", { class: "campeoes" }, carregando());
+  campeoesDe(chave).then((lista) => {
+    if (!lista.length) {
+      caixa.remove();
+      return;
+    }
+    caixa.replaceChildren(
+      h("p", { class: "nota", style: { fontWeight: 600, marginTop: "4px" } }, "Últimos campeões"),
+      h(
+        "ul",
+        { class: "lista-simples" },
+        lista.map((c) =>
+          h(
+            "li",
+            null,
+            h("span", { class: "sub" }, c.temporada),
+            h("span", { style: { textAlign: "right" } }, h("strong", null, c.campeao), c.vice ? h("span", { class: "sub" }, ` sobre ${c.vice}`) : c.extra ? h("span", { class: "sub" }, `, ${c.extra}`) : null)
+          )
+        )
+      )
+    );
+  });
+  return caixa;
+}
+
+function cartaoCampeoes(chave) {
+  const corpo = listaCampeoes(chave);
+  const card = cartao(null, corpo);
+  // se não houver campeões, o cartão inteiro some
+  new MutationObserver((_, obs) => {
+    if (!card.contains(corpo)) {
+      card.remove();
+      obs.disconnect();
+    }
+  }).observe(card, { childList: true, subtree: true });
+  return card;
 }
 
 /* ---------- Pedaços de interface ---------- */
@@ -291,22 +408,125 @@ function abasDetalhe(abas, atual, aoEscolher) {
   );
 }
 
-function barraData({ data, anterior, proximo, hoje, min, max, aoMudar }) {
+const formatoSemana = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC", weekday: "short" });
+
+/** Faixa de dias (como no Sofascore): dois dias para cada lado, setas e calendário. */
+function barraData({ data, anterior, proximo, hoje, min, max, aoMudar, temJogo }) {
+  const dias = [-2, -1, 0, 1, 2].map((n) => somarDias(data, n));
+  const rotulo = (d) => {
+    if (d === hoje) return "Hoje";
+    if (d === somarDias(hoje, -1)) return "Ontem";
+    if (d === somarDias(hoje, 1)) return "Amanhã";
+    return formatoSemana.format(meioDia(d)).replace(".", "");
+  };
+  const calendario = h("input", {
+    type: "date",
+    value: data,
+    min: min || null,
+    max: max || null,
+    "aria-label": "Escolher a data no calendário",
+    onchange: (e) => e.target.value && aoMudar(e.target.value),
+    onclick: (e) => {
+      // abre o calendário do navegador direto, sem precisar acertar o ícone
+      try {
+        e.target.showPicker();
+      } catch (_) {
+        /* navegador sem showPicker: o clique normal já serve */
+      }
+    },
+  });
   return h(
     "div",
-    { class: "barra-data" },
-    h("button", { class: "botao-icone", type: "button", "aria-label": "Dia anterior", disabled: !anterior, onclick: () => aoMudar(anterior) }, "‹"),
-    h("input", {
-      class: "campo-data",
-      type: "date",
-      value: data,
-      min: min || null,
-      max: max || null,
-      "aria-label": "Escolher a data",
-      onchange: (e) => e.target.value && aoMudar(e.target.value),
-    }),
-    h("button", { class: "botao-icone", type: "button", "aria-label": "Próximo dia", disabled: !proximo, onclick: () => aoMudar(proximo) }, "›"),
-    h("button", { class: "botao", type: "button", disabled: data === hoje, onclick: () => aoMudar(hoje) }, "Hoje")
+    { class: "faixa-datas" },
+    h("button", { class: "seta", type: "button", "aria-label": "Dia anterior", disabled: !anterior, onclick: () => aoMudar(anterior) }, "‹"),
+    h(
+      "div",
+      { class: "dias", role: "group", "aria-label": "Dias" },
+      dias.map((d) =>
+        h(
+          "button",
+          {
+            class: `dia${d === data ? " ativo" : ""}${temJogo && !temJogo(d) ? " sem-jogo" : ""}`,
+            type: "button",
+            "aria-pressed": String(d === data),
+            disabled: (min && d < min) || (max && d > max) ? true : null,
+            onclick: () => aoMudar(d),
+          },
+          h("span", { class: "dia-semana" }, rotulo(d)),
+          h("span", { class: "dia-num" }, `${d.slice(8, 10)}/${d.slice(5, 7)}`)
+        )
+      )
+    ),
+    h("button", { class: "seta", type: "button", "aria-label": "Próximo dia", disabled: !proximo, onclick: () => aoMudar(proximo) }, "›"),
+    h(
+      "label",
+      { class: "calendario", title: "Escolher no calendário" },
+      s("svg", { viewBox: "0 0 24 24", width: 18, height: 18, "aria-hidden": "true" },
+        s("rect", { x: 3, y: 5, width: 18, height: 16, rx: 2, fill: "none", stroke: "currentColor", "stroke-width": 2 }),
+        s("path", { d: "M3 10h18M8 3v4M16 3v4", stroke: "currentColor", "stroke-width": 2, "stroke-linecap": "round" })
+      ),
+      calendario
+    )
+  );
+}
+
+/* ---------- Filtro de jogos (como no Flashscore) ---------- */
+
+const FILTROS = [
+  ["todos", "Todos"],
+  ["ao-vivo", "Ao vivo"],
+  ["encerrados", "Encerrados"],
+  ["proximos", "Próximos"],
+];
+
+function passaFiltro(jogo) {
+  const f = S.filtro || "todos";
+  if (f === "ao-vivo") return jogo.estado === 2;
+  if (f === "encerrados") return jogo.estado === 3;
+  if (f === "proximos") return jogo.estado === 1;
+  return true;
+}
+
+/** Abas Todos / Ao vivo / Encerrados / Próximos com a contagem de cada uma. */
+function barraFiltro(jogos, aoMudar) {
+  const conta = {
+    todos: jogos.length,
+    "ao-vivo": jogos.filter((j) => j.estado === 2).length,
+    encerrados: jogos.filter((j) => j.estado === 3).length,
+    proximos: jogos.filter((j) => j.estado === 1).length,
+  };
+  return h(
+    "div",
+    { class: "filtro-jogos", role: "group", "aria-label": "Filtrar jogos" },
+    FILTROS.map(([id, nome]) =>
+      h(
+        "button",
+        {
+          class: `filtro${id === "ao-vivo" && conta[id] ? " com-ao-vivo" : ""}`,
+          type: "button",
+          "aria-pressed": String((S.filtro || "todos") === id),
+          onclick: () => {
+            S.filtro = id;
+            aoMudar();
+          },
+        },
+        nome,
+        h("span", { class: "contagem" }, conta[id])
+      )
+    )
+  );
+}
+
+/** Cabeçalho de um grupo de jogos (competição), com logo, atalho e estrela. */
+function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub }) {
+  return h(
+    "div",
+    { class: "grupo-liga-titulo" },
+    logo !== undefined ? imgLogo(logo) : null,
+    aoClicar ? h("button", { class: "botao-link", type: "button", onclick: aoClicar }, titulo) : h("span", null, titulo),
+    sub ? h("span", { class: "nota", style: { margin: 0 } }, sub) : null,
+    h("span", { style: { flex: 1 } }),
+    favorito ? botaoFavorito(favorito) : null
   );
 }
 
@@ -332,15 +552,25 @@ function blocoTransmissao(t) {
   );
 }
 
+function iconeTv() {
+  return s(
+    "svg",
+    { viewBox: "0 0 24 24", width: 12, height: 12, "aria-hidden": "true" },
+    s("rect", { x: 2, y: 5, width: 20, height: 13, rx: 2, fill: "none", stroke: "currentColor", "stroke-width": 2.2 }),
+    s("path", { d: "M8 21h8", stroke: "currentColor", "stroke-width": 2.2, "stroke-linecap": "round" })
+  );
+}
+
 function canalNaLista(t, mostrarPadrao = true) {
-  if (!t || !t.canais || !t.canais.length) return h("span");
-  if (!t.confirmado && !mostrarPadrao) return h("span");
-  const extra = t.canais.length > 1 ? `+${t.canais.length - 1}` : null;
+  if (!t || !t.canais || !t.canais.length) return null;
+  if (!t.confirmado && !mostrarPadrao) return null;
+  const visiveis = t.canais.slice(0, 2).join(", ");
+  const extra = t.canais.length > 2 ? ` +${t.canais.length - 2}` : "";
   return h(
     "div",
-    { class: "jogo-canal", title: `${t.confirmado ? "Grade confirmada" : "Padrão da competição"}: ${t.canais.join(", ")}` },
-    t.confirmado ? h("strong", null, t.canais[0]) : h("span", null, t.canais[0]),
-    extra
+    { class: `jogo-canal${t.confirmado ? " confirmado" : ""}`, title: `${t.confirmado ? "Grade confirmada" : "Padrão da competição"}: ${t.canais.join(", ")}` },
+    iconeTv(),
+    h("span", null, visiveis + extra)
   );
 }
 
@@ -372,9 +602,9 @@ function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoCl
           h("span", { class: "nome" }, t.nome),
           h("span", { class: "placar" }, t.placar ?? "")
         )
-      )
-    ),
-    canalNaLista(transmissao, mostrarPadrao)
+      ),
+      canalNaLista(transmissao, mostrarPadrao)
+    )
   );
 }
 
@@ -387,7 +617,8 @@ function placarGrande({ esquerda, direita, estado, status, info, centro }) {
       { class: "placar-time" },
       t.logo !== undefined ? imgLogo(t.logo) : null,
       t.aoClicar ? h("button", { class: "botao-link nome", type: "button", onclick: t.aoClicar }, t.nome) : h("div", { class: "nome" }, t.nome),
-      t.sub ? h("div", { class: "sub" }, t.sub) : null
+      t.sub ? h("div", { class: "sub" }, t.sub) : null,
+      t.favorito ? botaoFavorito(t.favorito) : null
     );
   const temPlacar = estado >= 2 && esquerda.placar !== null && esquerda.placar !== undefined;
   return h(
@@ -490,30 +721,43 @@ const Painel = {
 
 function desenharEsportes() {
   $("#esportes").replaceChildren(
-    ...S.esportes.map((e) =>
-      h("button", { class: "esporte", type: "button", "aria-current": String(e.id === S.esporte), onclick: () => irPara(e.id) }, e.nome)
-    )
+    ...S.esportes
+      .filter((e) => !e.oculto)
+      .map((e) =>
+        h("button", { class: "esporte", type: "button", "aria-current": String(e.id === S.esporte), onclick: () => irPara(e.id) }, e.nome)
+      )
   );
 }
 
-function desenharSubnav(esp, modulo, abas) {
-  const partes = [];
+/** Barra lateral: seções do esporte e, abaixo, o que o módulo quiser (competições, favoritos). */
+function desenharLateral(esp, modulo, abas) {
+  const partes = [h("div", { class: "lateral-titulo" }, esp.nome)];
   if (abas.length > 1) {
     partes.push(
       h(
-        "div",
-        { class: "abas", role: "group", "aria-label": "Seções" },
+        "nav",
+        { class: "lateral-secao", "aria-label": "Seções" },
         abas.map((a) =>
-          h("button", { class: "aba", type: "button", "aria-pressed": String(a.id === S.aba), onclick: () => irPara(esp.id, a.id) }, a.nome)
+          h(
+            "button",
+            { class: "item-lateral", type: "button", "aria-current": String(a.id === S.aba), onclick: () => irPara(esp.id, a.id) },
+            a.nome
+          )
         )
       )
     );
   }
-  if (modulo.subnavExtra) {
-    const extra = modulo.subnavExtra(esp, S.aba);
+  if (modulo.lateral) {
+    const extra = modulo.lateral(esp, S.aba);
     if (extra) partes.push(extra);
   }
-  $("#subnav").replaceChildren(...partes);
+  $("#lateral").replaceChildren(...partes);
+  document.body.classList.toggle("sem-lateral", partes.length === 1 && !modulo.lateral);
+}
+
+function abrirLateral(aberta) {
+  document.body.classList.toggle("lateral-aberta", aberta);
+  $("#fundo-lateral").hidden = !aberta;
 }
 
 function irPara(esporteId, aba) {
@@ -529,19 +773,20 @@ function irPara(esporteId, aba) {
   cancelarTudo();
   novoTokenLista();
   novoTokenDetalhe();
+  abrirLateral(false);
   document.body.classList.remove("mostrando-detalhe");
   layoutLargo(false);
   detalheVazio(modulo.textoVazio ? modulo.textoVazio(S.aba) : undefined);
   desenharEsportes();
-  desenharSubnav(esp, modulo, abas);
+  desenharLateral(esp, modulo, abas);
   lista().replaceChildren(carregando());
   modulo.desenhar(esp, S.aba);
 }
 
-function redesenharSubnav() {
+function redesenharLateral() {
   const esp = S.esportes.find((e) => e.id === S.esporte);
   const modulo = MODULOS[esp.tipo];
-  desenharSubnav(esp, modulo, modulo.abas(esp));
+  desenharLateral(esp, modulo, modulo.abas(esp));
 }
 
 async function iniciar() {
@@ -551,6 +796,16 @@ async function iniciar() {
     if (e.target === e.currentTarget) Painel.fechar();
   });
   $("#painel").addEventListener("close", () => Painel.token++);
+  $("#abrir-lateral").addEventListener("click", () => abrirLateral(!document.body.classList.contains("lateral-aberta")));
+  $("#fundo-lateral").addEventListener("click", () => abrirLateral(false));
+  $("#busca-topo").addEventListener("click", () => irPara("pesquisa"));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") abrirLateral(false);
+    if (e.key === "/" && !/input|textarea/i.test(document.activeElement.tagName)) {
+      e.preventDefault();
+      irPara("pesquisa");
+    }
+  });
 
   try {
     S.esportes = await api("/esportes");
@@ -558,8 +813,13 @@ async function iniciar() {
     lista().replaceChildren(caixaErro(erro, iniciar));
     return;
   }
-  S.esportes = S.esportes.filter((e) => MODULOS[e.tipo]);
-  irPara(lembrar("esporte") || S.esportes[0].id);
+  S.esportes = [
+    { id: "inicio", nome: "Início", tipo: "inicio", ligas: [] },
+    ...S.esportes,
+    { id: "pesquisa", nome: "Pesquisa", tipo: "pesquisa", ligas: [], oculto: true },
+  ].filter((e) => MODULOS[e.tipo]);
+  const salvo = lembrar("esporte");
+  irPara(S.esportes.some((e) => e.id === salvo) ? salvo : "inicio");
 }
 
 window.addEventListener("DOMContentLoaded", iniciar);
@@ -579,6 +839,7 @@ const NBA = {
 };
 
 const nbaLogo = (id) => (id ? `https://cdn.nba.com/logos/nba/${id}/global/L/logo.svg` : null);
+const nbaFavTime = (t) => (t && t.time_id ? { tipo: "time", esporte: "nba", liga: "nba", id: String(t.time_id), nome: t.nome, logo: nbaLogo(t.time_id) } : null);
 const nbaFoto = (id) => `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`;
 
 registrarModulo("nba", {
@@ -607,6 +868,7 @@ async function nbaJogos() {
     try {
       const resposta = await api("/datas");
       NBA.datas = resposta.datas;
+      NBA.conjuntoDatas = new Set(resposta.datas);
       NBA.hoje = resposta.hoje;
     } catch (erro) {
       if (tk === S.tkLista) lista().replaceChildren(caixaErro(erro, nbaJogos));
@@ -633,6 +895,7 @@ async function nbaDia(silencioso) {
     hoje: NBA.hoje,
     min: datas[0],
     max: datas[datas.length - 1],
+    temJogo: (d) => NBA.conjuntoDatas.has(d),
     aoMudar: (d) => {
       NBA.data = d;
       cancelar("lista");
@@ -650,12 +913,22 @@ async function nbaDia(silencioso) {
   }
   if (tk !== S.tkLista) return;
 
-  const linhas = jogos.map((j) => nbaLinhaJogo(j));
-  lista().replaceChildren(
-    barra,
-    h("p", { class: "titulo-dia" }, dataLonga(NBA.data)),
-    jogos.length ? h("div", { class: "cartao" }, linhas) : vazio("Nenhum jogo nesta data.")
-  );
+  const desenhar = () => {
+    const visiveis = jogos.filter(passaFiltro);
+    lista().replaceChildren(
+      barra,
+      barraFiltro(jogos, desenhar),
+      visiveis.length
+        ? h(
+            "section",
+            { class: "cartao grupo-liga" },
+            cabecaGrupo({ titulo: "NBA", sub: dataLonga(NBA.data), favorito: { tipo: "liga", esporte: "nba", liga: "nba", id: "nba", nome: "NBA" } }),
+            visiveis.map((j) => nbaLinhaJogo(j))
+          )
+        : vazio(jogos.length ? "Nenhum jogo com esse filtro." : "Nenhum jogo nesta data.")
+    );
+  };
+  desenhar();
 
   const temAoVivo = jogos.some((j) => j.estado === 2);
   const hojeComJogo = NBA.data === NBA.hoje && jogos.some((j) => j.estado === 1);
@@ -715,8 +988,8 @@ async function nbaPreJogo(jogo) {
     "section",
     { class: "cartao" },
     placarGrande({
-      esquerda: { nome: fora.nome, logo: nbaLogo(fora.time_id), sub: "Visitante" },
-      direita: { nome: casa.nome, logo: nbaLogo(casa.time_id), sub: "Mandante" },
+      esquerda: { nome: fora.nome, logo: nbaLogo(fora.time_id), sub: "Visitante", favorito: nbaFavTime(fora) },
+      direita: { nome: casa.nome, logo: nbaLogo(casa.time_id), sub: "Mandante", favorito: nbaFavTime(casa) },
       estado: 1,
       status: hora(pre.jogo.inicio) || "A definir",
       info: [dataLonga(pre.jogo.data), pre.jogo.fase].filter(Boolean).join(", "),
@@ -901,8 +1174,8 @@ async function nbaBoxScore(jogo, silencioso) {
     "section",
     { class: "cartao" },
     placarGrande({
-      esquerda: { nome: box.fora.nome, logo: nbaLogo(box.fora.time_id), placar: box.fora.placar },
-      direita: { nome: box.casa.nome, logo: nbaLogo(box.casa.time_id), placar: box.casa.placar },
+      esquerda: { nome: box.fora.nome, logo: nbaLogo(box.fora.time_id), placar: box.fora.placar, favorito: nbaFavTime(box.fora) },
+      direita: { nome: box.casa.nome, logo: nbaLogo(box.casa.time_id), placar: box.casa.placar, favorito: nbaFavTime(box.casa) },
       estado,
       status: estado === 3 ? "Encerrado" : box.status,
       info: dataLonga(jogo.data || NBA.data),
@@ -942,7 +1215,7 @@ function nbaTabelaBox(time, gameId) {
         h(
           "span",
           null,
-          h("button", { class: "botao-link", type: "button", onclick: () => abrirJogadorNBA(j.id, j.nome, { jogo: gameId, sigla: time.sigla }) }, j.nome),
+          h("button", { class: "botao-link", type: "button", onclick: () => abrirJogadorNBA(j.id, j.nome, { jogo: gameId, sigla: time.sigla, time_id: time.time_id }) }, j.nome),
           j.posicao ? h("span", { class: "nota", style: { marginLeft: "6px" } }, j.posicao) : null
         ),
     },
@@ -1009,11 +1282,23 @@ function desenharJogadorNBA(corpo, ativo, id, nome, contexto) {
   if (contexto.jogo) abas.push({ id: "arremessos", nome: "Arremessos no jogo" });
   let aba = contexto.aba || "temporada";
   const sub = h("div", { class: "perfil-sub" }, contexto.sigla || "");
+  const fav = { tipo: "jogador", esporte: "nba", liga: "nba", id: String(id), nome, time_id: contexto.time_id ? String(contexto.time_id) : null };
+  const estrela = h("div", { class: "perfil-acoes" }, botaoFavorito(fav, { comTexto: true }));
+  contexto.atualizarFavorito = (timeId) => {
+    if (!timeId) return;
+    fav.time_id = String(timeId);
+    // se já é favorito, guarda o time para a aba Início achar os jogos dele
+    if (Favoritos.tem(fav)) {
+      Favoritos.remover(fav);
+      Favoritos.alternar(fav);
+    }
+    estrela.replaceChildren(botaoFavorito(fav, { comTexto: true }));
+  };
   const cabeca = h(
     "div",
     { class: "perfil" },
     h("img", { class: "perfil-foto", src: nbaFoto(id), alt: "", onerror: (e) => (e.target.style.visibility = "hidden") }),
-    h("div", null, h("h3", { class: "perfil-nome" }, nome), sub)
+    h("div", null, h("h3", { class: "perfil-nome" }, nome), sub, estrela)
   );
   const area = h("div");
   let barra = abasDetalhe(abas, aba, trocar);
@@ -1146,6 +1431,7 @@ async function nbaPainelCarreira(area, ativo, id, contexto, sub) {
   if (!ativo()) return;
   const p = c.perfil;
   if (p && sub) sub.textContent = [p.time, p.posicao, p.camisa ? `#${p.camisa}` : null].filter(Boolean).join(", ") || sub.textContent;
+  if (p && p.time_id && contexto.atualizarFavorito) contexto.atualizarFavorito(p.time_id);
 
   let fase = "regular";
   let modo = "media";
@@ -1345,7 +1631,11 @@ async function nbaClassificacao() {
       tabela(
         [
           { nome: "#", valor: (t) => h("span", { class: "posicao" }, t.posicao) },
-          { nome: "Time", esq: true, valor: (t) => h("span", { class: "time-celula" }, imgLogo(nbaLogo(t.time_id)), t.time) },
+          {
+            nome: "Time",
+            esq: true,
+            valor: (t) => h("span", { class: "time-celula" }, imgLogo(nbaLogo(t.time_id)), t.time, botaoFavorito(nbaFavTime({ time_id: t.time_id, nome: t.time }))),
+          },
           { nome: "V", valor: (t) => t.vitorias },
           { nome: "D", valor: (t) => t.derrotas },
           { nome: "%", valor: (t) => num(t.aproveitamento * 100, 1) },
@@ -1365,7 +1655,10 @@ async function nbaClassificacao() {
         h("span", { style: { "--cor-zona": "var(--empate)" } }, h("i"), "Play-in")
       )
     );
-  lista().replaceChildren(h("div", { class: "grade-cartoes", style: { gridTemplateColumns: "repeat(auto-fit, minmax(460px, 1fr))" } }, tabelaConf("Leste", c.Leste), tabelaConf("Oeste", c.Oeste)));
+  lista().replaceChildren(
+    h("div", { class: "grade-cartoes", style: { gridTemplateColumns: "repeat(auto-fit, minmax(460px, 1fr))" } }, tabelaConf("Leste", c.Leste), tabelaConf("Oeste", c.Oeste)),
+    h("div", { style: { marginTop: "12px", maxWidth: "520px" } }, cartaoCampeoes("nba"))
+  );
 }
 
 /* ---------- Líderes ---------- */

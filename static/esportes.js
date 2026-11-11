@@ -33,8 +33,14 @@ async function desenharElenco(corpo, ativo, esporte, liga, timeId) {
   const e = await api(`/e/${esporte}/${liga}/times/${timeId}/elenco`);
   if (!ativo()) return;
   const grupos = e.grupos.filter((g) => g.atletas.length);
+  const favTime = { tipo: "time", esporte, liga, id: String(e.time.id || timeId), nome: e.time.nome || "Time", logo: e.time.logo };
   corpo.replaceChildren(
-    h("div", { class: "perfil" }, imgLogo(e.time.logo, "perfil-foto"), h("div", null, h("h3", { class: "perfil-nome" }, e.time.nome || "Elenco"), h("div", { class: "perfil-sub" }, "Clique num atleta para ver a carreira."))),
+    h(
+      "div",
+      { class: "perfil" },
+      imgLogo(e.time.logo, "perfil-foto"),
+      h("div", null, h("h3", { class: "perfil-nome" }, e.time.nome || "Elenco"), h("div", { class: "perfil-sub" }, "Clique num atleta para ver a carreira."), h("div", { class: "perfil-acoes" }, botaoFavorito(favTime, { comTexto: true })))
+    ),
     ...(grupos.length
       ? grupos.map((g) =>
           secao(
@@ -77,12 +83,19 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id) {
     ...p.extras.map((x) => [x.rotulo, x.valor]),
   ].filter(([, v]) => v);
 
+  const favAtleta = { tipo: "jogador", esporte, liga, id: String(p.id || id), nome: p.nome || "Atleta", time_id: p.time_id ? String(p.time_id) : null };
   const blocos = [
     h(
       "div",
       { class: "perfil" },
       p.foto ? h("img", { class: "perfil-foto", src: p.foto, alt: "" }) : imgLogo(null, "perfil-foto"),
-      h("div", null, h("h3", { class: "perfil-nome" }, p.nome), h("div", { class: "perfil-sub" }, imgBandeira(p.bandeira, p.pais), [p.time, p.posicao].filter(Boolean).join(", ")))
+      h(
+        "div",
+        null,
+        h("h3", { class: "perfil-nome" }, p.nome),
+        h("div", { class: "perfil-sub" }, imgBandeira(p.bandeira, p.pais), [p.time, p.posicao].filter(Boolean).join(", ")),
+        h("div", { class: "perfil-acoes" }, botaoFavorito(favAtleta, { comTexto: true }))
+      )
     ),
   ];
   if (fatos.length) blocos.push(h("dl", { class: "fatos" }, fatos.map(([r, v]) => h("div", { class: "fato" }, h("dt", null, r), h("dd", null, v)))));
@@ -104,10 +117,77 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id) {
       const rodape = cat.totais.length ? { temporada: "Carreira", ...Object.fromEntries(cat.totais.map((v, i) => [`c${i}`, v])) } : null;
       blocos.push(secao(cat.nome, tabela(colunas, cat.temporadas, { rodape })));
     }
-  } else {
+  }
+  const historico = h("div");
+  const temHistorico = esporte === "futebol" || esporte === "ufc";
+  if (temHistorico) {
+    blocos.push(historico);
+    historico.replaceChildren(secao(esporte === "ufc" ? "Histórico de lutas" : "Carreira por temporada", carregando("Montando o histórico…")));
+  } else if (!a.carreira.length) {
     blocos.push(h("p", { class: "nota", style: { padding: "0 16px" } }, "A ESPN não publica estatísticas de carreira para este atleta."));
   }
   corpo.replaceChildren(...blocos);
+  if (!temHistorico) return;
+  try {
+    const hist = await api(`/e/${esporte}/${liga}/atletas/${p.id || id}/historico`);
+    if (!ativo()) return;
+    historico.replaceChildren(hist.tipo === "lutas" ? secaoLutas(hist, esporte, liga) : secaoCarreiraFutebol(hist));
+  } catch (erro) {
+    if (ativo()) historico.replaceChildren(secao(esporte === "ufc" ? "Histórico de lutas" : "Carreira por temporada", h("p", { class: "nota" }, `Não carregou agora. ${erro.message}`)));
+  }
+}
+
+function secaoCarreiraFutebol(hist) {
+  if (!hist.temporadas.length) return secao("Carreira por temporada", h("p", { class: "nota" }, "A ESPN não tem o histórico deste jogador."));
+  const goleiro = hist.temporadas.some((l) => l.defesas);
+  const colunas = [
+    { chave: "temporada", nome: "Temporada", esq: true, valor: (l) => l.temporada },
+    { chave: "time", nome: "Time", esq: true, valor: (l) => h("span", { class: "time-celula" }, imgLogo(l.time_logo), l.time || "") },
+    { chave: "competicao", nome: "Competição", esq: true, valor: (l) => l.competicao || "" },
+    { chave: "jogos", nome: "J", titulo: "Jogos", valor: (l) => l.jogos ?? "" },
+    { chave: "gols", nome: "G", titulo: "Gols", destaque: true, valor: (l) => l.gols ?? "" },
+    { chave: "assistencias", nome: "A", titulo: "Assistências", valor: (l) => l.assistencias ?? "" },
+    { chave: "amarelos", nome: "CA", titulo: "Cartões amarelos", valor: (l) => l.amarelos ?? "" },
+    { chave: "vermelhos", nome: "CV", titulo: "Cartões vermelhos", valor: (l) => l.vermelhos ?? "" },
+    ...(goleiro ? [{ chave: "defesas", nome: "DEF", titulo: "Defesas", valor: (l) => l.defesas ?? "" }] : []),
+  ];
+  const t = hist.totais;
+  return secao(
+    "Carreira por temporada",
+    tabela(colunas, hist.temporadas, { rodape: { temporada: "Total", jogos: t.jogos, gols: t.gols, assistencias: t.assistencias, amarelos: t.amarelos, vermelhos: t.vermelhos, defesas: t.defesas } }),
+    h("p", { class: "nota" }, "Inclui todas as competições que a ESPN registra para o jogador.")
+  );
+}
+
+function plural(n, um, varios) {
+  return `${n} ${n === 1 ? um : varios}`;
+}
+
+function secaoLutas(hist, esporte, liga) {
+  if (!hist.lutas.length) return secao("Histórico de lutas", h("p", { class: "nota" }, "A ESPN não tem lutas registradas para este atleta."));
+  const c = hist.cartel_ufc;
+  return secao(
+    "Histórico de lutas",
+    h(
+      "p",
+      { class: "nota", style: { marginTop: 0 } },
+      `No UFC (lutas registradas pela ESPN): ${plural(c.vitorias, "vitória", "vitórias")}, ${plural(c.derrotas, "derrota", "derrotas")}${c.empates ? `, ${plural(c.empates, "empate", "empates")}` : ""}.`
+    ),
+    tabela(
+      [
+        { nome: "", valor: (l) => h("span", { class: "forma" }, h("span", { class: l.resultado || "" }, l.resultado || "–")) },
+        {
+          nome: "Adversário",
+          esq: true,
+          valor: (l) => (l.adversario_id ? h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta(esporte, liga, l.adversario_id, l.adversario) }, l.adversario) : l.adversario),
+        },
+        { nome: "Método", esq: true, valor: (l) => [l.metodo, l.round ? `${l.round}º round` : null, l.tempo].filter(Boolean).join(", ") },
+        { nome: "Evento", esq: true, valor: (l) => l.evento || "" },
+        { nome: "Data", valor: (l) => (l.data ? dataCurta(l.data) : "") },
+      ],
+      hist.lutas
+    )
+  );
 }
 
 /* ---------- Partidas: futebol e NFL ---------- */
@@ -175,36 +255,75 @@ function linhaPartida(esp, j, aoClicar) {
   });
 }
 
+const GRUPOS_LIGAS = {
+  "bra.1": "Brasil",
+  "bra.2": "Brasil",
+  "bra.copa_do_brazil": "Brasil",
+  "conmebol.libertadores": "América do Sul",
+  "conmebol.sudamericana": "América do Sul",
+  "uefa.champions": "Europa",
+  "uefa.europa": "Europa",
+  "eng.1": "Europa",
+  "esp.1": "Europa",
+  "ita.1": "Europa",
+  "ger.1": "Europa",
+  "fra.1": "Europa",
+  "por.1": "Europa",
+  "usa.1": "América do Norte",
+};
+const ORDEM_GRUPOS = ["Brasil", "América do Sul", "Europa", "América do Norte", "Seleções", "Outras"];
+
+function grupoDaLiga(l) {
+  return l.selecao ? "Seleções" : GRUPOS_LIGAS[l.id] || "Outras";
+}
+
+function favLiga(esp, ligaId) {
+  const liga = esp.ligas.find((l) => l.id === ligaId) || esp.ligas[0];
+  if (!liga) return null;
+  return { tipo: "liga", esporte: esp.id, liga: liga.id, id: liga.id, nome: liga.nome };
+}
+
 const ModuloPartidas = {
-  abas: () => [
+  abas: (esp) => [
     { id: "jogos", nome: "Jogos" },
     { id: "classificacao", nome: "Classificação" },
+    { id: "lideres", nome: esp.id === "futebol" ? "Artilharia e cartões" : "Líderes" },
   ],
 
-  subnavExtra(esp, aba) {
-    if (esp.ligas.length < 2) return null;
+  lateral(esp, aba) {
     const st = estadoDe(esp.id);
+    if (esp.ligas.length < 2) {
+      return h("div", { class: "lateral-secao" }, h("div", { class: "lateral-acao" }, botaoFavorito(favLiga(esp, esp.ligas[0].id), { comTexto: true })));
+    }
     if (!st.liga) st.liga = lembrar(`liga:${esp.id}`) || "todas";
-    if (aba === "classificacao" && st.liga === "todas") st.liga = esp.ligas[0].id;
-    const opcoes = aba === "jogos" ? [{ id: "todas", nome: "Todos os jogos" }, ...esp.ligas] : esp.ligas;
+    if (aba !== "jogos" && st.liga === "todas") st.liga = esp.ligas[0].id;
+    const escolher = (id) => {
+      st.liga = id;
+      guardar(`liga:${esp.id}`, id);
+      irPara(esp.id, S.aba);
+    };
+    const item = (l) =>
+      h(
+        "div",
+        { class: "item-liga" },
+        h("button", { class: "item-lateral", type: "button", "aria-current": String(l.id === st.liga), onclick: () => escolher(l.id) }, l.nome),
+        l.id !== "todas" ? botaoFavorito(favLiga(esp, l.id)) : null
+      );
+    const grupos = {};
+    esp.ligas.forEach((l) => (grupos[grupoDaLiga(l)] = grupos[grupoDaLiga(l)] || []).push(l));
+    const favoritas = Favoritos.lista().filter((f) => f.tipo === "liga" && f.esporte === esp.id);
     return h(
       "div",
-      { class: "ligas", role: "group", "aria-label": "Competições" },
-      opcoes.map((l) =>
-        h(
-          "button",
-          {
-            class: "chip",
-            type: "button",
-            "aria-pressed": String(l.id === st.liga),
-            onclick: () => {
-              st.liga = l.id;
-              guardar(`liga:${esp.id}`, l.id);
-              irPara(esp.id, S.aba);
-            },
-          },
-          l.nome
-        )
+      null,
+      favoritas.length
+        ? h("div", { class: "lateral-secao" }, h("div", { class: "lateral-rotulo" }, "Suas competições"), favoritas.map((f) => item({ id: f.liga, nome: f.nome })))
+        : null,
+      h(
+        "div",
+        { class: "lateral-secao" },
+        h("div", { class: "lateral-rotulo" }, "Competições"),
+        aba === "jogos" ? item({ id: "todas", nome: "Todos os jogos do dia" }) : null,
+        ORDEM_GRUPOS.filter((g) => grupos[g]).map((g) => [h("div", { class: "lateral-subrotulo" }, g), grupos[g].map(item)])
       )
     );
   },
@@ -212,9 +331,14 @@ const ModuloPartidas = {
   desenhar(esp, aba) {
     const st = estadoDe(esp.id);
     if (!st.liga) st.liga = esp.ligas.length > 1 ? lembrar(`liga:${esp.id}`) || "todas" : esp.ligas[0].id;
+    const ligaEscolhida = st.liga === "todas" ? esp.ligas[0].id : st.liga;
     if (aba === "classificacao") {
       layoutLargo(true);
-      return classificacaoEspn(esp, st.liga === "todas" ? esp.ligas[0].id : st.liga);
+      return classificacaoEspn(esp, ligaEscolhida);
+    }
+    if (aba === "lideres") {
+      layoutLargo(true);
+      return lideresEspn(esp, ligaEscolhida);
     }
     return partidasLista(esp);
   },
@@ -281,12 +405,27 @@ async function partidasSemana(esp, silencioso) {
     return;
   }
   if (tk !== S.tkLista) return;
-  const porDia = {};
-  jogos.forEach((j) => (porDia[j.data] = porDia[j.data] || []).push(j));
-  const conteudo = Object.keys(porDia)
-    .sort()
-    .map((dia) => [h("p", { class: "titulo-dia", style: { marginTop: "12px" } }, dataLonga(dia)), h("div", { class: "cartao" }, porDia[dia].map((j) => linhaPartida(esp, j, () => abrirPartida(esp, "nfl", j))))]);
-  lista().replaceChildren(barra, ...(conteudo.length ? conteudo : [vazio("Nenhum jogo nesta semana.")]));
+  const desenhar = () => {
+    const porDia = {};
+    jogos.filter(passaFiltro).forEach((j) => (porDia[j.data] = porDia[j.data] || []).push(j));
+    const conteudo = Object.keys(porDia)
+      .sort()
+      .map((dia) =>
+        h(
+          "section",
+          { class: "cartao grupo-liga" },
+          cabecaGrupo({ titulo: dataLonga(dia), logo: porDia[dia][0].liga_logo || null }),
+          porDia[dia].map((j) => linhaPartida(esp, j, () => abrirPartida(esp, "nfl", j)))
+        )
+      );
+    lista().replaceChildren(
+      barra,
+      barraFiltro(jogos, desenhar),
+      ...(conteudo.length ? conteudo : [vazio(jogos.length ? "Nenhum jogo com esse filtro." : "Nenhum jogo nesta semana.")])
+    );
+    marcarAtual(lista(), st.jogoAtual);
+  };
+  desenhar();
   if (jogos.some((j) => j.estado === 2)) agendar("lista", () => partidasSemana(esp, true), 20000);
 }
 
@@ -313,11 +452,13 @@ async function partidasDia(esp, silencioso) {
   const anterior = [...datasComJogos].reverse().find((d) => d < st.data) || somarDias(st.data, -1);
   const proximo = datasComJogos.find((d) => d > st.data) || somarDias(st.data, 1);
 
+  const conjunto = new Set(datasComJogos);
   const barra = barraData({
     data: st.data,
     anterior,
     proximo,
     hoje,
+    temJogo: ligaUnica && conjunto.size ? (d) => conjunto.has(d) : null,
     aoMudar: (d) => {
       st.data = d;
       cancelar("lista");
@@ -329,8 +470,8 @@ async function partidasDia(esp, silencioso) {
   const respostas = await Promise.allSettled(ligas.map((l) => api(`/e/${esp.id}/${l.id}/jogos?de=${st.data}`)));
   if (tk !== S.tkLista) return;
 
-  const grupos = [];
   const falhas = [];
+  const porLiga = [];
   let todosJogos = [];
   respostas.forEach((r, i) => {
     const liga = ligas[i];
@@ -340,22 +481,43 @@ async function partidasDia(esp, silencioso) {
     }
     if (!r.value.length) return;
     todosJogos = todosJogos.concat(r.value);
-    grupos.push(
-      h(
-        "section",
-        { class: "cartao grupo-liga" },
-        h("div", { class: "grupo-liga-titulo" }, liga.nome),
-        r.value.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, liga.id, j)))
-      )
-    );
+    porLiga.push({ liga, jogos: r.value });
   });
 
-  const partes = [barra, h("p", { class: "titulo-dia" }, dataLonga(st.data))];
-  if (grupos.length) partes.push(...grupos);
-  else if (falhas.length === ligas.length) partes.push(caixaErro(new Error("Não foi possível falar com a ESPN agora."), () => partidasDia(esp, false)));
-  else partes.push(vazio(ligaUnica ? "Nenhum jogo desta competição nesta data. Use as setas para ir ao próximo dia com jogos." : "Nenhum jogo nesta data."));
-  if (falhas.length && falhas.length < ligas.length) partes.push(h("p", { class: "nota" }, `Não carregou agora: ${falhas.join(", ")}.`));
-  lista().replaceChildren(...partes);
+  const desenhar = () => {
+    const grupos = porLiga
+      .map(({ liga, jogos }) => ({ liga, jogos: jogos.filter(passaFiltro) }))
+      .filter((g) => g.jogos.length)
+      .map(({ liga, jogos }) =>
+        h(
+          "section",
+          { class: "cartao grupo-liga" },
+          cabecaGrupo({
+            titulo: liga.nome,
+            logo: jogos[0].liga_logo || null,
+            sub: ligaUnica ? null : grupoDaLiga(liga),
+            aoClicar: ligaUnica
+              ? null
+              : () => {
+                  st.liga = liga.id;
+                  guardar(`liga:${esp.id}`, liga.id);
+                  irPara(esp.id, "jogos");
+                },
+            favorito: favLiga(esp, liga.id),
+          }),
+          jogos.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, liga.id, j)))
+        )
+      );
+    const partes = [barra, barraFiltro(todosJogos, desenhar)];
+    if (grupos.length) partes.push(...grupos);
+    else if (falhas.length === ligas.length) partes.push(caixaErro(new Error("Não foi possível falar com a ESPN agora."), () => partidasDia(esp, false)));
+    else if (todosJogos.length) partes.push(vazio("Nenhum jogo com esse filtro."));
+    else partes.push(vazio(ligaUnica ? "Nenhum jogo desta competição nesta data. Use as setas para ir ao próximo dia com jogos." : "Nenhum jogo nesta data."));
+    if (falhas.length && falhas.length < ligas.length) partes.push(h("p", { class: "nota" }, `Não carregou agora: ${falhas.join(", ")}.`));
+    lista().replaceChildren(...partes);
+    marcarAtual(lista(), st.jogoAtual);
+  };
+  desenhar();
 
   if (todosJogos.some((j) => j.estado === 2)) agendar("lista", () => partidasDia(esp, true), 20000);
   else if (st.data === hoje && todosJogos.some((j) => j.estado === 1)) agendar("lista", () => partidasDia(esp, true), 60000);
@@ -429,9 +591,10 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   }
 
   area.replaceChildren(...conteudoAba(aba));
+  const favTime = (t) => (t.id ? { tipo: "time", esporte: esp.id, liga, id: String(t.id), nome: t.nome, logo: t.logo } : null);
   const placar = placarGrande({
-    esquerda: { nome: esq.nome, logo: esq.logo, placar: placarComPenaltis(esq), sub: esq.campanha, aoClicar: () => abrirElenco(esp.id, liga, esq.id, esq.nome) },
-    direita: { nome: dir.nome, logo: dir.logo, placar: placarComPenaltis(dir), sub: dir.campanha, aoClicar: () => abrirElenco(esp.id, liga, dir.id, dir.nome) },
+    esquerda: { nome: esq.nome, logo: esq.logo, placar: placarComPenaltis(esq), sub: esq.campanha, aoClicar: () => abrirElenco(esp.id, liga, esq.id, esq.nome), favorito: favTime(esq) },
+    direita: { nome: dir.nome, logo: dir.logo, placar: placarComPenaltis(dir), sub: dir.campanha, aoClicar: () => abrirElenco(esp.id, liga, dir.id, dir.nome), favorito: favTime(dir) },
     estado: j.estado,
     status: j.estado === 1 ? j.status || hora(j.inicio) || "A definir" : j.status,
     info: [j.liga_nome, diaHora(j.inicio)].filter(Boolean).join(", "),
@@ -724,7 +887,14 @@ async function classificacaoEspn(esp, liga) {
           {
             nome: esp.tipo === "corrida" ? "Nome" : "Time",
             esq: true,
-            valor: (l) => h("span", { class: "time-celula" }, l.tipo === "atleta" ? imgBandeira(l.logo) : imgLogo(l.logo), nomeCelula(l)),
+            valor: (l) =>
+              h(
+                "span",
+                { class: "time-celula" },
+                l.tipo === "atleta" ? imgBandeira(l.logo) : imgLogo(l.logo),
+                nomeCelula(l),
+                l.tipo === "time" && esp.tipo !== "corrida" ? botaoFavorito({ tipo: "time", esporte: esp.id, liga, id: String(l.id), nome: l.nome, logo: l.logo }) : null
+              ),
           },
           ...colunas.map((col) => ({ nome: col.nome, titulo: col.titulo, destaque: ["points", "championshipPts"].includes(col.chave), valor: (l) => l.stats[col.chave] ?? "" })),
         ],
@@ -736,7 +906,70 @@ async function classificacaoEspn(esp, liga) {
         : null
     );
   });
-  lista().replaceChildren(...cartoes);
+  const chaveCampeoes = esp.id === "futebol" ? `futebol:${liga}` : esp.id;
+  lista().replaceChildren(h("div", { class: "grade-classificacao" }, h("div", null, ...cartoes), cartaoCampeoes(chaveCampeoes)));
+}
+
+/* ---------- Líderes: artilharia, assistências, cartões (futebol) e estatísticas da NFL ---------- */
+
+async function lideresEspn(esp, liga) {
+  const tk = novoTokenLista();
+  lista().replaceChildren(carregando("Somando os líderes da temporada…"));
+  let l;
+  try {
+    l = await api(`/e/${esp.id}/${liga}/lideres`);
+  } catch (erro) {
+    if (tk === S.tkLista) lista().replaceChildren(caixaErro(erro, () => lideresEspn(esp, liga)));
+    return;
+  }
+  if (tk !== S.tkLista) return;
+  const nomeLiga = (esp.ligas.find((x) => x.id === liga) || {}).nome || liga;
+  const partes = [
+    h(
+      "div",
+      { class: "cabeca-pagina" },
+      h("h2", null, nomeLiga),
+      l.temporada ? h("span", { class: "selo" }, `Temporada ${l.temporada}`) : null,
+      l.temporada_anterior ? h("span", { class: "nota", style: { margin: 0 } }, "A temporada atual ainda não tem números; mostrando a última.") : null
+    ),
+  ];
+  if (!l.categorias.length) {
+    partes.push(vazio(l.aviso || "A ESPN ainda não publicou os líderes desta competição."));
+  } else {
+    partes.push(
+      h(
+        "div",
+        { class: "grade-cartoes" },
+        l.categorias.map((cat) =>
+          cartao(
+            cat.nome,
+            h(
+              "ol",
+              { class: "ranking" },
+              cat.lideres.map((j) =>
+                h(
+                  "li",
+                  null,
+                  h("span", { class: "lugar" }, j.posicao),
+                  h(
+                    "span",
+                    null,
+                    j.id ? h("button", { class: "botao-link", type: "button", onclick: () => abrirAtleta(esp.id, liga, j.id, j.nome) }, j.nome) : j.nome,
+                    j.time ? h("div", { class: "sub" }, h("span", { class: "time-celula" }, imgLogo(j.time_logo), j.time)) : null
+                  ),
+                  h("span", { class: "valor" }, j.valor ?? "")
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+  if (l.faltando && l.faltando.length && l.categorias.length) {
+    partes.push(h("p", { class: "nota" }, `A ESPN não publica nesta competição: ${l.faltando.join(", ").toLowerCase()}.`));
+  }
+  lista().replaceChildren(...partes);
 }
 
 /* ---------- Eventos: F1 e UFC ---------- */
@@ -748,7 +981,12 @@ const ModuloEventos = {
           { id: "calendario", nome: "Calendário" },
           { id: "classificacao", nome: "Classificação" },
         ]
-      : [{ id: "calendario", nome: "Eventos" }],
+      : [
+          { id: "calendario", nome: "Eventos" },
+          { id: "ranking", nome: "Ranking" },
+        ],
+
+  lateral: (esp) => h("div", { class: "lateral-secao" }, h("div", { class: "lateral-acao" }, botaoFavorito(favLiga(esp, esp.ligas[0].id), { comTexto: true }))),
 
   textoVazio: () => "Escolha um evento para ver os detalhes.",
 
@@ -758,9 +996,66 @@ const ModuloEventos = {
       layoutLargo(true);
       return classificacaoEspn(esp, liga);
     }
+    if (aba === "ranking") {
+      layoutLargo(true);
+      return rankingUfc(esp, liga);
+    }
     return eventosLista(esp, liga);
   },
 };
+
+async function rankingUfc(esp, liga) {
+  const tk = novoTokenLista();
+  lista().replaceChildren(carregando("Buscando o ranking de cada categoria…"));
+  let r;
+  try {
+    r = await api(`/e/${esp.id}/${liga}/ranking`);
+  } catch (erro) {
+    if (tk === S.tkLista) lista().replaceChildren(caixaErro(erro, () => rankingUfc(esp, liga)));
+    return;
+  }
+  if (tk !== S.tkLista) return;
+  if (!r.categorias.length) {
+    lista().replaceChildren(vazio("A ESPN não publicou o ranking agora."));
+    return;
+  }
+  const movimento = (l) => {
+    if (l.anterior === null || l.anterior === undefined || l.posicao === null || l.posicao === undefined || l.campeao) return h("span");
+    if (l.anterior > l.posicao) return h("span", { class: "movimento subiu", title: `Antes: ${l.anterior}º` }, `▲ ${l.anterior}º`);
+    if (l.anterior < l.posicao) return h("span", { class: "movimento desceu", title: `Antes: ${l.anterior}º` }, `▼ ${l.anterior}º`);
+    return h("span", { class: "movimento" }, "=");
+  };
+  lista().replaceChildren(
+    h(
+      "div",
+      { class: "grade-cartoes" },
+      r.categorias.map((cat) =>
+        cartao(
+          cat.nome,
+          h(
+            "ol",
+            { class: "ranking" },
+            cat.lutadores.map((l) =>
+              h(
+                "li",
+                { class: l.campeao ? "campeao" : null },
+                h("span", { class: "lugar" }, l.campeao ? "C" : l.posicao ?? ""),
+                h(
+                  "span",
+                  null,
+                  imgBandeira(l.bandeira, l.pais),
+                  l.id ? h("button", { class: "botao-link", type: "button", onclick: () => abrirAtleta(esp.id, liga, l.id, l.nome) }, l.nome) : l.nome,
+                  l.campeao ? h("div", { class: "sub" }, "Campeão") : l.cartel ? h("div", { class: "sub" }, `Cartel ${l.cartel}`) : null
+                ),
+                movimento(l)
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+}
 
 registrarModulo("corrida", ModuloEventos);
 registrarModulo("luta", ModuloEventos);
@@ -951,11 +1246,12 @@ async function boxeLista(esp) {
       h("div", null, h("div", { class: "evento-nome" }, ev.nome), h("div", { class: "evento-sub" }, [ev.local, ev.inicio ? hora(ev.inicio) : "Horário a definir"].filter(Boolean).join(", "))),
       canalNaLista(ev.transmissao, true)
     );
-  lista().replaceChildren(
-    proximos.length ? [h("p", { class: "titulo-dia" }, "Próximas lutas"), h("div", { class: "cartao" }, proximos.map(linha))] : null,
-    passados.length ? [h("p", { class: "titulo-dia", style: { marginTop: "16px" } }, "Já aconteceram"), h("div", { class: "cartao" }, passados.map(linha))] : null,
-    h("p", { class: "nota" }, "A agenda de boxe vem do arquivo boxe_eventos.json. Depois de cada luta, anote o vencedor e o resultado nele.")
-  );
+  // replaceChildren não aceita listas dentro de listas: monta tudo numa lista só
+  const partes = [];
+  if (proximos.length) partes.push(h("p", { class: "titulo-dia" }, "Próximas lutas"), h("div", { class: "cartao" }, proximos.map(linha)));
+  if (passados.length) partes.push(h("p", { class: "titulo-dia", style: { marginTop: "16px" } }, "Já aconteceram"), h("div", { class: "cartao" }, passados.map(linha)));
+  partes.push(h("p", { class: "nota" }, "A agenda de boxe vem do arquivo boxe_eventos.json. Depois de cada luta, anote o vencedor e o resultado nele."));
+  lista().replaceChildren(...partes);
   const inicial = eventos.find((e) => e.id === st.eventoAtual) || proximos[0];
   if (inicial && window.matchMedia("(min-width: 861px)").matches) boxeAbrir(esp, inicial);
 }
