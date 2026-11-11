@@ -1,7 +1,7 @@
 "use strict";
 
 /* Liga o service worker e guarda o endereço do repasse, se vier no link.
-   Ex.: https://SEU-USUARIO.github.io/Scoresports-pessoal/?repasse=https://seu-repasse.workers.dev/?url= */
+   Ex.: https://SEU-USUARIO.github.io/Scoresports-pessoal2/?repasse=https://seu-repasse.workers.dev/?url= */
 
 (function () {
   try {
