@@ -1,58 +1,44 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Scoresports</title>
+  <meta name="color-scheme" content="light dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
   <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏀</text></svg>">
 </head>
 <body>
   <header class="topo">
-    <div class="topo-interno">
-      <h1 class="marca">Scoresports</h1>
-      <nav class="abas" aria-label="Seções">
-        <button class="aba ativa" data-aba="jogos">Jogos</button>
-        <button class="aba" data-aba="classificacao">Classificação</button>
-        <button class="aba" data-aba="lideres">Líderes</button>
-        <button class="aba" data-aba="corridas">MVP e calouro</button>
-      </nav>
+    <div class="topo-linha">
+      <a class="marca" href="/" aria-label="Scoresports, página inicial">
+        <span class="marca-ponto" aria-hidden="true"></span>Scoresports
+      </a>
+      <nav class="esportes" id="esportes" aria-label="Esportes"></nav>
     </div>
+    <div class="subnav" id="subnav"></div>
   </header>
 
-  <main>
-    <div class="datas" id="barra-datas">
-      <button class="seta" id="dia-anterior" aria-label="Dia anterior">‹</button>
-      <div class="faixa" id="faixa-datas"></div>
-      <button class="seta" id="dia-seguinte" aria-label="Próximo dia">›</button>
-      <input type="date" id="seletor-data" aria-label="Escolher uma data">
-      <button class="seta texto" id="hoje">Hoje</button>
-    </div>
-
-    <section id="jogos"></section>
-    <section id="classificacao" hidden></section>
-
-    <section id="lideres" hidden>
-      <div class="segmentos compacto" id="modo-lideres">
-        <button class="ativo" data-modo="media">Por jogo</button>
-        <button data-modo="total">Total da temporada</button>
-      </div>
-      <p class="nota" id="nota-lideres"></p>
-      <div class="lideres-grade" id="lideres-grade"></div>
+  <main class="palco">
+    <section class="coluna-lista" id="lista" aria-live="polite"></section>
+    <section class="coluna-detalhe" id="detalhe" aria-live="polite">
+      <div class="vazio-detalhe">Escolha um jogo para ver os detalhes.</div>
     </section>
-
-    <section id="corridas" hidden></section>
   </main>
 
-  <p id="atualizado"></p>
-
-  <dialog id="jogador-dialogo">
-    <div class="painel">
-      <button class="fechar" id="fechar-jogador" aria-label="Fechar">✕</button>
-      <div id="jogador-conteudo"></div>
+  <dialog class="painel" id="painel" aria-labelledby="painel-titulo">
+    <div class="painel-topo">
+      <button class="botao-icone" id="painel-voltar" type="button" aria-label="Voltar" hidden>‹</button>
+      <h2 class="painel-titulo" id="painel-titulo"></h2>
+      <button class="botao-icone" id="painel-fechar" type="button" aria-label="Fechar">×</button>
     </div>
+    <div class="painel-corpo" id="painel-corpo"></div>
   </dialog>
 
   <script src="/static/app.js"></script>
+  <script src="/static/esportes.js"></script>
 </body>
 </html>

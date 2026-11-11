@@ -1,10 +1,10 @@
-import json
 import re
 import unicodedata
 from datetime import date, datetime, timezone
 from html import unescape
-from pathlib import Path
 from zoneinfo import ZoneInfo
+
+import transmissoes
 
 TEMPORADA = "2026-27"
 FUSO_BRASILIA = ZoneInfo("America/Sao_Paulo")
@@ -65,6 +65,7 @@ def _time_box(t):
                 "id": j["personId"],
                 "camisa": j.get("jerseyNum"),
                 "posicao": j.get("position"),
+                "titular": str(j.get("starter")) in ("1", "True", "true"),
                 "min": minutos,
                 "pts": s["points"],
                 "reb": s["reboundsTotal"],
@@ -99,6 +100,8 @@ def buscar_boxscore(game_id):
     return {
         "id": game_id,
         "status": jogo["gameStatusText"],
+        "estado": jogo.get("gameStatus"),
+        "inicio": jogo.get("gameTimeUTC"),
         "fora": _time_box(jogo["awayTeam"]),
         "casa": _time_box(jogo["homeTeam"]),
     }
@@ -146,6 +149,11 @@ def buscar_classificacao():
                 "vitorias": t["WINS"],
                 "derrotas": t["LOSSES"],
                 "aproveitamento": t["WinPCT"],
+                "casa": t.get("HOME"),
+                "fora": t.get("ROAD"),
+                "ultimos10": t.get("L10"),
+                "sequencia": t.get("strCurrentStreak"),
+                "atras": t.get("ConferenceGamesBack"),
             }
         )
     return resultado
@@ -212,7 +220,6 @@ def buscar_calendario():
         for g in dia["games"]:
             if g["gameId"].startswith("001"):
                 continue  # ignora a pré-temporada
-
             inicio = _inicio_utc(g.get("gameDateTimeUTC"))
             if inicio:
                 data = inicio.astimezone(FUSO_BRASILIA).strftime("%Y-%m-%d")
@@ -223,7 +230,6 @@ def buscar_calendario():
                 inicio_iso = None
             if not data:
                 continue
-
             estado = g["gameStatus"]
             jogos.append(
                 {
@@ -232,11 +238,22 @@ def buscar_calendario():
                     "inicio": inicio_iso,
                     "status": (g.get("gameStatusText") or "").strip(),
                     "estado": estado,  # 1 = vai começar, 2 = ao vivo, 3 = terminou
+                    "fase": _fase_do_jogo(g["gameId"], g.get("gameLabel")),
                     "fora": _time_agenda(g["awayTeam"], estado),
                     "casa": _time_agenda(g["homeTeam"], estado),
                 }
             )
     return jogos
+
+
+def _fase_do_jogo(game_id, rotulo):
+    """O prefixo do ID diz a fase: 002 temporada regular, 004 playoffs, 005 play-in, 006 NBA Cup."""
+    prefixo = str(game_id)[:3]
+    fases = {"002": "Temporada regular", "003": "All-Star", "004": "Playoffs", "005": "Play-in", "006": "Final da NBA Cup"}
+    texto = fases.get(prefixo, "")
+    if rotulo and "cup" in rotulo.lower() and prefixo == "002":
+        texto = "NBA Cup"
+    return texto
 
 
 # ---------- Jogador ----------
@@ -271,7 +288,7 @@ def _data_do_log(texto):
 
 def _resumo_jogo(j):
     return {
-        "id": j.get("Game_ID"),
+        "id": j.get("Game_ID") or j.get("GAME_ID"),
         "data": _data_do_log(j.get("GAME_DATE")),
         "confronto": j.get("MATCHUP", ""),
     }
@@ -300,8 +317,11 @@ def _linha_jogo(j):
         "pts": _inteiro(j.get("PTS")),
         "reb": _inteiro(j.get("REB")),
         "ast": _inteiro(j.get("AST")),
+        "stl": _inteiro(j.get("STL")),
+        "blk": _inteiro(j.get("BLK")),
         "fg": _arremessos(_inteiro(j.get("FGM")), _inteiro(j.get("FGA"))),
         "tres": _arremessos(_inteiro(j.get("FG3M")), _inteiro(j.get("FG3A"))),
+        "mm": _inteiro(j.get("PLUS_MINUS")),
     }
 
 
@@ -315,11 +335,9 @@ def buscar_jogador(player_id):
         timeout=30,
     ).get_data_frames()[0]
     jogos = df.to_dict("records")  # do mais recente para o mais antigo
-
     base = {"id": player_id, "temporada": TEMPORADA, "jogos_disputados": len(jogos)}
     if not jogos:
         return {**base, "medias": None, "recordes": {}, "jogos": []}
-
     return {
         **base,
         "medias": {
@@ -344,6 +362,255 @@ def buscar_jogador(player_id):
         },
         "jogos": [_linha_jogo(j) for j in jogos],
     }
+
+
+# ---------- Carreira do jogador ----------
+
+CAMPOS_CARREIRA = [
+    "GP", "GS", "MIN", "PTS", "REB", "OREB", "DREB", "AST", "STL", "BLK", "TOV", "PF",
+    "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA",
+]
+
+_PREMIOS_PT = {
+    "NBA Most Valuable Player": "MVP da temporada",
+    "NBA Finals Most Valuable Player": "MVP das Finais",
+    "NBA Champion": "Campeão da NBA",
+    "NBA All-Star": "All-Star",
+    "NBA All-Star Most Valuable Player": "MVP do All-Star Game",
+    "All-NBA": "Seleção da temporada (All-NBA)",
+    "All-Defensive Team": "Seleção defensiva",
+    "All-Rookie Team": "Seleção de calouros",
+    "NBA Rookie of the Year": "Calouro do ano",
+    "NBA Defensive Player of the Year": "Defensor do ano",
+    "NBA Sixth Man of the Year": "Sexto homem do ano",
+    "NBA Most Improved Player": "Jogador que mais evoluiu",
+    "NBA Clutch Player of the Year": "Jogador decisivo do ano",
+    "NBA Sporting News Most Valuable Player of the Year": "MVP (Sporting News)",
+    "NBA Sporting News Rookie of the Year": "Calouro do ano (Sporting News)",
+    "NBA Player of the Month": "Jogador do mês",
+    "NBA Player of the Week": "Jogador da semana",
+    "NBA Rookie of the Month": "Calouro do mês",
+    "NBA Cup Most Valuable Player": "MVP da NBA Cup",
+    "NBA In-Season Tournament Most Valuable Player": "MVP da NBA Cup",
+    "NBA Cup All-Tournament Team": "Seleção da NBA Cup",
+    "Olympic Gold Medal": "Ouro olímpico",
+    "Olympic Silver Medal": "Prata olímpica",
+    "Olympic Bronze Medal": "Bronze olímpico",
+}
+
+_ORDEM_PREMIOS = list(_PREMIOS_PT.values())
+
+
+def _altura_cm(texto):
+    """'6-9' (pés-polegadas) -> 206."""
+    m = re.match(r"(\d+)-(\d+)", str(texto or ""))
+    if not m:
+        return None
+    return round((int(m.group(1)) * 12 + int(m.group(2))) * 2.54)
+
+
+def _peso_kg(texto):
+    try:
+        return round(float(texto) * 0.4536)
+    except (TypeError, ValueError):
+        return None
+
+
+def _idade(nascimento):
+    if not nascimento:
+        return None
+    hoje = date.today()
+    return hoje.year - nascimento.year - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
+
+
+def buscar_perfil(player_id):
+    """Dados pessoais: idade, altura, peso, draft, país, time atual."""
+    from nba_api.stats.endpoints import commonplayerinfo
+
+    dados = commonplayerinfo.CommonPlayerInfo(player_id=player_id, timeout=30).get_normalized_dict()
+    p = (dados.get("CommonPlayerInfo") or [{}])[0]
+    nascimento = None
+    if p.get("BIRTHDATE"):
+        try:
+            nascimento = datetime.fromisoformat(str(p["BIRTHDATE"])[:10]).date()
+        except ValueError:
+            nascimento = None
+    draft = None
+    if str(p.get("DRAFT_YEAR") or "").isdigit():
+        if str(p.get("DRAFT_NUMBER") or "").isdigit():
+            draft = f"{p['DRAFT_YEAR']}, {p.get('DRAFT_ROUND')}ª rodada, {p['DRAFT_NUMBER']}ª escolha"
+        else:
+            draft = f"{p['DRAFT_YEAR']}"
+    elif p.get("DRAFT_YEAR"):
+        draft = "Não draftado"
+    return {
+        "id": player_id,
+        "nome": p.get("DISPLAY_FIRST_LAST") or "",
+        "time": " ".join(x for x in (p.get("TEAM_CITY"), p.get("TEAM_NAME")) if x) or None,
+        "time_id": p.get("TEAM_ID") or None,
+        "sigla": p.get("TEAM_ABBREVIATION") or None,
+        "posicao": p.get("POSITION") or None,
+        "camisa": p.get("JERSEY") or None,
+        "nascimento": nascimento.isoformat() if nascimento else None,
+        "idade": _idade(nascimento),
+        "pais": p.get("COUNTRY") or None,
+        "formacao": p.get("SCHOOL") or None,
+        "altura_cm": _altura_cm(p.get("HEIGHT")),
+        "peso_kg": _peso_kg(p.get("WEIGHT")),
+        "draft": draft,
+        "temporadas": _inteiro(p.get("SEASON_EXP")),
+        "desde": p.get("FROM_YEAR"),
+        "ate": p.get("TO_YEAR"),
+        "lista_75": str(p.get("GREATEST_75_FLAG")) == "Y",
+        "ativo": str(p.get("ROSTERSTATUS")) == "Active",
+    }
+
+
+def _linha_carreira(linhas):
+    """Soma as linhas de uma temporada. Jogador trocado tem uma linha por time e uma 'TOT'."""
+    total = next((l for l in linhas if l.get("TEAM_ABBREVIATION") == "TOT"), None)
+    times = [l.get("TEAM_ABBREVIATION") for l in linhas if l.get("TEAM_ABBREVIATION") not in (None, "TOT")]
+    base = total or linhas[0]
+    linha = {c.lower(): _inteiro(base.get(c)) for c in CAMPOS_CARREIRA}
+    linha["temporada"] = base.get("SEASON_ID")
+    linha["idade"] = _inteiro(base.get("PLAYER_AGE")) or None
+    linha["times"] = times or [base.get("TEAM_ABBREVIATION")]
+    return linha
+
+
+def _temporadas(linhas):
+    por_temporada = {}
+    for l in linhas:
+        por_temporada.setdefault(l.get("SEASON_ID"), []).append(l)
+    return [_linha_carreira(grupo) for _, grupo in sorted(por_temporada.items(), key=lambda x: str(x[0]))]
+
+
+def _total_carreira(linhas):
+    if not linhas:
+        return None
+    l = linhas[0]
+    return {c.lower(): _inteiro(l.get(c)) for c in CAMPOS_CARREIRA}
+
+
+def buscar_carreira(player_id):
+    """Totais de cada temporada e da carreira (temporada regular e playoffs).
+
+    As médias saem de total / jogos na página, então um único pedido serve para as duas visões.
+    """
+    from nba_api.stats.endpoints import playercareerstats
+
+    dados = playercareerstats.PlayerCareerStats(
+        player_id=player_id, per_mode36="Totals", timeout=30
+    ).get_normalized_dict()
+    return {
+        "id": player_id,
+        "regular": {
+            "temporadas": _temporadas(dados.get("SeasonTotalsRegularSeason") or []),
+            "total": _total_carreira(dados.get("CareerTotalsRegularSeason") or []),
+        },
+        "playoffs": {
+            "temporadas": _temporadas(dados.get("SeasonTotalsPostSeason") or []),
+            "total": _total_carreira(dados.get("CareerTotalsPostSeason") or []),
+        },
+        "all_star": {
+            "temporadas": _temporadas(dados.get("SeasonTotalsAllStarSeason") or []),
+            "total": _total_carreira(dados.get("CareerTotalsAllStarSeason") or []),
+        },
+    }
+
+
+def buscar_recordes_carreira(player_id):
+    """Maiores marcas da carreira em temporada regular, com o jogo em que aconteceram."""
+    from nba_api.stats.endpoints import playergamelog
+
+    jogos = []
+    try:
+        df = playergamelog.PlayerGameLog(
+            player_id=player_id, season="ALL", season_type_all_star="Regular Season", timeout=45
+        ).get_data_frames()[0]
+        jogos = df.to_dict("records")
+    except Exception:
+        jogos = []
+    if jogos:
+        return {
+            "fonte": "jogos",
+            "jogos_na_conta": len(jogos),
+            "recordes": {
+                "pts": _recorde(jogos, "PTS"),
+                "reb": _recorde(jogos, "REB"),
+                "ast": _recorde(jogos, "AST"),
+                "stl": _recorde(jogos, "STL"),
+                "blk": _recorde(jogos, "BLK"),
+                "tres": _recorde(jogos, "FG3M"),
+                "fgm": _recorde(jogos, "FGM"),
+                "ftm": _recorde(jogos, "FTM"),
+            },
+        }
+
+    # plano B: o quadro de recordes do perfil do jogador
+    from nba_api.stats.endpoints import playerprofilev2
+
+    dados = playerprofilev2.PlayerProfileV2(player_id=player_id, timeout=30).get_normalized_dict()
+    mapa = {"PTS": "pts", "REB": "reb", "AST": "ast", "STL": "stl", "BLK": "blk", "FG3M": "tres", "FGM": "fgm", "FTM": "ftm"}
+    recordes = {}
+    for r in dados.get("CareerHighs") or []:
+        chave = mapa.get(r.get("STAT"))
+        if not chave or chave in recordes:
+            continue
+        adversario = r.get("VS_TEAM_ABBREVIATION") or ""
+        recordes[chave] = {
+            "valor": _inteiro(r.get("STAT_VALUE", r.get("STATS_VALUE"))),
+            "jogo": {
+                "id": r.get("GAME_ID"),
+                "data": _data_iso(str(r.get("GAME_DATE") or r.get("DATE_EST") or "")),
+                "confronto": f"vs. {adversario}" if adversario else "",
+            },
+        }
+    return {"fonte": "perfil", "jogos_na_conta": None, "recordes": recordes}
+
+
+def buscar_premios(player_id):
+    """Prêmios agrupados por tipo, com as temporadas de cada um."""
+    from nba_api.stats.endpoints import playerawards
+
+    dados = playerawards.PlayerAwards(player_id=player_id, timeout=30).get_normalized_dict()
+    grupos = {}
+    for a in dados.get("PlayerAwards") or []:
+        descricao = a.get("DESCRIPTION") or ""
+        nome = _PREMIOS_PT.get(descricao, descricao)
+        if descricao == "All-NBA" and a.get("ALL_NBA_TEAM_NUMBER"):
+            nome = f"All-NBA ({a['ALL_NBA_TEAM_NUMBER']}º time)"
+        g = grupos.setdefault(nome, {"nome": nome, "vezes": 0, "temporadas": []})
+        g["vezes"] += 1
+        temporada = a.get("SEASON")
+        if temporada and temporada not in g["temporadas"]:
+            g["temporadas"].append(temporada)
+
+    def ordem(g):
+        base = g["nome"].split(" (")[0]
+        return (_ORDEM_PREMIOS.index(base) if base in _ORDEM_PREMIOS else 99, -g["vezes"])
+
+    return sorted(grupos.values(), key=ordem)
+
+
+def buscar_jogadores_lista():
+    """Todos os jogadores da história da NBA (lista que vem junto com o nba_api, sem internet)."""
+    from nba_api.stats.static import players
+
+    return [
+        {"id": p["id"], "nome": p["full_name"], "ativo": bool(p.get("is_active"))}
+        for p in players.get_players()
+    ]
+
+
+def procurar_jogadores(lista, texto, limite=25):
+    alvo = _sem_acento(texto)
+    if len(alvo) < 2:
+        return []
+    achados = [p for p in lista if alvo in _sem_acento(p["nome"])]
+    # quem está em atividade e quem começa com o texto aparece primeiro
+    achados.sort(key=lambda p: (not p["ativo"], not _sem_acento(p["nome"]).startswith(alvo), p["nome"]))
+    return achados[:limite]
 
 
 # ---------- Líderes da temporada ----------
@@ -443,7 +710,6 @@ def montar_lideres(jogadores, modo, limite=10):
     max_jogos = max((_inteiro(j.get("GP")) for j in jogadores), default=0)
     # médias por jogo: mínimo de 70% dos jogos da liga; totais: qualquer jogador
     minimo_jogos = 1 if modo == "total" else max(1, (7 * max_jogos) // 10)
-
     categorias = []
     for chave, rotulo in CATEGORIAS_LIDERES.items():
         if chave in PERCENTUAIS:
@@ -454,7 +720,6 @@ def montar_lideres(jogadores, modo, limite=10):
         categorias.append(
             {"chave": chave, "rotulo": rotulo, "percentual": chave in PERCENTUAIS, "jogadores": lista}
         )
-
     return {
         "modo": modo,
         "jogos_da_liga": max_jogos,
@@ -555,14 +820,11 @@ def _extrair_ranking(html):
         posicao = int(m.group(1))
         if posicao in ranking or posicao > 15:
             continue
-
         nome, _, time = m.group(2).rpartition(",")
         if not nome:
             nome, time = m.group(2), ""
-
         fim = cabecalhos[i + 1].start() if i + 1 < len(cabecalhos) else len(html)
         corpo = _html_para_texto(html[c.end():fim])
-
         anterior = None
         movimento = None
         u = re.search(
@@ -581,10 +843,8 @@ def _extrair_ranking(html):
                     movimento = "igual"
             else:
                 movimento = "novo"
-
         s = re.search(r"Season\s+\w+\s*:\s*([^\n]+)", corpo, re.I)
         stats = _abreviar_stats(s.group(1).strip())[:80] if s else None
-
         ranking[posicao] = {
             "posicao": posicao,
             "nome": nome.strip(),
@@ -633,7 +893,6 @@ def buscar_corridas():
 
 # ---------- Pré-jogo: escalações prováveis, lesões, confronto direto, forma e líderes ----------
 
-ARQUIVO_TRANSMISSOES = Path(__file__).parent / "transmissoes.json"
 URL_LESOES = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries"
 
 LIDERES_DO_TIME = [
@@ -773,7 +1032,6 @@ def montar_escalacao(recentes, caixas, sigla, indisponiveis):
             reg["minutos"] += p["min"]
             if p["titular"]:
                 reg["titular_em"] += 1
-
     candidatos = [r for r in contagem.values() if _sem_acento(r["nome"]) not in indisponiveis]
     candidatos.sort(key=lambda r: (r["titular_em"], r["minutos"]), reverse=True)
     quinteto = candidatos[:5]
@@ -795,7 +1053,6 @@ def montar_lideres_do_time(jogadores, sigla):
         return []
     minimo_jogos = max(1, (7 * max(_inteiro(j.get("GP")) for j in do_time)) // 10)
     candidatos = [j for j in do_time if _inteiro(j.get("GP")) >= minimo_jogos]
-
     resultado = []
     for chave, rotulo in LIDERES_DO_TIME:
         melhor = max(candidatos, key=lambda j: _num(j.get(chave)) / _num(j.get("GP")))
@@ -823,10 +1080,8 @@ def buscar_confronto_direto(id_a, id_b, sigla_a, sigla_b):
         date_from_nullable=desde.strftime("%m/%d/%Y"),
         timeout=45,
     ).get_data_frames()[0]
-
     linhas = [j for j in df.to_dict("records") if str(j.get("GAME_ID", ""))[:3] not in ("001", "003")]
     linhas.sort(key=lambda j: str(j.get("GAME_DATE")), reverse=True)
-
     jogos = []
     for j in linhas[:10]:
         pts_a = _inteiro(j.get("PTS"))
@@ -846,20 +1101,17 @@ def buscar_confronto_direto(id_a, id_b, sigla_a, sigla_b):
     return {"jogos": jogos, "vitorias_fora": vitorias_a, "vitorias_casa": len(jogos) - vitorias_a}
 
 
-def buscar_transmissao(data, fora, casa):
-    """Canais do jogo no Brasil, lidos do arquivo transmissoes.json (editável)."""
-    try:
-        conteudo = json.loads(ARQUIVO_TRANSMISSOES.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
-    for item in conteudo.get("jogos", []):
-        if item.get("data") == data and item.get("fora") == fora and item.get("casa") == casa:
-            return {
-                "canais": list(item.get("canais") or []),
-                "conferido_em": item.get("conferido_em"),
-                "observacao": item.get("observacao"),
-            }
-    return None
+def buscar_transmissao(data, fora, casa, inicio=None):
+    """Canais do jogo no Brasil (grade confirmada em transmissoes.json ou o padrão da NBA).
+
+    `fora` e `casa` podem ser a sigla ('DET') ou o dicionário do time (sigla + nome).
+    """
+    def nomes(t):
+        if isinstance(t, dict):
+            return [t.get("sigla"), t.get("nome")]
+        return [t]
+
+    return transmissoes.onde_assistir("nba", data=data, inicio=inicio, times=[nomes(fora), nomes(casa)])
 
 
 def _resumo_time(t):
@@ -892,8 +1144,8 @@ def montar_pre_jogo(jogo, agenda, obter):
             43200,
             lambda: buscar_confronto_direto(fora["time_id"], casa["time_id"], fora["sigla"], casa["sigla"]),
         )
-    if confronto is None:
-        falhas.append("confronto")
+        if confronto is None:
+            falhas.append("confronto")
 
     times = {}
     for lado, time in (("fora", fora), ("casa", casa)):
@@ -920,10 +1172,11 @@ def montar_pre_jogo(jogo, agenda, obter):
             "inicio": jogo.get("inicio"),
             "estado": jogo["estado"],
             "status": jogo.get("status"),
+            "fase": jogo.get("fase"),
             "fora": _resumo_time(fora),
             "casa": _resumo_time(casa),
         },
-        "transmissao": buscar_transmissao(jogo["data"], fora["sigla"], casa["sigla"]),
+        "transmissao": buscar_transmissao(jogo["data"], fora, casa, jogo.get("inicio")),
         "confronto": confronto,
         "times": times,
         "falhas": falhas,

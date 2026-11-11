@@ -1,30 +1,54 @@
 # Scoresports
 
-App pessoal de placares da NBA, feito para treinar programação. Mostra os jogos de cada dia da temporada (passados e futuros), placar ao vivo, box score completo, estatísticas dos jogadores e a classificação das conferências, tudo com horários no fuso de Brasília.
+App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, NFL, Fórmula 1, UFC e boxe, com horários no fuso de Brasília e a informação de onde cada jogo passa no Brasil.
 
-> Projeto de estudo, para uso pessoal. Não é afiliado à NBA e não tem fins comerciais.
+> Projeto de estudo, para uso pessoal. Não é afiliado à NBA, à ESPN nem a nenhuma liga, e não tem fins comerciais.
 
 ## Funcionalidades
 
-- **Jogos por dia:** navegação por setas ou calendário, desde a primeira rodada até o fim da temporada, incluindo os jogos futuros.
-- **Placar ao vivo:** a página se atualiza sozinha a cada 20 segundos enquanto há jogo em andamento ou no dia de hoje.
-- **Horário de Brasília:** os jogos que ainda não começaram mostram o horário local de Brasília, e os dias são agrupados pelo fuso de Brasília.
-- **Box score completo:** pontos, rebotes, assistências, FG, bolas de três e lances livres (feitos/tentados), turnovers, faltas, roubos de bola, tocos e +/-.
-- **Painel do jogador:** ao clicar no nome de um jogador no box score, abre um painel com as médias da temporada, os recordes da temporada (com o jogo em que aconteceram), um gráfico de pontos por jogo e a lista de todos os jogos.
-- **Classificação:** tabela das conferências Leste e Oeste.
+### NBA
+- **Jogos por dia:** navegação por setas ou calendário, da primeira rodada ao fim da temporada.
+- **Placar ao vivo:** a página se atualiza sozinha a cada 20 segundos enquanto há jogo em andamento.
+- **Box score completo:** titulares e reservas separados, linha de totais do time.
+- **Pré-jogo:** prováveis titulares, últimos jogos, maiores médias, lesionados e confronto direto.
+- **Painel do jogador:**
+  - *Temporada:* médias, recordes, gráfico de pontos por jogo e lista de jogos.
+  - *Carreira:* perfil (idade, altura, peso, draft, país), prêmios, números de cada temporada (médias ou totais, temporada regular ou playoffs) e recordes da carreira.
+  - *Arremessos no jogo:* mapa de acertos e erros na quadra.
+- **Busca de jogadores:** toda a história da NBA, aposentados incluídos.
+- **Classificação, líderes da temporada e corridas pelo MVP e pelo calouro do ano.**
+
+### Futebol e NFL
+- **Futebol:** 14 competições (Brasileirão A e B, Copa do Brasil, Libertadores, Sul-Americana, Champions, Liga Europa, Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Liga Portugal e MLS). Dá para ver todos os jogos do dia juntos ou uma competição só.
+- **NFL:** navegação por semana da temporada.
+- **Detalhe da partida:** lances, estatísticas comparadas, escalações (futebol), estatísticas individuais (NFL), retrospecto, desfalques e onde assistir.
+- **Classificação** com as zonas de classificação e rebaixamento.
+- **Elenco e carreira:** clicar num time abre o elenco; clicar num atleta abre a carreira temporada por temporada.
+
+### Fórmula 1, UFC e boxe
+- **F1:** calendário da temporada, horários e resultados de cada sessão, classificação de pilotos.
+- **UFC:** eventos da temporada com o card completo, cartel dos lutadores e resultado de cada luta.
+- **Boxe:** agenda das principais noites de luta, lida do arquivo `boxe_eventos.json`.
+
+### Onde assistir no Brasil
+Cada jogo mostra os canais. A informação vem do `transmissoes.json`, em duas camadas:
+1. **Grade confirmada:** jogos anotados um a um, a partir das grades que as emissoras divulgam (aparece com o selo "Grade confirmada").
+2. **Padrão da competição:** quando o jogo não está na grade, vale o padrão (por exemplo, todo jogo da NBA está no League Pass e todo evento do UFC está no Paramount+). As regras do padrão podem depender do dia da semana e do horário (na NFL, quinta e domingo à noite no SporTV, segunda na ESPN).
 
 ## Tecnologias
 
 - **Python 3.10 ou superior**
 - **[FastAPI](https://fastapi.tiangolo.com/)** e **Uvicorn** para a API
-- **[nba_api](https://github.com/swar/nba_api)** para buscar os dados da NBA
+- **[nba_api](https://github.com/swar/nba_api)** para os dados da NBA
+- **API pública da ESPN** (não oficial, sem chave) para futebol, NFL, F1 e UFC
+- **requests** para as chamadas HTTP
 - **SQLite** (módulo `sqlite3` do Python) para o cache
 - **HTML, CSS e JavaScript** puros no front-end, sem frameworks
 
 ## Como rodar
 
-```bash
-git clone https://github.com/<seu-usuario>/Scoresports-pessoal.git
+```
+git clone https://github.com/byGlazed/Scoresports-pessoal.git
 cd Scoresports-pessoal
 
 python -m venv .venv
@@ -42,7 +66,7 @@ Depois abra **http://127.0.0.1:8000** no navegador. A documentação interativa 
 
 No PowerShell, se a ativação do ambiente virtual for bloqueada, rode uma vez:
 
-```powershell
+```
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
@@ -51,8 +75,13 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 Scoresports-pessoal/
 ├── api.py              # rotas da API (FastAPI) e entrega da página
-├── nba_dados.py        # busca e formata os dados da NBA
+├── nba_dados.py        # busca e formata os dados da NBA (inclui carreira e busca de jogadores)
+├── espn_dados.py       # futebol, NFL, F1 e UFC pela API pública da ESPN
+├── boxe.py             # lê a agenda de boxe
+├── transmissoes.py     # decide onde cada jogo passa no Brasil
 ├── cache.py            # cache em SQLite com tempo de validade
+├── transmissoes.json   # grade de transmissões (editável)
+├── boxe_eventos.json   # agenda de boxe (editável)
 ├── placar_nba.py       # script de terminal: placar do dia
 ├── box_score.py        # script de terminal: box score de um jogo
 ├── classificacao.py    # script de terminal: classificação das conferências
@@ -60,60 +89,93 @@ Scoresports-pessoal/
 └── static/
     ├── index.html
     ├── style.css
-    └── app.js
-```
-
-Os três scripts de terminal (`placar_nba.py`, `box_score.py` e `classificacao.py`) foram os primeiros passos do projeto e continuam funcionando de forma independente:
-
-```bash
-python placar_nba.py
-python box_score.py            # primeiro jogo de hoje
-python box_score.py 0022600099 # jogo específico, pelo ID
-python classificacao.py
+    ├── app.js          # base do site e módulo da NBA
+    └── esportes.js     # futebol, NFL, F1, UFC e boxe
 ```
 
 ## Rotas da API
 
+### NBA
+
 | Rota | O que devolve | Cache |
-|------|---------------|-------|
-| `GET /` | A página | n/a |
-| `GET /datas` | Todos os dias com jogos na temporada e o dia de hoje (Brasília) | 10 min |
-| `GET /jogos?data=AAAA-MM-DD` | Jogos do dia, com o placar ao vivo quando disponível | calendário: 10 min; ao vivo: 15 s |
-| `GET /jogos/{id}/boxscore` | Box score completo de um jogo | 15 s |
-| `GET /jogadores/{id}` | Médias, recordes e jogos do jogador na temporada | 10 min |
-| `GET /classificacao` | Classificação do Leste e do Oeste | 1 h |
+| --- | --- | --- |
+| `GET /datas` | Dias com jogos na temporada e o dia de hoje (Brasília) | 10 min |
+| `GET /jogos?data=AAAA-MM-DD` | Jogos do dia, com placar ao vivo e transmissão | calendário: 10 min; ao vivo: 15 s |
+| `GET /jogos/{id}/boxscore` | Box score completo | 15 s |
+| `GET /jogos/{id}/pre-jogo` | Escalações prováveis, forma, líderes, lesões e confronto direto | varia por parte |
+| `GET /jogos/{id}/arremessos/{jogador}` | Arremessos de um jogador no jogo | 15 s |
+| `GET /jogadores/busca?q=nome` | Jogadores de toda a história com esse nome | 1 dia |
+| `GET /jogadores/{id}` | Médias, recordes e jogos da temporada | 10 min |
+| `GET /jogadores/{id}/carreira` | Perfil, prêmios, temporadas e recordes da carreira | 6 h a 1 dia |
+| `GET /lideres?modo=media\|total` | Top 10 de cada estatística | 30 min |
+| `GET /corridas` | Rankings do MVP e do calouro do ano (NBA.com) | 2 h |
+| `GET /classificacao` | Leste e Oeste | 1 h |
+
+### Futebol, NFL, F1 e UFC
+
+`{esporte}` é `futebol`, `nfl`, `f1` ou `ufc`. `{liga}` é o código da ESPN (`bra.1`, `eng.1`, `nfl`, `f1`, `ufc`...). A lista completa sai em `GET /esportes`.
+
+| Rota | O que devolve | Cache |
+| --- | --- | --- |
+| `GET /esportes` | Esportes e competições disponíveis | n/a |
+| `GET /e/{esporte}/{liga}/jogos?de=&ate=` | Jogos entre duas datas (até 15 dias) | 15 s perto de hoje; 10 min a 1 h nos outros dias |
+| `GET /e/{esporte}/{liga}/datas` | Dias com jogos (futebol) ou semanas (NFL) | 6 h |
+| `GET /e/{esporte}/{liga}/jogos/{id}` | Detalhe da partida | 15 s |
+| `GET /e/{esporte}/{liga}/classificacao` | Tabela da competição | 30 min |
+| `GET /e/{esporte}/{liga}/times/{id}/elenco` | Elenco de um time | 12 h |
+| `GET /e/{esporte}/{liga}/atletas/{id}` | Perfil e carreira de um atleta | 6 h |
+| `GET /e/{esporte}/{liga}/eventos` | Calendário de GPs (F1) ou eventos (UFC) | 1 h |
+| `GET /e/{esporte}/{liga}/eventos/{id}?data=` | Sessões e resultados (F1) ou card completo (UFC) | 30 s |
+| `GET /boxe/eventos` | Agenda de boxe | sem cache |
 
 ## Como funciona
 
 ```
-navegador  ->  API (FastAPI)  ->  cache (SQLite)  ->  NBA (nba_api)
+navegador  ->  API (FastAPI)  ->  cache (SQLite)  ->  NBA (nba_api) / ESPN / arquivos JSON
 ```
 
 1. O navegador só conversa com a API do próprio projeto.
-2. A API pede os dados ao módulo `cache.py`. Se o dado salvo ainda estiver dentro do tempo de validade, ele é devolvido na hora.
-3. Se estiver vencido, o `nba_dados.py` busca na NBA, o resultado é salvo no banco (`cache.db`) e devolvido.
-4. Se a NBA falhar e existir um dado antigo salvo, ele é usado no lugar, e a página continua funcionando.
+2. A API pede os dados ao `cache.py`. Se o dado salvo ainda está dentro do tempo de validade, ele volta na hora.
+3. Se venceu, o módulo do esporte busca na fonte, o resultado é salvo no banco (`cache.db`) e devolvido.
+4. Se a fonte falhar e houver um dado antigo salvo, ele é usado no lugar e a página continua funcionando.
 
-Isso reduz o número de consultas à NBA e deixa a página mais rápida. Os dados vêm de três fontes: o feed de jogos ao vivo (placar e box score), o calendário estático da temporada e o `stats.nba.com` (classificação e histórico dos jogadores), todos acessados pelo `nba_api` ou por requisições simples.
+## Mantendo as transmissões em dia
+
+As emissoras divulgam a grade semana a semana. Para anotar um jogo, acrescente um item na lista `jogos` do `transmissoes.json`:
+
+```json
+{"esporte": "nba", "data": "2026-11-20", "times": ["LAL", "BOS"], "canais": ["Prime Video", "NBA League Pass"], "conferido_em": "2026-11-16", "fonte": "grade do Prime Video"}
+```
+
+- `data` é o dia em Brasília (um jogo à 1h da madrugada de quarta entra como quarta).
+- `times` aceita siglas ou nomes, em qualquer ordem.
+- Para F1, UFC e boxe, use `"evento": "UFC 335"` no lugar de `times`.
+
+Salve e atualize a página. Não precisa reiniciar o servidor.
+
+## Mantendo o boxe em dia
+
+Cada noite de lutas é um item em `boxe_eventos.json`. Depois da luta, preencha `vencedor` (com o nome do lutador, igual ao da lista `lutadores`) e `resultado` (por exemplo, "Nocaute técnico no 7º round").
 
 ## Configuração
 
-A temporada exibida é definida pela constante `TEMPORADA` (por exemplo, `"2026-27"`) no início do `nba_dados.py`. O `classificacao.py` tem a sua própria. Quando uma nova temporada começar, é só atualizar esse valor.
+A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-27"`) no início do `nba_dados.py`. O `classificacao.py` tem a sua própria. Quando uma nova temporada começar, é só atualizar esse valor. Os outros esportes acompanham a temporada atual da ESPN sozinhos.
 
 ## Limitações conhecidas
 
-- Os dados vêm de endpoints **não oficiais** da NBA. Eles podem mudar, ficar lentos ou bloquear consultas sem aviso. O cache ameniza isso, mas não elimina.
-- As estatísticas e recordes dos jogadores consideram apenas a **temporada regular**.
-- As datas no histórico do jogador seguem o fuso dos EUA, então um jogo de madrugada em Brasília pode aparecer com a data do dia anterior nesse painel.
+- Os dados vêm de endpoints **não oficiais** da NBA e da ESPN. Eles podem mudar, ficar lentos ou bloquear consultas sem aviso. O cache ameniza isso, mas não elimina.
+- Os recordes da temporada consideram apenas a **temporada regular**. Na carreira, há números de temporada regular e de playoffs.
+- A ESPN não publica estatísticas de carreira de todos os atletas; quando falta, o painel avisa.
+- A Globo transmite só 15 dos 24 GPs de F1 em TV aberta, e quais são varia. O padrão aponta SporTV e Globoplay, que passam todos.
+- O boxe depende do arquivo `boxe_eventos.json`, atualizado à mão.
 - A pré-temporada não aparece no calendário.
 
 ## Próximos passos
 
-- [ ] Adicionar futebol como segunda fonte de dados (a ideia é usar um provedor com chave de API gratuita)
-- [ ] Opção de ver playoffs
-- [ ] Recordes da carreira, além dos da temporada
-- [ ] Linha de totais por time no box score
+- [ ] Opção de ver playoffs no calendário da NBA
+- [ ] Atualizar a grade de transmissões automaticamente a partir das páginas das emissoras
+- [ ] Mais esportes da ESPN (NHL, MLB, tênis)
 
 ## Aviso
 
-Este projeto é de uso pessoal e educacional. Os dados pertencem à NBA e aos respectivos detentores, e o app não os redistribui nem os usa comercialmente.
+Este projeto é de uso pessoal e educacional. Os dados pertencem às ligas, à ESPN e aos respectivos detentores, e o app não os redistribui nem os usa comercialmente.
