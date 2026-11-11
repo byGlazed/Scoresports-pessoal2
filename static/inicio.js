@@ -113,7 +113,7 @@ function abrirFavorito(f) {
     return abrirAtleta(f.esporte, f.liga, f.id, f.nome);
   }
   if (f.esporte === "nba" && esporteObj("nba") && esporteObj("nba").tipo === "nba") return irPara("nba", "jogos");
-  return abrirElenco(f.esporte, f.liga, f.id, f.nome);
+  return abrirTime(f.esporte, f.liga, f.id, f.nome);
 }
 
 /** Junta, por esporte, o que precisa ser buscado e como filtrar os jogos. */
@@ -453,7 +453,7 @@ async function pesquisaProcurar(texto, resultados) {
             descricao: t.descricao,
             esporte: t.esporte,
             imagem: t.imagem,
-            aoClicar: () => abrirElenco(t.esporte, t.liga, t.id, t.nome),
+            aoClicar: () => abrirTime(t.esporte, t.liga, t.id, t.nome),
             favorito: { tipo: "time", esporte: t.esporte, liga: t.liga, id: String(t.id), nome: t.nome, logo: t.imagem },
           })
         )

@@ -1170,3 +1170,43 @@ select.campo-data { cursor: pointer; }
 /* ---------- Cartel do boxe ---------- */
 .numeros.cartel .numero-caixa.vitoria strong { color: var(--vitoria); }
 .numeros.cartel .numero-caixa.derrota strong { color: var(--derrota); }
+
+/* ---------- Página do time ---------- */
+.barra-abas-time {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--linha);
+  margin-bottom: 4px;
+}
+.barra-abas-time .abas-detalhe { border-top: 0; }
+.conteudo-aba-time { min-height: 120px; }
+.jogo-do-time { border-bottom: 1px solid var(--linha); }
+.jogo-do-time:last-child { border-bottom: 0; }
+.jogo-do-time .jogo { border-bottom: 0; }
+.jogo-do-time-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 0;
+  font-size: 12px;
+  color: var(--texto-2);
+}
+.jogo-do-time-data { flex: 1; min-width: 0; }
+.selo-resultado {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex: none;
+}
+.selo-resultado.v { background: var(--vitoria); }
+.selo-resultado.e { background: var(--texto-3); }
+.selo-resultado.d { background: var(--derrota); }
+.tabela tr.linha-destaque td { background: var(--marca-suave); font-weight: 600; }
+.tecnico { margin: 0; font-weight: 600; }

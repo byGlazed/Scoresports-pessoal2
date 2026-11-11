@@ -1055,15 +1055,14 @@ async function buscarTime(esporte, liga, timeId) {
   } catch (_) {
     /* sem estádio */
   }
+  // técnico: o do elenco da ESPN quando vem (NBA, NFL, seleções...); no futebol de clubes, o Wikidata
   let tecnico = null;
-  if (cfg.esporte === "soccer") tecnico = await tecnicoFutebol(time.displayName, timeId, liga);
-  else {
-    try {
-      tecnico = (await obter(`espn_elenco_v2:${esporte}:${liga}:${timeId}`, 21600, () => buscarElenco(esporte, liga, timeId))).tecnico;
-    } catch (_) {
-      /* sem técnico */
-    }
+  try {
+    tecnico = (await obter(`espn_elenco_v2:${esporte}:${liga}:${timeId}`, 21600, () => buscarElenco(esporte, liga, timeId))).tecnico;
+  } catch (_) {
+    /* sem elenco */
   }
+  if (!tecnico && cfg.esporte === "soccer") tecnico = await tecnicoFutebol(time.displayName, timeId, liga);
   return {
     id: String(time.id || timeId),
     nome: time.displayName || null,

@@ -24,45 +24,173 @@ function empilharAtleta(esporte, liga, id, nome) {
   Painel.empilhar(nome || "Atleta", (corpo, ativo) => desenharAtleta(corpo, ativo, esporte, liga, id));
 }
 
-function abrirElenco(esporte, liga, timeId, nome) {
+/* ---------- Página do time (como no Sofascore) ---------- */
+
+function abrirTime(esporte, liga, timeId, nome) {
   if (!timeId) return;
-  Painel.abrir(nome || "Elenco", (corpo, ativo) => desenharElenco(corpo, ativo, esporte, liga, timeId));
+  Painel.abrir(nome || "Time", (corpo, ativo) => desenharTime(corpo, ativo, esporte, liga, timeId));
 }
 
-async function desenharElenco(corpo, ativo, esporte, liga, timeId) {
+/** Da página do time para o detalhe do jogo, na tela do esporte. */
+function abrirJogoDoTime(esporte, liga, jogo) {
+  Painel.fechar();
+  if (S.esporte !== esporte) irPara(esporte);
+  mostrarDetalhe();
+  partidaDetalhe(esporteObj(esporte), liga, jogo, false);
+}
+
+function tabelaElenco(esporte, liga, atletas) {
+  return tabela(
+    [
+      { nome: "#", valor: (a) => a.camisa || "" },
+      {
+        nome: "Atleta",
+        esq: true,
+        valor: (a) => h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta(esporte, liga, a.id, a.nome) }, a.nome),
+      },
+      { nome: "Posição", valor: (a) => a.posicao || "" },
+      { nome: "Idade", valor: (a) => a.idade ?? "" },
+      { nome: "País", valor: (a) => a.pais || "" },
+    ],
+    atletas
+  );
+}
+
+function secoesElenco(esporte, liga, e) {
+  const grupos = (e.grupos || []).filter((g) => g.atletas.length);
+  if (!grupos.length && !e.tecnico) return [vazio("A ESPN não tem o elenco deste time.")];
+  return [
+    ...grupos.map((g) => secao(g.nome, tabelaElenco(esporte, liga, g.atletas))),
+    e.tecnico ? secao("Técnico", h("p", { class: "tecnico" }, e.tecnico)) : null,
+  ].filter(Boolean);
+}
+
+/** Site do PC pelo servidor Python: ele não tem as rotas novas, então mostra só o elenco. */
+async function desenharElencoSimples(corpo, ativo, esporte, liga, timeId) {
   const e = await api(`/e/${esporte}/${liga}/times/${timeId}/elenco`);
   if (!ativo()) return;
-  const grupos = e.grupos.filter((g) => g.atletas.length);
   const favTime = { tipo: "time", esporte, liga, id: String(e.time.id || timeId), nome: e.time.nome || "Time", logo: e.time.logo };
   corpo.replaceChildren(
     h(
       "div",
       { class: "perfil" },
       imgLogo(e.time.logo, "perfil-foto"),
-      h("div", null, h("h3", { class: "perfil-nome" }, e.time.nome || "Elenco"), h("div", { class: "perfil-sub" }, "Clique num atleta para ver a carreira."), h("div", { class: "perfil-acoes" }, botaoFavorito(favTime, { comTexto: true })))
+      h(
+        "div",
+        null,
+        h("h3", { class: "perfil-nome" }, e.time.nome || "Elenco"),
+        h("div", { class: "perfil-sub" }, "Clique num atleta para ver a carreira."),
+        h("div", { class: "perfil-acoes" }, botaoFavorito(favTime, { comTexto: true }))
+      )
     ),
-    ...(grupos.length
-      ? grupos.map((g) =>
-          secao(
-            g.nome,
-            tabela(
-              [
-                { nome: "#", valor: (a) => a.camisa || "" },
-                {
-                  nome: "Atleta",
-                  esq: true,
-                  valor: (a) => h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta(esporte, liga, a.id, a.nome) }, a.nome),
-                },
-                { nome: "Posição", valor: (a) => a.posicao || "" },
-                { nome: "Idade", valor: (a) => a.idade ?? "" },
-                { nome: "País", valor: (a) => a.pais || "" },
-              ],
-              g.atletas
-            )
-          )
-        )
-      : [vazio("A ESPN não tem o elenco deste time.")])
+    h("p", { class: "nota" }, "A página completa do time está no app e na pasta docs/."),
+    ...secoesElenco(esporte, liga, e)
   );
+}
+
+const ABAS_TIME = [
+  { id: "jogos", nome: "Jogos" },
+  { id: "elenco", nome: "Elenco" },
+  { id: "detalhes", nome: "Detalhes" },
+  { id: "classificacao", nome: "Classificação" },
+  { id: "estatisticas", nome: "Estatísticas" },
+];
+
+const NOME_RESULTADO = { V: "Vitória", E: "Empate", D: "Derrota" };
+
+function linhaJogoDoTime(esporte, liga, timeId, j) {
+  const resultado = resultadoDoTime(j, timeId);
+  return h(
+    "div",
+    { class: "jogo-do-time" },
+    h(
+      "div",
+      { class: "jogo-do-time-info" },
+      h("span", { class: "jogo-do-time-data" }, diaHora(j.inicio) || ""),
+      resultado ? h("span", { class: `selo-resultado ${resultado.toLowerCase()}`, title: NOME_RESULTADO[resultado] }, resultado) : null
+    ),
+    linhaPartida(esporteObj(esporte), j, () => abrirJogoDoTime(esporte, liga, j))
+  );
+}
+
+async function desenharTime(corpo, ativo, esporte, liga, timeId) {
+  if (!window.MODO_CELULAR) return desenharElencoSimples(corpo, ativo, esporte, liga, timeId);
+  const base = `/e/${esporte}/${liga}/times/${timeId}`;
+  const t = await api(base);
+  if (!ativo()) return;
+  const id = String(t.id || timeId);
+  $("#painel-titulo").textContent = t.nome || "Time";
+  const fav = { tipo: "time", esporte, liga, id, nome: t.nome || "Time", logo: t.logo };
+  const cabecalho = h(
+    "div",
+    { class: "perfil" },
+    imgLogo(t.logo, "perfil-foto"),
+    h(
+      "div",
+      null,
+      h("h3", { class: "perfil-nome" }, t.nome || "Time"),
+      h("div", { class: "perfil-sub" }, [t.posicao || t.liga_nome, t.campanha ? `Campanha ${t.campanha}` : null].filter(Boolean).join(" · ")),
+      h("div", { class: "perfil-acoes" }, botaoFavorito(fav, { comTexto: true }))
+    )
+  );
+
+  const carregar = {
+    jogos: async () => {
+      const r = await api(`${base}/jogos`);
+      const bloco = (titulo, jogos) =>
+        secao(titulo, ...(jogos.length ? jogos.map((j) => linhaJogoDoTime(esporte, liga, id, j)) : [vazio("Nenhum jogo encontrado.")]));
+      return [bloco("Últimos jogos", r.ultimos), bloco("Próximos jogos", r.proximos)];
+    },
+    elenco: async () => secoesElenco(esporte, liga, await api(`${base}/elenco`)),
+    detalhes: async () => {
+      const fatos = [
+        ["Estádio", t.estadio],
+        ["Cidade", t.cidade],
+        ["Técnico", t.tecnico],
+        ["Liga", t.liga_nome],
+        ["Posição", t.posicao],
+        ["Campanha", t.campanha],
+      ].filter(([, v]) => v);
+      if (!fatos.length) return [vazio("A ESPN não tem detalhes deste time.")];
+      return [h("dl", { class: "fatos" }, fatos.map(([r, v]) => h("div", { class: "fato" }, h("dt", null, r), h("dd", null, v))))];
+    },
+    classificacao: async () => {
+      const c = await api(`/e/${esporte}/${liga}/classificacao`);
+      if (!c.grupos.length) return [vazio("A classificação desta competição ainda não saiu.")];
+      return cartoesClassificacao(esporteObj(esporte), liga, c, id);
+    },
+    estatisticas: async () => {
+      const s = await api(`${base}/estatisticas`);
+      if (!s.grupos.length) return [vazio("A ESPN não tem estatísticas deste time nesta competição.")];
+      return [
+        s.temporada ? h("p", { class: "nota" }, `Temporada ${s.temporada}`) : null,
+        ...s.grupos.map((g) =>
+          secao(g.grupo, h("div", { class: "numeros" }, g.itens.map((i) => h("div", { class: "numero-caixa" }, h("strong", null, i.valor), h("span", null, i.rotulo)))))
+        ),
+      ].filter(Boolean);
+    },
+  };
+
+  // cada aba busca só quando é aberta; o resultado fica guardado enquanto a página está aberta
+  const guardados = {};
+  const barra = h("div", { class: "barra-abas-time" });
+  const area = h("div", { class: "conteudo-aba-time" });
+  let atual = null;
+  const escolher = async (aba) => {
+    atual = aba;
+    barra.replaceChildren(abasDetalhe(ABAS_TIME, aba, escolher));
+    area.replaceChildren(carregando());
+    try {
+      if (!guardados[aba]) guardados[aba] = carregar[aba]();
+      const nos = await guardados[aba];
+      if (ativo() && atual === aba) area.replaceChildren(...nos);
+    } catch (erro) {
+      delete guardados[aba];
+      if (ativo() && atual === aba) area.replaceChildren(caixaErro(erro, () => escolher(aba)));
+    }
+  };
+  corpo.replaceChildren(cabecalho, barra, area);
+  escolher("jogos");
 }
 
 async function desenharAtleta(corpo, ativo, esporte, liga, id) {
@@ -602,8 +730,8 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   area.replaceChildren(...conteudoAba(aba));
   const favTime = (t) => (t.id ? { tipo: "time", esporte: esp.id, liga, id: String(t.id), nome: t.nome, logo: t.logo } : null);
   const placar = placarGrande({
-    esquerda: { nome: esq.nome, logo: esq.logo, placar: placarComPenaltis(esq), sub: esq.campanha, aoClicar: () => abrirElenco(esp.id, liga, esq.id, esq.nome), favorito: favTime(esq) },
-    direita: { nome: dir.nome, logo: dir.logo, placar: placarComPenaltis(dir), sub: dir.campanha, aoClicar: () => abrirElenco(esp.id, liga, dir.id, dir.nome), favorito: favTime(dir) },
+    esquerda: { nome: esq.nome, logo: esq.logo, placar: placarComPenaltis(esq), sub: esq.campanha, aoClicar: () => abrirTime(esp.id, liga, esq.id, esq.nome), favorito: favTime(esq) },
+    direita: { nome: dir.nome, logo: dir.logo, placar: placarComPenaltis(dir), sub: dir.campanha, aoClicar: () => abrirTime(esp.id, liga, dir.id, dir.nome), favorito: favTime(dir) },
     estado: j.estado,
     status: j.estado === 1 ? j.status || hora(j.inicio) || "A definir" : j.status,
     info: [j.liga_nome, diaHora(j.inicio)].filter(Boolean).join(", "),
@@ -871,8 +999,15 @@ async function classificacaoEspn(esp, liga) {
     lista().replaceChildren(vazio("A classificação desta competição ainda não saiu."));
     return;
   }
+  const cartoes = cartoesClassificacao(esp, liga, c);
+  const chaveCampeoes = esp.id === "futebol" ? `futebol:${liga}` : esp.id;
+  lista().replaceChildren(h("div", { class: "grade-classificacao" }, h("div", null, ...cartoes), cartaoCampeoes(chaveCampeoes)));
+}
+
+/** Os cartões da classificação (um por grupo). destaqueTimeId marca a linha do time na página do time. */
+function cartoesClassificacao(esp, liga, c, destaqueTimeId = null) {
   const preferidas = COLUNAS_CLASSIFICACAO[esp.id] || [];
-  const cartoes = c.grupos.map((g) => {
+  return c.grupos.map((g) => {
     const existentes = new Set(g.colunas.map((col) => col.chave));
     let colunas = preferidas.filter(([chave]) => existentes.has(chave)).map(([chave, nome, titulo]) => ({ chave, nome, titulo }));
     if (colunas.length < 2) {
@@ -881,9 +1016,9 @@ async function classificacaoEspn(esp, liga) {
     const zonas = new Map();
     g.linhas.forEach((l) => l.nota && l.cor_nota && zonas.set(l.nota, l.cor_nota));
     const linhas = g.linhas.map((l, i) => ({ ...l, _pos: l.rank ?? i + 1, _cor: l.cor_nota ? (l.cor_nota.startsWith("#") ? l.cor_nota : `#${l.cor_nota}`) : null }));
-    // pilotos e times abrem o perfil ou o elenco; equipes da F1 não têm elenco na ESPN
+    // pilotos abrem o perfil e times abrem a página do time; equipes da F1 não têm elenco na ESPN
     const clicavel = (l) =>
-      l.tipo === "atleta" ? () => abrirAtleta(esp.id, liga, l.id, l.nome) : esp.tipo === "corrida" ? null : () => abrirElenco(esp.id, liga, l.id, l.nome);
+      l.tipo === "atleta" ? () => abrirAtleta(esp.id, liga, l.id, l.nome) : esp.tipo === "corrida" ? null : () => abrirTime(esp.id, liga, l.id, l.nome);
     const nomeCelula = (l) => {
       const acao = clicavel(l);
       return acao ? h("button", { class: "botao-link", type: "button", onclick: acao }, l.nome) : h("span", null, l.nome);
@@ -908,15 +1043,13 @@ async function classificacaoEspn(esp, liga) {
           ...colunas.map((col) => ({ nome: col.nome, titulo: col.titulo, destaque: ["points", "championshipPts"].includes(col.chave), valor: (l) => l.stats[col.chave] ?? "" })),
         ],
         linhas,
-        { classeLinha: (l) => (l._cor ? "zona" : null) }
+        { classeLinha: (l) => [l._cor ? "zona" : "", destaqueTimeId && String(l.id) === String(destaqueTimeId) ? "linha-destaque" : ""].join(" ").trim() || null }
       ),
       zonas.size
         ? h("div", { class: "legenda" }, [...zonas].map(([nota, cor]) => h("span", { style: { "--cor-zona": cor.startsWith("#") ? cor : `#${cor}` } }, h("i"), nota)))
         : null
     );
   });
-  const chaveCampeoes = esp.id === "futebol" ? `futebol:${liga}` : esp.id;
-  lista().replaceChildren(h("div", { class: "grade-classificacao" }, h("div", null, ...cartoes), cartaoCampeoes(chaveCampeoes)));
 }
 
 /* ---------- Líderes: artilharia, assistências, cartões (futebol) e estatísticas da NFL ---------- */
