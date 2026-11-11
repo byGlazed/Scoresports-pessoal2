@@ -1,1450 +1,1544 @@
+"use strict";
+
+/* =========================================================================
+   Scoresports — base do site e módulo da NBA.
+   Os outros esportes (futebol, NFL, F1, UFC e boxe) ficam em esportes.js.
+   ========================================================================= */
+
 const FUSO = "America/Sao_Paulo";
+const $ = (seletor, raiz = document) => raiz.querySelector(seletor);
 
-// Intervalos de atualização da aba Jogos (em milissegundos)
-const INTERVALO_AO_VIVO = 10000; // há jogo em andamento
-const INTERVALO_NORMAL = 30000;  // nenhum jogo em andamento
+/* ---------- Criação de elementos ---------- */
 
-const SVG_NS = "http://www.w3.org/2000/svg";
-const urlLogo = (id) => `https://cdn.nba.com/logos/nba/${id}/global/L/logo.svg`;
-const urlFoto = (id, tamanho = "1040x760") =>
-  `https://cdn.nba.com/headshots/nba/latest/${tamanho}/${id}.png`;
-
-const abertos = new Set();         // box scores abertos, para não fechar na atualização
-const ultimoBox = new Map();       // id do jogo -> { box, estado } do último box score recebido
-const timeEscolhido = new Map();   // id do jogo -> "fora" | "casa" (time exibido no box score)
-const cacheTemporada = new Map();  // id do jogador -> dados da temporada
-const cacheArremessos = new Map(); // "idJogo:idJogador" -> lista de arremessos
-const falhas = new Set();          // pedidos que deram erro (para mostrar a mensagem certa)
-const cachePreJogo = new Map();    // id do jogo -> { dados, em } (pré-jogo dos jogos que vão acontecer)
-const abaPreJogo = new Map();      // id do jogo -> aba escolhida no pré-jogo
-
-let datas = [];                    // dias que têm jogos
-let hoje = null;
-let dataAtual = null;
-let haAoVivo = false;
-let abaAtual = "jogos";
-let modoLideres = "media";
-
-const seletor = document.getElementById("seletor-data");
-const botaoAnterior = document.getElementById("dia-anterior");
-const botaoSeguinte = document.getElementById("dia-seguinte");
-const botaoHoje = document.getElementById("hoje");
-const faixaDatas = document.getElementById("faixa-datas");
-
-const dialogoJogador = document.getElementById("jogador-dialogo");
-const conteudoJogador = document.getElementById("jogador-conteudo");
-
-/* ---------- Funções de apoio ---------- */
-
-function el(tag, classe, texto) {
-  const e = document.createElement(tag);
-  if (classe) e.className = classe;
-  if (texto !== undefined && texto !== null) e.textContent = texto;
-  return e;
+function h(tag, props, ...filhos) {
+  const el = document.createElement(tag);
+  aplicarProps(el, props);
+  anexar(el, filhos);
+  return el;
 }
 
-function svg(tag, atributos = {}) {
-  const e = document.createElementNS(SVG_NS, tag);
-  for (const [chave, valor] of Object.entries(atributos)) e.setAttribute(chave, String(valor));
-  return e;
+function s(tag, props, ...filhos) {
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  aplicarProps(el, props);
+  anexar(el, filhos);
+  return el;
 }
 
-async function buscar(caminho) {
-  const resp = await fetch(caminho);
-  if (!resp.ok) throw new Error("Erro " + resp.status);
-  return resp.json();
-}
-
-function imagem(url, classe, alt = "") {
-  const img = el("img", classe);
-  img.src = url;
-  img.alt = alt;
-  img.loading = "lazy";
-  img.addEventListener("error", () => {
-    img.hidden = true; // se a imagem não carregar, ela simplesmente some
-  });
-  return img;
-}
-
-function logoTime(timeId, classe = "logo") {
-  return timeId ? imagem(urlLogo(timeId), classe) : null;
-}
-
-// uma célula pode ser um valor simples ou { texto, classe, aoClicar, logo }
-function tabela(colunas, linhas) {
-  const t = el("table");
-  const cab = el("tr");
-  colunas.forEach((c) => cab.append(el("th", null, c)));
-  t.append(cab);
-
-  linhas.forEach((valores) => {
-    const tr = el("tr");
-    valores.forEach((v) => {
-      const objeto = v !== null && typeof v === "object";
-      const td = el("td", objeto ? v.classe : null);
-      if (objeto) {
-        const logo = v.logo ? logoTime(v.logo, "logo-mini") : null;
-        if (logo) td.append(logo);
-        if (v.aoClicar) {
-          const botao = el("button", "link-jogador", v.texto);
-          botao.addEventListener("click", v.aoClicar);
-          td.append(botao);
-        } else {
-          td.append(el("span", null, v.texto));
-        }
-      } else {
-        td.textContent = v ?? "";
-      }
-      tr.append(td);
-    });
-    t.append(tr);
-  });
-  return t;
-}
-
-// só cria link para endereços conhecidos (NBA.com, ESPN Brasil, Prime Video e YouTube)
-const PREFIXOS_LINK = [
-  "https://www.nba.com/",
-  "https://www.espn.com.br/",
-  "https://www.primevideo.com/",
-  "https://www.youtube.com/",
-];
-
-function linkSeguro(texto, url) {
-  if (typeof url === "string" && PREFIXOS_LINK.some((p) => url.startsWith(p))) {
-    const a = el("a", null, texto);
-    a.href = url;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    return a;
+function aplicarProps(el, props) {
+  if (!props) return;
+  for (const [k, v] of Object.entries(props)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") el.setAttribute("class", v);
+    else if (k === "text") el.textContent = v;
+    else if (k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2), v);
+    else if (k === "style" && typeof v === "object") Object.assign(el.style, v);
+    else if (k === "dataset") Object.assign(el.dataset, v);
+    else el.setAttribute(k, v === true ? "" : v);
   }
-  return el("span", null, texto);
 }
 
-function maisMenos(n) {
-  if (n > 0) return { texto: "+" + n, classe: "positivo" };
-  if (n < 0) return { texto: String(n), classe: "negativo" };
-  return { texto: "0", classe: "" };
+function anexar(el, filhos) {
+  for (const f of filhos.flat(Infinity)) {
+    if (f === null || f === undefined || f === false) continue;
+    el.append(f instanceof Node ? f : document.createTextNode(String(f)));
+  }
 }
 
-// "12/13" -> "12/13 (92%)"
-function comPct(valor) {
-  if (typeof valor !== "string" || !valor.includes("/")) return "–";
-  const [feitos, tentados] = valor.split("/").map(Number);
-  return tentados > 0 ? `${feitos}/${tentados} (${Math.round((100 * feitos) / tentados)}%)` : valor;
+/* ---------- Dados ---------- */
+
+async function api(url) {
+  const resposta = await fetch(url);
+  if (!resposta.ok) {
+    let detalhe = "";
+    try {
+      detalhe = (await resposta.json()).detail;
+    } catch (_) {
+      /* resposta sem JSON */
+    }
+    throw new Error(typeof detalhe === "string" && detalhe ? detalhe : `Erro ${resposta.status} ao buscar os dados.`);
+  }
+  return resposta.json();
 }
 
-/* ---------- Horário de Brasília ---------- */
+function guardar(chave, valor) {
+  try {
+    localStorage.setItem(`ss:${chave}`, valor);
+  } catch (_) {
+    /* navegador sem armazenamento: só não lembra a escolha */
+  }
+}
 
-function horaBrasilia(iso) {
+function lembrar(chave) {
+  try {
+    return localStorage.getItem(`ss:${chave}`);
+  } catch (_) {
+    return null;
+  }
+}
+
+/* ---------- Datas e números ---------- */
+
+const formatoHora = new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, hour: "2-digit", minute: "2-digit" });
+const formatoDiaHora = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: FUSO,
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+const formatoIsoBR = new Intl.DateTimeFormat("en-CA", { timeZone: FUSO, year: "numeric", month: "2-digit", day: "2-digit" });
+
+function hora(iso) {
+  if (!iso) return null;
   const d = new Date(iso);
-  if (isNaN(d)) return null;
-  return d.toLocaleTimeString("pt-BR", { timeZone: FUSO, hour: "2-digit", minute: "2-digit" });
+  return Number.isNaN(d.getTime()) ? null : formatoHora.format(d);
 }
 
-function textoStatus(jogo) {
-  const hora = jogo.estado === 1 && jogo.inicio ? horaBrasilia(jogo.inicio) : null;
-  return hora ? `${hora} (Brasília)` : jogo.status;
+function diaHora(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : formatoDiaHora.format(d);
+}
+
+function hojeBR() {
+  return formatoIsoBR.format(new Date());
+}
+
+function dataBR(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : formatoIsoBR.format(d);
+}
+
+function meioDia(ymd) {
+  return new Date(`${ymd}T12:00:00Z`);
+}
+
+function dataCurta(ymd) {
+  if (!ymd) return "";
+  return meioDia(ymd.slice(0, 10)).toLocaleDateString("pt-BR", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" });
+}
+
+function dataLonga(ymd) {
+  if (!ymd) return "";
+  const texto = meioDia(ymd).toLocaleDateString("pt-BR", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" });
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function somarDias(ymd, n) {
+  const d = meioDia(ymd);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function num(valor, casas = 1) {
+  if (valor === null || valor === undefined || valor === "" || Number.isNaN(Number(valor))) return "–";
+  return Number(valor).toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
+}
+
+function pct(feitos, tentados) {
+  return tentados ? num((100 * feitos) / tentados, 1) : "–";
+}
+
+function separarArremesso(texto) {
+  const [f, t] = String(texto || "0/0").split("/").map(Number);
+  return [f || 0, t || 0];
+}
+
+/* ---------- Estado da página ---------- */
+
+const S = {
+  esportes: [],
+  esporte: null,
+  aba: null,
+  tkLista: 0,
+  tkDetalhe: 0,
+  timers: {},
+  abaDetalhe: {},
+};
+
+const MODULOS = {};
+
+function registrarModulo(tipo, modulo) {
+  MODULOS[tipo] = modulo;
+}
+
+const lista = () => $("#lista");
+const detalhe = () => $("#detalhe");
+
+function novoTokenLista() {
+  return ++S.tkLista;
+}
+
+function novoTokenDetalhe() {
+  return ++S.tkDetalhe;
+}
+
+function agendar(nome, funcao, ms = 20000) {
+  clearTimeout(S.timers[nome]);
+  S.timers[nome] = setTimeout(() => {
+    if (document.hidden) {
+      agendar(nome, funcao, ms);
+      return;
+    }
+    funcao();
+  }, ms);
+}
+
+function cancelar(nome) {
+  clearTimeout(S.timers[nome]);
+  delete S.timers[nome];
+}
+
+function cancelarTudo() {
+  Object.keys(S.timers).forEach(cancelar);
+}
+
+function layoutLargo(largo) {
+  $(".palco").classList.toggle("largo", Boolean(largo));
+}
+
+function mostrarDetalhe() {
+  document.body.classList.add("mostrando-detalhe");
+  if (window.matchMedia("(max-width: 860px)").matches) window.scrollTo({ top: 0 });
+}
+
+function voltarParaLista() {
+  document.body.classList.remove("mostrando-detalhe");
+  cancelar("detalhe");
+}
+
+function detalheVazio(texto = "Escolha um jogo para ver os detalhes.") {
+  detalhe().replaceChildren(h("div", { class: "vazio-detalhe" }, texto));
+}
+
+function marcarAtual(raiz, id) {
+  raiz.querySelectorAll("[data-id]").forEach((el) => {
+    if (el.dataset.id === String(id)) el.setAttribute("aria-current", "true");
+    else el.removeAttribute("aria-current");
+  });
+}
+
+/* ---------- Pedaços de interface ---------- */
+
+function carregando(texto = "Carregando…") {
+  return h("div", { class: "carregando" }, texto);
+}
+
+function vazio(texto) {
+  return h("div", { class: "vazio" }, texto);
+}
+
+function caixaErro(erro, tentar) {
+  return h(
+    "div",
+    { class: "erro" },
+    h("div", null, erro && erro.message ? erro.message : String(erro)),
+    tentar ? h("button", { class: "botao", type: "button", onclick: tentar }, "Tentar de novo") : null
+  );
+}
+
+function cartao(titulo, ...conteudo) {
+  return h(
+    "section",
+    { class: "cartao" },
+    titulo ? h("div", { class: "cartao-cabeca" }, typeof titulo === "string" ? h("h3", null, titulo) : titulo) : null,
+    h("div", { class: "cartao-corpo" }, ...conteudo)
+  );
+}
+
+function secao(titulo, ...conteudo) {
+  return h("div", { class: "secao" }, titulo ? h("h3", null, titulo) : null, ...conteudo);
+}
+
+function imgLogo(src, classe = "logo") {
+  if (!src) return h("span", { class: "logo-vazio", "aria-hidden": "true" });
+  return h("img", {
+    class: classe,
+    src,
+    alt: "",
+    loading: "lazy",
+    onerror: (e) => e.target.replaceWith(h("span", { class: "logo-vazio", "aria-hidden": "true" })),
+  });
+}
+
+function imgBandeira(src, pais) {
+  return src ? h("img", { class: "bandeira", src, alt: pais || "", title: pais || null, loading: "lazy" }) : null;
+}
+
+function botaoVoltarMobile() {
+  return h("button", { class: "botao voltar-mobile", type: "button", onclick: voltarParaLista }, "‹ Voltar");
+}
+
+function alternar(opcoes, atual, aoEscolher, rotulo) {
+  return h(
+    "div",
+    { class: "alternar", role: "group", "aria-label": rotulo || null },
+    opcoes.map(([valor, texto]) =>
+      h("button", { type: "button", "aria-pressed": String(valor === atual), onclick: () => aoEscolher(valor) }, texto)
+    )
+  );
+}
+
+function abasDetalhe(abas, atual, aoEscolher) {
+  return h(
+    "div",
+    { class: "abas-detalhe", role: "group", "aria-label": "Seções" },
+    abas.map((a) =>
+      h("button", { class: "aba-detalhe", type: "button", "aria-pressed": String(a.id === atual), onclick: () => aoEscolher(a.id) }, a.nome)
+    )
+  );
+}
+
+function barraData({ data, anterior, proximo, hoje, min, max, aoMudar }) {
+  return h(
+    "div",
+    { class: "barra-data" },
+    h("button", { class: "botao-icone", type: "button", "aria-label": "Dia anterior", disabled: !anterior, onclick: () => aoMudar(anterior) }, "‹"),
+    h("input", {
+      class: "campo-data",
+      type: "date",
+      value: data,
+      min: min || null,
+      max: max || null,
+      "aria-label": "Escolher a data",
+      onchange: (e) => e.target.value && aoMudar(e.target.value),
+    }),
+    h("button", { class: "botao-icone", type: "button", "aria-label": "Próximo dia", disabled: !proximo, onclick: () => aoMudar(proximo) }, "›"),
+    h("button", { class: "botao", type: "button", disabled: data === hoje, onclick: () => aoMudar(hoje) }, "Hoje")
+  );
+}
+
+function blocoTransmissao(t) {
+  if (!t) {
+    return h(
+      "p",
+      { class: "nota" },
+      "Sem informação de transmissão para esta competição. Dá para anotar a grade em transmissoes.json."
+    );
+  }
+  return h(
+    "div",
+    { class: "transmissao" },
+    t.canais && t.canais.length ? h("div", { class: "canais" }, t.canais.map((c) => h("span", { class: "canal" }, c))) : null,
+    h(
+      "div",
+      null,
+      h("span", { class: `selo${t.confirmado ? " confirmado" : ""}` }, t.confirmado ? "Grade confirmada" : "Padrão da competição"),
+      t.conferido_em ? h("span", { class: "nota", style: { marginLeft: "8px" } }, `conferido em ${dataCurta(t.conferido_em)}`) : null
+    ),
+    t.observacao ? h("p", { class: "nota" }, t.observacao) : null
+  );
+}
+
+function canalNaLista(t, mostrarPadrao = true) {
+  if (!t || !t.canais || !t.canais.length) return h("span");
+  if (!t.confirmado && !mostrarPadrao) return h("span");
+  const extra = t.canais.length > 1 ? `+${t.canais.length - 1}` : null;
+  return h(
+    "div",
+    { class: "jogo-canal", title: `${t.confirmado ? "Grade confirmada" : "Padrão da competição"}: ${t.canais.join(", ")}` },
+    t.confirmado ? h("strong", null, t.canais[0]) : h("span", null, t.canais[0]),
+    extra
+  );
+}
+
+/** Uma linha de jogo na lista. `times` vem na ordem em que deve aparecer. */
+function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoClicar, atual }) {
+  const aoVivo = estado === 2;
+  return h(
+    "button",
+    {
+      class: `jogo${aoVivo ? " ao-vivo" : ""}`,
+      type: "button",
+      dataset: { id: String(id) },
+      "aria-current": atual ? "true" : null,
+      onclick: aoClicar,
+    },
+    h(
+      "div",
+      { class: `jogo-status${aoVivo ? " ao-vivo" : ""}` },
+      status.map((linha, i) => h("div", { class: i === 0 && estado === 1 ? "hora" : null }, linha))
+    ),
+    h(
+      "div",
+      { class: "jogo-times" },
+      times.map((t) =>
+        h(
+          "div",
+          { class: `linha-time${t.perdeu ? " perdeu" : ""}` },
+          imgLogo(t.logo),
+          h("span", { class: "nome" }, t.nome),
+          h("span", { class: "placar" }, t.placar ?? "")
+        )
+      )
+    ),
+    canalNaLista(transmissao, mostrarPadrao)
+  );
+}
+
+/** Placar grande do topo do detalhe. */
+function placarGrande({ esquerda, direita, estado, status, info, centro }) {
+  const aoVivo = estado === 2;
+  const ladoTime = (t) =>
+    h(
+      "div",
+      { class: "placar-time" },
+      t.logo !== undefined ? imgLogo(t.logo) : null,
+      t.aoClicar ? h("button", { class: "botao-link nome", type: "button", onclick: t.aoClicar }, t.nome) : h("div", { class: "nome" }, t.nome),
+      t.sub ? h("div", { class: "sub" }, t.sub) : null
+    );
+  const temPlacar = estado >= 2 && esquerda.placar !== null && esquerda.placar !== undefined;
+  return h(
+    "div",
+    { class: "placar-grande" },
+    ladoTime(esquerda),
+    h(
+      "div",
+      { class: "placar-centro" },
+      centro ||
+        (temPlacar
+          ? h(
+              "div",
+              { class: `placar-numeros${aoVivo ? " ao-vivo" : ""}` },
+              String(esquerda.placar),
+              h("span", { class: "separador" }, "–"),
+              String(direita.placar ?? "")
+            )
+          : h("div", { class: "placar-numeros" }, status || "–")),
+      temPlacar || centro ? h("div", { class: `placar-status${aoVivo ? " ao-vivo" : ""}` }, status || "") : null,
+      info ? h("div", { class: "placar-info" }, info) : null
+    ),
+    ladoTime(direita)
+  );
+}
+
+function tabela(colunas, linhas, { rodape, classeLinha } = {}) {
+  return h(
+    "div",
+    { class: "rolagem" },
+    h(
+      "table",
+      { class: "tabela" },
+      h("thead", null, h("tr", null, colunas.map((c) => h("th", { title: c.titulo || null, class: c.esq ? "esq" : null }, c.nome)))),
+      h(
+        "tbody",
+        null,
+        linhas.map((l, i) =>
+          l && l.separador
+            ? h("tr", { class: "separador-linha" }, h("td", { colspan: colunas.length }, l.separador))
+            : h(
+                "tr",
+                { class: classeLinha ? classeLinha(l, i) : null, style: l && l._cor ? { "--cor-zona": l._cor } : null },
+                colunas.map((c) => h("td", { class: [c.esq ? "esq" : "", c.destaque ? "destaque" : ""].join(" ").trim() || null }, c.valor(l, i)))
+              )
+        )
+      ),
+      rodape ? h("tfoot", null, h("tr", null, colunas.map((c) => h("td", { class: c.esq ? "esq" : null }, rodape[c.chave] ?? "")))) : null
+    )
+  );
+}
+
+/* ---------- Painel (jogador, atleta, elenco) ---------- */
+
+const Painel = {
+  pilha: [],
+  atual: null,
+  token: 0,
+
+  abrir(titulo, construir) {
+    this.pilha = [];
+    this.mostrar(titulo, construir);
+    const dialogo = $("#painel");
+    if (!dialogo.open) dialogo.showModal();
+  },
+
+  empilhar(titulo, construir) {
+    if (this.atual) this.pilha.push(this.atual);
+    this.mostrar(titulo, construir);
+  },
+
+  mostrar(titulo, construir) {
+    this.atual = { titulo, construir };
+    $("#painel-titulo").textContent = titulo;
+    $("#painel-voltar").hidden = this.pilha.length === 0;
+    const corpo = $("#painel-corpo");
+    corpo.replaceChildren(carregando());
+    corpo.scrollTop = 0;
+    const tk = ++this.token;
+    const ativo = () => tk === this.token && $("#painel").open;
+    Promise.resolve()
+      .then(() => construir(corpo, ativo))
+      .catch((erro) => {
+        if (tk === this.token) corpo.replaceChildren(caixaErro(erro, () => this.mostrar(titulo, construir)));
+      });
+  },
+
+  voltar() {
+    const anterior = this.pilha.pop();
+    if (anterior) this.mostrar(anterior.titulo, anterior.construir);
+  },
+
+  fechar() {
+    this.token++;
+    $("#painel").close();
+  },
+};
+
+/* ---------- Navegação entre esportes ---------- */
+
+function desenharEsportes() {
+  $("#esportes").replaceChildren(
+    ...S.esportes.map((e) =>
+      h("button", { class: "esporte", type: "button", "aria-current": String(e.id === S.esporte), onclick: () => irPara(e.id) }, e.nome)
+    )
+  );
+}
+
+function desenharSubnav(esp, modulo, abas) {
+  const partes = [];
+  if (abas.length > 1) {
+    partes.push(
+      h(
+        "div",
+        { class: "abas", role: "group", "aria-label": "Seções" },
+        abas.map((a) =>
+          h("button", { class: "aba", type: "button", "aria-pressed": String(a.id === S.aba), onclick: () => irPara(esp.id, a.id) }, a.nome)
+        )
+      )
+    );
+  }
+  if (modulo.subnavExtra) {
+    const extra = modulo.subnavExtra(esp, S.aba);
+    if (extra) partes.push(extra);
+  }
+  $("#subnav").replaceChildren(...partes);
+}
+
+function irPara(esporteId, aba) {
+  const esp = S.esportes.find((e) => e.id === esporteId) || S.esportes[0];
+  const modulo = MODULOS[esp.tipo];
+  const abas = modulo.abas(esp);
+  const pedida = aba || lembrar(`aba:${esp.id}`);
+  S.esporte = esp.id;
+  S.aba = abas.some((a) => a.id === pedida) ? pedida : abas[0].id;
+  guardar("esporte", esp.id);
+  guardar(`aba:${esp.id}`, S.aba);
+
+  cancelarTudo();
+  novoTokenLista();
+  novoTokenDetalhe();
+  document.body.classList.remove("mostrando-detalhe");
+  layoutLargo(false);
+  detalheVazio(modulo.textoVazio ? modulo.textoVazio(S.aba) : undefined);
+  desenharEsportes();
+  desenharSubnav(esp, modulo, abas);
+  lista().replaceChildren(carregando());
+  modulo.desenhar(esp, S.aba);
+}
+
+function redesenharSubnav() {
+  const esp = S.esportes.find((e) => e.id === S.esporte);
+  const modulo = MODULOS[esp.tipo];
+  desenharSubnav(esp, modulo, modulo.abas(esp));
+}
+
+async function iniciar() {
+  $("#painel-fechar").addEventListener("click", () => Painel.fechar());
+  $("#painel-voltar").addEventListener("click", () => Painel.voltar());
+  $("#painel").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) Painel.fechar();
+  });
+  $("#painel").addEventListener("close", () => Painel.token++);
+
+  try {
+    S.esportes = await api("/esportes");
+  } catch (erro) {
+    lista().replaceChildren(caixaErro(erro, iniciar));
+    return;
+  }
+  S.esportes = S.esportes.filter((e) => MODULOS[e.tipo]);
+  irPara(lembrar("esporte") || S.esportes[0].id);
+}
+
+window.addEventListener("DOMContentLoaded", iniciar);
+
+/* =========================================================================
+   NBA
+   ========================================================================= */
+
+const NBA = {
+  datas: null,
+  hoje: null,
+  data: null,
+  jogoAtual: null,
+  modoLideres: "media",
+  listaJogadores: [],
+  busca: "",
+};
+
+const nbaLogo = (id) => (id ? `https://cdn.nba.com/logos/nba/${id}/global/L/logo.svg` : null);
+const nbaFoto = (id) => `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}.png`;
+
+registrarModulo("nba", {
+  abas: () => [
+    { id: "jogos", nome: "Jogos" },
+    { id: "classificacao", nome: "Classificação" },
+    { id: "lideres", nome: "Líderes" },
+    { id: "corridas", nome: "MVP e calouro" },
+    { id: "jogadores", nome: "Jogadores" },
+  ],
+  desenhar(esp, aba) {
+    if (aba === "jogos") return nbaJogos();
+    layoutLargo(true);
+    if (aba === "classificacao") return nbaClassificacao();
+    if (aba === "lideres") return nbaLideres();
+    if (aba === "corridas") return nbaCorridas();
+    if (aba === "jogadores") return nbaJogadores();
+  },
+});
+
+/* ---------- Jogos ---------- */
+
+async function nbaJogos() {
+  const tk = novoTokenLista();
+  if (!NBA.datas) {
+    try {
+      const resposta = await api("/datas");
+      NBA.datas = resposta.datas;
+      NBA.hoje = resposta.hoje;
+    } catch (erro) {
+      if (tk === S.tkLista) lista().replaceChildren(caixaErro(erro, nbaJogos));
+      return;
+    }
+  }
+  if (tk !== S.tkLista) return;
+  if (!NBA.data) {
+    const d = NBA.datas;
+    NBA.data = d.includes(NBA.hoje) ? NBA.hoje : d.find((x) => x > NBA.hoje) || d[d.length - 1] || NBA.hoje;
+  }
+  nbaDia(false);
+}
+
+async function nbaDia(silencioso) {
+  const tk = silencioso ? S.tkLista : novoTokenLista();
+  const datas = NBA.datas;
+  const anterior = [...datas].reverse().find((d) => d < NBA.data) || null;
+  const proximo = datas.find((d) => d > NBA.data) || null;
+  const barra = barraData({
+    data: NBA.data,
+    anterior,
+    proximo,
+    hoje: NBA.hoje,
+    min: datas[0],
+    max: datas[datas.length - 1],
+    aoMudar: (d) => {
+      NBA.data = d;
+      cancelar("lista");
+      nbaDia(false);
+    },
+  });
+  if (!silencioso) lista().replaceChildren(barra, carregando());
+
+  let jogos;
+  try {
+    jogos = await api(`/jogos?data=${NBA.data}`);
+  } catch (erro) {
+    if (tk === S.tkLista && !silencioso) lista().replaceChildren(barra, caixaErro(erro, () => nbaDia(false)));
+    return;
+  }
+  if (tk !== S.tkLista) return;
+
+  const linhas = jogos.map((j) => nbaLinhaJogo(j));
+  lista().replaceChildren(
+    barra,
+    h("p", { class: "titulo-dia" }, dataLonga(NBA.data)),
+    jogos.length ? h("div", { class: "cartao" }, linhas) : vazio("Nenhum jogo nesta data.")
+  );
+
+  const temAoVivo = jogos.some((j) => j.estado === 2);
+  const hojeComJogo = NBA.data === NBA.hoje && jogos.some((j) => j.estado === 1);
+  if (temAoVivo || hojeComJogo) agendar("lista", () => nbaDia(true), temAoVivo ? 20000 : 60000);
+}
+
+function nbaStatusLista(j) {
+  if (j.estado === 1) return [hora(j.inicio) || "A definir"];
+  if (j.estado === 2) return [j.status || "Ao vivo"];
+  return ["Fim"];
+}
+
+function nbaLinhaJogo(j) {
+  const terminou = j.estado === 3;
+  const pf = Number(j.fora.placar);
+  const pc = Number(j.casa.placar);
+  return botaoJogo({
+    id: j.id,
+    estado: j.estado,
+    status: nbaStatusLista(j),
+    atual: j.id === NBA.jogoAtual,
+    transmissao: j.transmissao,
+    mostrarPadrao: false,
+    aoClicar: () => nbaAbrirJogo(j),
+    times: [
+      { nome: j.fora.nome, logo: nbaLogo(j.fora.time_id), placar: j.estado >= 2 ? j.fora.placar : null, perdeu: terminou && pf < pc },
+      { nome: j.casa.nome, logo: nbaLogo(j.casa.time_id), placar: j.estado >= 2 ? j.casa.placar : null, perdeu: terminou && pc < pf },
+    ],
+  });
+}
+
+function nbaAbrirJogo(jogo) {
+  NBA.jogoAtual = jogo.id;
+  marcarAtual(lista(), jogo.id);
+  mostrarDetalhe();
+  cancelar("detalhe");
+  if (jogo.estado === 1) nbaPreJogo(jogo);
+  else nbaBoxScore(jogo, false);
+}
+
+/* ---------- Pré-jogo ---------- */
+
+async function nbaPreJogo(jogo) {
+  const tk = novoTokenDetalhe();
+  detalhe().replaceChildren(botaoVoltarMobile(), carregando("Montando o pré-jogo…"));
+  let pre;
+  try {
+    pre = await api(`/jogos/${jogo.id}/pre-jogo`);
+  } catch (erro) {
+    if (tk === S.tkDetalhe) detalhe().replaceChildren(botaoVoltarMobile(), caixaErro(erro, () => nbaPreJogo(jogo)));
+    return;
+  }
+  if (tk !== S.tkDetalhe) return;
+
+  const { fora, casa } = pre.jogo;
+  const topo = h(
+    "section",
+    { class: "cartao" },
+    placarGrande({
+      esquerda: { nome: fora.nome, logo: nbaLogo(fora.time_id), sub: "Visitante" },
+      direita: { nome: casa.nome, logo: nbaLogo(casa.time_id), sub: "Mandante" },
+      estado: 1,
+      status: hora(pre.jogo.inicio) || "A definir",
+      info: [dataLonga(pre.jogo.data), pre.jogo.fase].filter(Boolean).join(", "),
+    }),
+    secao("Onde assistir no Brasil", blocoTransmissao(jogo.transmissao || pre.transmissao))
+  );
+
+  const t = pre.times;
+  const blocos = [topo];
+
+  blocos.push(
+    cartao(
+      "Últimos jogos",
+      h("div", { class: "duas-colunas" }, nbaForma(fora, t.fora.forma), nbaForma(casa, t.casa.forma))
+    )
+  );
+
+  blocos.push(
+    cartao(
+      "Prováveis titulares",
+      h("div", { class: "duas-colunas" }, nbaEscalacao(fora, t.fora.escalacao), nbaEscalacao(casa, t.casa.escalacao)),
+      h("p", { class: "nota" }, "Quem mais começou jogando nos últimos jogos, sem os jogadores fora por lesão.")
+    )
+  );
+
+  blocos.push(
+    cartao("Maiores médias", h("div", { class: "duas-colunas" }, nbaLideresTime(fora, t.fora.lideres), nbaLideresTime(casa, t.casa.lideres)))
+  );
+
+  blocos.push(
+    cartao("Lesionados", h("div", { class: "duas-colunas" }, nbaLesionados(fora, t.fora.lesionados), nbaLesionados(casa, t.casa.lesionados)))
+  );
+
+  if (pre.confronto && pre.confronto.jogos.length) {
+    const c = pre.confronto;
+    blocos.push(
+      cartao(
+        `Confronto direto: ${fora.sigla} ${c.vitorias_fora} x ${c.vitorias_casa} ${casa.sigla}`,
+        h(
+          "ul",
+          { class: "lista-simples" },
+          c.jogos.map((g) =>
+            h(
+              "li",
+              null,
+              h("span", { class: "sub" }, dataCurta(g.data)),
+              h("span", { class: "numero" }, `${g.visitante} ${g.pontos_visitante} x ${g.pontos_mandante} ${g.mandante}`)
+            )
+          )
+        )
+      )
+    );
+  }
+
+  if (pre.falhas && pre.falhas.length) {
+    blocos.push(h("p", { class: "nota" }, `Algumas partes não carregaram agora (${pre.falhas.join(", ")}). Elas voltam na próxima atualização.`));
+  }
+  detalhe().replaceChildren(botaoVoltarMobile(), ...blocos);
+}
+
+function nbaForma(time, forma) {
+  if (!forma.length) return h("div", null, h("strong", null, time.sigla), h("p", { class: "nota" }, "Ainda sem jogos na temporada."));
+  return h(
+    "div",
+    null,
+    h("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: "8px" } }, h("strong", null, time.sigla),
+      h("div", { class: "forma" }, forma.map((f) => h("span", { class: f.resultado, title: `${f.local === "casa" ? "vs." : "@"} ${f.adversario}` }, f.resultado)))),
+    h(
+      "ul",
+      { class: "lista-simples" },
+      forma.map((f) =>
+        h(
+          "li",
+          null,
+          h("span", { class: "sub" }, `${dataCurta(f.data)} ${f.local === "casa" ? "vs." : "@"} ${f.adversario}`),
+          h("span", { class: "numero" }, `${f.pontos} x ${f.pontos_adv}`)
+        )
+      )
+    )
+  );
+}
+
+function nbaEscalacao(time, esc) {
+  if (!esc.quinteto.length) return h("div", null, h("strong", null, time.sigla), h("p", { class: "nota" }, "Sem jogos suficientes para estimar."));
+  return h(
+    "div",
+    null,
+    h("strong", null, time.sigla),
+    h(
+      "ul",
+      { class: "lista-simples", style: { marginTop: "8px" } },
+      esc.quinteto.map((p) =>
+        h(
+          "li",
+          null,
+          h("button", { class: "botao-link", type: "button", onclick: () => abrirJogadorNBA(p.id, p.nome, { sigla: time.sigla }) }, p.nome),
+          h("span", { class: "sub" }, [p.posicao, `${num(p.min_medio)} min`].filter(Boolean).join(", "))
+        )
+      )
+    )
+  );
+}
+
+function nbaLideresTime(time, lideres) {
+  if (!lideres.length) return h("div", null, h("strong", null, time.sigla), h("p", { class: "nota" }, "Sem estatísticas ainda."));
+  return h(
+    "div",
+    null,
+    h("strong", null, time.sigla),
+    h(
+      "ul",
+      { class: "lista-simples", style: { marginTop: "8px" } },
+      lideres.map((l) =>
+        h(
+          "li",
+          null,
+          h(
+            "span",
+            null,
+            h("span", { class: "sub" }, `${l.rotulo}: `),
+            h("button", { class: "botao-link", type: "button", onclick: () => abrirJogadorNBA(l.id, l.nome, { sigla: time.sigla }) }, l.nome)
+          ),
+          h("strong", { class: "numero" }, num(l.valor))
+        )
+      )
+    )
+  );
+}
+
+function nbaLesionados(time, lesionados) {
+  return h(
+    "div",
+    null,
+    h("strong", null, time.sigla),
+    lesionados.length
+      ? h(
+          "ul",
+          { class: "lista-simples", style: { marginTop: "8px" } },
+          lesionados.map((l) =>
+            h("li", null, h("span", null, l.nome, l.motivo ? h("span", { class: "sub" }, ` (${l.motivo})`) : null), h("span", { class: "sub" }, traduzirStatusLesao(l.status)))
+          )
+        )
+      : h("p", { class: "nota" }, "Ninguém na lista.")
+  );
+}
+
+function traduzirStatusLesao(status) {
+  const mapa = { out: "Fora", questionable: "Dúvida", doubtful: "Improvável", probable: "Provável", "day-to-day": "Dia a dia" };
+  return mapa[String(status || "").toLowerCase()] || status || "";
 }
 
 /* ---------- Box score ---------- */
 
-function tabelaBox(time, contexto) {
-  const caixa = el("div", "box");
-  caixa.append(
-    tabela(
-      ["Jogador", "MIN", "PTS", "REB", "AST", "FG", "3PT", "FT", "TO", "PF", "STL", "BLK", "+/-"],
-      time.jogadores.map((j) => [
-        { texto: j.nome, aoClicar: () => abrirJogador(j, contexto) },
-        j.min, j.pts, j.reb, j.ast,
-        j.fg, j.tres, j.ll, j.to, j.faltas, j.stl, j.blk,
-        maisMenos(j.mm),
-      ])
-    )
-  );
-  return caixa;
-}
-
-function mostrarBox(box, area, jogo) {
-  const lado = timeEscolhido.get(jogo.id) || "fora";
-
-  // botões para escolher qual time aparece (visitante ou mandante)
-  const escolha = el("div", "segmentos");
-  for (const chave of ["fora", "casa"]) {
-    const time = box[chave];
-    const botao = el("button", chave === lado ? "ativo" : "");
-    const logo = logoTime(time.time_id, "logo-mini");
-    if (logo) botao.append(logo);
-    botao.append(el("span", null, time.sigla));
-    botao.addEventListener("click", () => {
-      timeEscolhido.set(jogo.id, chave);
-      const atual = (ultimoBox.get(jogo.id) || {}).box || box;
-      mostrarBox(atual, area, jogo);
-    });
-    escolha.append(botao);
-  }
-
-  area.replaceChildren(
-    escolha,
-    tabelaBox(box[lado], { jogo, box, lado }),
-    el(
-      "p",
-      "legenda",
-      "FG: arremessos de quadra · 3PT: bolas de três · FT: lances livres · TO: turnovers · " +
-        "PF: faltas · STL: roubos de bola · BLK: tocos · +/-: saldo de pontos com o jogador em quadra. " +
-        "Toque no nome de um jogador para ver o mapa de arremessos."
-    )
-  );
-}
-
-async function carregarBox(jogo, area) {
-  // mostra na hora o último box recebido, para a tela não piscar a cada atualização
-  const guardado = ultimoBox.get(jogo.id);
-  if (guardado) {
-    mostrarBox(guardado.box, area, jogo);
-    // jogo terminado e box final já guardado: não precisa buscar de novo
-    if (guardado.estado === 3 && jogo.estado === 3) return;
-  } else {
-    area.textContent = "Carregando...";
-  }
-
+async function nbaBoxScore(jogo, silencioso) {
+  const tk = silencioso ? S.tkDetalhe : novoTokenDetalhe();
+  if (!silencioso) detalhe().replaceChildren(botaoVoltarMobile(), carregando());
+  let box;
   try {
-    const box = await buscar(`/jogos/${jogo.id}/boxscore`);
-    ultimoBox.set(jogo.id, { box, estado: jogo.estado });
-    mostrarBox(box, area, jogo);
-  } catch {
-    if (!guardado) area.textContent = "Não foi possível carregar o box score.";
+    box = await api(`/jogos/${jogo.id}/boxscore`);
+  } catch (erro) {
+    if (tk === S.tkDetalhe && !silencioso) detalhe().replaceChildren(botaoVoltarMobile(), caixaErro(erro, () => nbaBoxScore(jogo, false)));
+    return;
   }
-}
+  if (tk !== S.tkDetalhe) return;
 
-/* ---------- Pré-jogo (jogos que ainda vão acontecer) ---------- */
-
-const VALIDADE_PRE_JOGO = 5 * 60 * 1000; // busca de novo depois de 5 minutos
-
-const ABAS_PRE_JOGO = [
-  ["assistir", "Onde assistir"],
-  ["escalacoes", "Escalações"],
-  ["confronto", "Confronto direto"],
-  ["medias", "Médias"],
-];
-
-const ESTATISTICAS_DO_TIME = [
-  ["PTS", "Pontos"],
-  ["REB", "Rebotes"],
-  ["AST", "Assistências"],
-  ["STL", "Roubos de bola"],
-  ["BLK", "Tocos"],
-  ["FG3M", "Bolas de três"],
-];
-
-const LINKS_PROGRAMACAO = [
-  ["ESPN Brasil", "https://www.espn.com.br/nba/"],
-  ["Prime Video", "https://www.primevideo.com/"],
-  ["YouTube da NBA Brasil", "https://www.youtube.com/results?search_query=NBA+Brasil+ao+vivo"],
-];
-
-const STATUS_LESAO = {
-  out: ["Fora", "negativo"],
-  "day-to-day": ["Dúvida", "alerta"],
-  questionable: ["Dúvida", "alerta"],
-  doubtful: ["Improvável", "negativo"],
-  probable: ["Provável", "positivo"],
-  available: ["Disponível", "positivo"],
-};
-
-// a fonte das lesões (ESPN) vem em inglês; traduzimos os termos mais comuns
-const TERMOS_LESAO = {
-  knee: "joelho", ankle: "tornozelo", foot: "pé", hip: "quadril", calf: "panturrilha",
-  shoulder: "ombro", wrist: "punho", thumb: "polegar", finger: "dedo", groin: "virilha",
-  back: "costas", hamstring: "posterior da coxa", achilles: "tendão de Aquiles",
-  quadricep: "quadríceps", quad: "quadríceps", hand: "mão", elbow: "cotovelo", toe: "dedo do pé",
-  neck: "pescoço", head: "cabeça", leg: "perna", rib: "costela", eye: "olho", nose: "nariz",
-  illness: "doença", rest: "descanso", concussion: "concussão", soreness: "dor",
-  sprain: "entorse", strain: "distensão", surgery: "cirurgia", fracture: "fratura",
-  tendinitis: "tendinite", contusion: "contusão", injury: "lesão", bruise: "hematoma",
-  "personal reasons": "motivos pessoais", "injury management": "controle de lesão",
-  "load management": "controle de carga", "g league": "G League",
-};
-
-function statusLesao(status) {
-  const chave = String(status || "").toLowerCase();
-  return STATUS_LESAO[chave] || [status || "Sem status", "alerta"];
-}
-
-function traduzirTermo(texto) {
-  const original = String(texto || "").trim();
-  return TERMOS_LESAO[original.toLowerCase()] || original;
-}
-
-function descreverLesao(l) {
-  const parte = traduzirTermo(l.parte);
-  const detalhe = traduzirTermo(l.detalhe);
-  if (parte && detalhe) return `${detalhe} (${parte})`;
-  return parte || detalhe || traduzirTermo(l.motivo);
-}
-
-function dataCurtaAno(iso) {
-  // '2026-10-23' -> '23/10/26'
-  return /^\d{4}-\d{2}-\d{2}/.test(iso) ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(2, 4)}` : iso;
-}
-
-function cabecalhoTime(time) {
-  const c = el("div", "pre-time");
-  const logo = logoTime(time.time_id, "logo-mini");
-  if (logo) c.append(logo);
-  c.append(el("strong", null, time.nome));
-  return c;
-}
-
-/* --- aba "Onde assistir" --- */
-
-function painelAssistir(dados) {
-  const painel = el("div", "pre-painel");
-  painel.append(el("h3", null, "Onde assistir no Brasil"));
-
-  const hora = dados.jogo.inicio ? horaBrasilia(dados.jogo.inicio) : null;
-  if (hora) {
-    painel.append(el("p", "info", `${dataBR(dados.jogo.data)} às ${hora} (horário de Brasília)`));
-  }
-
-  const t = dados.transmissao;
-  if (t && t.canais.length) {
-    const canais = el("div", "canais");
-    t.canais.forEach((c) => canais.append(el("span", "canal", c)));
-    painel.append(canais);
-    const nota = [];
-    if (t.conferido_em) nota.push(`Conferido em ${dataBR(t.conferido_em)}`);
-    if (t.observacao) nota.push(t.observacao);
-    if (nota.length) painel.append(el("p", "legenda", nota.join(" · ")));
-  } else {
-    painel.append(
-      el("p", "status", "O canal deste jogo ainda não está cadastrado no app. Confira a programação abaixo.")
-    );
-  }
-
-  painel.append(
-    el(
-      "p",
-      "info",
-      "O NBA League Pass (assinatura, pelo app da NBA ou pelo Prime Video) mostra todos os jogos. " +
-        "A ESPN 2, com o Disney+ Premium, e o Prime Video transmitem jogos selecionados, " +
-        "e o canal da NBA Brasil no YouTube exibe alguns jogos ao vivo."
-    )
-  );
-
-  const links = el("p", "links-programacao", "Conferir a programação: ");
-  LINKS_PROGRAMACAO.forEach(([texto, url]) => links.append(linkSeguro(texto, url)));
-  painel.append(links);
-  return painel;
-}
-
-/* --- aba "Escalações" (provável quinteto e lesionados) --- */
-
-function colunaEscalacao(dados, lado) {
-  const time = dados.jogo[lado];
-  const info = dados.times[lado];
-  const coluna = el("div", "pre-coluna");
-  coluna.append(cabecalhoTime(time));
-
-  coluna.append(el("h4", null, "Provável quinteto"));
-  const esc = info.escalacao;
-  if (!esc || esc.quinteto.length === 0) {
-    coluna.append(el("p", "status", "Ainda não há jogos suficientes para estimar o quinteto."));
-  } else {
-    const lista = el("div", "lista-jogadores");
-    for (const p of esc.quinteto) {
-      const linha = el("div", "linha-jogador");
-      const botao = el("button", "link-jogador", p.nome);
-      botao.addEventListener("click", () =>
-        abrirJogador({ id: p.id, nome: p.nome, time: time.nome, camisa: p.camisa, posicao: p.posicao })
-      );
-      linha.append(
-        el("span", "pos", p.posicao || "–"),
-        botao,
-        el(
-          "span",
-          "detalhe",
-          esc.criterio === "titulares" ? `titular em ${p.titular_em}/${esc.jogos_base}` : `${p.min_medio} min`
-        )
-      );
-      lista.append(linha);
-    }
-    coluna.append(
-      lista,
-      el(
-        "p",
-        "legenda",
-        esc.criterio === "titulares"
-          ? `Estimativa com base em quem mais começou jogando nos últimos ${esc.jogos_base} jogo(s), sem os jogadores marcados como fora.`
-          : `Estimativa com base em quem mais jogou nos últimos ${esc.jogos_base} jogo(s).`
-      )
-    );
-  }
-
-  coluna.append(el("h4", null, "Lesionados"));
-  if (dados.falhas.includes("lesoes")) {
-    coluna.append(el("p", "status", "A lista de lesões está indisponível agora."));
-  } else if (info.lesionados.length === 0) {
-    coluna.append(el("p", "status", "Nenhum jogador no relatório de lesões."));
-  } else {
-    const lista = el("div", "lista-lesoes");
-    for (const l of info.lesionados) {
-      const [rotulo, classe] = statusLesao(l.status);
-      const linha = el("div", "linha-lesao");
-      linha.append(el("span", "chip-status " + classe, rotulo), el("span", "nome-lesao", l.nome));
-      const partes = [descreverLesao(l)];
-      if (/^\d{4}-\d{2}-\d{2}/.test(l.retorno || "")) partes.push("retorno previsto " + dataBR(l.retorno.slice(0, 10)));
-      const texto = partes.filter(Boolean).join(" · ");
-      if (texto) linha.append(el("span", "detalhe", texto));
-      lista.append(linha);
-    }
-    coluna.append(lista, el("p", "legenda", "Fonte das lesões: ESPN (não oficial)."));
-  }
-  return coluna;
-}
-
-function painelEscalacoes(dados) {
-  const colunas = el("div", "pre-colunas");
-  colunas.append(colunaEscalacao(dados, "fora"), colunaEscalacao(dados, "casa"));
-  return colunas;
-}
-
-/* --- aba "Confronto direto" (e forma recente) --- */
-
-function blocoForma(time, forma) {
-  const bloco = el("div", "pre-coluna");
-  bloco.append(cabecalhoTime(time));
-  if (forma.length === 0) {
-    bloco.append(el("p", "status", "Ainda sem jogos nesta temporada."));
-    return bloco;
-  }
-
-  const selos = el("div", "forma");
-  [...forma].reverse().forEach((j) => {
-    const selo = el("span", j.resultado === "V" ? "v" : "d", j.resultado);
-    selo.title = `${dataCurta(j.data)} ${j.local === "casa" ? "vs" : "@"} ${j.adversario}: ${j.pontos}-${j.pontos_adv}`;
-    selos.append(selo);
-  });
-
-  const caixa = el("div", "box");
-  caixa.append(
-    tabela(
-      ["Data", "Jogo", "Placar"],
-      forma.map((j) => [
-        dataCurta(j.data),
-        `${j.local === "casa" ? "vs" : "@"} ${j.adversario}`,
-        { texto: `${j.pontos}-${j.pontos_adv}`, classe: j.resultado === "V" ? "positivo" : "negativo" },
-      ])
-    )
-  );
-  bloco.append(selos, caixa);
-  return bloco;
-}
-
-function painelConfronto(dados) {
-  const painel = el("div", "pre-painel");
-  painel.append(el("h3", null, "Últimos confrontos entre os times"));
-
-  const c = dados.confronto;
-  if (!c || c.jogos.length === 0) {
-    const texto = dados.falhas.includes("confronto")
-      ? "O confronto direto está indisponível agora."
-      : "Os times não se enfrentaram nos últimos anos.";
-    painel.append(el("p", "status", texto));
-  } else {
-    const { fora, casa } = dados.jogo;
-    painel.append(
-      el("p", "resumo-h2h", `${fora.sigla} ${c.vitorias_fora} × ${c.vitorias_casa} ${casa.sigla} nos últimos ${c.jogos.length} jogos`)
-    );
-    const caixa = el("div", "box");
-    caixa.append(
-      tabela(
-        ["Data", "Mandante", "Placar", "Visitante"],
-        c.jogos.map((g) => {
-          const mandanteVenceu = g.vencedor === g.mandante;
-          return [
-            dataCurtaAno(g.data),
-            { texto: g.mandante, classe: mandanteVenceu ? "forte" : "fraco" },
-            `${g.pontos_mandante} - ${g.pontos_visitante}`,
-            { texto: g.visitante, classe: mandanteVenceu ? "fraco" : "forte" },
-          ];
-        })
-      )
-    );
-    painel.append(caixa);
-  }
-
-  painel.append(el("h3", null, "Últimos jogos de cada time"));
-  const colunas = el("div", "pre-colunas");
-  colunas.append(blocoForma(dados.jogo.fora, dados.times.fora.forma), blocoForma(dados.jogo.casa, dados.times.casa.forma));
-  painel.append(colunas);
-  return painel;
-}
-
-/* --- aba "Médias" (maior média de cada time em cada estatística) --- */
-
-function ladoMedia(lider, sigla, classe) {
-  const lado = el("div", classe);
-  if (!lider) {
-    lado.append(el("span", "detalhe", "–"));
-    return lado;
-  }
-  const botao = el("button", "link-jogador", lider.nome);
-  botao.addEventListener("click", () => abrirJogador({ id: lider.id, nome: lider.nome, time: sigla }));
-  lado.append(botao, el("strong", null, lider.valor.toFixed(1)));
-  return lado;
-}
-
-function painelMedias(dados) {
-  const painel = el("div", "pre-painel");
-  painel.append(el("h3", null, "Maiores médias de cada time"));
-
-  const { fora, casa } = dados.jogo;
-  const lideresFora = dados.times.fora.lideres;
-  const lideresCasa = dados.times.casa.lideres;
-  if (lideresFora.length === 0 && lideresCasa.length === 0) {
-    const texto = dados.falhas.includes("estatisticas")
-      ? "As estatísticas estão indisponíveis agora."
-      : "Ainda não há estatísticas nesta temporada.";
-    painel.append(el("p", "status", texto));
-    return painel;
-  }
-
-  const cabecalho = el("div", "medias-linha cabecalho");
-  cabecalho.append(cabecalhoTime(fora), el("span"), cabecalhoTime(casa));
-  painel.append(cabecalho);
-
-  for (const [chave, rotulo] of ESTATISTICAS_DO_TIME) {
-    const linha = el("div", "medias-linha");
-    linha.append(
-      ladoMedia(lideresFora.find((l) => l.chave === chave), fora.sigla, "media-lado"),
-      el("span", "rotulo-media", rotulo),
-      ladoMedia(lideresCasa.find((l) => l.chave === chave), casa.sigla, "media-lado dir")
-    );
-    painel.append(linha);
-  }
-  painel.append(el("p", "legenda", "Médias por jogo na temporada. Só entram jogadores com pelo menos 70% dos jogos do time."));
-  return painel;
-}
-
-/* --- estrutura do pré-jogo --- */
-
-function mostrarPreJogo(dados, area, jogo) {
-  const atual = abaPreJogo.get(jogo.id) || "assistir";
-
-  const abas = el("div", "segmentos");
-  for (const [chave, rotulo] of ABAS_PRE_JOGO) {
-    const botao = el("button", chave === atual ? "ativo" : "", rotulo);
-    botao.addEventListener("click", () => {
-      abaPreJogo.set(jogo.id, chave);
-      mostrarPreJogo((cachePreJogo.get(jogo.id) || {}).dados || dados, area, jogo);
-    });
-    abas.append(botao);
-  }
-
-  const paineis = {
-    assistir: painelAssistir,
-    escalacoes: painelEscalacoes,
-    confronto: painelConfronto,
-    medias: painelMedias,
+  const estado = box.estado || jogo.estado;
+  const aba = S.abaDetalhe.nba && [box.fora.sigla, box.casa.sigla].includes(S.abaDetalhe.nba) ? S.abaDetalhe.nba : box.fora.sigla;
+  const area = h("div");
+  const trocar = (sigla) => {
+    S.abaDetalhe.nba = sigla;
+    abas.replaceWith((abas = abasDetalhe(opcoes, sigla, trocar)));
+    area.replaceChildren(nbaTabelaBox(sigla === box.casa.sigla ? box.casa : box.fora, box.id));
   };
-  area.replaceChildren(abas, paineis[atual](dados));
+  const opcoes = [
+    { id: box.fora.sigla, nome: box.fora.nome },
+    { id: box.casa.sigla, nome: box.casa.nome },
+  ];
+  let abas = abasDetalhe(opcoes, aba, trocar);
+  area.replaceChildren(nbaTabelaBox(aba === box.casa.sigla ? box.casa : box.fora, box.id));
+
+  const topo = h(
+    "section",
+    { class: "cartao" },
+    placarGrande({
+      esquerda: { nome: box.fora.nome, logo: nbaLogo(box.fora.time_id), placar: box.fora.placar },
+      direita: { nome: box.casa.nome, logo: nbaLogo(box.casa.time_id), placar: box.casa.placar },
+      estado,
+      status: estado === 3 ? "Encerrado" : box.status,
+      info: dataLonga(jogo.data || NBA.data),
+    }),
+    abas,
+    area
+  );
+  const blocos = [topo];
+  if (estado === 2 && jogo.transmissao) blocos.push(cartao("Onde assistir no Brasil", blocoTransmissao(jogo.transmissao)));
+  blocos.push(h("p", { class: "nota" }, "Clique no nome de um jogador para ver a temporada, a carreira e o mapa de arremessos deste jogo."));
+  detalhe().replaceChildren(botaoVoltarMobile(), ...blocos);
+
+  if (estado === 2) agendar("detalhe", () => nbaBoxScore(jogo, true), 20000);
 }
 
-async function carregarPreJogo(jogo, area) {
-  // mostra na hora o que já temos e só busca de novo depois de alguns minutos
-  const guardado = cachePreJogo.get(jogo.id);
-  if (guardado) {
-    mostrarPreJogo(guardado.dados, area, jogo);
-    if (Date.now() - guardado.em < VALIDADE_PRE_JOGO) return;
-  } else {
-    area.textContent = "Carregando o pré-jogo... (na primeira vez pode levar alguns segundos)";
-  }
-
-  try {
-    const dados = await buscar(`/jogos/${jogo.id}/pre-jogo`);
-    cachePreJogo.set(jogo.id, { dados, em: Date.now() });
-    mostrarPreJogo(dados, area, jogo);
-  } catch {
-    if (!guardado) area.textContent = "Não foi possível carregar o pré-jogo agora.";
-  }
-}
-
-/* ---------- Lista de jogos ---------- */
-
-function cartaoJogo(jogo) {
-  const cartao = el("article", "jogo");
-
-  const aoVivo = jogo.estado === 2;
-  const topo = el("div", "jogo-topo");
-  topo.append(el("span", aoVivo ? "status ao-vivo" : "status", textoStatus(jogo)));
-  cartao.append(topo);
-
-  const terminou = jogo.estado === 3;
-  const maior = Math.max(Number(jogo.fora.placar), Number(jogo.casa.placar));
-
-  for (const lado of [jogo.fora, jogo.casa]) {
-    const perdeu = terminou && Number(lado.placar) < maior;
-    const linha = el("div", perdeu ? "lado perdedor" : "lado");
-    linha.append(
-      logoTime(lado.time_id) || el("span", "logo vazio"),
-      el("span", "nome-time", lado.nome),
-      el("strong", "pontos", lado.placar ?? "–")
+function nbaTabelaBox(time, gameId) {
+  const titulares = time.jogadores.filter((j) => j.titular);
+  const reservas = time.jogadores.filter((j) => !j.titular);
+  const linhas = titulares.length ? [...titulares, { separador: "Reservas" }, ...reservas] : time.jogadores;
+  const soma = (campo) => time.jogadores.reduce((total, j) => total + (Number(j[campo]) || 0), 0);
+  const somaArremessos = (campo) => {
+    const [f, t] = time.jogadores.reduce(
+      (acc, j) => {
+        const [a, b] = separarArremesso(j[campo]);
+        return [acc[0] + a, acc[1] + b];
+      },
+      [0, 0]
     );
-    cartao.append(linha);
-
-    if (lado.lider) {
-      const l = lado.lider;
-      cartao.append(el("div", "lider", `${l.nome} · ${l.pts} pts, ${l.reb} reb, ${l.ast} ast`));
-    }
-  }
-
-  // jogo que ainda não começou mostra o pré-jogo; os demais mostram o box score
-  const preJogo = jogo.estado === 1;
-  const rotulo = preJogo ? "pré-jogo" : "box score";
-  const botao = el("button", "detalhes", "Ver " + rotulo);
-  const area = el("div", "box");
-  area.hidden = true;
-
-  async function alternar() {
-    if (area.hidden) {
-      area.hidden = false;
-      cartao.classList.add("aberto");
-      abertos.add(jogo.id);
-      botao.textContent = "Esconder " + rotulo;
-      await (preJogo ? carregarPreJogo(jogo, area) : carregarBox(jogo, area));
-    } else {
-      area.hidden = true;
-      cartao.classList.remove("aberto");
-      abertos.delete(jogo.id);
-      botao.textContent = "Ver " + rotulo;
-    }
-  }
-
-  botao.addEventListener("click", alternar);
-  cartao.append(botao, area);
-
-  if (abertos.has(jogo.id)) alternar(); // reabre após atualizar a lista
-
-  return cartao;
-}
-
-async function carregarJogos() {
-  const secao = document.getElementById("jogos");
-
-  if (!dataAtual) {
-    secao.replaceChildren(el("p", "status", "Nenhuma data disponível."));
-    return;
-  }
-
-  const dataPedida = dataAtual;
-  try {
-    const jogos = await buscar("/jogos?data=" + dataPedida);
-    if (dataPedida !== dataAtual) return; // o usuário já trocou de dia
-
-    haAoVivo = jogos.some((j) => j.estado === 2);
-    if (jogos.length === 0) {
-      secao.replaceChildren(el("p", "status", "Nenhum jogo nesta data."));
-    } else {
-      secao.replaceChildren(...jogos.map(cartaoJogo));
-    }
-    document.getElementById("atualizado").textContent =
-      "Atualizado às " +
-      new Date().toLocaleTimeString("pt-BR", { timeZone: FUSO }) +
-      (haAoVivo ? " · ao vivo: atualiza a cada 10 segundos" : "");
-  } catch {
-    if (dataPedida !== dataAtual) return;
-    secao.replaceChildren(el("p", "status", "Não foi possível carregar os jogos."));
-  }
-}
-
-/* ---------- Navegação entre dias ---------- */
-
-function diaVizinho(sentido) {
-  if (sentido < 0) {
-    const antes = datas.filter((d) => d < dataAtual);
-    return antes.length ? antes[antes.length - 1] : null;
-  }
-  const depois = datas.filter((d) => d > dataAtual);
-  return depois.length ? depois[0] : null;
-}
-
-function dataInicial() {
-  if (datas.includes(hoje)) return hoje;
-  const anteriores = datas.filter((d) => d < hoje);
-  if (anteriores.length) return anteriores[anteriores.length - 1];
-  return datas[0] || null;
-}
-
-function rotuloDia(iso) {
-  const d = new Date(iso + "T12:00:00");
-  const semana = d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "");
-  return { semana, dia: `${iso.slice(8, 10)}/${iso.slice(5, 7)}` };
-}
-
-// mostra 7 dias com jogos ao redor do dia escolhido
-function desenharFaixa() {
-  if (!dataAtual || datas.length === 0) {
-    faixaDatas.replaceChildren();
-    return;
-  }
-  const TAMANHO = 7;
-  let i = datas.findIndex((d) => d >= dataAtual);
-  if (i < 0) i = datas.length - 1;
-  const inicio = Math.max(0, Math.min(i - 3, datas.length - TAMANHO));
-
-  faixaDatas.replaceChildren(
-    ...datas.slice(inicio, inicio + TAMANHO).map((d) => {
-      const { semana, dia } = rotuloDia(d);
-      let classe = "dia";
-      if (d === dataAtual) classe += " ativo";
-      if (d === hoje) classe += " hoje";
-      const botao = el("button", classe);
-      botao.append(el("span", "semana", semana), el("span", "numero", dia));
-      botao.addEventListener("click", () => mudarData(d));
-      return botao;
+    return `${f}/${t} (${pct(f, t)}%)`;
+  };
+  const colunas = [
+    {
+      chave: "nome",
+      nome: "Jogador",
+      esq: true,
+      valor: (j) =>
+        h(
+          "span",
+          null,
+          h("button", { class: "botao-link", type: "button", onclick: () => abrirJogadorNBA(j.id, j.nome, { jogo: gameId, sigla: time.sigla }) }, j.nome),
+          j.posicao ? h("span", { class: "nota", style: { marginLeft: "6px" } }, j.posicao) : null
+        ),
+    },
+    { chave: "min", nome: "MIN", valor: (j) => j.min },
+    { chave: "pts", nome: "PTS", destaque: true, valor: (j) => j.pts },
+    { chave: "reb", nome: "REB", valor: (j) => j.reb },
+    { chave: "ast", nome: "AST", valor: (j) => j.ast },
+    { chave: "fg", nome: "FG", titulo: "Arremessos de quadra (feitos/tentados)", valor: (j) => j.fg },
+    { chave: "tres", nome: "3PT", titulo: "Bolas de três (feitas/tentadas)", valor: (j) => j.tres },
+    { chave: "ll", nome: "LL", titulo: "Lances livres (feitos/tentados)", valor: (j) => j.ll },
+    { chave: "reb_of", nome: "RO", titulo: "Rebotes ofensivos", valor: (j) => j.reb_of },
+    { chave: "reb_def", nome: "RD", titulo: "Rebotes defensivos", valor: (j) => j.reb_def },
+    { chave: "stl", nome: "ROB", titulo: "Roubos de bola", valor: (j) => j.stl },
+    { chave: "blk", nome: "TOC", titulo: "Tocos", valor: (j) => j.blk },
+    { chave: "to", nome: "TO", titulo: "Turnovers", valor: (j) => j.to },
+    { chave: "faltas", nome: "FAL", titulo: "Faltas", valor: (j) => j.faltas },
+    { chave: "mm", nome: "+/-", valor: (j) => (j.mm > 0 ? `+${j.mm}` : j.mm) },
+  ];
+  if (!time.jogadores.length) return h("div", { class: "secao" }, vazio("O box score aparece quando o jogo começar."));
+  return h(
+    "div",
+    { class: "secao" },
+    tabela(colunas, linhas, {
+      rodape: {
+        nome: "Total do time",
+        pts: soma("pts"),
+        reb: soma("reb"),
+        ast: soma("ast"),
+        fg: somaArremessos("fg"),
+        tres: somaArremessos("tres"),
+        ll: somaArremessos("ll"),
+        reb_of: soma("reb_of"),
+        reb_def: soma("reb_def"),
+        stl: soma("stl"),
+        blk: soma("blk"),
+        to: soma("to"),
+        faltas: soma("faltas"),
+      },
     })
   );
 }
 
-function atualizarBarra() {
-  seletor.value = dataAtual || "";
-  botaoAnterior.disabled = !diaVizinho(-1);
-  botaoSeguinte.disabled = !diaVizinho(1);
-  desenharFaixa();
+/* ---------- Painel do jogador ---------- */
+
+function abrirJogadorNBA(id, nome, contexto = {}) {
+  Painel.abrir(nome, (corpo, ativo) => desenharJogadorNBA(corpo, ativo, id, nome, contexto));
 }
 
-function mudarData(nova) {
-  if (!nova || nova === dataAtual) return;
-  dataAtual = nova;
-  abertos.clear();
-  atualizarBarra();
-  carregarJogos();
+async function abrirJogadorPorNome(nome) {
+  try {
+    const achados = await api(`/jogadores/busca?q=${encodeURIComponent(nome)}`);
+    const exato = achados.find((p) => p.nome.toLowerCase() === nome.toLowerCase()) || achados[0];
+    if (exato) abrirJogadorNBA(exato.id, exato.nome);
+  } catch (_) {
+    /* sem resultado: não abre nada */
+  }
 }
 
-botaoAnterior.addEventListener("click", () => mudarData(diaVizinho(-1)));
-botaoSeguinte.addEventListener("click", () => mudarData(diaVizinho(1)));
-botaoHoje.addEventListener("click", () => mudarData(dataInicial()));
-seletor.addEventListener("change", () => mudarData(seletor.value));
+function desenharJogadorNBA(corpo, ativo, id, nome, contexto) {
+  const abas = [
+    { id: "temporada", nome: "Temporada" },
+    { id: "carreira", nome: "Carreira" },
+  ];
+  if (contexto.jogo) abas.push({ id: "arremessos", nome: "Arremessos no jogo" });
+  let aba = contexto.aba || "temporada";
+  const sub = h("div", { class: "perfil-sub" }, contexto.sigla || "");
+  const cabeca = h(
+    "div",
+    { class: "perfil" },
+    h("img", { class: "perfil-foto", src: nbaFoto(id), alt: "", onerror: (e) => (e.target.style.visibility = "hidden") }),
+    h("div", null, h("h3", { class: "perfil-nome" }, nome), sub)
+  );
+  const area = h("div");
+  let barra = abasDetalhe(abas, aba, trocar);
+
+  function trocar(nova) {
+    aba = nova;
+    const novaBarra = abasDetalhe(abas, aba, trocar);
+    barra.replaceWith(novaBarra);
+    barra = novaBarra;
+    area.replaceChildren(carregando());
+    const funcoes = { temporada: nbaPainelTemporada, carreira: nbaPainelCarreira, arremessos: nbaPainelArremessos };
+    funcoes[aba](area, ativo, id, contexto, sub).catch((erro) => {
+      if (ativo()) area.replaceChildren(caixaErro(erro, () => trocar(aba)));
+    });
+  }
+
+  corpo.replaceChildren(cabeca, barra, area);
+  trocar(aba);
+}
+
+async function nbaPainelTemporada(area, ativo, id) {
+  const j = await api(`/jogadores/${id}`);
+  if (!ativo()) return;
+  if (!j.jogos_disputados) {
+    area.replaceChildren(vazio(`Sem jogos na temporada regular ${j.temporada}. Veja a aba Carreira.`));
+    return;
+  }
+  const m = j.medias;
+  const caixa = (valor, rotulo) => h("div", { class: "numero-caixa" }, h("strong", null, valor), h("span", null, rotulo));
+  const rotulosRecorde = { pts: "Pontos", reb: "Rebotes", ast: "Assistências", stl: "Roubos", blk: "Tocos", tres: "Bolas de três" };
+  const cronologico = [...j.jogos].reverse();
+
+  area.replaceChildren(
+    secao(
+      `Médias em ${j.temporada} (${j.jogos_disputados} jogos)`,
+      h(
+        "div",
+        { class: "numeros" },
+        caixa(num(m.pts), "Pontos"),
+        caixa(num(m.reb), "Rebotes"),
+        caixa(num(m.ast), "Assistências"),
+        caixa(num(m.stl), "Roubos"),
+        caixa(num(m.blk), "Tocos"),
+        caixa(num(m.to), "Turnovers"),
+        caixa(num(m.min), "Minutos"),
+        caixa(m.fg_pct === null ? "–" : `${num(m.fg_pct)}%`, "FG"),
+        caixa(m.tres_pct === null ? "–" : `${num(m.tres_pct)}%`, "3PT"),
+        caixa(m.ll_pct === null ? "–" : `${num(m.ll_pct)}%`, "Lances livres")
+      )
+    ),
+    secao("Pontos por jogo", graficoPontos(cronologico, m.pts)),
+    secao("Recordes da temporada", listaRecordes(j.recordes, rotulosRecorde)),
+    secao(
+      "Jogo a jogo",
+      tabela(
+        [
+          { nome: "Data", esq: true, valor: (g) => dataCurta(g.data) },
+          { nome: "Jogo", esq: true, valor: (g) => g.confronto },
+          { nome: "", valor: (g) => g.resultado || "" },
+          { nome: "MIN", valor: (g) => g.min },
+          { nome: "PTS", destaque: true, valor: (g) => g.pts },
+          { nome: "REB", valor: (g) => g.reb },
+          { nome: "AST", valor: (g) => g.ast },
+          { nome: "ROB", valor: (g) => g.stl ?? "" },
+          { nome: "TOC", valor: (g) => g.blk ?? "" },
+          { nome: "FG", valor: (g) => g.fg },
+          { nome: "3PT", valor: (g) => g.tres },
+          { nome: "+/-", valor: (g) => (g.mm > 0 ? `+${g.mm}` : g.mm ?? "") },
+        ],
+        j.jogos
+      )
+    )
+  );
+}
+
+function listaRecordes(recordes, rotulos) {
+  const itens = Object.entries(rotulos)
+    .filter(([chave]) => recordes && recordes[chave])
+    .map(([chave, rotulo]) => {
+      const r = recordes[chave];
+      return h(
+        "li",
+        null,
+        h("span", null, h("strong", { class: "numero" }, r.valor), ` ${rotulo.toLowerCase()}`),
+        h("span", { class: "sub" }, [r.jogo.confronto, dataCurta(r.jogo.data)].filter(Boolean).join(", "))
+      );
+    });
+  return itens.length ? h("ul", { class: "lista-simples" }, itens) : h("p", { class: "nota" }, "Sem recordes para mostrar.");
+}
+
+function graficoPontos(jogos, media) {
+  const largura = 600;
+  const altura = 140;
+  const topo = 12;
+  const base = altura - 18;
+  const maximo = Math.max(10, ...jogos.map((g) => g.pts));
+  const passo = largura / Math.max(jogos.length, 1);
+  const barra = Math.max(3, passo * 0.7);
+  const y = (v) => base - ((base - topo) * v) / maximo;
+  const svg = s("svg", { class: "grafico", viewBox: `0 0 ${largura} ${altura}`, role: "img", "aria-label": `Pontos em cada um dos ${jogos.length} jogos` });
+  jogos.forEach((g, i) => {
+    const x = i * passo + (passo - barra) / 2;
+    svg.append(
+      s(
+        "rect",
+        { class: `barra-pts${g.resultado === "L" ? " derrota" : ""}`, x, y: y(g.pts), width: barra, height: Math.max(1, base - y(g.pts)), rx: 2 },
+        s("title", null, `${dataCurta(g.data)} ${g.confronto}: ${g.pts} pontos`)
+      )
+    );
+  });
+  if (media) svg.append(s("line", { class: "linha-media", x1: 0, x2: largura, y1: y(media), y2: y(media) }));
+  svg.append(s("text", { x: 0, y: altura - 4 }, jogos.length ? dataCurta(jogos[0].data) : ""));
+  svg.append(s("text", { x: largura, y: altura - 4, "text-anchor": "end" }, jogos.length ? dataCurta(jogos[jogos.length - 1].data) : ""));
+  svg.append(s("text", { x: largura, y: Math.max(10, y(media) - 4), "text-anchor": "end" }, `média ${num(media)}`));
+  return h("div", null, svg, h("p", { class: "nota" }, "Barras cinza são derrotas do time. A linha tracejada é a média."));
+}
+
+const COLUNAS_CARREIRA = [
+  ["min", "MIN"],
+  ["pts", "PTS"],
+  ["reb", "REB"],
+  ["ast", "AST"],
+  ["stl", "ROB"],
+  ["blk", "TOC"],
+  ["tov", "TO"],
+];
+
+async function nbaPainelCarreira(area, ativo, id, contexto, sub) {
+  const c = await api(`/jogadores/${id}/carreira`);
+  if (!ativo()) return;
+  const p = c.perfil;
+  if (p && sub) sub.textContent = [p.time, p.posicao, p.camisa ? `#${p.camisa}` : null].filter(Boolean).join(", ") || sub.textContent;
+
+  let fase = "regular";
+  let modo = "media";
+  const tabelaArea = h("div");
+
+  function desenharTabela() {
+    const dados = c.carreira[fase];
+    if (!dados.temporadas.length) {
+      tabelaArea.replaceChildren(h("p", { class: "nota" }, fase === "playoffs" ? "Nunca jogou playoffs." : "Sem temporadas registradas."));
+      return;
+    }
+    const valor = (l, campo) => (modo === "media" ? num(l.gp ? l[campo] / l.gp : 0) : (l[campo] ?? 0).toLocaleString("pt-BR"));
+    const colunas = [
+      { chave: "temporada", nome: "Temporada", esq: true, valor: (l) => l.temporada },
+      { chave: "times", nome: "Time", esq: true, valor: (l) => (l.times || []).join(", ") },
+      { chave: "idade", nome: "Idade", valor: (l) => l.idade ?? "" },
+      { chave: "gp", nome: "J", titulo: "Jogos", valor: (l) => l.gp },
+      { chave: "gs", nome: "JT", titulo: "Jogos como titular", valor: (l) => l.gs },
+      ...COLUNAS_CARREIRA.map(([campo, nome]) => ({ chave: campo, nome, destaque: campo === "pts", valor: (l) => valor(l, campo) })),
+      { chave: "fg", nome: "FG%", valor: (l) => pct(l.fgm, l.fga) },
+      { chave: "tres", nome: "3P%", valor: (l) => pct(l.fg3m, l.fg3a) },
+      { chave: "ll", nome: "LL%", valor: (l) => pct(l.ftm, l.fta) },
+    ];
+    const t = dados.total;
+    const rodape = t
+      ? {
+          temporada: "Carreira",
+          gp: t.gp,
+          gs: t.gs,
+          ...Object.fromEntries(COLUNAS_CARREIRA.map(([campo]) => [campo, valor(t, campo)])),
+          fg: pct(t.fgm, t.fga),
+          tres: pct(t.fg3m, t.fg3a),
+          ll: pct(t.ftm, t.fta),
+        }
+      : null;
+    tabelaArea.replaceChildren(tabela(colunas, dados.temporadas, { rodape }));
+  }
+
+  const controles = h("div", { class: "controles" });
+  function desenharControles() {
+    controles.replaceChildren(
+      alternar(
+        [
+          ["regular", "Temporada regular"],
+          ["playoffs", "Playoffs"],
+        ],
+        fase,
+        (v) => {
+          fase = v;
+          desenharControles();
+          desenharTabela();
+        },
+        "Fase"
+      ),
+      alternar(
+        [
+          ["media", "Médias"],
+          ["total", "Totais"],
+        ],
+        modo,
+        (v) => {
+          modo = v;
+          desenharControles();
+          desenharTabela();
+        },
+        "Mostrar"
+      )
+    );
+  }
+  desenharControles();
+  desenharTabela();
+
+  const blocos = [];
+  if (p) {
+    const fatos = [
+      ["Idade", p.idade ? `${p.idade} anos` : null],
+      ["Nascimento", p.nascimento ? dataCurta(p.nascimento) : null],
+      ["Altura", p.altura_cm ? `${num(p.altura_cm / 100, 2)} m` : null],
+      ["Peso", p.peso_kg ? `${p.peso_kg} kg` : null],
+      ["País", p.pais],
+      ["Posição", p.posicao],
+      ["Draft", p.draft],
+      ["Formação", p.formacao],
+      ["Na NBA", p.desde ? `${p.desde} a ${p.ativo ? "hoje" : p.ate}` : null],
+    ].filter(([, v]) => v);
+    blocos.push(
+      h(
+        "dl",
+        { class: "fatos" },
+        fatos.map(([rotulo, valor]) => h("div", { class: "fato" }, h("dt", null, rotulo), h("dd", null, valor))),
+        p.lista_75 ? h("div", { class: "fato" }, h("dt", null, "Homenagem"), h("dd", null, "Entre os 75 maiores da NBA")) : null
+      )
+    );
+  }
+  if (c.premios && c.premios.length) {
+    blocos.push(
+      secao(
+        "Prêmios",
+        h(
+          "div",
+          { class: "premios" },
+          c.premios.map((pr) =>
+            h("span", { class: "premio", title: pr.temporadas.join(", ") }, pr.vezes > 1 ? h("strong", null, `${pr.vezes}×`) : null, pr.nome)
+          )
+        )
+      )
+    );
+  }
+  blocos.push(secao("Números da carreira", controles, tabelaArea));
+  if (c.recordes && c.recordes.recordes) {
+    blocos.push(
+      secao(
+        "Recordes da carreira (temporada regular)",
+        listaRecordes(c.recordes.recordes, {
+          pts: "Pontos",
+          reb: "Rebotes",
+          ast: "Assistências",
+          stl: "Roubos",
+          blk: "Tocos",
+          tres: "Bolas de três",
+          fgm: "Arremessos de quadra",
+          ftm: "Lances livres",
+        })
+      )
+    );
+  }
+  if (c.falhas && c.falhas.length) blocos.push(h("p", { class: "nota", style: { padding: "0 14px" } }, "Parte do perfil não carregou agora. Tente de novo em alguns minutos."));
+  area.replaceChildren(...blocos);
+}
+
+async function nbaPainelArremessos(area, ativo, id, contexto) {
+  const r = await api(`/jogos/${contexto.jogo}/arremessos/${id}`);
+  if (!ativo()) return;
+  const lista = r.arremessos;
+  if (!lista.length) {
+    area.replaceChildren(vazio("Nenhum arremesso de quadra neste jogo."));
+    return;
+  }
+  const feitos = lista.filter((a) => a.feito).length;
+  const de3 = lista.filter((a) => a.tipo === "3pt");
+  const feitos3 = de3.filter((a) => a.feito).length;
+  area.replaceChildren(
+    secao(
+      `${feitos} de ${lista.length} arremessos (${pct(feitos, lista.length)}%)`,
+      h("p", { class: "nota" }, `Bolas de três: ${feitos3} de ${de3.length}. Bolinha verde é acerto, X vermelho é erro.`),
+      quadraSVG(lista)
+    )
+  );
+}
+
+function quadraSVG(arremessos) {
+  const svg = s("svg", { class: "quadra", viewBox: "-250 -52.5 500 470", role: "img", "aria-label": `Mapa com ${arremessos.length} arremessos` });
+  svg.append(
+    s(
+      "g",
+      { class: "linhas" },
+      s("rect", { x: -250, y: -47.5, width: 500, height: 470 }),
+      s("rect", { x: -80, y: -47.5, width: 160, height: 190 }),
+      s("rect", { x: -60, y: -47.5, width: 120, height: 190 }),
+      s("circle", { cx: 0, cy: 142.5, r: 60 }),
+      s("line", { x1: -30, y1: -7.5, x2: 30, y2: -7.5 }),
+      s("circle", { cx: 0, cy: 0, r: 7.5 }),
+      s("path", { d: "M -40 0 A 40 40 0 0 0 40 0" }),
+      s("line", { x1: -220, y1: -47.5, x2: -220, y2: 92.5 }),
+      s("line", { x1: 220, y1: -47.5, x2: 220, y2: 92.5 }),
+      s("path", { d: "M -220 92.5 A 237.5 237.5 0 0 0 220 92.5" })
+    )
+  );
+  for (const a of arremessos) {
+    const titulo = s(
+      "title",
+      null,
+      `${a.feito ? "Acerto" : "Erro"}, ${a.tipo === "3pt" ? "3 pontos" : "2 pontos"}, ${a.distancia ?? "?"} pés, ${a.periodo}º quarto ${a.relogio || ""}`
+    );
+    if (a.feito) svg.append(s("circle", { class: "acerto", cx: a.x, cy: a.y, r: 7 }, titulo));
+    else svg.append(s("path", { class: "erro-arremesso", d: `M ${a.x - 6} ${a.y - 6} L ${a.x + 6} ${a.y + 6} M ${a.x + 6} ${a.y - 6} L ${a.x - 6} ${a.y + 6}` }, titulo));
+  }
+  return svg;
+}
 
 /* ---------- Classificação ---------- */
 
-function celulaPosicao(posicao) {
-  // 1º ao 6º: playoffs direto; 7º ao 10º: play-in
-  const classe = posicao <= 6 ? "zona-direta" : posicao <= 10 ? "zona-playin" : null;
-  return { texto: posicao, classe };
-}
-
-async function carregarClassificacao() {
-  const secao = document.getElementById("classificacao");
-  if (!secao.hasChildNodes()) secao.textContent = "Carregando...";
+async function nbaClassificacao() {
+  const tk = novoTokenLista();
+  let c;
   try {
-    const dados = await buscar("/classificacao");
-    const cartoes = Object.entries(dados).map(([conferencia, times]) => {
-      const cartao = el("article", "cartao");
-      cartao.append(el("h2", null, "Conferência " + conferencia));
-      const caixa = el("div", "box");
-      caixa.append(
-        tabela(
-          ["#", "Time", "V", "D", "%"],
-          times.map((t) => [
-            celulaPosicao(t.posicao),
-            { texto: t.time, logo: t.time_id },
-            t.vitorias,
-            t.derrotas,
-            t.aproveitamento.toFixed(3),
-          ])
-        )
-      );
-      cartao.append(
-        caixa,
-        el("p", "legenda", "Verde: 1º ao 6º, direto aos playoffs · Âmbar: 7º ao 10º, play-in")
-      );
-      return cartao;
-    });
-    secao.replaceChildren(...cartoes);
-  } catch {
-    secao.replaceChildren(el("p", "status", "Não foi possível carregar a classificação."));
-  }
-}
-
-/* ---------- Líderes da temporada ---------- */
-
-function cartaoLideres(categoria, modo) {
-  const cartao = el("article", "cartao");
-  cartao.append(el("h3", null, categoria.rotulo));
-
-  if (categoria.jogadores.length === 0) {
-    cartao.append(el("p", "status", "Ainda não há jogadores que atendam ao mínimo exigido."));
-    return cartao;
-  }
-
-  const colunas = categoria.percentual
-    ? ["#", "Jogador", "Time", "Feitos/Tent.", "%"]
-    : ["#", "Jogador", "Time", "J", modo === "media" ? "Média" : "Total"];
-
-  const linhas = categoria.jogadores.map((j) => [
-    j.posicao,
-    { texto: j.nome, aoClicar: () => abrirJogador(j) },
-    j.time,
-    categoria.percentual ? j.extra : j.jogos,
-    categoria.percentual
-      ? j.valor.toFixed(1) + "%"
-      : modo === "media"
-        ? j.valor.toFixed(1)
-        : j.valor,
-  ]);
-
-  const caixa = el("div", "box");
-  caixa.append(tabela(colunas, linhas));
-  cartao.append(caixa);
-  return cartao;
-}
-
-function textoNotaLideres(dados) {
-  const partes = [];
-  if (dados.modo === "media") {
-    partes.push(
-      `Médias por jogo: entram jogadores com pelo menos ${dados.minimo_jogos} jogo(s), ` +
-        `cerca de 70% dos ${dados.jogos_da_liga} jogos disputados pela liga até agora.`
-    );
-  } else {
-    partes.push("Totais da temporada: todos os jogadores que já entraram em quadra.");
-  }
-  partes.push(
-    "Os percentuais exigem um mínimo de arremessos feitos, proporcional aos jogos disputados " +
-      "(baseado na regra da NBA), e não mudam com a opção escolhida. J = jogos disputados."
-  );
-  return partes.join(" ");
-}
-
-async function carregarLideres() {
-  const grade = document.getElementById("lideres-grade");
-  const modoPedido = modoLideres;
-  if (!grade.hasChildNodes()) grade.textContent = "Carregando...";
-
-  try {
-    const dados = await buscar("/lideres?modo=" + modoPedido);
-    if (modoPedido !== modoLideres) return; // o usuário já trocou de opção
-    grade.replaceChildren(...dados.categorias.map((c) => cartaoLideres(c, dados.modo)));
-    document.getElementById("nota-lideres").textContent = textoNotaLideres(dados);
-  } catch {
-    if (modoPedido !== modoLideres) return;
-    grade.replaceChildren(el("p", "status", "Não foi possível carregar os líderes agora."));
-  }
-}
-
-const botoesModo = document.querySelectorAll("#modo-lideres button");
-botoesModo.forEach((botao) => {
-  botao.addEventListener("click", () => {
-    modoLideres = botao.dataset.modo;
-    botoesModo.forEach((b) => b.classList.toggle("ativo", b === botao));
-    carregarLideres();
-  });
-});
-
-/* ---------- Corridas do MVP e do calouro do ano ---------- */
-
-function dataBR(iso) {
-  // '2026-11-07' -> '07/11/2026'
-  return /^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso.slice(8)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}` : iso;
-}
-
-function celulaMovimento(e) {
-  if (e.movimento === "subiu") return { texto: `▲ ${e.anterior - e.posicao}`, classe: "positivo" };
-  if (e.movimento === "desceu") return { texto: `▼ ${e.posicao - e.anterior}`, classe: "negativo" };
-  if (e.movimento === "novo") return { texto: "novo", classe: "positivo" };
-  if (e.movimento === "igual") return { texto: "=", classe: "" };
-  return "";
-}
-
-function cartaoCorrida(titulo, corrida) {
-  const cartao = el("article", "cartao");
-  cartao.append(el("h2", null, titulo));
-
-  if (!corrida.ranking.length) {
-    cartao.append(
-      el(
-        "p",
-        "status",
-        "A NBA ainda não publicou o primeiro ranking desta temporada. " +
-          "Quando sair, ele aparece aqui sozinho."
-      )
-    );
-    const fonte = el("p", "fonte");
-    fonte.append(linkSeguro("Ver a página dos rankings no NBA.com", corrida.pagina));
-    cartao.append(fonte);
-    return cartao;
-  }
-
-  cartao.append(el("p", "edicao", `Edição de ${dataBR(corrida.data)}`));
-
-  const caixa = el("div", "box");
-  caixa.append(
-    tabela(
-      ["#", "Jogador", "Time", "Mov.", "Médias na temporada"],
-      corrida.ranking.map((e) => [e.posicao, e.nome, e.time, celulaMovimento(e), e.stats || ""])
-    )
-  );
-  cartao.append(caixa);
-
-  const fonte = el("p", "fonte", "Ranking semanal do NBA.com · ");
-  fonte.append(linkSeguro("ler a análise completa", corrida.url));
-  cartao.append(fonte);
-  return cartao;
-}
-
-async function carregarCorridas() {
-  const secao = document.getElementById("corridas");
-  if (!secao.hasChildNodes()) secao.textContent = "Carregando...";
-  try {
-    const dados = await buscar("/corridas");
-    secao.replaceChildren(
-      cartaoCorrida("Corrida pelo MVP", dados.mvp),
-      cartaoCorrida("Corrida pelo calouro do ano", dados.roy)
-    );
-  } catch {
-    secao.replaceChildren(el("p", "status", "Não foi possível carregar os rankings da NBA agora."));
-  }
-}
-
-/* ---------- Painel do jogador ---------- */
-
-// estado do painel aberto: { jogador, contexto, aba, periodo }
-// contexto existe quando o painel foi aberto pelo box score: { jogo, box, lado }
-let dialogo = null;
-let corpoEl = null;
-let chipAtivo = null;
-let temporizadorDialogo = null;
-
-const ROTULOS_RECORDE = [
-  ["pts", "Pontos"],
-  ["reb", "Rebotes"],
-  ["ast", "Assistências"],
-  ["stl", "Roubos de bola"],
-  ["blk", "Tocos"],
-  ["tres", "Bolas de três"],
-];
-
-function dataCurta(iso) {
-  // '2026-10-23' -> '23/10'
-  return /^\d{4}-\d{2}-\d{2}/.test(iso) ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}` : iso;
-}
-
-function formatarPct(v) {
-  return v === null || v === undefined ? "–" : v.toFixed(1) + "%";
-}
-
-function periodoRotulo(p) {
-  return p <= 4 ? "Q" + p : "OT" + (p - 4);
-}
-
-function nomeCurto(nome) {
-  const partes = String(nome).trim().split(/\s+/);
-  if (partes.length < 2) return String(nome);
-  return `${partes[0][0]}. ${partes.slice(1).join(" ")}`;
-}
-
-function boxAtual(contexto) {
-  return (ultimoBox.get(contexto.jogo.id) || {}).box || contexto.box;
-}
-
-/* --- aba "Temporada" --- */
-
-function cartaoMedia(rotulo, valor) {
-  const c = el("div", "media");
-  c.append(el("strong", null, valor), el("span", null, rotulo));
-  return c;
-}
-
-function blocoMedias(m) {
-  const grade = el("div", "medias");
-  grade.append(
-    cartaoMedia("PTS", m.pts),
-    cartaoMedia("REB", m.reb),
-    cartaoMedia("AST", m.ast),
-    cartaoMedia("STL", m.stl),
-    cartaoMedia("BLK", m.blk),
-    cartaoMedia("TO", m.to),
-    cartaoMedia("MIN", m.min),
-    cartaoMedia("FG%", formatarPct(m.fg_pct)),
-    cartaoMedia("3PT%", formatarPct(m.tres_pct)),
-    cartaoMedia("FT%", formatarPct(m.ll_pct))
-  );
-  return grade;
-}
-
-function blocoRecordes(recordes) {
-  const caixa = el("div", "box");
-  caixa.append(
-    tabela(
-      ["Estatística", "Recorde", "Jogo"],
-      ROTULOS_RECORDE.map(([chave, nome]) => {
-        const r = recordes[chave];
-        return [nome, r.valor, `${dataCurta(r.jogo.data)} · ${r.jogo.confronto}`];
-      })
-    )
-  );
-  return caixa;
-}
-
-function graficoPontos(jogos) {
-  // a lista vem do jogo mais recente para o mais antigo; o gráfico vai do primeiro ao último
-  const ordem = [...jogos].reverse();
-  const maximo = Math.max(...ordem.map((j) => j.pts), 1);
-  const grafico = el("div", "grafico");
-  ordem.forEach((j) => {
-    const barra = el("div", "barra");
-    barra.style.height = (j.pts / maximo) * 100 + "%";
-    barra.title = `${dataCurta(j.data)} ${j.confronto}: ${j.pts} pts`;
-    barra.append(el("span", null, j.pts));
-    grafico.append(barra);
-  });
-  return grafico;
-}
-
-function resultado(wl) {
-  if (wl === "W") return { texto: "V", classe: "positivo" };
-  if (wl === "L") return { texto: "D", classe: "negativo" };
-  return "";
-}
-
-function tabelaJogos(jogos) {
-  const caixa = el("div", "box");
-  caixa.append(
-    tabela(
-      ["Data", "Jogo", "Res.", "MIN", "PTS", "REB", "AST", "FG", "3PT"],
-      jogos.map((j) => [
-        dataCurta(j.data), j.confronto, resultado(j.resultado),
-        j.min, j.pts, j.reb, j.ast, j.fg, j.tres,
-      ])
-    )
-  );
-  return caixa;
-}
-
-function corpoJogador(dados) {
-  if (!dados.jogos_disputados) {
-    return [el("p", "status", "Ainda não jogou nesta temporada.")];
-  }
-  return [
-    el("p", "status", `Temporada ${dados.temporada} · ${dados.jogos_disputados} jogos`),
-    el("h3", null, "Médias da temporada"),
-    blocoMedias(dados.medias),
-    el("h3", null, "Recordes da temporada"),
-    blocoRecordes(dados.recordes),
-    el("h3", null, "Pontos por jogo"),
-    graficoPontos(dados.jogos),
-    el("h3", null, "Todos os jogos"),
-    tabelaJogos(dados.jogos),
-  ];
-}
-
-function corpoTemporadaDoJogador() {
-  const id = dialogo.jogador.id;
-  const dados = cacheTemporada.get(id);
-  if (!dados) {
-    const texto = falhas.has("temporada:" + id)
-      ? "Não foi possível carregar os dados do jogador."
-      : "Carregando...";
-    return [el("p", "status", texto)];
-  }
-  return corpoJogador(dados);
-}
-
-/* --- aba "Neste jogo": mapa de arremessos e estatísticas --- */
-
-function textoArremesso(a) {
-  const quando = periodoRotulo(a.periodo) + (a.relogio ? " " + a.relogio : "");
-  const tipo = a.tipo === "3pt" ? "bola de três" : "arremesso de 2";
-  const distancia = a.distancia !== null && a.distancia !== undefined ? ` · ${a.distancia} pés` : "";
-  return `${quando} · ${tipo}${distancia} · ${a.feito ? "acertou" : "errou"}`;
-}
-
-// Quadra desenhada em SVG com as medidas da NBA (cada unidade = 1/10 de pé).
-// A cesta fica no ponto (0, 0), no topo; o eixo y cresce em direção à meia-quadra.
-function quadraComArremessos(lista) {
-  const linha = { fill: "none", stroke: "#1b1710", "stroke-opacity": 0.75, "stroke-width": 2 };
-  const raiz = svg("svg", {
-    viewBox: "-255 -52 510 480",
-    class: "quadra",
-    role: "img",
-    "aria-label": "Mapa dos arremessos do jogador na quadra",
-  });
-
-  raiz.append(
-    svg("rect", { x: -250, y: -47.5, width: 500, height: 470, fill: "#a88f60" }),
-    svg("rect", { x: -80, y: -47.5, width: 160, height: 190, fill: "#97804f" }),
-    svg("rect", { x: -250, y: -47.5, width: 500, height: 470, ...linha }),
-    svg("rect", { x: -80, y: -47.5, width: 160, height: 190, ...linha }),
-    svg("rect", { x: -60, y: -47.5, width: 120, height: 190, ...linha }),
-    svg("path", { d: "M -60 142.5 A 60 60 0 0 0 60 142.5", ...linha }),
-    svg("path", { d: "M -60 142.5 A 60 60 0 0 1 60 142.5", ...linha, "stroke-dasharray": "8 8" }),
-    svg("path", { d: "M -40 0 A 40 40 0 0 0 40 0", ...linha }),
-    svg("line", { x1: -30, y1: -8, x2: 30, y2: -8, ...linha }),
-    svg("circle", { cx: 0, cy: 0, r: 7.5, ...linha }),
-    svg("path", { d: "M -220 -47.5 L -220 89.5 A 237.5 237.5 0 0 0 220 89.5 L 220 -47.5", ...linha }),
-    svg("path", { d: "M -60 422.5 A 60 60 0 0 1 60 422.5", ...linha }),
-    svg("path", { d: "M -20 422.5 A 20 20 0 0 1 20 422.5", ...linha })
-  );
-
-  // erros primeiro, acertos por cima
-  const ordenada = [...lista].sort((a, b) => Number(a.feito) - Number(b.feito));
-  for (const a of ordenada) {
-    const x = Number(a.x);
-    const y = Number(a.y);
-    const marca = a.feito
-      ? svg("circle", { cx: x, cy: y, r: 9, fill: "#34c77b", stroke: "#10151a", "stroke-width": 3 })
-      : svg("path", {
-          d: `M ${x - 7} ${y - 7} L ${x + 7} ${y + 7} M ${x - 7} ${y + 7} L ${x + 7} ${y - 7}`,
-          fill: "none",
-          stroke: "#ee5a5f",
-          "stroke-width": 4,
-          "stroke-linecap": "round",
-        });
-    const dica = svg("title");
-    dica.textContent = textoArremesso(a);
-    marca.append(dica);
-    raiz.append(marca);
-  }
-  return raiz;
-}
-
-function resumoArremessos(lista) {
-  const resumo = el("p", "resumo-arremessos");
-  if (lista.length === 0) {
-    resumo.textContent = "Nenhum arremesso de quadra neste período.";
-    return resumo;
-  }
-  const feitos = lista.filter((a) => a.feito).length;
-  const tres = lista.filter((a) => a.tipo === "3pt");
-  const tresFeitos = tres.filter((a) => a.feito).length;
-
-  const total = el("span");
-  total.append(el("strong", null, `${feitos}/${lista.length}`), ` na quadra (${Math.round((100 * feitos) / lista.length)}%)`);
-  const bolas = el("span");
-  bolas.append(el("strong", null, `${tresFeitos}/${tres.length}`), " bolas de três");
-  const legenda = el("span");
-  legenda.append(el("span", "marca-acerto", "●"), " acerto  ", el("span", "marca-erro", "✕"), " erro");
-  resumo.append(total, bolas, legenda);
-  return resumo;
-}
-
-function secaoArremessos() {
-  const { jogador, contexto, periodo } = dialogo;
-  const chave = `${contexto.jogo.id}:${jogador.id}`;
-  const secao = el("div", "arremessos");
-  secao.append(el("h3", null, "Mapa de arremessos"));
-
-  const lista = cacheArremessos.get(chave);
-  if (!lista) {
-    const texto = falhas.has("arremessos:" + chave)
-      ? "Não foi possível carregar os arremessos deste jogo."
-      : "Carregando...";
-    secao.append(el("p", "status", texto));
-    return secao;
-  }
-
-  // filtro por período: Todos, Q1..Q4 e prorrogações, se houver
-  const periodos = Math.max(4, ...lista.map((a) => a.periodo || 0));
-  const opcoes = [["todos", "Todos"]];
-  for (let p = 1; p <= periodos; p++) opcoes.push([p, periodoRotulo(p)]);
-
-  const filtro = el("div", "segmentos");
-  for (const [valor, rotulo] of opcoes) {
-    const botao = el("button", periodo === valor ? "ativo" : "", rotulo);
-    botao.addEventListener("click", () => {
-      dialogo.periodo = valor;
-      desenharCorpo();
-    });
-    filtro.append(botao);
-  }
-
-  const filtrada = periodo === "todos" ? lista : lista.filter((a) => a.periodo === periodo);
-  secao.append(filtro, quadraComArremessos(filtrada), resumoArremessos(filtrada));
-  return secao;
-}
-
-function linhaStat(rotulo, valor, opcoes = {}) {
-  const linha = el("div", opcoes.sub ? "linha-stat sub" : "linha-stat");
-  linha.append(
-    el("span", "rotulo", rotulo),
-    el("span", opcoes.classe ? "valor " + opcoes.classe : "valor", valor)
-  );
-  return linha;
-}
-
-function grupoStats(...linhas) {
-  const grupo = el("div", "grupo");
-  grupo.append(...linhas);
-  return grupo;
-}
-
-function linhaDoJogadorNoBox() {
-  const { jogador, contexto } = dialogo;
-  const time = boxAtual(contexto)[contexto.lado];
-  return time.jogadores.find((j) => j.id === jogador.id) || jogador;
-}
-
-function corpoJogo() {
-  const j = linhaDoJogadorNoBox();
-  const mm = maisMenos(j.mm);
-
-  const grupos = el("div", "grupos");
-  grupos.append(
-    grupoStats(linhaStat("Minutos", j.min)),
-    grupoStats(
-      linhaStat("Pontos", j.pts),
-      linhaStat("Lances livres", comPct(j.ll)),
-      linhaStat("Arremessos de 2", comPct(j.dois)),
-      linhaStat("Bolas de três", comPct(j.tres)),
-      linhaStat("Arremessos de quadra", comPct(j.fg))
-    ),
-    grupoStats(
-      linhaStat("Rebotes", j.reb),
-      linhaStat("Ofensivos", j.reb_of ?? "–", { sub: true }),
-      linhaStat("Defensivos", j.reb_def ?? "–", { sub: true })
-    ),
-    grupoStats(
-      linhaStat("Assistências", j.ast),
-      linhaStat("Roubos de bola", j.stl),
-      linhaStat("Tocos", j.blk),
-      linhaStat("Turnovers", j.to),
-      linhaStat("Faltas", j.faltas),
-      linhaStat("+/-", mm.texto, { classe: mm.classe })
-    )
-  );
-
-  return [secaoArremessos(), el("h3", null, "Estatísticas no jogo"), grupos];
-}
-
-/* --- estrutura do painel --- */
-
-function desenharCorpo() {
-  if (!dialogo || !corpoEl) return;
-  const itens = dialogo.contexto && dialogo.aba === "jogo" ? corpoJogo() : corpoTemporadaDoJogador();
-  corpoEl.replaceChildren(...itens);
-}
-
-function infoDoJogador() {
-  const { jogador, contexto } = dialogo;
-  const info = el("div", "jogador-info");
-  info.append(el("h2", null, jogador.nome));
-
-  const sub = el("p", "jogador-sub");
-  let nomeTime = jogador.time || "";
-  if (contexto) {
-    const time = boxAtual(contexto)[contexto.lado];
-    nomeTime = time.nome;
-    const logo = logoTime(time.time_id, "logo-mini");
-    if (logo) sub.append(logo);
-  }
-  const partes = [];
-  if (jogador.camisa) partes.push("#" + jogador.camisa);
-  if (jogador.posicao) partes.push(jogador.posicao);
-  if (nomeTime) partes.push(nomeTime);
-  sub.append(el("span", null, partes.join(" · ")));
-  info.append(sub);
-  return info;
-}
-
-function abasDoJogador() {
-  const seg = el("div", "segmentos");
-  for (const [chave, rotulo] of [["jogo", "Neste jogo"], ["temporada", "Temporada"]]) {
-    const botao = el("button", dialogo.aba === chave ? "ativo" : "", rotulo);
-    botao.addEventListener("click", () => {
-      dialogo.aba = chave;
-      desenharJogador();
-    });
-    seg.append(botao);
-  }
-  return seg;
-}
-
-// colegas de time em uma faixa horizontal, para trocar de jogador sem fechar o painel
-function faixaEquipe() {
-  const { contexto, jogador } = dialogo;
-  const time = boxAtual(contexto)[contexto.lado];
-  const faixa = el("div", "equipe-faixa");
-  chipAtivo = null;
-
-  for (const j of time.jogadores) {
-    const ativo = j.id === jogador.id;
-    const chip = el("button", ativo ? "chip-jogador ativo" : "chip-jogador");
-    chip.append(imagem(urlFoto(j.id, "260x190"), "foto-mini"), el("span", null, nomeCurto(j.nome)));
-    chip.addEventListener("click", () => trocarJogador(j));
-    faixa.append(chip);
-    if (ativo) chipAtivo = chip;
-  }
-  return faixa;
-}
-
-function desenharJogador() {
-  const { jogador, contexto } = dialogo;
-
-  const cabecalho = el("div", "jogador-cabecalho");
-  cabecalho.append(imagem(urlFoto(jogador.id), "foto", jogador.nome), infoDoJogador());
-
-  corpoEl = el("div", "jogador-corpo");
-  const partes = [cabecalho];
-  if (contexto) partes.push(abasDoJogador());
-  partes.push(corpoEl);
-  if (contexto) partes.push(faixaEquipe());
-
-  conteudoJogador.replaceChildren(...partes);
-  desenharCorpo();
-  if (chipAtivo) chipAtivo.scrollIntoView({ inline: "center", block: "nearest" });
-}
-
-function redesenharSeAtual(idJogador) {
-  if (dialogo && dialogo.jogador.id === idJogador) desenharCorpo();
-}
-
-async function carregarTemporada(jogador) {
-  if (cacheTemporada.has(jogador.id)) return;
-  falhas.delete("temporada:" + jogador.id);
-  try {
-    cacheTemporada.set(jogador.id, await buscar(`/jogadores/${jogador.id}`));
-  } catch {
-    falhas.add("temporada:" + jogador.id);
-  }
-  redesenharSeAtual(jogador.id);
-}
-
-async function carregarArremessos(jogador, jogo, forcar = false) {
-  const chave = `${jogo.id}:${jogador.id}`;
-  if (cacheArremessos.has(chave) && !forcar) return;
-  falhas.delete("arremessos:" + chave);
-  try {
-    const dados = await buscar(`/jogos/${jogo.id}/arremessos/${jogador.id}`);
-    cacheArremessos.set(chave, dados.arremessos);
-  } catch {
-    falhas.add("arremessos:" + chave);
-  }
-  redesenharSeAtual(jogador.id);
-}
-
-function carregarDadosDoPainel() {
-  const { jogador, contexto } = dialogo;
-  carregarTemporada(jogador);
-  if (contexto) carregarArremessos(jogador, contexto.jogo);
-}
-
-function trocarJogador(jogador) {
-  dialogo.jogador = jogador;
-  dialogo.periodo = "todos";
-  desenharJogador();
-  carregarDadosDoPainel();
-}
-
-function pararAtualizacaoDoPainel() {
-  if (temporizadorDialogo) clearInterval(temporizadorDialogo);
-  temporizadorDialogo = null;
-}
-
-// com o jogo em andamento, o painel também se atualiza (estatísticas e arremessos)
-function iniciarAtualizacaoDoPainel() {
-  pararAtualizacaoDoPainel();
-  if (!dialogo || !dialogo.contexto || dialogo.contexto.jogo.estado !== 2) return;
-
-  temporizadorDialogo = setInterval(async () => {
-    if (!dialogo || !dialogoJogador.open || document.hidden) return;
-    const { jogador, contexto } = dialogo;
-    try {
-      const box = await buscar(`/jogos/${contexto.jogo.id}/boxscore`);
-      ultimoBox.set(contexto.jogo.id, { box, estado: contexto.jogo.estado });
-      if (/^final/i.test(box.status || "")) pararAtualizacaoDoPainel();
-    } catch {
-      // mantém o que já está na tela
-    }
-    await carregarArremessos(jogador, contexto.jogo, true);
-  }, INTERVALO_AO_VIVO);
-}
-
-function abrirJogador(jogador, contexto) {
-  dialogo = {
-    jogador,
-    contexto: contexto || null,
-    aba: contexto ? "jogo" : "temporada",
-    periodo: "todos",
-  };
-  if (!dialogoJogador.open) dialogoJogador.showModal();
-  desenharJogador();
-  carregarDadosDoPainel();
-  iniciarAtualizacaoDoPainel();
-}
-
-document.getElementById("fechar-jogador").addEventListener("click", () => dialogoJogador.close());
-
-// clicar fora do painel (no fundo escurecido) também fecha
-dialogoJogador.addEventListener("click", (e) => {
-  if (e.target === dialogoJogador) dialogoJogador.close();
-});
-
-dialogoJogador.addEventListener("close", () => {
-  dialogo = null;
-  corpoEl = null;
-  chipAtivo = null;
-  pararAtualizacaoDoPainel();
-});
-
-/* ---------- Abas ---------- */
-
-const ABAS = {
-  jogos: carregarJogos,
-  classificacao: carregarClassificacao,
-  lideres: carregarLideres,
-  corridas: carregarCorridas,
-};
-
-document.querySelectorAll(".aba").forEach((botao) => {
-  botao.addEventListener("click", () => {
-    abaAtual = botao.dataset.aba;
-    document.querySelectorAll(".aba").forEach((b) => b.classList.toggle("ativa", b === botao));
-    for (const id of Object.keys(ABAS)) {
-      document.getElementById(id).hidden = id !== abaAtual;
-    }
-    document.getElementById("barra-datas").hidden = abaAtual !== "jogos";
-    document.getElementById("atualizado").hidden = abaAtual !== "jogos";
-    ABAS[abaAtual]();
-  });
-});
-
-/* ---------- Início e atualização automática ---------- */
-
-async function iniciar() {
-  try {
-    const info = await buscar("/datas");
-    datas = info.datas;
-    hoje = info.hoje;
-    seletor.min = datas[0] || "";
-    seletor.max = datas[datas.length - 1] || "";
-    dataAtual = dataInicial();
-  } catch {
-    document
-      .getElementById("jogos")
-      .replaceChildren(el("p", "status", "Não foi possível carregar o calendário."));
+    c = await api("/classificacao");
+  } catch (erro) {
+    if (tk === S.tkLista) lista().replaceChildren(caixaErro(erro, nbaClassificacao));
     return;
   }
-  atualizarBarra();
-  carregarJogos();
+  if (tk !== S.tkLista) return;
+  const corZona = (pos) => (pos <= 6 ? "var(--vitoria)" : pos <= 10 ? "var(--empate)" : null);
+  const tabelaConf = (nome, times) =>
+    cartao(
+      `Conferência ${nome}`,
+      tabela(
+        [
+          { nome: "#", valor: (t) => h("span", { class: "posicao" }, t.posicao) },
+          { nome: "Time", esq: true, valor: (t) => h("span", { class: "time-celula" }, imgLogo(nbaLogo(t.time_id)), t.time) },
+          { nome: "V", valor: (t) => t.vitorias },
+          { nome: "D", valor: (t) => t.derrotas },
+          { nome: "%", valor: (t) => num(t.aproveitamento * 100, 1) },
+          { nome: "Atrás", titulo: "Jogos atrás do líder", valor: (t) => (t.atras ? num(t.atras, 1) : "–") },
+          { nome: "Casa", valor: (t) => t.casa || "" },
+          { nome: "Fora", valor: (t) => t.fora || "" },
+          { nome: "Últ. 10", valor: (t) => t.ultimos10 || "" },
+          { nome: "Seq.", titulo: "Sequência atual", valor: (t) => (t.sequencia || "").replace("W", "V ").replace("L", "D ") },
+        ],
+        times.map((t) => ({ ...t, _cor: corZona(t.posicao) })),
+        { classeLinha: (t) => (t._cor ? "zona" : null) }
+      ),
+      h(
+        "div",
+        { class: "legenda" },
+        h("span", { style: { "--cor-zona": "var(--vitoria)" } }, h("i"), "Playoffs"),
+        h("span", { style: { "--cor-zona": "var(--empate)" } }, h("i"), "Play-in")
+      )
+    );
+  lista().replaceChildren(h("div", { class: "grade-cartoes", style: { gridTemplateColumns: "repeat(auto-fit, minmax(460px, 1fr))" } }, tabelaConf("Leste", c.Leste), tabelaConf("Oeste", c.Oeste)));
 }
 
-// Atualiza a aba Jogos sozinha: a cada 10 s quando há jogo ao vivo, a cada 30 s nos demais casos.
-// O box score aberto é atualizado junto, porque a lista inteira é desenhada de novo.
-function agendarAtualizacao() {
-  setTimeout(async () => {
-    if (abaAtual === "jogos" && !document.hidden && (dataAtual === hoje || haAoVivo)) {
-      await carregarJogos();
+/* ---------- Líderes ---------- */
+
+async function nbaLideres() {
+  const tk = novoTokenLista();
+  lista().replaceChildren(carregando());
+  let l;
+  try {
+    l = await api(`/lideres?modo=${NBA.modoLideres}`);
+  } catch (erro) {
+    if (tk === S.tkLista) lista().replaceChildren(caixaErro(erro, nbaLideres));
+    return;
+  }
+  if (tk !== S.tkLista) return;
+  const controles = h(
+    "div",
+    { class: "controles" },
+    alternar(
+      [
+        ["media", "Por jogo"],
+        ["total", "Total na temporada"],
+      ],
+      NBA.modoLideres,
+      (v) => {
+        NBA.modoLideres = v;
+        nbaLideres();
+      },
+      "Mostrar"
+    ),
+    h(
+      "span",
+      { class: "nota", style: { margin: 0 } },
+      l.modo === "media"
+        ? `Por jogo: mínimo de ${l.minimo_jogos} jogos (70% dos ${l.jogos_da_liga} da liga). Percentuais usam o mínimo de acertos da NBA.`
+        : "Totais: todos os jogadores. Percentuais usam o mínimo de acertos da NBA."
+    )
+  );
+  const cartoes = l.categorias.map((cat) =>
+    cartao(
+      cat.rotulo,
+      cat.jogadores.length
+        ? h(
+            "ol",
+            { class: "ranking" },
+            cat.jogadores.map((j) =>
+              h(
+                "li",
+                null,
+                h("span", { class: "lugar" }, j.posicao),
+                h(
+                  "span",
+                  null,
+                  h("button", { class: "botao-link", type: "button", onclick: () => abrirJogadorNBA(j.id, j.nome, { sigla: j.time }) }, j.nome),
+                  h("div", { class: "sub" }, [j.time, `${j.jogos} jogos`, j.extra].filter(Boolean).join(", "))
+                ),
+                h("span", { class: "valor" }, cat.percentual ? `${num(j.valor)}%` : l.modo === "media" ? num(j.valor) : j.valor.toLocaleString("pt-BR"))
+              )
+            )
+          )
+        : h("p", { class: "nota" }, "Ninguém atingiu o mínimo ainda.")
+    )
+  );
+  lista().replaceChildren(controles, h("div", { class: "grade-cartoes" }, cartoes));
+}
+
+/* ---------- Corridas do MVP e do calouro ---------- */
+
+async function nbaCorridas() {
+  const tk = novoTokenLista();
+  let c;
+  try {
+    c = await api("/corridas");
+  } catch (erro) {
+    if (tk === S.tkLista) lista().replaceChildren(caixaErro(erro, nbaCorridas));
+    return;
+  }
+  if (tk !== S.tkLista) return;
+  const seta = { subiu: "▲", desceu: "▼", igual: "=", novo: "novo" };
+  const bloco = (titulo, ladder) =>
+    cartao(
+      titulo,
+      ladder.ranking.length
+        ? [
+            h("p", { class: "nota", style: { marginTop: 0 } }, `Edição de ${dataCurta(ladder.data)}`),
+            h(
+              "ol",
+              { class: "ranking" },
+              ladder.ranking.map((r) =>
+                h(
+                  "li",
+                  null,
+                  h("span", { class: "lugar" }, r.posicao),
+                  h(
+                    "span",
+                    null,
+                    h("button", { class: "botao-link", type: "button", onclick: () => abrirJogadorPorNome(r.nome) }, r.nome),
+                    h("div", { class: "sub" }, [r.time, r.stats].filter(Boolean).join(", "))
+                  ),
+                  r.movimento
+                    ? h(
+                        "span",
+                        { class: `movimento ${r.movimento}`, title: r.anterior ? `Na semana passada: ${r.anterior}º` : "Estreia no ranking" },
+                        seta[r.movimento],
+                        r.anterior && r.movimento !== "igual" ? ` ${r.anterior}º` : ""
+                      )
+                    : h("span")
+                )
+              )
+            ),
+            h("p", { class: "nota" }, h("a", { href: ladder.url, target: "_blank", rel: "noopener" }, "Ler a análise completa no NBA.com")),
+          ]
+        : [
+            h("p", { class: "nota" }, "O ranking desta temporada ainda não saiu."),
+            h("p", { class: "nota" }, h("a", { href: ladder.pagina, target: "_blank", rel: "noopener" }, "Ver a página no NBA.com")),
+          ]
+    );
+  lista().replaceChildren(
+    h("div", { class: "grade-cartoes", style: { gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))" } }, bloco("Corrida pelo MVP", c.mvp), bloco("Corrida pelo calouro do ano", c.roy))
+  );
+}
+
+/* ---------- Busca de jogadores ---------- */
+
+function nbaJogadores() {
+  novoTokenLista();
+  const resultados = h("div");
+  const campo = h("input", {
+    class: "busca",
+    type: "search",
+    placeholder: "Nome do jogador (atuais e aposentados)",
+    "aria-label": "Procurar jogador",
+    value: NBA.busca,
+    autocomplete: "off",
+  });
+  let espera;
+  const procurar = async () => {
+    const texto = campo.value.trim();
+    NBA.busca = texto;
+    if (texto.length < 2) {
+      resultados.replaceChildren(h("p", { class: "nota" }, "Digite pelo menos duas letras. A busca cobre toda a história da NBA."));
+      return;
     }
-    agendarAtualizacao();
-  }, haAoVivo ? INTERVALO_AO_VIVO : INTERVALO_NORMAL);
+    const tk = novoTokenLista();
+    resultados.replaceChildren(carregando("Procurando…"));
+    try {
+      const achados = await api(`/jogadores/busca?q=${encodeURIComponent(texto)}`);
+      if (tk !== S.tkLista) return;
+      resultados.replaceChildren(
+        achados.length
+          ? h(
+              "div",
+              { class: "cartao" },
+              achados.map((p) =>
+                h(
+                  "button",
+                  { class: "resultado-busca", type: "button", onclick: () => abrirJogadorNBA(p.id, p.nome, { aba: p.ativo ? "temporada" : "carreira" }) },
+                  h("span", { style: { fontWeight: 600 } }, p.nome),
+                  h("span", { class: "selo" }, p.ativo ? "Em atividade" : "Aposentado")
+                )
+              )
+            )
+          : vazio("Nenhum jogador com esse nome.")
+      );
+    } catch (erro) {
+      if (tk === S.tkLista) resultados.replaceChildren(caixaErro(erro, procurar));
+    }
+  };
+  campo.addEventListener("input", () => {
+    clearTimeout(espera);
+    espera = setTimeout(procurar, 250);
+  });
+  lista().replaceChildren(h("div", { style: { maxWidth: "680px" } }, campo, h("div", { style: { marginTop: "12px" } }, resultados)));
+  procurar();
+  campo.focus();
 }
-
-// ao voltar para a aba do navegador, atualiza na hora
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && abaAtual === "jogos") carregarJogos();
-});
-
-iniciar();
-agendarAtualizacao();
