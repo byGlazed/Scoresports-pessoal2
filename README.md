@@ -58,7 +58,7 @@ Não precisa instalar Android Studio. O arquivo `.github/workflows/apk.yml` faz 
 1. Faça commit e push do projeto inteiro (inclusive as pastas `android/`, `celular/`, `docs/` e `.github/`).
 2. No GitHub, abra a aba **Actions**. Vai aparecer **Gerar APK** rodando; leva uns 5 minutos.
 3. Quando ficar verde, o APK está publicado em **Releases**, com um link fixo:
-   `https://github.com/byGlazed/Scoresports-pessoal/releases/latest/download/Scoresports.apk`
+   `https://github.com/byGlazed/Scoresports-pessoal2/releases/latest/download/Scoresports.apk`
 
 Se quiser gerar sem mudar nada, em **Actions > Gerar APK** clique em **Run workflow**.
 
@@ -84,7 +84,7 @@ A pasta `docs/` é uma versão do app que roda inteira no navegador do celular: 
 1. Faça commit e push do projeto, com a pasta `docs/`, para o GitHub.
 2. No repositório, abra **Settings > Pages**.
 3. Em **Build and deployment**, escolha **Deploy from a branch**, branch `main`, pasta `/docs`, e clique em **Save**.
-4. Em um ou dois minutos o endereço aparece no topo da página, algo como `https://byglazed.github.io/Scoresports-pessoal/` (com o seu usuário).
+4. Em um ou dois minutos o endereço aparece no topo da página, algo como `https://byglazed.github.io/Scoresports-pessoal2/` (com o seu usuário).
 
 ### Instalar no celular
 - **Android (Chrome):** abra o endereço, toque nos três pontinhos e em **Instalar app** (ou **Adicionar à tela inicial**).
@@ -114,8 +114,8 @@ Se a ESPN recusar os pedidos vindos do navegador, crie um repasse gratuito na Cl
 ## Como rodar
 
 ```
-git clone https://github.com/byGlazed/Scoresports-pessoal.git
-cd Scoresports-pessoal
+git clone https://github.com/byGlazed/Scoresports-pessoal2.git
+cd Scoresports-pessoal2
 
 python -m venv .venv
 
@@ -139,7 +139,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ## Estrutura do projeto
 
 ```
-Scoresports-pessoal/
+Scoresports-pessoal2/
 ├── api.py              # rotas da API (FastAPI) e entrega da página
 ├── nba_dados.py        # busca e formata os dados da NBA (inclui carreira e busca de jogadores)
 ├── espn_dados.py       # futebol, NFL, F1 e UFC pela API pública da ESPN

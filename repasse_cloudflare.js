@@ -6,7 +6,7 @@
 // 2. Apague o código de exemplo, cole este arquivo inteiro e clique em Deploy.
 // 3. Copie o endereço do worker (algo como https://scoresports.SEU-NOME.workers.dev).
 // 4. No celular, abra uma vez o app com ?repasse= no fim do link, assim:
-//    https://SEU-USUARIO.github.io/Scoresports-pessoal/?repasse=https://scoresports.SEU-NOME.workers.dev/?url=
+//    https://SEU-USUARIO.github.io/Scoresports-pessoal2/?repasse=https://scoresports.SEU-NOME.workers.dev/?url=
 
 const PERMITIDOS = /^https:\/\/([a-z0-9-]+\.)*(espn\.com|wikipedia\.org)\//;
 
