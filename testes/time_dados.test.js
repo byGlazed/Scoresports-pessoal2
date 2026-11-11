@@ -151,3 +151,20 @@ test("idTecnicoAtual: prefere o rank preferred e o técnico sem data de fim", ()
   assert.equal(T.idTecnicoAtual({ claims: { P286: [tecnico("Q10", "normal", true)] } }), null);
   assert.equal(T.idTecnicoAtual({}), null);
 });
+
+test("candidatosExatos: só itens cujo nome ou apelido é exatamente o nome do time", () => {
+  const bota = T.candidatosExatos(amostra("wikidata_busca_botafogo"), "Botafogo");
+  assert.ok(!bota.includes("Q2332493"), "Botafogo Futebol Clube não é o Botafogo da ESPN");
+  assert.ok(bota.includes("Q894624"));
+  assert.equal(T.candidatosExatos(amostra("wikidata_busca_palmeiras"), "palmeirás")[0], "Q80964");
+  assert.ok(!T.candidatosExatos(amostra("wikidata_busca_arsenal"), "Arsenal").includes("Q9617"));
+  assert.deepEqual(T.candidatosExatos({}, "Botafogo"), []);
+});
+
+test("escolherClube com país: descarta clube de outro país", () => {
+  const clube = (pais) => ({ claims: { P31: [p31("Q476028")], P17: [p31(pais)] } });
+  const resposta = { entities: { Q1: clube("Q159"), Q2: clube("Q145") } };
+  assert.equal(T.escolherClube(resposta, "Q145"), "Q2");
+  assert.equal(T.escolherClube(resposta, "Q155"), null);
+  assert.equal(T.escolherClube(resposta), "Q1");
+});

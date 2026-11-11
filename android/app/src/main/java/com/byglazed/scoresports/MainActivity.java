@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
                 if (host.equals("appassets.androidplatform.net")) {
                     return arquivos.shouldInterceptRequest(uri);
                 }
-                if (pedido.getMethod().equals("GET") && (host.endsWith("espn.com") || host.endsWith("wikipedia.org"))) {
+                if (pedido.getMethod().equals("GET") && (host.endsWith("espn.com") || host.endsWith("wikipedia.org") || host.endsWith("wikidata.org"))) {
                     return buscarPeloAndroid(uri.toString());
                 }
                 return null; // o resto (fontes, logos, fotos) segue normal

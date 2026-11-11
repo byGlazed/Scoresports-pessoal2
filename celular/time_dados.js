@@ -176,11 +176,22 @@ function idDoValor(afirmacao) {
   return v && typeof v === "object" && v.id ? v.id : null;
 }
 
-/** Na resposta do wbgetentities, o primeiro item que é clube ou seleção de futebol. */
-function escolherClube(resposta) {
+const normalizar = (s) => String(s || "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
+
+/** Na resposta do wbsearchentities, os itens cujo nome ou apelido é exatamente o nome procurado (sem acento e caixa). */
+function candidatosExatos(busca, nome) {
+  const alvo = normalizar(nome);
+  return ((busca || {}).search || []).filter((s) => normalizar((s.match || {}).text) === alvo).map((s) => s.id);
+}
+
+/** Na resposta do wbgetentities, o primeiro item que é clube ou seleção de futebol (e do país pedido, se houver). */
+function escolherClube(resposta, paisQid = null) {
   for (const [qid, ent] of Object.entries((resposta || {}).entities || {})) {
-    const tipos = (((ent || {}).claims || {}).P31 || []).map(idDoValor);
-    if (tipos.some((t) => CLUBE_OU_SELECAO.includes(t))) return qid;
+    const claims = (ent || {}).claims || {};
+    const tipos = (claims.P31 || []).map(idDoValor);
+    if (!tipos.some((t) => CLUBE_OU_SELECAO.includes(t))) continue;
+    if (paisQid && !(claims.P17 || []).map(idDoValor).includes(paisQid)) continue;
+    return qid;
   }
   return null;
 }
@@ -197,5 +208,5 @@ function idTecnicoAtual(entidade) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { atletaCurto, grupoDaPosicao, agruparElenco, resultadoDoTime, separarJogos, estatisticasDoTime, escolherClube, idTecnicoAtual };
+  module.exports = { atletaCurto, grupoDaPosicao, agruparElenco, resultadoDoTime, separarJogos, estatisticasDoTime, candidatosExatos, escolherClube, idTecnicoAtual };
 }

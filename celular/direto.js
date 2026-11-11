@@ -977,29 +977,135 @@ async function buscarClassificacao(esporte, liga) {
 
 /* ---------- Elenco e atleta ---------- */
 
-const GRUPOS_ELENCO_PT = { offense: "Ataque", defense: "Defesa", specialteam: "Times especiais", "special teams": "Times especiais", goalkeeper: "Goleiros", defender: "Defensores", midfielder: "Meio-campistas", forward: "Atacantes" };
-
-// atletaCurto fica em time_dados.js (carregado antes deste arquivo)
+// atletaCurto, agruparElenco e as outras regras da página do time ficam em time_dados.js
 
 async function buscarElenco(esporte, liga, timeId) {
   const [cfg] = dConfig(esporte, liga);
   const dados = await espnGet(`${D_BASE}/${cfg.esporte}/${liga}/teams/${timeId}/roster`);
-  const atletas = dados.athletes || [];
-  let grupos;
-  if (atletas.length && atletas[0] && "items" in atletas[0]) {
-    grupos = atletas.map((g) => {
-      const nome = String(g.position || "");
-      return { nome: GRUPOS_ELENCO_PT[nome.toLowerCase()] || nome.charAt(0).toUpperCase() + nome.slice(1), atletas: (g.items || []).map(atletaCurto) };
-    });
-  } else grupos = [{ nome: "Elenco", atletas: atletas.map(atletaCurto) }];
+  const { grupos, tecnico } = agruparElenco(esporte, dados);
   const time = dados.team || {};
-  const resultado = { time: { id: time.id || timeId, nome: time.displayName, logo: logoDe(time) }, grupos };
+  const resultado = { time: { id: time.id || timeId, nome: time.displayName, logo: logoDe(time) }, grupos, tecnico };
   Indice.registrar(
     [{ tipo: "time", esporte, liga, id: resultado.time.id, nome: resultado.time.nome, imagem: resultado.time.logo }].concat(
       grupos.flatMap((g) => g.atletas.map((a) => ({ esporte, liga, id: a.id, nome: a.nome, descricao: resultado.time.nome, imagem: a.foto })))
     )
   );
   return resultado;
+}
+
+/* ---------- Página do time ---------- */
+
+const WIKIDATA = "https://www.wikidata.org";
+
+/** País (item do Wikidata) de cada liga nacional, para não confundir clubes de mesmo nome. */
+const PAIS_DA_LIGA = { bra: "Q155", eng: "Q145", esp: "Q29", ita: "Q38", ger: "Q183", fra: "Q142", por: "Q45", usa: "Q30", ned: "Q55" };
+
+/** Item do clube no Wikidata: primeiro pelo ID da ESPN (P13590); senão pelo nome exato, no país da liga. */
+async function clubeNoWikidata(nomeTime, timeId, liga) {
+  const porId = await wiki(WIKIDATA, { action: "query", list: "search", srsearch: `haswbstatement:P13590=${timeId}`, srlimit: 1 });
+  const achado = (((porId.query || {}).search || [])[0] || {}).title;
+  if (achado) return achado;
+  const pais = PAIS_DA_LIGA[String(liga).split(".")[0]];
+  if (!pais || !nomeTime) return null; // torneio internacional: sem o ID da ESPN, não arrisca
+  const busca = await wiki(WIKIDATA, { action: "wbsearchentities", search: nomeTime, language: "pt", uselang: "pt", type: "item", limit: 10 });
+  const ids = candidatosExatos(busca, nomeTime);
+  if (!ids.length) return null;
+  const ents = await wiki(WIKIDATA, { action: "wbgetentities", ids: ids.join("|"), props: "claims" });
+  const ordenadas = { entities: Object.fromEntries(ids.filter((id) => (ents.entities || {})[id]).map((id) => [id, ents.entities[id]])) };
+  return escolherClube(ordenadas, pais);
+}
+
+/** Técnico atual de um time de futebol pelo Wikidata (a ESPN não informa). null quando não acha com segurança. */
+async function tecnicoFutebol(nomeTime, timeId, liga) {
+  try {
+    return await obter(`wikidata_tecnico_v2:${liga}:${timeId}`, 7 * 86400, async () => {
+      const clube = await clubeNoWikidata(nomeTime, timeId, liga);
+      if (!clube) return null;
+      const ent = await wiki(WIKIDATA, { action: "wbgetentities", ids: clube, props: "claims" });
+      const idTecnico = idTecnicoAtual((ent.entities || {})[clube]);
+      if (!idTecnico) return null;
+      const t = await wiki(WIKIDATA, { action: "wbgetentities", ids: idTecnico, props: "labels", languages: "pt|en" });
+      const rotulos = ((t.entities || {})[idTecnico] || {}).labels || {};
+      return (rotulos.pt || rotulos.en || {}).value || null;
+    });
+  } catch (_) {
+    return null;
+  }
+}
+
+/** "1° no Campeonato Brasileiro" (ou "1st in ...") → "1º lugar · Brasileirão Série A"; "3° no Divisão Atlântico" → "3º lugar · Divisão Atlântico". */
+function posicaoNaLiga(resumo, liga, futebol) {
+  const m = /^(\d+)\S*\s+(?:in|no|na|em)\s+(.+)$/.exec(String(resumo || "").trim());
+  if (!m) return null;
+  let onde = futebol ? nomeDaLiga(liga) : m[2];
+  onde = onde.replace(/^(.+) Division$/, "Divisão $1").replace(/^(.+) Conference$/, "Conferência $1");
+  return `${m[1]}º lugar · ${onde}`;
+}
+
+async function buscarTime(esporte, liga, timeId) {
+  const [cfg] = dConfig(esporte, liga);
+  // o /schedule traz o resumo do time e, ao contrário do /teams/{id}, aceita pedidos do navegador
+  const d = await espnGet(`${D_BASE}/${cfg.esporte}/${liga}/teams/${timeId}/schedule`);
+  const time = d.team || {};
+  const [ano] = await temporadaAtual(cfg.esporte, liga);
+  let venue = {};
+  try {
+    const core = await espnGet(`${D_CORE}/${cfg.esporte}/leagues/${liga}/seasons/${ano}/teams/${timeId}`);
+    venue = (core.venue && core.venue.$ref ? await ref(core.venue.$ref) : core.venue) || {};
+  } catch (_) {
+    /* sem estádio */
+  }
+  let tecnico = null;
+  if (cfg.esporte === "soccer") tecnico = await tecnicoFutebol(time.displayName, timeId, liga);
+  else {
+    try {
+      tecnico = (await obter(`espn_elenco_v2:${esporte}:${liga}:${timeId}`, 21600, () => buscarElenco(esporte, liga, timeId))).tecnico;
+    } catch (_) {
+      /* sem técnico */
+    }
+  }
+  return {
+    id: String(time.id || timeId),
+    nome: time.displayName || null,
+    logo: logoDe(time),
+    liga_nome: nomeDaLiga(liga),
+    posicao: posicaoNaLiga(time.standingSummary, liga, cfg.esporte === "soccer"),
+    campanha: time.recordSummary || null,
+    estadio: venue.fullName || null,
+    cidade: (venue.address || {}).city || null,
+    tecnico,
+  };
+}
+
+async function buscarJogosTime(esporte, liga, timeId) {
+  const [cfg] = dConfig(esporte, liga);
+  const url = `${D_BASE}/${cfg.esporte}/${liga}/teams/${timeId}/schedule`;
+  const pedidos = [espnGet(url)];
+  if (cfg.esporte === "soccer") pedidos.push(espnGet(url, { fixture: true }).catch(() => ({ events: [] }))); // o futebol só manda os próximos assim
+  const respostas = await Promise.all(pedidos);
+  const vistos = new Set();
+  const jogos = [];
+  for (const ev of respostas.flatMap((r) => r.events || [])) {
+    const id = String(ev.id || "");
+    if (!id || vistos.has(id)) continue;
+    vistos.add(id);
+    jogos.push(partida(ev, esporte, liga));
+  }
+  return separarJogos(jogos, new Date().toISOString());
+}
+
+async function buscarEstatisticasTime(esporte, liga, timeId) {
+  const [cfg] = dConfig(esporte, liga);
+  const [ano, tipo, nome] = await temporadaAtual(cfg.esporte, liga);
+  // no futebol a ESPN informa um código interno de temporada; as estatísticas de time ficam no tipo 1
+  const t = cfg.esporte === "soccer" ? 1 : tipo || 2;
+  try {
+    const d = await espnGet(`${D_CORE}/${cfg.esporte}/leagues/${liga}/seasons/${ano}/types/${t}/teams/${timeId}/statistics`);
+    return { temporada: nome, grupos: estatisticasDoTime(esporte, ((d.splits || {}).categories) || []) };
+  } catch (erro) {
+    if (/erro (400|404)/.test(String(erro.message))) return { temporada: nome, grupos: [] }; // competição sem estatística de time
+    throw erro;
+  }
 }
 
 const texto = (v) => (v && typeof v === "object" ? v.displayName || v.text || v.name || v.abbreviation || null : v || null);
@@ -1785,7 +1891,10 @@ const ROTAS = [
   }],
   [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v1:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3)],
   [/^\/e\/([^/]+)\/([^/]+)\/classificacao$/, (m) => viaEspn(`espn_classificacao_v1:${m[1]}:${m[2]}`, 1800, () => buscarClassificacao(m[1], m[2]))],
-  [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/elenco$/, (m) => viaEspn(`espn_elenco_v1:${m[1]}:${m[2]}:${m[3]}`, 43200, () => buscarElenco(m[1], m[2], m[3]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)$/, (m) => viaEspn(`espn_time_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarTime(m[1], m[2], m[3]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/jogos$/, (m) => viaEspn(`espn_time_jogos_v1:${m[1]}:${m[2]}:${m[3]}`, 900, () => buscarJogosTime(m[1], m[2], m[3]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/estatisticas$/, (m) => viaEspn(`espn_time_stats_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarEstatisticasTime(m[1], m[2], m[3]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/elenco$/, (m) => viaEspn(`espn_elenco_v2:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarElenco(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/atletas\/([^/]+)\/historico$/, (m) => {
     const [cfg] = dConfig(m[1], m[2]);
     if (cfg.tipo === "luta") return viaEspn(`ufc_lutas_v1:${m[3]}`, 6 * 3600, () => buscarLutas(m[3]));
