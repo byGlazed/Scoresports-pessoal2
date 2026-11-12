@@ -1210,3 +1210,20 @@ select.campo-data { cursor: pointer; }
 .selo-resultado.d { background: var(--derrota); }
 .tabela tr.linha-destaque td { background: var(--marca-suave); font-weight: 600; }
 .tecnico { margin: 0; font-weight: 600; }
+
+/* ---------- Busca: filtros e recentes ---------- */
+.chips-busca { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 10px 0 12px; }
+.chip-busca {
+  flex: none;
+  border: 1px solid var(--linha);
+  background: var(--superficie);
+  color: var(--texto);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.chip-busca[aria-pressed="true"] { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
+.recente { display: flex; align-items: center; }
+.recente .resultado-busca { flex: 1; min-width: 0; }
+.tirar-recente { flex: none; font-size: 20px; color: var(--texto-3); background: none; border: 0; width: 40px; height: 40px; }

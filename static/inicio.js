@@ -344,27 +344,6 @@ const ABAS_POR_ESPORTE = {
   boxe: [["eventos", "Eventos"]],
 };
 
-function pesquisaDesenhar() {
-  novoTokenLista();
-  const resultados = h("div", { class: "resultados-pesquisa" });
-  const campo = h("input", {
-    class: "busca",
-    type: "search",
-    placeholder: "Ex.: Vini Jr., Flamengo, Libertadores, Mahomes, Pereira",
-    "aria-label": "Procurar jogador, time ou competição",
-    value: PESQUISA.texto,
-    autocomplete: "off",
-  });
-  let espera;
-  campo.addEventListener("input", () => {
-    clearTimeout(espera);
-    espera = setTimeout(() => pesquisaProcurar(campo.value.trim(), resultados), 350);
-  });
-  lista().replaceChildren(h("div", { class: "pesquisa" }, campo, resultados));
-  pesquisaProcurar(PESQUISA.texto, resultados);
-  campo.focus();
-}
-
 function cartaoLiga(l) {
   const chave = l.esporte === "futebol" ? `futebol:${l.liga}` : l.esporte;
   const fav = { tipo: "liga", esporte: l.esporte, liga: l.liga, id: l.liga, nome: l.nome };
@@ -378,7 +357,20 @@ function cartaoLiga(l) {
       h(
         "div",
         { class: "controles" },
-        (ABAS_POR_ESPORTE[l.esporte] || []).map(([aba, nome]) => h("button", { class: "botao", type: "button", onclick: () => abrirLiga(l.esporte, l.liga, aba) }, nome))
+        (ABAS_POR_ESPORTE[l.esporte] || []).map(([aba, nome]) =>
+          h(
+            "button",
+            {
+              class: "botao",
+              type: "button",
+              onclick: () => {
+                PESQUISA_lembrar({ tipo: "liga", esporte: l.esporte, liga: l.liga, id: l.liga, nome: l.nome, descricao: null, imagem: null });
+                abrirLiga(l.esporte, l.liga, aba);
+              },
+            },
+            nome
+          )
+        )
       ),
       listaCampeoes(chave)
     )
@@ -400,16 +392,160 @@ function linhaResultado({ nome, descricao, esporte, imagem, aoClicar, favorito }
   );
 }
 
-async function pesquisaProcurar(texto, resultados) {
-  PESQUISA.texto = texto;
-  if (texto.length < 2) {
+const FILTROS_BUSCA = [
+  ["todos", "Todos"],
+  ["times", "Times"],
+  ["atletas", "Atletas"],
+  ["competicoes", "Competições"],
+];
+
+function pesquisaDesenhar() {
+  novoTokenLista();
+  if (!PESQUISA.filtro) PESQUISA.filtro = "todos";
+  const resultados = h("div", { class: "resultados-pesquisa" });
+  const campo = h("input", {
+    class: "busca",
+    type: "search",
+    placeholder: "Ex.: Vini Jr., Flamengo, Libertadores, Mahomes, Usyk",
+    "aria-label": "Procurar jogador, time ou competição",
+    value: PESQUISA.texto,
+    autocomplete: "off",
+  });
+  const chips = h("div", { class: "chips-busca", role: "group", "aria-label": "Filtrar resultados" });
+  const desenharChips = () =>
+    chips.replaceChildren(
+      ...FILTROS_BUSCA.map(([id, nome]) =>
+        h(
+          "button",
+          {
+            class: "chip-busca",
+            type: "button",
+            "aria-pressed": String(PESQUISA.filtro === id),
+            onclick: () => {
+              PESQUISA.filtro = id;
+              desenharChips();
+              // troca de filtro não pede de novo: redesenha com o último resultado
+              if (PESQUISA.texto.length >= 2 && PESQUISA.ultimo) pesquisaMostrar(PESQUISA.ultimo, resultados);
+              else pesquisaRecentes(resultados);
+            },
+          },
+          nome
+        )
+      )
+    );
+  desenharChips();
+  let espera;
+  campo.addEventListener("input", () => {
+    clearTimeout(espera);
+    espera = setTimeout(() => pesquisaProcurar(campo.value.trim(), resultados), 350);
+  });
+  lista().replaceChildren(h("div", { class: "pesquisa" }, campo, chips, resultados));
+  pesquisaProcurar(PESQUISA.texto, resultados);
+  campo.focus();
+}
+
+/* ---------- Buscas recentes (guardadas no aparelho) ---------- */
+
+function pesquisaLerRecentes() {
+  try {
+    const l = JSON.parse(lembrar("busca_recentes") || "[]");
+    return Array.isArray(l) ? l : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function PESQUISA_lembrar(item) {
+  guardar("busca_recentes", JSON.stringify(lembrarRecente(pesquisaLerRecentes(), item)));
+}
+
+function pesquisaEsquecer(item) {
+  const chave = `${item.tipo}:${item.esporte}:${item.id}`;
+  guardar("busca_recentes", JSON.stringify(pesquisaLerRecentes().filter((x) => `${x.tipo}:${x.esporte}:${x.id}` !== chave)));
+}
+
+/** Abre um resultado (atleta, time ou competição) e o põe no topo dos recentes. */
+function pesquisaAbrir(item) {
+  PESQUISA_lembrar(item);
+  if (item.tipo === "liga") return abrirLiga(item.esporte, item.liga, ((ABAS_POR_ESPORTE[item.esporte] || [])[0] || [])[0]);
+  if (item.tipo === "time") return abrirTime(item.esporte, item.liga, item.id, item.nome);
+  if (item.esporte === "boxe") return abrirBoxeador(item.nome);
+  if (item.esporte === "nba" && esporteObj("nba") && esporteObj("nba").tipo === "nba")
+    return abrirJogadorNBA(Number(item.id), item.nome, { aba: item.ativo === false ? "carreira" : "temporada" });
+  return abrirAtleta(item.esporte, item.liga, item.id, item.nome);
+}
+
+function itemDeBusca(tipo, x) {
+  return { tipo, esporte: x.esporte, liga: x.liga, id: String(x.id), nome: x.nome, descricao: x.descricao || null, imagem: x.imagem || null, ativo: x.ativo };
+}
+
+function linhaDeItem(item) {
+  return linhaResultado({
+    nome: item.nome,
+    descricao: item.descricao,
+    esporte: item.esporte,
+    imagem: item.imagem,
+    aoClicar: () => pesquisaAbrir(item),
+    favorito:
+      item.tipo === "time"
+        ? { tipo: "time", esporte: item.esporte, liga: item.liga, id: item.id, nome: item.nome, logo: item.imagem }
+        : item.tipo === "liga"
+          ? { tipo: "liga", esporte: item.esporte, liga: item.liga, id: item.liga, nome: item.nome }
+          : { tipo: "jogador", esporte: item.esporte, liga: item.liga, id: item.id, nome: item.nome },
+  });
+}
+
+function pesquisaRecentes(resultados) {
+  const recentes = pesquisaLerRecentes().filter((x) => {
+    const f = PESQUISA.filtro;
+    return f === "todos" || (f === "times" && x.tipo === "time") || (f === "atletas" && x.tipo === "jogador") || (f === "competicoes" && x.tipo === "liga");
+  });
+  if (!recentes.length) {
     resultados.replaceChildren(
       h(
         "p",
         { class: "nota" },
-        "Procure em todos os esportes: jogadores da NBA (inclusive aposentados), jogadores e times de futebol e NFL, lutadores do UFC, pilotos e competições. Nas competições aparecem os últimos campeões."
+        "Procure em todos os esportes: jogadores da NBA (inclusive aposentados), jogadores e times de futebol, NFL, MLB e NHL, lutadores do UFC, boxeadores, pilotos e competições. Nas competições aparecem os últimos campeões."
       )
     );
+    return;
+  }
+  resultados.replaceChildren(
+    h("p", { class: "titulo-dia" }, "Recentes"),
+    h(
+      "div",
+      { class: "cartao" },
+      recentes.map((item) =>
+        h(
+          "div",
+          { class: "recente" },
+          linhaDeItem(item),
+          h(
+            "button",
+            {
+              class: "botao-icone tirar-recente",
+              type: "button",
+              "aria-label": "Tirar dos recentes",
+              onclick: () => {
+                pesquisaEsquecer(item);
+                pesquisaRecentes(resultados);
+              },
+            },
+            "×"
+          )
+        )
+      )
+    )
+  );
+}
+
+/* ---------- Resultados ---------- */
+
+async function pesquisaProcurar(texto, resultados) {
+  PESQUISA.texto = texto;
+  if (texto.length < 2) {
+    PESQUISA.ultimo = null;
+    pesquisaRecentes(resultados);
     return;
   }
   const tk = novoTokenLista();
@@ -422,55 +558,30 @@ async function pesquisaProcurar(texto, resultados) {
     return;
   }
   if (tk !== S.tkLista) return;
+  PESQUISA.ultimo = r;
+  pesquisaMostrar(r, resultados);
+}
 
+function pesquisaMostrar(r, resultados) {
+  const f = PESQUISA.filtro || "todos";
+  const ver = (qual) => f === "todos" || f === qual;
   const partes = [];
-  if (r.ligas.length) {
+  if (ver("competicoes") && r.ligas.length) {
     partes.push(h("p", { class: "titulo-dia" }, "Competições"), h("div", { class: "grade-cartoes" }, r.ligas.map(cartaoLiga)));
   }
-  if (r.jogadores.length) {
+  if (ver("atletas") && r.jogadores.length) {
     partes.push(
       h("p", { class: "titulo-dia", style: { marginTop: "16px" } }, "Jogadores e atletas"),
-      h(
-        "div",
-        { class: "cartao" },
-        r.jogadores.map((p) =>
-          linhaResultado({
-            nome: p.nome,
-            descricao: p.descricao,
-            esporte: p.esporte,
-            imagem: p.imagem,
-            aoClicar: () =>
-              p.esporte === "boxe"
-                ? abrirBoxeador(p.nome)
-                : p.esporte === "nba" && esporteObj("nba").tipo === "nba"
-                  ? abrirJogadorNBA(Number(p.id), p.nome, { aba: p.ativo === false ? "carreira" : "temporada" })
-                  : abrirAtleta(p.esporte, p.liga, p.id, p.nome),
-            favorito: { tipo: "jogador", esporte: p.esporte, liga: p.liga, id: String(p.id), nome: p.nome },
-          })
-        )
-      )
+      h("div", { class: "cartao" }, r.jogadores.map((p) => linhaDeItem(itemDeBusca("jogador", p))))
     );
   }
-  if (r.times.length) {
+  if (ver("times") && r.times.length) {
     partes.push(
       h("p", { class: "titulo-dia", style: { marginTop: "16px" } }, "Times e seleções"),
-      h(
-        "div",
-        { class: "cartao" },
-        r.times.map((t) =>
-          linhaResultado({
-            nome: t.nome,
-            descricao: t.descricao,
-            esporte: t.esporte,
-            imagem: t.imagem,
-            aoClicar: () => abrirTime(t.esporte, t.liga, t.id, t.nome),
-            favorito: { tipo: "time", esporte: t.esporte, liga: t.liga, id: String(t.id), nome: t.nome, logo: t.imagem },
-          })
-        )
-      )
+      h("div", { class: "cartao" }, r.times.map((t) => linhaDeItem(itemDeBusca("time", t))))
     );
   }
-  if (!partes.length) partes.push(vazio("Nada encontrado com esse nome."));
+  if (!partes.length) partes.push(vazio(f === "todos" ? "Nada encontrado com esse nome." : "Nada encontrado nesse filtro."));
   if (r.falhas && r.falhas.length) partes.push(h("p", { class: "nota" }, `${r.falhas.join(" e ")} não respondeu agora: aparecem só os outros resultados.`));
   if (r.indice !== undefined) {
     partes.push(

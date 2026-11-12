@@ -16,7 +16,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 
 ### Início e Pesquisa
 - **Favoritos:** a estrela ☆ ao lado de times, jogadores e competições guarda o favorito no navegador. A aba **Início** junta, no dia escolhido, os jogos de todos os favoritos (de qualquer esporte), com placar ao vivo e onde assistir.
-- **Pesquisa:** procura jogadores (inclusive aposentados da NBA), times, seleções, lutadores, pilotos e competições. Cada competição mostra atalhos para jogos, classificação e estatísticas, e os **últimos campeões**.
+- **Pesquisa:** procura jogadores (inclusive aposentados da NBA), times, seleções, lutadores do UFC, boxeadores (pela Wikipédia), pilotos e competições, com o nome certo primeiro. Filtros Todos, Times, Atletas e Competições; com o campo vazio aparecem as **buscas recentes** (com × para apagar). Cada competição mostra atalhos para jogos, classificação e estatísticas, e os **últimos campeões**.
 
 ### NBA
 - **Jogos por dia:** navegação por setas ou calendário, da primeira rodada ao fim da temporada.
@@ -177,6 +177,7 @@ Scoresports-pessoal2/
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
 ├── time_dados.js      # regras da página do time (elenco por posição, jogos, estatísticas, técnico)
+├── busca_regras.js    # regras da busca (relevância, boxeadores da Wikipédia, recentes)
 ├── regras_esportes.js # regras de MLB e NHL (placar ao vivo, série, pontuações, líderes)
 ├── sw.js, registrar.js, manifest.webmanifest, ícones
 ├── android.js         # botão voltar do Android (só no APK)
