@@ -59,7 +59,17 @@ function filtrarBoxeadores(boxeadores, ordemDaBusca, texto) {
   return ordenados.filter((b) => b.titulo === primeiro || nivelRelevancia(b.titulo, texto) <= 3);
 }
 
-const chaveRecente =(x) => `${x.tipo}:${x.esporte}:${x.id}`;
+/** Identidade de um item da busca. No boxe o mesmo lutador vem da agenda e da Wikipédia com códigos diferentes: vale o nome. */
+const chaveRecente = (x) => (x.esporte === "boxe" ? `${x.tipo}:boxe:${semAcentoBusca(x.nome)}` : `${x.tipo}:${x.esporte}:${x.id}`);
+
+/** "Lutador · UFC" mais o resto da descrição, sem repetir o "UFC" que ela já trazia. */
+function rotuloUfc(descricao) {
+  const resto = String(descricao || "")
+    .replace(/^Lutador · UFC( · )?/, "")
+    .replace(/^UFC[,\s]*/, "")
+    .trim();
+  return resto ? `Lutador · UFC · ${resto}` : "Lutador · UFC";
+}
 
 /** Lista de recentes com o item no topo, sem repetição e com no máximo `limite` itens. Não altera a lista recebida. */
 function lembrarRecente(lista, item, limite = 10) {
@@ -68,5 +78,5 @@ function lembrarRecente(lista, item, limite = 10) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { ordenarPorRelevancia, boxeadoresDaWikipedia, filtrarBoxeadores, lembrarRecente, nivelRelevancia };
+  module.exports = { ordenarPorRelevancia, boxeadoresDaWikipedia, filtrarBoxeadores, lembrarRecente, nivelRelevancia, chaveRecente, rotuloUfc };
 }

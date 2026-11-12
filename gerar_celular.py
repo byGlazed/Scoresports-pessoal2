@@ -18,7 +18,7 @@ from pathlib import Path
 RAIZ = Path(__file__).parent
 DOCS = RAIZ / "docs"
 APK_WWW = RAIZ / "android" / "app" / "src" / "main" / "assets" / "www"
-TELAS = ("app.js", "esportes.js", "inicio.js", "style.css")
+TELAS = ("app.js", "esportes.js", "busca_regras.js", "inicio.js", "style.css")
 DADOS = ("transmissoes.json", "boxe_eventos.json", "campeoes.json")
 
 CABECA_CELULAR = """  <link rel="manifest" href="./manifest.webmanifest">
@@ -50,7 +50,7 @@ def main():
     html = html.replace("</head>", CABECA_CELULAR + "</head>")
     html = html.replace(
         '<script src="./inicio.js"></script>',
-        '<script src="./inicio.js"></script>\n  <script src="./busca_regras.js"></script>\n  <script src="./regras_esportes.js"></script>\n  <script src="./time_dados.js"></script>\n  <script src="./direto.js"></script>\n  <script src="./registrar.js"></script>',
+        '<script src="./inicio.js"></script>\n  <script src="./regras_esportes.js"></script>\n  <script src="./time_dados.js"></script>\n  <script src="./direto.js"></script>\n  <script src="./registrar.js"></script>',
     )
     (DOCS / "index.html").write_text(html, encoding="utf-8")
 

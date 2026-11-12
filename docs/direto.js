@@ -1765,10 +1765,20 @@ async function boxeEventos() {
   return eventos;
 }
 
-async function wiki(base, params) {
+async function wiki(base, params, limiteMs = 6000) {
   const u = new URL(`${base}/w/api.php`);
   for (const [k, v] of Object.entries({ ...params, format: "json", formatversion: 2, origin: "*" })) u.searchParams.set(k, v);
-  const r = await fetch(u.toString());
+  // Wikipédia lenta vira falha em vez de travar a tela
+  const controle = new AbortController();
+  const relogio = setTimeout(() => controle.abort(), limiteMs);
+  let r;
+  try {
+    r = await fetch(u.toString(), { signal: controle.signal });
+  } catch (erro) {
+    throw new Error(controle.signal.aborted ? "a Wikipédia demorou demais para responder" : `a Wikipédia não respondeu (${erro.message})`);
+  } finally {
+    clearTimeout(relogio);
+  }
   if (!r.ok) throw new Error(`a Wikipédia respondeu com erro ${r.status}`);
   return r.json();
 }
@@ -2027,25 +2037,20 @@ const ROTAS = [
     };
     for (const i of await Indice.procurar(textoBusca)) juntar({ esporte: i.esporte, liga: i.liga, id: i.id, nome: i.nome, descricao: i.descricao, imagem: i.imagem }, i.tipo);
     const falhas = [];
-    try {
-      const espn = await obter(`busca_espn_v2:${semAcento(textoBusca)}`, 6 * 3600, () => buscarEspn(textoBusca));
-      espn.jogadores.forEach((j) => juntar(j, "jogador"));
-      espn.times.forEach((t) => juntar(t, "time"));
-    } catch (_) {
-      falhas.push("ESPN");
-    }
-    if (textoBusca.length >= 3) {
-      try {
-        const boxeadores = await buscarBoxeadoresWiki(textoBusca);
-        boxeadores.forEach((b) => juntar(b, "jogador"));
-        Indice.registrar(boxeadores);
-      } catch (_) {
-        falhas.push("Wikipédia");
-      }
-    }
-    for (const j of jogadores) {
-      if (j.esporte === "ufc" && !String(j.descricao || "").startsWith("Lutador")) j.descricao = ["Lutador · UFC", j.descricao].filter(Boolean).join(" · ");
-    }
+    // ESPN e Wikipédia ao mesmo tempo: uma lenta não segura a outra
+    const [espn, boxe] = await Promise.allSettled([
+      obter(`busca_espn_v2:${semAcento(textoBusca)}`, 6 * 3600, () => buscarEspn(textoBusca)),
+      textoBusca.length >= 3 ? buscarBoxeadoresWiki(textoBusca) : Promise.resolve([]),
+    ]);
+    if (espn.status === "fulfilled") {
+      espn.value.jogadores.forEach((j) => juntar(j, "jogador"));
+      espn.value.times.forEach((t) => juntar(t, "time"));
+    } else falhas.push("ESPN");
+    if (boxe.status === "fulfilled") {
+      boxe.value.forEach((b) => juntar(b, "jogador"));
+      if (boxe.value.length) Indice.registrar(boxe.value).catch(() => {});
+    } else falhas.push("Wikipédia");
+    for (const j of jogadores) if (j.esporte === "ufc") j.descricao = rotuloUfc(j.descricao);
     return {
       ligas: procurarLigas(textoBusca),
       jogadores: ordenarPorRelevancia(jogadores, textoBusca).slice(0, 40),

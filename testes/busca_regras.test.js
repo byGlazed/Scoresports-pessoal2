@@ -6,7 +6,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const B = require("../celular/busca_regras.js");
+const B = require("../static/busca_regras.js");
 
 const amostra = (nome) => JSON.parse(fs.readFileSync(path.join(__dirname, "amostras", `${nome}.json`), "utf8"));
 const titulos = (l) => l.map((x) => x.titulo);
@@ -78,4 +78,23 @@ test("filtrarBoxeadores: com nome de mais de uma palavra, só quem tem o nome pa
   assert.deepEqual(titulos(r), []);
   const r2 = B.filtrarBoxeadores([{ titulo: "Tony Danza" }, { titulo: "Tyson Fury" }], ["Tony Danza", "Tyson Fury"], "Tyson Fury");
   assert.deepEqual(titulos(r2), ["Tyson Fury"]);
+});
+
+/* ---------- Correções da revisão final ---------- */
+
+test("rotuloUfc: 'Lutador · UFC' sem repetir o UFC que já vinha na descrição", () => {
+  assert.equal(B.rotuloUfc("UFC"), "Lutador · UFC");
+  assert.equal(B.rotuloUfc("UFC, Peso meio-pesado"), "Lutador · UFC · Peso meio-pesado");
+  assert.equal(B.rotuloUfc("UFC Peso-pena"), "Lutador · UFC · Peso-pena");
+  assert.equal(B.rotuloUfc("MMA"), "Lutador · UFC · MMA");
+  assert.equal(B.rotuloUfc(null), "Lutador · UFC");
+  assert.equal(B.rotuloUfc("Lutador · UFC · MMA"), "Lutador · UFC · MMA");
+});
+
+test("lembrarRecente: boxeador é o mesmo pelo nome, mesmo com códigos diferentes", () => {
+  const agenda = { tipo: "jogador", esporte: "boxe", id: "oleksandr-usyk", nome: "Oleksandr Usyk" };
+  const wiki = { tipo: "jogador", esporte: "boxe", id: "Oleksandr Usyk", nome: "Oleksandr Usyk" };
+  const l = B.lembrarRecente(B.lembrarRecente([], agenda), wiki);
+  assert.equal(l.length, 1);
+  assert.equal(B.chaveRecente(agenda), B.chaveRecente(wiki));
 });

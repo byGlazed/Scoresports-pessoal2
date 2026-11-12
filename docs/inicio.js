@@ -460,8 +460,8 @@ function PESQUISA_lembrar(item) {
 }
 
 function pesquisaEsquecer(item) {
-  const chave = `${item.tipo}:${item.esporte}:${item.id}`;
-  guardar("busca_recentes", JSON.stringify(pesquisaLerRecentes().filter((x) => `${x.tipo}:${x.esporte}:${x.id}` !== chave)));
+  const chave = chaveRecente(item);
+  guardar("busca_recentes", JSON.stringify(pesquisaLerRecentes().filter((x) => chaveRecente(x) !== chave)));
 }
 
 /** Abre um resultado (atleta, time ou competição) e o põe no topo dos recentes. */
