@@ -298,10 +298,15 @@ function boxScoreNBA(esp, liga, r, estado, redesenhar) {
       }
       corpo.push(...b.naoJogaram.map((j) => linhaJogador(j, true)));
       const total = h("tr", { class: "total-box" }, h("td", { class: "esq coluna-jogador" }, "Total"), COLUNAS_BOX_NBA.map(([chave]) => h("td", null, chave === "minutos" || chave === "mais_menos" ? "" : textoBox(b.totais[chave]))));
-      return secao(
-        lado.nome,
-        h("div", { class: "rolagem box-nba" }, h("table", { class: "tabela" }, h("thead", null, cabecalho), h("tbody", null, corpo), h("tfoot", null, total)))
+      // a rolagem para o lado fica guardada no estado: a atualização do jogo ao vivo redesenha a tabela
+      const chaveRolagem = String(lado.id);
+      const rolagem = h(
+        "div",
+        { class: "rolagem box-nba", onscroll: (e) => ((estado.rolagem = estado.rolagem || {})[chaveRolagem] = e.target.scrollLeft) },
+        h("table", { class: "tabela" }, h("thead", null, cabecalho), h("tbody", null, corpo), h("tfoot", null, total))
       );
+      queueMicrotask(() => (rolagem.scrollLeft = (estado.rolagem || {})[chaveRolagem] || 0)); // logo depois de a tabela entrar na tela
+      return secao(lado.nome, rolagem);
     })
     .filter(Boolean)
     .concat(h("p", { class: "nota" }, "Toque no nome de uma coluna para ordenar; de novo inverte, e uma terceira vez volta ao normal. Toque no jogador para ver os arremessos dele."));

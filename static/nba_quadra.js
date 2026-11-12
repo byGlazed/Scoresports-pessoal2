@@ -24,6 +24,8 @@ function arremessosDoJogo(plays) {
     const texto = String(p.text || "");
     // lance livre: o tipo vem em inglês mesmo com o texto em português ("anota lance livre")
     if (/free throw/i.test(`${(p.type || {}).text || ""} ${texto}`) || /lance livre/i.test(texto)) continue;
+    // arremesso de desespero no fim do quarto que não entra não conta no FG (regra da NBA)
+    if (/heave/i.test((p.type || {}).text || "") && !p.scoringPlay) continue;
     const time = String((p.team || {}).id || "");
     const pos = converterCoordenada(p.coordinate);
     if (!pos) {
@@ -35,7 +37,11 @@ function arremessosDoJogo(plays) {
     const cy = p.coordinate.y;
     const distancia = Math.round(Math.hypot(cx - 25, cy - 1));
     const canto = Math.abs(cx - 25) >= 22 && cy <= 13;
-    const tres = /three point|de 3 pontos|de três/i.test(texto) || (canto && distancia >= 22) || Math.hypot(cx - 25, cy - 1) >= 23.75;
+    // acerto: o valor da cesta é exato; erro: texto, canto ou distância (as coordenadas vêm em pés inteiros,
+    // então uma bola de três pode medir 23,6 pés)
+    const tres = p.scoringPlay && typeof p.scoreValue === "number"
+      ? p.scoreValue === 3
+      : /three point|de 3 pontos|de três/i.test(texto) || canto || Math.hypot(cx - 25, cy - 1) >= 23.5;
     lista.push({
       x: pos.x,
       y: pos.y,
@@ -168,8 +174,10 @@ function quadraSVG(arremessos, { aoTocar } = {}) {
     const marca = a.feito
       ? s("circle", { class: "acerto", cx: a.x, cy: a.y, r: 5 }, titulo)
       : s("path", { class: "erro-arremesso", d: `M ${a.x - 4.5} ${a.y - 4.5} L ${a.x + 4.5} ${a.y + 4.5} M ${a.x + 4.5} ${a.y - 4.5} L ${a.x - 4.5} ${a.y + 4.5}` }, titulo);
-    if (aoTocar) marca.addEventListener("click", () => aoTocar(a));
-    svg.append(marca);
+    // área de toque invisível maior que a marca (o X vazado só respondia no traço, ~1,5 px no celular)
+    const grupo = s("g", { class: "marca-arremesso" }, s("circle", { class: "toque-arremesso", cx: a.x, cy: a.y, r: 11 }), marca);
+    if (aoTocar) grupo.addEventListener("click", () => aoTocar(a));
+    svg.append(grupo);
   }
   return svg;
 }

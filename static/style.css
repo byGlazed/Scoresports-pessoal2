@@ -860,6 +860,7 @@ select.campo-data { cursor: pointer; }
 .quadra .linhas { fill: none; stroke: var(--texto-3); stroke-width: 2; }
 .quadra .acerto { fill: var(--vitoria); stroke: var(--superficie); stroke-width: 1; cursor: pointer; }
 .quadra .erro-arremesso { fill: none; stroke: var(--derrota); stroke-width: 2.2; cursor: pointer; }
+.quadra .toque-arremesso { fill: transparent; pointer-events: all; cursor: pointer; }
 
 /* ---------- Líderes e corridas ---------- */
 .grade-cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }

@@ -88,3 +88,35 @@ test("arremessosDoJogo em português: lance livre pelo tipo, e 3 pontos pelo tex
   assert.equal(r.lista.length, 1);
   assert.equal(r.lista[0].tres, true);
 });
+
+/* ---------- Correções da revisão final ---------- */
+
+test("arremessosDoJogo: arremesso de desespero errado fica fora; o que entra conta", () => {
+  const base = { shootingPlay: true, team: { id: "1" }, participants: [{ athlete: { id: "9" } }] };
+  const r = Q.arremessosDoJogo([
+    { ...base, text: "Trae Young erra heave jump shot", type: { text: "Heave Jump Shot" }, coordinate: { x: 25, y: 40 }, scoringPlay: false },
+    { ...base, text: "Trae Young anota heave jump shot", type: { text: "Heave Jump Shot" }, coordinate: { x: 25, y: 40 }, scoringPlay: true, scoreValue: 3 },
+  ]);
+  assert.equal(r.lista.length, 1);
+  assert.equal(r.lista[0].feito, true);
+});
+
+test("arremessosDoJogo: três de 23,7 pés pelo valor da cesta, e erro a 23,6 pés conta como três", () => {
+  const base = { shootingPlay: true, team: { id: "1" }, participants: [{ athlete: { id: "9" } }], type: { text: "Running Jump Shot" } };
+  const r = Q.arremessosDoJogo([
+    { ...base, text: "OG Anunoby anota 24pés running jump shot", coordinate: { x: 36, y: 22 }, scoringPlay: true, scoreValue: 3 },
+    { ...base, text: "De'Aaron Fox erra 24pés jump shot", coordinate: { x: 11, y: 20 }, scoringPlay: false, scoreValue: 0 },
+    { ...base, text: "Fulano anota 23pés jump shot", coordinate: { x: 36, y: 22 }, scoringPlay: true, scoreValue: 2 },
+  ]);
+  assert.deepEqual(r.lista.map((a) => a.tres), [true, true, false]);
+});
+
+test("arremessosDoJogo com o jogo real: arremessos do mapa e de três batem com o box score", () => {
+  const { lista, semPosicao } = Q.arremessosDoJogo(jogo.plays);
+  for (const t of times) {
+    const b = Q.boxScoreDoTime(t).totais;
+    const doTime = lista.filter((a) => String(a.time_id) === String(t.team.id));
+    assert.equal(doTime.length + (semPosicao.porTime[String(t.team.id)] || 0), b.fg.t);
+    assert.equal(doTime.filter((a) => a.tres).length, b.tres.t, `3PT ${t.team.displayName}`);
+  }
+});
