@@ -29,6 +29,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
   - *Arremessos no jogo:* mapa de acertos e erros na quadra.
 - **Busca de jogadores:** toda a história da NBA, aposentados incluídos.
 - **Classificação, líderes da temporada e corridas pelo MVP e pelo calouro do ano.**
+- **No app e na pasta `docs/`:** box score com titulares, reservas e totais, **ordenável por qualquer estatística** (toque no nome da coluna), e **mapa de arremessos** de cada time e de cada jogador, em escala real, com os dados da ESPN.
 
 ### Futebol e NFL
 - **Futebol:** 15 ligas e copas de clubes (Brasileirão A e B, Copa do Brasil, Libertadores, Sul-Americana, Champions, Liga Europa, Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Liga Portugal, Eredivisie e MLS), 17 copas nacionais e supercopas no grupo **Copas** (Copa del Rey, FA Cup, Copa da Liga Inglesa, Community Shield, Copa da Alemanha, Coppa Italia, Copa da França, Taça de Portugal, Copa da Holanda, as supercopas da Espanha, Alemanha, Itália, França e Brasil, Recopa, Supercopa da UEFA e Mundial de Clubes) e 7 de seleções (amistosos, Eliminatórias da América do Sul e da Europa, Liga das Nações, Copa do Mundo, Copa América e Eurocopa). Dá para ver todos os jogos do dia juntos ou uma competição só.
@@ -177,6 +178,7 @@ Scoresports-pessoal2/
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
 ├── time_dados.js      # regras da página do time (elenco por posição, jogos, estatísticas, técnico)
+├── nba_quadra.js      # NBA: box score, arremessos e desenho da quadra (PC e app)
 ├── busca_regras.js    # regras da busca (relevância, boxeadores da Wikipédia, recentes)
 ├── regras_esportes.js # regras de MLB e NHL (placar ao vivo, série, pontuações, líderes)
 ├── sw.js, registrar.js, manifest.webmanifest, ícones

@@ -19,9 +19,12 @@ function abrirAtleta(esporte, liga, id, nome) {
   Painel.abrir(nome || "Atleta", (corpo, ativo) => desenharAtleta(corpo, ativo, esporte, liga, id));
 }
 
-function empilharAtleta(esporte, liga, id, nome) {
+function empilharAtleta(esporte, liga, id, nome, contexto = null) {
   if (!id) return;
-  Painel.empilhar(nome || "Atleta", (corpo, ativo) => desenharAtleta(corpo, ativo, esporte, liga, id));
+  // contexto.arremessos: os arremessos dele no jogo de onde veio (box score da NBA)
+  // vindo do box score o painel ainda está fechado: abre em vez de empilhar
+  const mostrar = $("#painel").open ? Painel.empilhar.bind(Painel) : Painel.abrir.bind(Painel);
+  mostrar(nome || "Atleta", (corpo, ativo) => desenharAtleta(corpo, ativo, esporte, liga, id, contexto));
 }
 
 /* ---------- Página do time (como no Sofascore) ---------- */
@@ -209,7 +212,155 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
   escolher(ABAS_TIME.some((a) => a.id === lembrar.aba) ? lembrar.aba : "jogos");
 }
 
-async function desenharAtleta(corpo, ativo, esporte, liga, id) {
+/* ---------- NBA: box score ordenável e mapa de arremessos (dados da ESPN) ---------- */
+
+const COLUNAS_BOX_NBA = [
+  ["minutos", "MIN", "Minutos"],
+  ["pts", "PTS", "Pontos"],
+  ["reb", "REB", "Rebotes"],
+  ["ast", "AST", "Assistências"],
+  ["fg", "FG", "Arremessos de quadra (feitos-tentados)"],
+  ["tres", "3PT", "Bolas de três (feitas-tentadas)"],
+  ["ft", "FT", "Lances livres (feitos-tentados)"],
+  ["stl", "STL", "Roubos de bola"],
+  ["blk", "BLK", "Tocos"],
+  ["to", "TO", "Erros"],
+  ["pf", "PF", "Faltas"],
+  ["mais_menos", "+/−", "Saldo com o jogador em quadra"],
+];
+
+const textoBox = (v) => (v && typeof v === "object" ? (v.f === null ? "" : `${v.f}-${v.t}`) : v === null || v === undefined ? "" : String(v));
+
+/** Maior valor de cada coluna entre os jogadores (para o destaque). */
+function maioresDoBox(jogadores) {
+  const maior = {};
+  for (const [chave] of COLUNAS_BOX_NBA) {
+    const valores = jogadores.map((j) => (j[chave] && typeof j[chave] === "object" ? j[chave].f : j[chave])).filter((v) => typeof v === "number");
+    maior[chave] = valores.length ? Math.max(...valores) : null;
+  }
+  return maior;
+}
+
+function boxScoreNBA(esp, liga, r, estado, redesenhar) {
+  const ordemLados = ordemTimes(esp.id, r.jogo);
+  const caixaDe = (lado) => r.nba.box.find((b) => b.time_id === String(lado.id)) || null;
+  const tocarColuna = (chave) => {
+    if (estado.coluna !== chave) Object.assign(estado, { coluna: chave, direcao: "desc" });
+    else if (estado.direcao === "desc") estado.direcao = "asc";
+    else Object.assign(estado, { coluna: null, direcao: "desc" });
+    redesenhar();
+  };
+  const arremessosDe = (id) => r.nba.lista.filter((a) => a.atleta_id === String(id));
+
+  return ordemLados
+    .map((lado) => {
+      const b = caixaDe(lado);
+      if (!b) return null;
+      const jogaram = [...b.titulares, ...b.reservas];
+      const maior = maioresDoBox(jogaram);
+      const cabecalho = h(
+        "tr",
+        null,
+        h("th", { class: "esq coluna-jogador" }, "Jogador"),
+        COLUNAS_BOX_NBA.map(([chave, sigla, titulo]) => {
+          const ativa = estado.coluna === chave;
+          return h(
+            "th",
+            { "aria-sort": ativa ? (estado.direcao === "desc" ? "descending" : "ascending") : "none", title: titulo },
+            h("button", { class: "box-ordem", type: "button", onclick: () => tocarColuna(chave) }, sigla, ativa ? (estado.direcao === "desc" ? " ▼" : " ▲") : "")
+          );
+        })
+      );
+      const linhaJogador = (j, naoJogou = false) =>
+        h(
+          "tr",
+          { class: naoJogou ? "nao-jogou" : null },
+          h(
+            "td",
+            { class: "esq coluna-jogador" },
+            h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta("nba", liga, j.id, j.nome, { arremessos: arremessosDe(j.id) }) }, j.nome_curto || j.nome),
+            j.posicao ? h("span", { class: "sub" }, ` ${j.posicao}`) : null
+          ),
+          naoJogou
+            ? h("td", { colspan: COLUNAS_BOX_NBA.length, class: "esq" }, "Não jogou")
+            : COLUNAS_BOX_NBA.map(([chave]) => {
+                const v = j[chave];
+                const n = v && typeof v === "object" ? v.f : v;
+                return h("td", { class: n !== null && n === maior[chave] && maior[chave] > 0 ? "destaque-box" : null }, textoBox(v));
+              })
+        );
+      const separador = (texto) => h("tr", { class: "separador-linha" }, h("td", { colspan: COLUNAS_BOX_NBA.length + 1 }, texto));
+      const corpo = [];
+      if (estado.coluna) corpo.push(...ordenarBox(jogaram, estado.coluna, estado.direcao).map((j) => linhaJogador(j)));
+      else {
+        corpo.push(separador("Titulares"), ...b.titulares.map((j) => linhaJogador(j)));
+        if (b.reservas.length) corpo.push(separador("Reservas"), ...b.reservas.map((j) => linhaJogador(j)));
+      }
+      corpo.push(...b.naoJogaram.map((j) => linhaJogador(j, true)));
+      const total = h("tr", { class: "total-box" }, h("td", { class: "esq coluna-jogador" }, "Total"), COLUNAS_BOX_NBA.map(([chave]) => h("td", null, chave === "minutos" || chave === "mais_menos" ? "" : textoBox(b.totais[chave]))));
+      return secao(
+        lado.nome,
+        h("div", { class: "rolagem box-nba" }, h("table", { class: "tabela" }, h("thead", null, cabecalho), h("tbody", null, corpo), h("tfoot", null, total)))
+      );
+    })
+    .filter(Boolean)
+    .concat(h("p", { class: "nota" }, "Toque no nome de uma coluna para ordenar; de novo inverte, e uma terceira vez volta ao normal. Toque no jogador para ver os arremessos dele."));
+}
+
+/** Resumo, linha de informação e quadra, para uma lista de arremessos. */
+function blocoMapa(lista, semPosicao = 0, nomeDe = () => null) {
+  const r = resumoArremessos(lista);
+  const info = h("p", { class: "info-arremesso", "aria-live": "polite" }, "Toque numa marca para ver o arremesso.");
+  const texto = r.tentados
+    ? `${r.feitos} de ${r.tentados} (${r.pct.toFixed(1).replace(".", ",")}%) · de 3: ${r.feitos3} de ${r.tentados3}${semPosicao ? ` · ${semPosicao} sem posição` : ""}`
+    : "Nenhum arremesso de quadra.";
+  const aoTocar = (a) => {
+    info.textContent = [nomeDe(a.atleta_id), a.periodo ? `${a.periodo}º quarto, ${a.relogio || ""}`.trim() : null, `${a.distancia} pés`, a.feito ? "Acerto" : "Erro"].filter(Boolean).join(" · ");
+  };
+  return [h("p", { class: "resumo-arremessos" }, texto), info, quadraSVG(lista, { aoTocar })];
+}
+
+function arremessosNBA(esp, liga, r, estado, redesenhar) {
+  const lados = ordemTimes(esp.id, r.jogo);
+  if (!lados.some((l) => l.id && String(l.id) === estado.time)) estado.time = String(lados[0].id);
+  const box = r.nba.box.find((b) => b.time_id === estado.time);
+  const jogadores = box ? [...box.titulares, ...box.reservas] : [];
+  const nomeDe = (id) => (jogadores.find((j) => j.id === String(id)) || {}).nome || null;
+  const doTime = r.nba.lista.filter((a) => a.time_id === estado.time);
+  const comArremesso = jogadores
+    .map((j) => ({ j, n: doTime.filter((a) => a.atleta_id === j.id).length }))
+    .filter((x) => x.n)
+    .sort((a, b) => b.n - a.n);
+  if (estado.atleta !== "todos" && !comArremesso.some((x) => x.j.id === estado.atleta)) estado.atleta = "todos";
+  const lista = estado.atleta === "todos" ? doTime : doTime.filter((a) => a.atleta_id === estado.atleta);
+  const seletor = h(
+    "select",
+    {
+      class: "seletor-jogador",
+      "aria-label": "Jogador",
+      onchange: (e) => {
+        estado.atleta = e.target.value;
+        redesenhar();
+      },
+    },
+    h("option", { value: "todos", selected: estado.atleta === "todos" }, "Todos os jogadores"),
+    comArremesso.map(({ j, n }) => h("option", { value: j.id, selected: estado.atleta === j.id }, `${j.nome} (${n})`))
+  );
+  const escolhaTime = alternar(
+    lados.map((l) => [String(l.id), l.nome_curto || l.nome]),
+    estado.time,
+    (t) => {
+      estado.time = t;
+      estado.atleta = "todos";
+      redesenhar();
+    },
+    "Time"
+  );
+  const semPos = estado.atleta === "todos" ? r.nba.semPosicao.porTime[estado.time] || 0 : 0;
+  return [secao(null, h("div", { class: "controles-mapa" }, escolhaTime, seletor), ...blocoMapa(lista, semPos, nomeDe))];
+}
+
+async function desenharAtleta(corpo, ativo, esporte, liga, id, contexto = null) {
   const a = await api(`/e/${esporte}/${liga}/atletas/${id}`);
   if (!ativo()) return;
   const p = a.perfil;
@@ -242,6 +393,7 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id) {
       )
     ),
   ];
+  if (contexto && contexto.arremessos) blocos.push(secao("Arremessos no jogo", ...blocoMapa(contexto.arremessos)));
   if (fatos.length) blocos.push(h("dl", { class: "fatos" }, fatos.map(([r, v]) => h("div", { class: "fato" }, h("dt", null, r), h("dd", null, v)))));
   if (p.resumo.length) {
     blocos.push(
@@ -740,7 +892,9 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   const abas = [{ id: "resumo", nome: "Resumo" }];
   if (r.estatisticas.length) abas.push({ id: "estatisticas", nome: "Estatísticas" });
   if (r.escalacoes.some((e) => e.titulares.length || e.reservas.length)) abas.push({ id: "escalacoes", nome: "Escalações" });
-  if (r.jogadores.some((t) => t.grupos.length)) abas.push({ id: "jogadores", nome: "Jogadores" });
+  const nba = esp.id === "nba" && r.nba && r.nba.box.length;
+  if (nba || r.jogadores.some((t) => t.grupos.length)) abas.push({ id: "jogadores", nome: "Jogadores" });
+  if (nba && (r.nba.lista.length || r.nba.semPosicao.total)) abas.push({ id: "arremessos", nome: "Arremessos" });
   const temPre = r.forma.length || r.confronto || r.lesionados.length || r.lideres.length;
   if (temPre) abas.push({ id: "pre", nome: j.estado === 1 ? "Pré-jogo" : "Retrospecto" });
 
@@ -762,6 +916,10 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   function conteudoAba(id) {
     if (id === "estatisticas") return [secao(null, comparacaoEstatisticas(r.estatisticas, j, futebol))];
     if (id === "escalacoes") return escalacoesFutebol(esp, liga, r.escalacoes);
+    // estados guardados por jogo: resistem à atualização automática do jogo ao vivo
+    const guardado = (sufixo, inicial) => (S.abaDetalhe[`${chaveAba}:${sufixo}`] = S.abaDetalhe[`${chaveAba}:${sufixo}`] || inicial);
+    if (id === "jogadores" && nba) return boxScoreNBA(esp, liga, r, guardado("ordem", { coluna: null, direcao: "desc" }), () => area.replaceChildren(...conteudoAba("jogadores")));
+    if (id === "arremessos" && nba) return arremessosNBA(esp, liga, r, guardado("mapa", { time: null, atleta: "todos" }), () => area.replaceChildren(...conteudoAba("arremessos")));
     if (id === "jogadores") return jogadoresNFL(esp, liga, r.jogadores);
     if (id === "pre") return preJogoEspn(esp, liga, r);
     const blocos = [];

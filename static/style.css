@@ -1227,3 +1227,16 @@ select.campo-data { cursor: pointer; }
 .recente { display: flex; align-items: center; }
 .recente .resultado-busca { flex: 1; min-width: 0; }
 .tirar-recente { flex: none; font-size: 20px; color: var(--texto-3); background: none; border: 0; width: 40px; height: 40px; }
+
+/* ---------- NBA: box score e mapa de arremessos ---------- */
+.box-nba .tabela th, .box-nba .tabela td { white-space: nowrap; }
+.box-nba .coluna-jogador { position: sticky; left: 0; z-index: 1; background: var(--superficie); text-align: left; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+.box-ordem { border: 0; background: none; color: inherit; font: inherit; font-weight: 700; padding: 4px 2px; cursor: pointer; }
+.box-nba th[aria-sort="descending"], .box-nba th[aria-sort="ascending"] { color: var(--marca); }
+.destaque-box { font-weight: 700; }
+.nao-jogou td { color: var(--texto-3); }
+.total-box td { font-weight: 700; border-top: 1px solid var(--linha); }
+.controles-mapa { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.seletor-jogador { flex: 1; min-width: 160px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--linha); background: var(--superficie); color: var(--texto); }
+.resumo-arremessos { font-weight: 600; margin: 4px 0; }
+.info-arremesso { font-size: 13px; color: var(--texto-2); min-height: 18px; margin: 0 0 6px; }
