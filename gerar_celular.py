@@ -50,7 +50,7 @@ def main():
     html = html.replace("</head>", CABECA_CELULAR + "</head>")
     html = html.replace(
         '<script src="./inicio.js"></script>',
-        '<script src="./inicio.js"></script>\n  <script src="./regras_esportes.js"></script>\n  <script src="./time_dados.js"></script>\n  <script src="./direto.js"></script>\n  <script src="./registrar.js"></script>',
+        '<script src="./inicio.js"></script>\n  <script src="./busca_regras.js"></script>\n  <script src="./regras_esportes.js"></script>\n  <script src="./time_dados.js"></script>\n  <script src="./direto.js"></script>\n  <script src="./registrar.js"></script>',
     )
     (DOCS / "index.html").write_text(html, encoding="utf-8")
 
