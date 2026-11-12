@@ -1590,40 +1590,12 @@ async function nbaPainelArremessos(area, ativo, id, contexto) {
     secao(
       `${feitos} de ${lista.length} arremessos (${pct(feitos, lista.length)}%)`,
       h("p", { class: "nota" }, `Bolas de três: ${feitos3} de ${de3.length}. Bolinha verde é acerto, X vermelho é erro.`),
-      quadraSVG(lista)
+      quadraSVG(lista.map((a) => ({ ...a, tres: a.tipo === "3pt" })))
     )
   );
 }
 
-function quadraSVG(arremessos) {
-  const svg = s("svg", { class: "quadra", viewBox: "-250 -52.5 500 470", role: "img", "aria-label": `Mapa com ${arremessos.length} arremessos` });
-  svg.append(
-    s(
-      "g",
-      { class: "linhas" },
-      s("rect", { x: -250, y: -47.5, width: 500, height: 470 }),
-      s("rect", { x: -80, y: -47.5, width: 160, height: 190 }),
-      s("rect", { x: -60, y: -47.5, width: 120, height: 190 }),
-      s("circle", { cx: 0, cy: 142.5, r: 60 }),
-      s("line", { x1: -30, y1: -7.5, x2: 30, y2: -7.5 }),
-      s("circle", { cx: 0, cy: 0, r: 7.5 }),
-      s("path", { d: "M -40 0 A 40 40 0 0 0 40 0" }),
-      s("line", { x1: -220, y1: -47.5, x2: -220, y2: 92.5 }),
-      s("line", { x1: 220, y1: -47.5, x2: 220, y2: 92.5 }),
-      s("path", { d: "M -220 92.5 A 237.5 237.5 0 0 0 220 92.5" })
-    )
-  );
-  for (const a of arremessos) {
-    const titulo = s(
-      "title",
-      null,
-      `${a.feito ? "Acerto" : "Erro"}, ${a.tipo === "3pt" ? "3 pontos" : "2 pontos"}, ${a.distancia ?? "?"} pés, ${a.periodo}º quarto ${a.relogio || ""}`
-    );
-    if (a.feito) svg.append(s("circle", { class: "acerto", cx: a.x, cy: a.y, r: 7 }, titulo));
-    else svg.append(s("path", { class: "erro-arremesso", d: `M ${a.x - 6} ${a.y - 6} L ${a.x + 6} ${a.y + 6} M ${a.x + 6} ${a.y - 6} L ${a.x - 6} ${a.y + 6}` }, titulo));
-  }
-  return svg;
-}
+// quadraSVG fica em nba_quadra.js (comum ao PC e ao app)
 
 /* ---------- Classificação ---------- */
 
