@@ -471,7 +471,7 @@ async function pesquisaProcurar(texto, resultados) {
     );
   }
   if (!partes.length) partes.push(vazio("Nada encontrado com esse nome."));
-  if (r.falhas && r.falhas.length) partes.push(h("p", { class: "nota" }, "A busca da ESPN não respondeu agora: aparecem só os resultados do índice local."));
+  if (r.falhas && r.falhas.length) partes.push(h("p", { class: "nota" }, `${r.falhas.join(" e ")} não respondeu agora: aparecem só os outros resultados.`));
   if (r.indice !== undefined) {
     partes.push(
       h(

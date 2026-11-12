@@ -1944,6 +1944,18 @@ async function viaEspn(chave, ttl, buscar, estavel) {
   }
 }
 
+/** Boxeadores pela Wikipédia em inglês: busca "texto boxer" e aceita só páginas da categoria de boxeadores. */
+async function buscarBoxeadoresWiki(texto) {
+  return obter(`wiki_boxe_v3:${semAcento(texto)}`, 7 * 86400, async () => {
+    const base = "https://en.wikipedia.org";
+    const busca = await wiki(base, { action: "query", list: "search", srsearch: `${texto} boxer`, srlimit: 5 });
+    const titulos = ((busca.query || {}).search || []).map((s) => s.title);
+    if (!titulos.length) return [];
+    const cats = await wiki(base, { action: "query", prop: "categories", cllimit: "max", titles: titulos.join("|") });
+    return filtrarBoxeadores(boxeadoresDaWikipedia(cats), titulos, texto).map((b) => ({ esporte: "boxe", liga: "boxe", id: b.titulo, nome: b.titulo, descricao: "Boxe", imagem: null }));
+  });
+}
+
 const ROTAS = [
   [/^\/esportes$/, () => [
     ...Object.entries(D_ESPORTES).map(([id, v]) => ({ id, nome: v.nome, tipo: v.tipo, ligas: v.ligas })),
@@ -2007,7 +2019,8 @@ const ROTAS = [
     const times = [];
     const vistos = new Set();
     const juntar = (item, tipo) => {
-      const k = `${tipo}:${item.esporte}:${item.id}`;
+      // no boxe o mesmo lutador vem da agenda e da Wikipédia com códigos diferentes: junta pelo nome
+      const k = item.esporte === "boxe" ? `${tipo}:boxe:${semAcento(item.nome)}` : `${tipo}:${item.esporte}:${item.id}`;
       if (vistos.has(k)) return;
       vistos.add(k);
       (tipo === "time" ? times : jogadores).push(item);
@@ -2021,7 +2034,26 @@ const ROTAS = [
     } catch (_) {
       falhas.push("ESPN");
     }
-    return { ligas: procurarLigas(textoBusca), jogadores: jogadores.slice(0, 40), times: times.slice(0, 30), falhas, indice: await Indice.contar(), semeando };
+    if (textoBusca.length >= 3) {
+      try {
+        const boxeadores = await buscarBoxeadoresWiki(textoBusca);
+        boxeadores.forEach((b) => juntar(b, "jogador"));
+        Indice.registrar(boxeadores);
+      } catch (_) {
+        falhas.push("Wikipédia");
+      }
+    }
+    for (const j of jogadores) {
+      if (j.esporte === "ufc" && !String(j.descricao || "").startsWith("Lutador")) j.descricao = ["Lutador · UFC", j.descricao].filter(Boolean).join(" · ");
+    }
+    return {
+      ligas: procurarLigas(textoBusca),
+      jogadores: ordenarPorRelevancia(jogadores, textoBusca).slice(0, 40),
+      times: ordenarPorRelevancia(times, textoBusca).slice(0, 30),
+      falhas,
+      indice: await Indice.contar(),
+      semeando,
+    };
   }],
 ];
 

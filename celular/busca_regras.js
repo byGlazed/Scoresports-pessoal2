@@ -43,7 +43,23 @@ function boxeadoresDaWikipedia(resposta) {
     .map((p) => ({ titulo: p.title }));
 }
 
-const chaveRecente = (x) => `${x.tipo}:${x.esporte}:${x.id}`;
+/**
+ * Dos boxeadores achados, fica quem tem o nome parecido com o texto, mais o 1º boxeador na ordem da busca da
+ * Wikipédia (que cobre apelidos, como "Popó" → Acelino Freitas). Resultado na ordem da busca.
+ */
+function filtrarBoxeadores(boxeadores, ordemDaBusca, texto) {
+  const posicao = (t) => {
+    const i = (ordemDaBusca || []).indexOf(t);
+    return i < 0 ? 999 : i;
+  };
+  const ordenados = [...(boxeadores || [])].sort((a, b) => posicao(a.titulo) - posicao(b.titulo));
+  // o 1º boxeador da busca só vale para uma palavra (apelido); nome completo precisa bater
+  const umaPalavra = semAcentoBusca(texto).split(/\s+/).filter(Boolean).length === 1;
+  const primeiro = umaPalavra && ordenados.length ? ordenados[0].titulo : null;
+  return ordenados.filter((b) => b.titulo === primeiro || nivelRelevancia(b.titulo, texto) <= 3);
+}
+
+const chaveRecente =(x) => `${x.tipo}:${x.esporte}:${x.id}`;
 
 /** Lista de recentes com o item no topo, sem repetição e com no máximo `limite` itens. Não altera a lista recebida. */
 function lembrarRecente(lista, item, limite = 10) {
@@ -52,5 +68,5 @@ function lembrarRecente(lista, item, limite = 10) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { ordenarPorRelevancia, boxeadoresDaWikipedia, lembrarRecente, nivelRelevancia };
+  module.exports = { ordenarPorRelevancia, boxeadoresDaWikipedia, filtrarBoxeadores, lembrarRecente, nivelRelevancia };
 }

@@ -62,3 +62,20 @@ test("lembrarRecente: novo no topo, repetido sobe sem duplicar, limite e sem alt
   assert.equal(l[0].nome, "T11");
   assert.equal(l[9].nome, "T2");
 });
+
+test("filtrarBoxeadores: nome que bate, ou o 1º da busca da Wikipédia (apelidos como Popó)", () => {
+  const ordem = ["Acelino Freitas", "Floyd Patterson", "Ricky Hatton", "Popo Ramos"];
+  const boxeadores = [{ titulo: "Ricky Hatton" }, { titulo: "Popo Ramos" }, { titulo: "Acelino Freitas" }, { titulo: "Floyd Patterson" }];
+  assert.deepEqual(titulos(B.filtrarBoxeadores(boxeadores, ordem, "Popó")), ["Acelino Freitas", "Popo Ramos"]);
+  // o 1º da busca pode não ser boxeador (página de desambiguação): vale o 1º boxeador
+  assert.deepEqual(titulos(B.filtrarBoxeadores([{ titulo: "Acelino Freitas" }], ["Popo", "Acelino Freitas"], "Popó")), ["Acelino Freitas"]);
+  assert.deepEqual(titulos(B.filtrarBoxeadores([{ titulo: "Floyd Patterson" }, { titulo: "Ricky Hatton" }], ["Floyd Patterson", "Ricky Hatton"], "Champions")), ["Floyd Patterson"]);
+  assert.deepEqual(B.filtrarBoxeadores([], [], "x"), []);
+});
+
+test("filtrarBoxeadores: com nome de mais de uma palavra, só quem tem o nome parecido", () => {
+  const r = B.filtrarBoxeadores([{ titulo: "Tony Danza" }, { titulo: "Amari Jones" }], ["Tony Danza", "Amari Jones"], "Jon Jones");
+  assert.deepEqual(titulos(r), []);
+  const r2 = B.filtrarBoxeadores([{ titulo: "Tony Danza" }, { titulo: "Tyson Fury" }], ["Tony Danza", "Tyson Fury"], "Tyson Fury");
+  assert.deepEqual(titulos(r2), ["Tyson Fury"]);
+});
