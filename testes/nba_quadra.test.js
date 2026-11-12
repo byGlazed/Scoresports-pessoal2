@@ -75,3 +75,16 @@ test("ordenarBox: por pontos, sentido inverso, desempate em FG e nulos no fim", 
   assert.deepEqual(Q.ordenarBox(base, "mais_menos", "asc").map((j) => j.nome), ["C", "B", "A"]);
   assert.deepEqual(base.map((j) => j.nome), ["A", "B", "C"]);
 });
+
+test("arremessosDoJogo em português: lance livre pelo tipo, e 3 pontos pelo texto", () => {
+  const inv = { x: -214748340, y: -214748365 };
+  const plays = [
+    { shootingPlay: true, text: "Gui Santos anota lance livre 1 de 2", type: { text: "Free Throw - 1 of 2" }, coordinate: inv, team: { id: "9" } },
+    { shootingPlay: true, text: "Fulano erra lance livre", type: { text: "Free Throw - Technical" }, coordinate: inv, team: { id: "9" } },
+    { shootingPlay: true, scoringPlay: true, text: "Jeremiah Fears anota 20pés arremesso de 3 pontos", type: { text: "Jump Shot" }, coordinate: { x: 25, y: 21 }, team: { id: "9" }, participants: [{ athlete: { id: "1" } }] },
+  ];
+  const r = Q.arremessosDoJogo(plays);
+  assert.equal(r.semPosicao.total, 0);
+  assert.equal(r.lista.length, 1);
+  assert.equal(r.lista[0].tres, true);
+});

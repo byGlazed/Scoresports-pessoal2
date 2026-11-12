@@ -22,7 +22,8 @@ function arremessosDoJogo(plays) {
   for (const p of plays || []) {
     if (!p || !p.shootingPlay) continue;
     const texto = String(p.text || "");
-    if (/free throw/i.test(texto)) continue;
+    // lance livre: o tipo vem em inglês mesmo com o texto em português ("anota lance livre")
+    if (/free throw/i.test(`${(p.type || {}).text || ""} ${texto}`) || /lance livre/i.test(texto)) continue;
     const time = String((p.team || {}).id || "");
     const pos = converterCoordenada(p.coordinate);
     if (!pos) {
@@ -34,7 +35,7 @@ function arremessosDoJogo(plays) {
     const cy = p.coordinate.y;
     const distancia = Math.round(Math.hypot(cx - 25, cy - 1));
     const canto = Math.abs(cx - 25) >= 22 && cy <= 13;
-    const tres = /three point/i.test(texto) || (canto && distancia >= 22) || Math.hypot(cx - 25, cy - 1) >= 23.75;
+    const tres = /three point|de 3 pontos|de três/i.test(texto) || (canto && distancia >= 22) || Math.hypot(cx - 25, cy - 1) >= 23.75;
     lista.push({
       x: pos.x,
       y: pos.y,

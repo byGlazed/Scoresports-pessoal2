@@ -924,6 +924,11 @@ async function buscarResumo(esporte, liga, eventoId) {
     jogadores: box,
     escalacoes: esc,
     lances: lances(dados, cfg.esporte),
+    // NBA: box score completo e arremessos com posição (para o mapa)
+    nba:
+      cfg.esporte === "basketball" && ((dados.boxscore || {}).players || []).length
+        ? { box: dados.boxscore.players.map(boxScoreDoTime), ...arremessosDoJogo(dados.plays) }
+        : null,
     forma: (dados.lastFiveGames || []).map((t) => ({ time: { id: (t.team || {}).id, nome: (t.team || {}).displayName, logo: logoDe(t.team) }, jogos: (t.events || []).map(jogoHistorico) })),
     confronto: (() => {
       for (const t of dados.headToHeadGames || []) {
