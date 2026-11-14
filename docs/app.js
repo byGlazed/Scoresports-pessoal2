@@ -237,7 +237,7 @@ const Favoritos = {
   },
   avisar() {
     // a aba Favoritos mostra os favoritos: desenha de novo quando ela reaparecer
-    if (window.Navegacao && Navegacao.pilhas) Navegacao.invalidar("favoritos");
+    if (typeof Navegacao !== "undefined" && Navegacao.pilhas) Navegacao.invalidar("favoritos");
   },
 };
 

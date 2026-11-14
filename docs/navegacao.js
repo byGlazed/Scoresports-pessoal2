@@ -240,7 +240,7 @@ registrarPagina("jogos", {
 
 registrarPagina("favoritos", {
   titulo: () => TITULO_ABA.favoritos,
-  desenhar: () => inicioDesenhar(false),
+  desenhar: (corpo, params, ativo, p) => paginaFavoritos(corpo, p),
   aoMostrar: () => inicioDesenhar(true),
 });
 

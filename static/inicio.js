@@ -1,7 +1,7 @@
 "use strict";
 
 /* =========================================================================
-   Início (jogos dos favoritos) e Pesquisa (jogadores, times e competições).
+   Favoritos (jogos dos favoritos e a lista deles) e Pesquisa (jogadores, times e competições).
    Usa a base de app.js e as telas de esportes.js.
    ========================================================================= */
 
@@ -14,24 +14,66 @@ function abrirLiga(esporte, liga, aba) {
   irPara(esporte, aba, liga);
 }
 
-/* ---------- Início ---------- */
+/* ---------- Aba Favoritos ---------- */
 
-const INICIO = { data: null };
+const INICIO = { data: null, chip: "todos" };
 
-/** Favoritos na barra lateral, agrupados, com atalho e botão de tirar. */
-function lateralFavoritos() {
+/** Os favoritos do chip escolhido ("todos" = todos). */
+function favoritosDoChip() {
   const favs = Favoritos.lista();
-  if (!favs.length) {
-    return h("div", { class: "lateral-secao" }, h("p", { class: "nota" }, "Toque na estrela ☆ de um time, jogador ou competição para ele aparecer aqui."));
-  }
+  return INICIO.chip === "todos" ? favs : favs.filter((f) => f.esporte === INICIO.chip);
+}
+
+/** Chips: "Todos" e só os esportes em que há favorito. */
+function chipsFavoritos() {
+  const esportes = new Set(Favoritos.lista().map((f) => f.esporte));
+  return Rotas.CHIPS_ESPORTE.filter(([id]) => id === "todos" || esportes.has(id));
+}
+
+function paginaFavoritos(corpo, p) {
+  const area = h("div", { class: "area-favoritos" });
+  p.alvo = area;
+  const chips = chipsFavoritos();
+  if (!chips.some(([id]) => id === INICIO.chip)) INICIO.chip = "todos";
+  const barra = h("div", { class: "chips-esporte", role: "group", "aria-label": "Esportes dos favoritos" });
+  const pintar = () =>
+    barra.replaceChildren(
+      ...chips.map(([id, nome]) =>
+        h(
+          "button",
+          {
+            class: "chip-esporte",
+            type: "button",
+            "aria-pressed": String(id === INICIO.chip),
+            onclick: () => {
+              if (id === INICIO.chip) return;
+              INICIO.chip = id;
+              pintar();
+              cancelarTudo();
+              inicioDesenhar(false);
+            },
+          },
+          nome
+        )
+      )
+    );
+  pintar();
+  // sem favoritos não há chips: só o convite
+  corpo.replaceChildren(...(Favoritos.lista().length ? [barra] : []), area);
+  return inicioDesenhar(false);
+}
+
+/** "Seus favoritos": a lista agrupada, com atalho e botão de tirar. */
+function listaFavoritos(favs) {
   const grupos = [
     ["time", "Times"],
     ["jogador", "Jogadores"],
     ["liga", "Competições"],
   ];
   return h(
-    "div",
-    null,
+    "section",
+    { class: "cartao seus-favoritos" },
+    h("div", { class: "cartao-cabeca" }, h("h2", null, "Seus favoritos")),
     grupos
       .filter(([tipo]) => favs.some((f) => f.tipo === tipo))
       .map(([tipo, titulo]) =>
@@ -61,7 +103,7 @@ function lateralFavoritos() {
                     title: "Tirar dos favoritos",
                     onclick: () => {
                       Favoritos.remover(f);
-                      inicioDesenhar(false);
+                      Navegacao.redesenhar();
                     },
                   },
                   "×"
@@ -78,7 +120,7 @@ function inicioVazio() {
     "section",
     { class: "cartao boas-vindas" },
     h("div", { class: "cartao-corpo" },
-      h("h2", null, "Monte a sua página inicial"),
+      h("h2", null, "Seus favoritos aparecem aqui"),
       h(
         "p",
         null,
@@ -124,7 +166,7 @@ function planoDeBusca(favs) {
 }
 
 async function inicioDesenhar(silencioso) {
-  const favs = Favoritos.lista();
+  const favs = favoritosDoChip();
   const hoje = hojeBR();
   if (!INICIO.data) INICIO.data = hoje;
   const tk = silencioso ? S.tkLista : novoTokenLista();
@@ -156,7 +198,11 @@ async function inicioDesenhar(silencioso) {
       api(`/jogos?data=${data}`).then((jogos) => {
         const todos = p.ligasInteiras.has("nba");
         const escolhidos = jogos.filter((j) => todos || p.times.has(String(j.fora.time_id)) || p.times.has(String(j.casa.time_id)));
-        return { titulo: "NBA", jogos: escolhidos, linha: (j) => nbaLinhaJogo(j) };
+        return {
+          jogos: escolhidos,
+          desenhar: (visiveis) =>
+            h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo: "NBA", aoClicar: () => irPara("nba", "classificacao") }), visiveis.map((j) => nbaLinhaJogo(j))),
+        };
       })
     );
   }
@@ -177,12 +223,14 @@ async function inicioDesenhar(silencioso) {
         api(`/e/${esporte}/${liga}/jogos?de=${data}`).then((jogos) => {
           const inteira = p.ligasInteiras.has(liga);
           const escolhidos = jogos.filter((j) => inteira || p.times.has(String(j.casa.id)) || p.times.has(String(j.fora.id)));
-          const nome = (esp.ligas.find((l) => l.id === liga) || {}).nome || liga;
+          const ligaObj = esp.ligas.find((l) => l.id === liga) || { id: liga, nome: liga };
           return {
-            titulo: esp.ligas.length === 1 ? esp.nome : nome,
-            logo: escolhidos.length ? escolhidos[0].liga_logo || null : null,
             jogos: escolhidos,
-            linha: (j) => linhaPartida(esp, j, () => abrirPartida(esp, liga, j)),
+            desenhar: (visiveis) =>
+              grupoDeJogos(esp, ligaObj, visiveis, {
+                aoTocarLiga: () => irPara(esp.id, "classificacao", liga),
+                aoTocarJogo: (j) => abrirPartida(esp, liga, j),
+              }),
           };
         })
       );
@@ -217,6 +265,7 @@ async function inicioDesenhar(silencioso) {
           );
         return {
           titulo: NOME_ESPORTE[esporte],
+          esporte,
           eventos: alvo.map(linha),
           aoVivo: alvo.some((e) => e.estado === 2),
           rodape: !alvo.length && proximo ? `Próximo: ${proximo.nome}, ${diaHora(proximo.inicio)}` : null,
@@ -234,6 +283,7 @@ async function inicioDesenhar(silencioso) {
         const esp = esporteObj("boxe");
         return {
           titulo: "Boxe",
+          esporte: "boxe",
           eventos: noDia.map((ev) =>
             h(
               "button",
@@ -264,9 +314,9 @@ async function inicioDesenhar(silencioso) {
     for (const g of grupos) {
       if (g.jogos) {
         const visiveis = g.jogos.filter(passaFiltro);
-        if (visiveis.length) blocos.push(h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo: g.titulo, logo: g.logo }), visiveis.map(g.linha)));
+        if (visiveis.length) blocos.push(g.desenhar(visiveis));
       } else if (g.eventos && g.eventos.length) {
-        blocos.push(h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo: g.titulo }), g.eventos));
+        blocos.push(h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo: g.titulo, aoClicar: () => irPara(g.esporte) }), g.eventos));
       } else if (g.rodape) {
         notas.push(h("p", { class: "nota" }, `${g.titulo}: ${g.rodape}`));
       }
@@ -276,6 +326,7 @@ async function inicioDesenhar(silencioso) {
     else partes.push(vazio(todosJogos.length ? "Nenhum jogo com esse filtro." : "Nenhum jogo dos seus favoritos nesta data. Use as setas para ver outros dias."));
     partes.push(...notas);
     if (falhas) partes.push(h("p", { class: "nota" }, "Parte dos jogos não carregou agora; tente atualizar em alguns segundos."));
+    partes.push(listaFavoritos(favs));
     lista().replaceChildren(...partes);
   };
   desenhar();

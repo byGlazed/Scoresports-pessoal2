@@ -7,15 +7,18 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 ## Funcionalidades
 
 ### Interface
-- Três colunas, no estilo do Sofascore e do Flashscore: **barra lateral** com as seções do esporte e as competições agrupadas (Brasil, América do Sul, Europa, Seleções), **lista de jogos** e **detalhe** do jogo escolhido.
+- No estilo do Sofascore e do Flashscore: uma **barra embaixo** com **Jogos**, **Favoritos** e **Pesquisa**, e cada coisa que você abre (partida, time, competição, atleta, boxeador, evento) vira uma **página com voltar**.
+- **Jogos:** a tela inicial mostra só os jogos do dia. Os **chips** no topo escolhem o esporte (Todos, Futebol, NBA, NFL, MLB, NHL, F1, UFC, Boxe). Em "Todos", os jogos de todos os esportes aparecem juntos, agrupados por competição, com os que estão **ao vivo primeiro**. Se um esporte não carregar, só ele mostra o aviso, com um botão para tentar de novo.
+- **Competição:** tocar no nome dela abre a página da liga, com as abas **Classificação**, Jogos e Líderes (no futebol, Artilharia e cartões). Na F1 são Calendário e Classificação; no UFC, Eventos e Ranking.
+- **Voltar:** cada aba guarda as suas páginas. Trocar de aba e voltar mantém onde você estava; tocar na aba de novo volta ao começo dela. No Android, o botão voltar volta uma página por vez e só sai do app no começo da aba Jogos. Cada página tem um endereço próprio (por exemplo `#/liga/futebol/bra.1/classificacao`), então recarregar mantém a página aberta.
 - **Faixa de dias** com ontem, hoje e amanhã, setas e calendário. Na NBA e numa competição escolhida, os dias sem jogo ficam apagados.
 - **Filtros** Todos, Ao vivo, Encerrados e Próximos, com a contagem de cada um.
-- Busca sempre à mão no topo (atalho: tecla `/`).
+- Busca sempre à mão: a lupa no topo e a aba Pesquisa (atalho no PC: tecla `/`).
 - Fonte **Inter** embutida no app (`static/fontes/`), igual com ou sem internet. No Android, o app acompanha o tamanho de letra do celular até +15%.
-- Em telas menores a barra lateral vira uma gaveta (botão ☰); no celular a lista e o detalhe ocupam a tela inteira.
+- No PC, o app ocupa uma coluna central, como no celular.
 
-### Início e Pesquisa
-- **Favoritos:** a estrela ☆ ao lado de times, jogadores e competições guarda o favorito no navegador. A aba **Início** junta, no dia escolhido, os jogos de todos os favoritos (de qualquer esporte), com placar ao vivo e onde assistir.
+### Favoritos e Pesquisa
+- **Favoritos:** a estrela ☆ ao lado de times, jogadores e competições guarda o favorito no navegador. A aba **Favoritos** junta, no dia escolhido, os jogos de todos os favoritos (de qualquer esporte), com placar ao vivo e onde assistir. Os chips mostram só os esportes em que você tem favorito, e embaixo fica a lista **Seus favoritos**, com atalho para cada um e o × para tirar.
 - **Pesquisa:** procura jogadores (inclusive aposentados da NBA), times, seleções, lutadores do UFC, boxeadores (pela Wikipédia), pilotos e competições, com o nome certo primeiro. Filtros Todos, Times, Atletas e Competições; com o campo vazio aparecem as **buscas recentes** (com × para apagar). Cada competição mostra atalhos para jogos, classificação e estatísticas, e os **últimos campeões**.
 
 ### NBA
@@ -23,7 +26,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **Placar ao vivo:** a página se atualiza sozinha a cada 20 segundos enquanto há jogo em andamento.
 - **Box score completo:** titulares e reservas separados, linha de totais do time.
 - **Pré-jogo:** prováveis titulares, últimos jogos, maiores médias, lesionados e confronto direto.
-- **Painel do jogador:**
+- **Página do jogador:**
   - *Temporada:* médias, recordes, gráfico de pontos por jogo e lista de jogos.
   - *Carreira:* perfil (idade, altura, peso, draft, país), prêmios, números de cada temporada (médias ou totais, temporada regular ou playoffs) e recordes da carreira.
   - *Arremessos no jogo:* mapa de acertos e erros na quadra.
@@ -171,19 +174,21 @@ Scoresports-pessoal2/
 └── static/
     ├── index.html
     ├── style.css
+    ├── rotas.js        # regras da navegação: endereços, pilhas de páginas, voltar e ordem dos grupos
     ├── app.js          # base do site e módulo da NBA
     ├── esportes.js     # futebol, NFL, F1, UFC, boxe e a página do time
-    ├── inicio.js       # aba Início (favoritos) e Pesquisa
+    ├── busca_regras.js # regras da busca (relevância, boxeadores da Wikipédia, recentes)
+    ├── nba_quadra.js   # NBA: box score, arremessos e desenho da quadra (PC e app)
+    ├── inicio.js       # abas Favoritos e Pesquisa
+    ├── navegacao.js    # barra de baixo, páginas com voltar, aba Jogos e página da liga
     └── fontes/         # fonte Inter (licença SIL OFL)
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
 ├── time_dados.js      # regras da página do time (elenco por posição, jogos, estatísticas, técnico)
-├── nba_quadra.js      # NBA: box score, arremessos e desenho da quadra (PC e app)
-├── busca_regras.js    # regras da busca (relevância, boxeadores da Wikipédia, recentes)
 ├── regras_esportes.js # regras de MLB e NHL (placar ao vivo, série, pontuações, líderes)
 ├── sw.js, registrar.js, manifest.webmanifest, ícones
 ├── android.js         # botão voltar do Android (só no APK)
-testes/                # testes das regras da página do time, com amostras reais da ESPN e do Wikidata
+testes/                # testes das regras (time, busca, NBA, navegação), com amostras reais da ESPN e do Wikidata
 planejamento/          # especificações e planos de cada parte
 docs/                  # versão do celular pronta (gerada pelo gerar_celular.py)
 android/               # projeto do app Android (o GitHub Actions monta o APK)
@@ -291,7 +296,7 @@ A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-2
 
 - Os dados vêm de endpoints **não oficiais** da NBA e da ESPN. Eles podem mudar, ficar lentos ou bloquear consultas sem aviso. O cache ameniza isso, mas não elimina.
 - Os recordes da temporada consideram apenas a **temporada regular**. Na carreira, há números de temporada regular e de playoffs.
-- A ESPN não publica estatísticas de carreira de todos os atletas; quando falta, o painel avisa.
+- A ESPN não publica estatísticas de carreira de todos os atletas; quando falta, a página avisa.
 - A Globo transmite só 15 dos 24 GPs de F1 em TV aberta, e quais são varia. O padrão aponta SporTV e Globoplay, que passam todos.
 - A agenda de boxe depende do arquivo `boxe_eventos.json`, atualizado à mão; o perfil dos lutadores depende de a Wikipédia ter uma página sobre eles.
 - Os favoritos ficam guardados no navegador: em outro navegador ou celular eles começam vazios.
