@@ -49,7 +49,7 @@ const Navegacao = {
   },
 
   endereco() {
-    // a página "painel" não tem endereço próprio: fica com o da página de baixo
+    // uma página sem endereço próprio fica com o da página de baixo
     const pilha = this.pilhas[this.pilhas.atual];
     for (let i = pilha.length - 1; i >= 0; i--) {
       const e = Rotas.montarEndereco(pilha[i]);
@@ -197,10 +197,17 @@ const Navegacao = {
     const raiz = this.pilhas[this.pilhas.atual].length === 1;
     $("#voltar-pagina").hidden = raiz;
     $("#topo-pagina").classList.toggle("na-raiz", raiz);
-    $("#titulo-pagina").textContent = p.titulo || (def.titulo ? def.titulo(p.params, p) : TITULO_ABA[p.tipo] || "");
+    const texto = p.titulo || (def.titulo ? def.titulo(p.params, p) : TITULO_ABA[p.tipo] || "");
+    const partes = [h("span", { class: "titulo-texto" }, texto), p.subtitulo ? h("span", { class: "subtitulo-pagina" }, p.subtitulo) : null];
+    // na partida, o título (a liga) é um botão que abre a página da liga
+    $("#titulo-pagina").replaceChildren(
+      def.aoTocarTitulo && !raiz
+        ? h("button", { class: "titulo-botao", type: "button", onclick: () => def.aoTocarTitulo(p.params, p) }, h("span", { class: "titulo-bloco" }, ...partes), s("svg", { viewBox: "0 0 24 24", width: "14", height: "14", "aria-hidden": "true" }, s("path", { d: "M9 5l7 7-7 7", fill: "none", stroke: "currentColor", "stroke-width": "2.4", "stroke-linecap": "round", "stroke-linejoin": "round" })))
+        : h("span", { class: "titulo-bloco" }, ...partes)
+    );
     $("#acoes-pagina").replaceChildren(...[def.acoes ? def.acoes(p.params, p) : null].filter(Boolean));
     $("#busca-pagina").hidden = this.pilhas.atual === "pesquisa";
-    document.title = raiz && p.tipo === "jogos" ? "Scoresports" : `${$("#titulo-pagina").textContent} · Scoresports`;
+    document.title = raiz && p.tipo === "jogos" ? "Scoresports" : `${texto} · Scoresports`;
   },
 
   desenharBarra() {
@@ -211,23 +218,19 @@ const Navegacao = {
   },
 };
 
-/** Troca o título de uma página (o nome do time chega depois do carregamento, por exemplo). */
-function definirTitulo(corpo, texto) {
-  const p = Rotas.ABAS.flatMap((aba) => Navegacao.pilhas[aba]).find((x) => x.corpo === corpo) || Navegacao.topo();
+function paginaDoCorpo(corpo) {
+  return Rotas.ABAS.flatMap((aba) => Navegacao.pilhas[aba]).find((x) => x.corpo === corpo) || Navegacao.topo();
+}
+
+/** Troca o título de uma página (o nome do time chega depois do carregamento, por exemplo). corpo null = a página do topo. */
+function definirTitulo(corpo, texto, subtitulo) {
+  const p = paginaDoCorpo(corpo);
   p.titulo = texto;
-  if (p === Navegacao.topo()) {
-    $("#titulo-pagina").textContent = texto;
-    document.title = `${texto} · Scoresports`;
-  }
+  if (subtitulo !== undefined) p.subtitulo = subtitulo;
+  if (p === Navegacao.topo()) Navegacao.desenharTopo(p, PAGINAS[p.tipo]);
 }
 
 /* ---------- Páginas ---------- */
-
-/** Página sem endereço próprio, aberta pelo Painel (jogador da NBA no PC, por exemplo). */
-registrarPagina("painel", {
-  titulo: (params) => params.titulo || "",
-  desenhar: (corpo, params, ativo, p) => p.construir(corpo, ativo),
-});
 
 registrarPagina("jogos", {
   titulo: () => TITULO_ABA.jogos,
@@ -246,6 +249,30 @@ registrarPagina("pesquisa", {
   desenhar: () => pesquisaDesenhar(),
 });
 
+/** Time: a aba escolhida fica guardada na própria página (ao voltar de um atleta, reabre na mesma aba). */
+registrarPagina("time", {
+  titulo: (params, p) => p.nome || "Time",
+  desenhar: (corpo, params, ativo, p) => {
+    p.lembrar = p.lembrar || { aba: "jogos" };
+    return desenharTime(corpo, ativo, params.esporte, params.liga, params.id, p.nome, p.lembrar);
+  },
+});
+
+/** Atleta da ESPN; no site do PC, o jogador da NBA abre a tela própria (ids da NBA.com). */
+registrarPagina("atleta", {
+  titulo: (params, p) => p.nome || "Atleta",
+  desenhar: (corpo, params, ativo, p) => {
+    const nba = esporteObj("nba");
+    if (params.esporte === "nba" && nba && nba.tipo === "nba") return desenharJogadorNBA(corpo, ativo, Number(params.id), p.nome || "", p.contexto || {});
+    return desenharAtleta(corpo, ativo, params.esporte, params.liga, params.id, p.contexto || null);
+  },
+});
+
+registrarPagina("boxeador", {
+  titulo: (params) => params.nome,
+  desenhar: (corpo, params, ativo) => desenharBoxeador(corpo, ativo, params.nome),
+});
+
 /** Partida: com o jogo da lista em memória abre na hora; pelo endereço, busca o jogo pelo id. */
 registrarPagina("jogo", {
   titulo: (params) => {
@@ -253,14 +280,16 @@ registrarPagina("jogo", {
     const l = esp && esp.ligas.find((x) => x.id === params.liga);
     return (l && l.nome) || (esp && esp.nome) || "Jogo";
   },
+  aoTocarTitulo: (params) => irPara(params.esporte, "classificacao", params.liga),
   desenhar: (corpo, params, ativo, p) => {
     const esp = esporteObj(params.esporte);
-    if (esp.tipo === "nba") return nbaMostrarJogo(p.jogo);
+    if (!esp) return corpo.replaceChildren(vazio("Jogo não encontrado."));
+    if (esp.tipo === "nba") return p.jogo ? nbaMostrarJogo(p.jogo) : nbaJogoPeloId(params.id, p);
     return partidaDetalhe(esp, params.liga, p.jogo || { id: params.id }, false);
   },
   aoMostrar: (corpo, params, p) => {
     const esp = esporteObj(params.esporte);
-    if (esp.tipo === "nba") return nbaMostrarJogo(p.jogo, true);
+    if (esp.tipo === "nba") return p.jogo ? nbaMostrarJogo(p.jogo, true) : null;
     return partidaDetalhe(esp, params.liga, p.jogo || { id: params.id }, true);
   },
 });
@@ -268,14 +297,21 @@ registrarPagina("jogo", {
 /** Evento da F1, do UFC ou noite de boxe. */
 registrarPagina("evento", {
   titulo: (params) => (esporteObj(params.esporte) || {}).nome || "Evento",
-  desenhar: (corpo, params, ativo, p) => {
+  desenhar: async (corpo, params, ativo, p) => {
     const esp = esporteObj(params.esporte);
+    if (!esp) return corpo.replaceChildren(vazio("Evento não encontrado."));
+    if (!p.evento) {
+      // aberto pelo endereço: acha o evento no calendário pelo id
+      const lista = esp.tipo === "boxe" ? await api("/boxe/eventos") : (await api(`/e/${esp.id}/${params.liga}/eventos`)).eventos;
+      p.evento = lista.find((ev) => String(ev.id) === String(params.id));
+      if (!p.evento) return corpo.replaceChildren(vazio("Evento não encontrado."));
+    }
     if (esp.tipo === "boxe") return boxeEventoDetalhe(esp, p.evento);
     return eventoDetalhe(esp, params.liga, p.evento, false);
   },
   aoMostrar: (corpo, params, p) => {
     const esp = esporteObj(params.esporte);
-    if (esp.tipo !== "boxe") eventoDetalhe(esp, params.liga, p.evento, true);
+    if (esp.tipo !== "boxe" && p.evento) eventoDetalhe(esp, params.liga, p.evento, true);
   },
 });
 

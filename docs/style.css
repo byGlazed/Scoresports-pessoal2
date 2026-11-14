@@ -123,6 +123,26 @@ img { max-width: 100%; }
   color: var(--texto);
 }
 .botao-topo:hover { background: var(--superficie-2); }
+.titulo-bloco { display: grid; min-width: 0; line-height: 1.2; }
+.titulo-texto { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.subtitulo-pagina { font-size: 0.75rem; font-weight: 500; color: var(--texto-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.titulo-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0 6px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.titulo-botao:hover { background: var(--superficie-2); }
+.titulo-botao svg { flex: none; color: var(--texto-3); }
 .acoes-pagina { display: flex; align-items: center; gap: 2px; }
 .acoes-pagina:empty { display: none; }
 .acoes-pagina .estrela { width: 44px; height: 44px; }

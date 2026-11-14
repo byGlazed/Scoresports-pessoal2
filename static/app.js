@@ -669,23 +669,6 @@ function tabela(colunas, linhas, { rodape, classeLinha } = {}) {
   );
 }
 
-/* ---------- Painel: as telas antigas abrem páginas pela navegação ---------- */
-
-const Painel = {
-  abrir(titulo, construir) {
-    Navegacao.abrir({ tipo: "painel", params: { titulo }, construir });
-  },
-  empilhar(titulo, construir) {
-    this.abrir(titulo, construir);
-  },
-  fechar() {
-    if (Navegacao.topo().tipo === "painel") Navegacao.voltar();
-  },
-  voltar() {
-    Navegacao.voltar();
-  },
-};
-
 /* ---------- Início ---------- */
 
 async function iniciar() {
@@ -845,6 +828,19 @@ function nbaAbrirJogo(jogo) {
   NBA.jogoAtual = jogo.id;
   marcarAtual(lista(), jogo.id);
   Navegacao.abrir({ tipo: "jogo", params: { esporte: "nba", liga: "nba", id: String(jogo.id) }, jogo });
+}
+
+/** Jogo da NBA aberto pelo endereço (sem o jogo da lista): o box score diz se já começou. */
+async function nbaJogoPeloId(id, pagina) {
+  let estado = 1;
+  try {
+    const box = await api(`/jogos/${id}/boxscore`);
+    estado = box.estado || 1;
+  } catch (_) {
+    /* ainda sem box score: é pré-jogo */
+  }
+  pagina.jogo = { id, estado };
+  return nbaMostrarJogo(pagina.jogo);
 }
 
 /** Desenha o jogo da NBA (site do PC) na página aberta: pré-jogo antes de começar, box score depois. */
@@ -1145,7 +1141,7 @@ function nbaTabelaBox(time, gameId) {
 /* ---------- Painel do jogador ---------- */
 
 function abrirJogadorNBA(id, nome, contexto = {}) {
-  Painel.abrir(nome, (corpo, ativo) => desenharJogadorNBA(corpo, ativo, id, nome, contexto));
+  Navegacao.abrir({ tipo: "atleta", params: { esporte: "nba", liga: "nba", id: String(id) }, nome, contexto });
 }
 
 async function abrirJogadorPorNome(nome) {
