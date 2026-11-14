@@ -165,8 +165,9 @@ function registrarModulo(tipo, modulo) {
   MODULOS[tipo] = modulo;
 }
 
-const lista = () => $("#lista");
-const detalhe = () => $("#detalhe");
+// as telas desenham na página do topo (navegacao.js)
+const lista = () => Navegacao.alvo();
+const detalhe = () => Navegacao.alvo();
 
 function novoTokenLista() {
   return ++S.tkLista;
@@ -194,24 +195,6 @@ function cancelar(nome) {
 
 function cancelarTudo() {
   Object.keys(S.timers).forEach(cancelar);
-}
-
-function layoutLargo(largo) {
-  $(".palco").classList.toggle("largo", Boolean(largo));
-}
-
-function mostrarDetalhe() {
-  document.body.classList.add("mostrando-detalhe");
-  if (window.matchMedia("(max-width: 860px)").matches) window.scrollTo({ top: 0 });
-}
-
-function voltarParaLista() {
-  document.body.classList.remove("mostrando-detalhe");
-  cancelar("detalhe");
-}
-
-function detalheVazio(texto = "Escolha um jogo para ver os detalhes.") {
-  detalhe().replaceChildren(h("div", { class: "vazio-detalhe" }, texto));
 }
 
 function marcarAtual(raiz, id) {
@@ -253,9 +236,8 @@ const Favoritos = {
     this.avisar();
   },
   avisar() {
-    // a barra lateral mostra os favoritos: redesenha quando eles mudam
-    clearTimeout(this.espera);
-    this.espera = setTimeout(() => S.esporte && redesenharLateral(), 0);
+    // a aba Favoritos mostra os favoritos: desenha de novo quando ela reaparecer
+    if (typeof Navegacao !== "undefined" && Navegacao.pilhas) Navegacao.invalidar("favoritos");
   },
 };
 
@@ -397,10 +379,6 @@ function imgBandeira(src, pais) {
   return src ? h("img", { class: "bandeira", src, alt: pais || "", title: pais || null, loading: "lazy" }) : null;
 }
 
-function botaoVoltarMobile() {
-  return h("button", { class: "botao voltar-mobile", type: "button", onclick: voltarParaLista }, "‹ Voltar");
-}
-
 function alternar(opcoes, atual, aoEscolher, rotulo) {
   return h(
     "div",
@@ -536,7 +514,14 @@ function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub }) {
     "div",
     { class: "grupo-liga-titulo" },
     logo !== undefined ? imgLogo(logo) : null,
-    aoClicar ? h("button", { class: "botao-link", type: "button", onclick: aoClicar }, titulo) : h("span", null, titulo),
+    aoClicar
+      ? h(
+          "button",
+          { class: "botao-link abre-liga", type: "button", onclick: aoClicar },
+          titulo,
+          s("svg", { viewBox: "0 0 24 24", width: "14", height: "14", "aria-hidden": "true" }, s("path", { d: "M9 5l7 7-7 7", fill: "none", stroke: "currentColor", "stroke-width": "2.4", "stroke-linecap": "round", "stroke-linejoin": "round" }))
+        )
+      : h("span", null, titulo),
     sub ? h("span", { class: "nota", style: { margin: 0 } }, sub) : null,
     h("span", { style: { flex: 1 } }),
     favorito ? botaoFavorito(favorito) : null
@@ -684,155 +669,22 @@ function tabela(colunas, linhas, { rodape, classeLinha } = {}) {
   );
 }
 
-/* ---------- Painel (jogador, atleta, elenco) ---------- */
-
-const Painel = {
-  pilha: [],
-  atual: null,
-  token: 0,
-
-  abrir(titulo, construir) {
-    this.pilha = [];
-    this.mostrar(titulo, construir);
-    const dialogo = $("#painel");
-    if (!dialogo.open) dialogo.showModal();
-  },
-
-  empilhar(titulo, construir) {
-    if (this.atual) this.pilha.push(this.atual);
-    this.mostrar(titulo, construir);
-  },
-
-  mostrar(titulo, construir) {
-    this.atual = { titulo, construir };
-    $("#painel-titulo").textContent = titulo;
-    $("#painel-voltar").hidden = this.pilha.length === 0;
-    const corpo = $("#painel-corpo");
-    corpo.replaceChildren(carregando());
-    corpo.scrollTop = 0;
-    const tk = ++this.token;
-    const ativo = () => tk === this.token && $("#painel").open;
-    Promise.resolve()
-      .then(() => construir(corpo, ativo))
-      .catch((erro) => {
-        if (tk === this.token) corpo.replaceChildren(caixaErro(erro, () => this.mostrar(titulo, construir)));
-      });
-  },
-
-  voltar() {
-    const anterior = this.pilha.pop();
-    if (anterior) this.mostrar(anterior.titulo, anterior.construir);
-  },
-
-  fechar() {
-    this.token++;
-    $("#painel").close();
-  },
-};
-
-/* ---------- Navegação entre esportes ---------- */
-
-function desenharEsportes() {
-  $("#esportes").replaceChildren(
-    ...S.esportes
-      .filter((e) => !e.oculto)
-      .map((e) =>
-        h("button", { class: "esporte", type: "button", "aria-current": String(e.id === S.esporte), onclick: () => irPara(e.id) }, e.nome)
-      )
-  );
-}
-
-/** Barra lateral: seções do esporte e, abaixo, o que o módulo quiser (competições, favoritos). */
-function desenharLateral(esp, modulo, abas) {
-  const partes = [h("div", { class: "lateral-titulo" }, esp.nome)];
-  if (abas.length > 1) {
-    partes.push(
-      h(
-        "nav",
-        { class: "lateral-secao", "aria-label": "Seções" },
-        abas.map((a) =>
-          h(
-            "button",
-            { class: "item-lateral", type: "button", "aria-current": String(a.id === S.aba), onclick: () => irPara(esp.id, a.id) },
-            a.nome
-          )
-        )
-      )
-    );
-  }
-  if (modulo.lateral) {
-    const extra = modulo.lateral(esp, S.aba);
-    if (extra) partes.push(extra);
-  }
-  $("#lateral").replaceChildren(...partes);
-  document.body.classList.toggle("sem-lateral", partes.length === 1 && !modulo.lateral);
-}
-
-function abrirLateral(aberta) {
-  document.body.classList.toggle("lateral-aberta", aberta);
-  $("#fundo-lateral").hidden = !aberta;
-}
-
-function irPara(esporteId, aba) {
-  const esp = S.esportes.find((e) => e.id === esporteId) || S.esportes[0];
-  const modulo = MODULOS[esp.tipo];
-  const abas = modulo.abas(esp);
-  const pedida = aba || lembrar(`aba:${esp.id}`);
-  S.esporte = esp.id;
-  S.aba = abas.some((a) => a.id === pedida) ? pedida : abas[0].id;
-  guardar("esporte", esp.id);
-  guardar(`aba:${esp.id}`, S.aba);
-
-  cancelarTudo();
-  novoTokenLista();
-  novoTokenDetalhe();
-  abrirLateral(false);
-  document.body.classList.remove("mostrando-detalhe");
-  layoutLargo(false);
-  detalheVazio(modulo.textoVazio ? modulo.textoVazio(S.aba) : undefined);
-  desenharEsportes();
-  desenharLateral(esp, modulo, abas);
-  lista().replaceChildren(carregando());
-  modulo.desenhar(esp, S.aba);
-}
-
-function redesenharLateral() {
-  const esp = S.esportes.find((e) => e.id === S.esporte);
-  const modulo = MODULOS[esp.tipo];
-  desenharLateral(esp, modulo, modulo.abas(esp));
-}
+/* ---------- Início ---------- */
 
 async function iniciar() {
-  $("#painel-fechar").addEventListener("click", () => Painel.fechar());
-  $("#painel-voltar").addEventListener("click", () => Painel.voltar());
-  $("#painel").addEventListener("click", (e) => {
-    if (e.target === e.currentTarget) Painel.fechar();
-  });
-  $("#painel").addEventListener("close", () => Painel.token++);
-  $("#abrir-lateral").addEventListener("click", () => abrirLateral(!document.body.classList.contains("lateral-aberta")));
-  $("#fundo-lateral").addEventListener("click", () => abrirLateral(false));
-  $("#busca-topo").addEventListener("click", () => irPara("pesquisa"));
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") abrirLateral(false);
-    if (e.key === "/" && !/input|textarea/i.test(document.activeElement.tagName)) {
+    if (e.key === "/" && !/input|textarea|select/i.test(document.activeElement.tagName)) {
       e.preventDefault();
-      irPara("pesquisa");
+      Navegacao.trocarAba("pesquisa");
     }
   });
-
   try {
-    S.esportes = await api("/esportes");
+    S.esportes = (await api("/esportes")).filter((e) => MODULOS[e.tipo]);
   } catch (erro) {
-    lista().replaceChildren(caixaErro(erro, iniciar));
+    $("#pagina").replaceChildren(caixaErro(erro, () => location.reload()));
     return;
   }
-  S.esportes = [
-    { id: "inicio", nome: "Início", tipo: "inicio", ligas: [] },
-    ...S.esportes,
-    { id: "pesquisa", nome: "Pesquisa", tipo: "pesquisa", ligas: [], oculto: true },
-  ].filter((e) => MODULOS[e.tipo]);
-  const salvo = lembrar("esporte");
-  irPara(S.esportes.some((e) => e.id === salvo) ? salvo : "inicio");
+  Navegacao.iniciar();
 }
 
 window.addEventListener("DOMContentLoaded", iniciar);
@@ -857,15 +709,14 @@ const nbaFoto = (id) => `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}
 
 registrarModulo("nba", {
   abas: () => [
-    { id: "jogos", nome: "Jogos" },
     { id: "classificacao", nome: "Classificação" },
+    { id: "jogos", nome: "Jogos" },
     { id: "lideres", nome: "Líderes" },
     { id: "corridas", nome: "MVP e calouro" },
     { id: "jogadores", nome: "Jogadores" },
   ],
   desenhar(esp, aba) {
     if (aba === "jogos") return nbaJogos();
-    layoutLargo(true);
     if (aba === "classificacao") return nbaClassificacao();
     if (aba === "lideres") return nbaLideres();
     if (aba === "corridas") return nbaCorridas();
@@ -976,22 +827,38 @@ function nbaLinhaJogo(j) {
 function nbaAbrirJogo(jogo) {
   NBA.jogoAtual = jogo.id;
   marcarAtual(lista(), jogo.id);
-  mostrarDetalhe();
-  cancelar("detalhe");
-  if (jogo.estado === 1) nbaPreJogo(jogo);
-  else nbaBoxScore(jogo, false);
+  Navegacao.abrir({ tipo: "jogo", params: { esporte: "nba", liga: "nba", id: String(jogo.id) }, jogo });
+}
+
+/** Jogo da NBA aberto pelo endereço (sem o jogo da lista): o box score diz se já começou. */
+async function nbaJogoPeloId(id, pagina) {
+  let estado = 1;
+  try {
+    const box = await api(`/jogos/${id}/boxscore`);
+    estado = box.estado || 1;
+  } catch (_) {
+    /* ainda sem box score: é pré-jogo */
+  }
+  pagina.jogo = { id, estado };
+  return nbaMostrarJogo(pagina.jogo);
+}
+
+/** Desenha o jogo da NBA (site do PC) na página aberta: pré-jogo antes de começar, box score depois. */
+function nbaMostrarJogo(jogo, silencioso = false) {
+  if (jogo.estado === 1) return silencioso ? null : nbaPreJogo(jogo);
+  return nbaBoxScore(jogo, silencioso);
 }
 
 /* ---------- Pré-jogo ---------- */
 
 async function nbaPreJogo(jogo) {
   const tk = novoTokenDetalhe();
-  detalhe().replaceChildren(botaoVoltarMobile(), carregando("Montando o pré-jogo…"));
+  detalhe().replaceChildren(carregando("Montando o pré-jogo…"));
   let pre;
   try {
     pre = await api(`/jogos/${jogo.id}/pre-jogo`);
   } catch (erro) {
-    if (tk === S.tkDetalhe) detalhe().replaceChildren(botaoVoltarMobile(), caixaErro(erro, () => nbaPreJogo(jogo)));
+    if (tk === S.tkDetalhe) detalhe().replaceChildren(caixaErro(erro, () => nbaPreJogo(jogo)));
     return;
   }
   if (tk !== S.tkDetalhe) return;
@@ -1060,7 +927,7 @@ async function nbaPreJogo(jogo) {
   if (pre.falhas && pre.falhas.length) {
     blocos.push(h("p", { class: "nota" }, `Algumas partes não carregaram agora (${pre.falhas.join(", ")}). Elas voltam na próxima atualização.`));
   }
-  detalhe().replaceChildren(botaoVoltarMobile(), ...blocos);
+  detalhe().replaceChildren(...blocos);
 }
 
 function nbaForma(time, forma) {
@@ -1158,12 +1025,12 @@ function traduzirStatusLesao(status) {
 
 async function nbaBoxScore(jogo, silencioso) {
   const tk = silencioso ? S.tkDetalhe : novoTokenDetalhe();
-  if (!silencioso) detalhe().replaceChildren(botaoVoltarMobile(), carregando());
+  if (!silencioso) detalhe().replaceChildren(carregando());
   let box;
   try {
     box = await api(`/jogos/${jogo.id}/boxscore`);
   } catch (erro) {
-    if (tk === S.tkDetalhe && !silencioso) detalhe().replaceChildren(botaoVoltarMobile(), caixaErro(erro, () => nbaBoxScore(jogo, false)));
+    if (tk === S.tkDetalhe && !silencioso) detalhe().replaceChildren(caixaErro(erro, () => nbaBoxScore(jogo, false)));
     return;
   }
   if (tk !== S.tkDetalhe) return;
@@ -1199,7 +1066,7 @@ async function nbaBoxScore(jogo, silencioso) {
   const blocos = [topo];
   if (estado === 2 && jogo.transmissao) blocos.push(cartao("Onde assistir no Brasil", blocoTransmissao(jogo.transmissao)));
   blocos.push(h("p", { class: "nota" }, "Clique no nome de um jogador para ver a temporada, a carreira e o mapa de arremessos deste jogo."));
-  detalhe().replaceChildren(botaoVoltarMobile(), ...blocos);
+  detalhe().replaceChildren(...blocos);
 
   if (estado === 2) agendar("detalhe", () => nbaBoxScore(jogo, true), 20000);
 }
@@ -1274,7 +1141,7 @@ function nbaTabelaBox(time, gameId) {
 /* ---------- Painel do jogador ---------- */
 
 function abrirJogadorNBA(id, nome, contexto = {}) {
-  Painel.abrir(nome, (corpo, ativo) => desenharJogadorNBA(corpo, ativo, id, nome, contexto));
+  Navegacao.abrir({ tipo: "atleta", params: { esporte: "nba", liga: "nba", id: String(id) }, nome, contexto });
 }
 
 async function abrirJogadorPorNome(nome) {

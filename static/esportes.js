@@ -2,7 +2,7 @@
 
 /* =========================================================================
    Futebol, NFL, Fórmula 1, UFC e boxe.
-   Usa as funções da base (h, api, cartao, tabela, Painel...) definidas em app.js.
+   Usa as funções da base (h, api, cartao, tabela...) definidas em app.js e abre as páginas pela navegação (navegacao.js).
    ========================================================================= */
 
 const ESTADO_ESPORTE = {};
@@ -16,32 +16,26 @@ function estadoDe(esporteId) {
 
 function abrirAtleta(esporte, liga, id, nome) {
   if (!id) return;
-  Painel.abrir(nome || "Atleta", (corpo, ativo) => desenharAtleta(corpo, ativo, esporte, liga, id));
+  Navegacao.abrir({ tipo: "atleta", params: { esporte, liga, id: String(id) }, nome });
 }
 
 function empilharAtleta(esporte, liga, id, nome, contexto = null) {
   if (!id) return;
   // contexto.arremessos: os arremessos dele no jogo de onde veio (box score da NBA)
-  // vindo do box score o painel ainda está fechado: abre em vez de empilhar
-  const mostrar = $("#painel").open ? Painel.empilhar.bind(Painel) : Painel.abrir.bind(Painel);
-  mostrar(nome || "Atleta", (corpo, ativo) => desenharAtleta(corpo, ativo, esporte, liga, id, contexto));
+  Navegacao.abrir({ tipo: "atleta", params: { esporte, liga, id: String(id) }, nome, contexto });
 }
 
 /* ---------- Página do time (como no Sofascore) ---------- */
 
 function abrirTime(esporte, liga, timeId, nome) {
   if (!timeId) return;
-  // a aba escolhida fica guardada aqui: ao voltar de um atleta, a página reabre na mesma aba
-  const lembrar = { aba: "jogos" };
-  Painel.abrir(nome || "Time", (corpo, ativo) => desenharTime(corpo, ativo, esporte, liga, timeId, nome, lembrar));
+  // a aba escolhida fica guardada na página: ao voltar de um atleta, ela reabre na mesma aba
+  Navegacao.abrir({ tipo: "time", params: { esporte, liga, id: String(timeId) }, nome, lembrar: { aba: "jogos" } });
 }
 
-/** Da página do time para o detalhe do jogo, na tela do esporte. */
+/** Da página do time para a página do jogo. */
 function abrirJogoDoTime(esporte, liga, jogo) {
-  Painel.fechar();
-  if (S.esporte !== esporte) irPara(esporte);
-  mostrarDetalhe();
-  partidaDetalhe(esporteObj(esporte), liga, jogo, false);
+  Navegacao.abrir({ tipo: "jogo", params: { esporte, liga, id: String(jogo.id) }, jogo });
 }
 
 function tabelaElenco(esporte, liga, atletas) {
@@ -144,7 +138,7 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
   pedidoCabecalho
     .then((info) => {
       if (!ativo()) return;
-      $("#painel-titulo").textContent = info.nome || nomeInicial || "Time";
+      definirTitulo(corpo, info.nome || nomeInicial || "Time");
       cabecalho.replaceChildren(cabecalhoTime(info, { ...fav, nome: info.nome || fav.nome, logo: info.logo }));
     })
     .catch(() => {
@@ -369,7 +363,7 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id, contexto = null) 
   const a = await api(`/e/${esporte}/${liga}/atletas/${id}`);
   if (!ativo()) return;
   const p = a.perfil;
-  $("#painel-titulo").textContent = p.nome || "Atleta";
+  definirTitulo(corpo, p.nome || "Atleta");
   const fatos = [
     ["Posição", p.posicao],
     ["Time", p.time],
@@ -630,61 +624,17 @@ function favLiga(esp, ligaId) {
 
 const ModuloPartidas = {
   abas: (esp) => [
-    { id: "jogos", nome: "Jogos" },
     { id: "classificacao", nome: "Classificação" },
+    { id: "jogos", nome: "Jogos" },
     { id: "lideres", nome: esp.id === "futebol" ? "Artilharia e cartões" : "Líderes" },
   ],
-
-  lateral(esp, aba) {
-    const st = estadoDe(esp.id);
-    if (esp.ligas.length < 2) {
-      return h("div", { class: "lateral-secao" }, h("div", { class: "lateral-acao" }, botaoFavorito(favLiga(esp, esp.ligas[0].id), { comTexto: true })));
-    }
-    if (!st.liga) st.liga = lembrar(`liga:${esp.id}`) || "todas";
-    if (aba !== "jogos" && st.liga === "todas") st.liga = esp.ligas[0].id;
-    const escolher = (id) => {
-      st.liga = id;
-      guardar(`liga:${esp.id}`, id);
-      irPara(esp.id, S.aba);
-    };
-    const item = (l) =>
-      h(
-        "div",
-        { class: "item-liga" },
-        h("button", { class: "item-lateral", type: "button", "aria-current": String(l.id === st.liga), onclick: () => escolher(l.id) }, l.nome),
-        l.id !== "todas" ? botaoFavorito(favLiga(esp, l.id)) : null
-      );
-    const grupos = {};
-    esp.ligas.forEach((l) => (grupos[grupoDaLiga(l)] = grupos[grupoDaLiga(l)] || []).push(l));
-    const favoritas = Favoritos.lista().filter((f) => f.tipo === "liga" && f.esporte === esp.id);
-    return h(
-      "div",
-      null,
-      favoritas.length
-        ? h("div", { class: "lateral-secao" }, h("div", { class: "lateral-rotulo" }, "Suas competições"), favoritas.map((f) => item({ id: f.liga, nome: f.nome })))
-        : null,
-      h(
-        "div",
-        { class: "lateral-secao" },
-        h("div", { class: "lateral-rotulo" }, "Competições"),
-        aba === "jogos" ? item({ id: "todas", nome: "Todos os jogos do dia" }) : null,
-        ORDEM_GRUPOS.filter((g) => grupos[g]).map((g) => [h("div", { class: "lateral-subrotulo" }, g), grupos[g].map(item)])
-      )
-    );
-  },
 
   desenhar(esp, aba) {
     const st = estadoDe(esp.id);
     if (!st.liga) st.liga = esp.ligas.length > 1 ? lembrar(`liga:${esp.id}`) || "todas" : esp.ligas[0].id;
     const ligaEscolhida = st.liga === "todas" ? esp.ligas[0].id : st.liga;
-    if (aba === "classificacao") {
-      layoutLargo(true);
-      return classificacaoEspn(esp, ligaEscolhida);
-    }
-    if (aba === "lideres") {
-      layoutLargo(true);
-      return lideresEspn(esp, ligaEscolhida);
-    }
+    if (aba === "classificacao") return classificacaoEspn(esp, ligaEscolhida);
+    if (aba === "lideres") return lideresEspn(esp, ligaEscolhida);
     return partidasLista(esp);
   },
 };
@@ -780,6 +730,7 @@ async function partidasDia(esp, silencioso) {
   const ligaUnica = st.liga !== "todas";
   const ligas = ligaUnica ? esp.ligas.filter((l) => l.id === st.liga) : esp.ligas;
   const tk = silencioso ? S.tkLista : novoTokenLista();
+  const naPaginaDaLiga = Navegacao.topo().tipo === "liga";
 
   // com uma competição escolhida, as setas pulam direto para o próximo dia com jogos
   let datasComJogos = [];
@@ -834,24 +785,12 @@ async function partidasDia(esp, silencioso) {
       .map(({ liga, jogos }) => ({ liga, jogos: jogos.filter(passaFiltro) }))
       .filter((g) => g.jogos.length)
       .map(({ liga, jogos }) =>
-        h(
-          "section",
-          { class: "cartao grupo-liga" },
-          cabecaGrupo({
-            titulo: liga.nome,
-            logo: jogos[0].liga_logo || null,
-            sub: ligaUnica ? null : grupoDaLiga(liga),
-            aoClicar: ligaUnica
-              ? null
-              : () => {
-                  st.liga = liga.id;
-                  guardar(`liga:${esp.id}`, liga.id);
-                  irPara(esp.id, "jogos");
-                },
-            favorito: favLiga(esp, liga.id),
-          }),
-          jogos.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, liga.id, j)))
-        )
+        grupoDeJogos(esp, liga, jogos, {
+          sub: ligaUnica ? null : grupoDaLiga(liga),
+          // na página da própria liga o cabeçalho não abre nada
+          aoTocarLiga: naPaginaDaLiga ? null : () => irPara(esp.id, "classificacao", liga.id),
+          aoTocarJogo: (j) => abrirPartida(esp, liga.id, j),
+        })
       );
     const partes = [barra, barraFiltro(todosJogos, desenhar)];
     if (grupos.length) partes.push(...grupos);
@@ -868,23 +807,31 @@ async function partidasDia(esp, silencioso) {
   else if (st.data === hoje && todosJogos.some((j) => j.estado === 1)) agendar("lista", () => partidasDia(esp, true), 60000);
 }
 
+/** Um grupo da lista do dia: o cabeçalho da competição (o toque abre a página dela) e os jogos. */
+function grupoDeJogos(esp, liga, jogos, { aoTocarLiga, aoTocarJogo, sub } = {}) {
+  return h(
+    "section",
+    { class: "cartao grupo-liga" },
+    cabecaGrupo({ titulo: liga.nome, logo: (jogos[0] && jogos[0].liga_logo) || null, sub, aoClicar: aoTocarLiga, favorito: favLiga(esp, liga.id) }),
+    jogos.map((j) => linhaPartida(esp, j, () => aoTocarJogo(j)))
+  );
+}
+
 function abrirPartida(esp, liga, jogo) {
   const st = estadoDe(esp.id);
   st.jogoAtual = jogo.id;
   marcarAtual(lista(), jogo.id);
-  mostrarDetalhe();
-  cancelar("detalhe");
-  partidaDetalhe(esp, liga, jogo, false);
+  Navegacao.abrir({ tipo: "jogo", params: { esporte: esp.id, liga, id: String(jogo.id) }, jogo });
 }
 
 async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   const tk = silencioso ? S.tkDetalhe : novoTokenDetalhe();
-  if (!silencioso) detalhe().replaceChildren(botaoVoltarMobile(), carregando());
+  if (!silencioso) detalhe().replaceChildren(carregando());
   let r;
   try {
     r = await api(`/e/${esp.id}/${liga}/jogos/${jogoLista.id}`);
   } catch (erro) {
-    if (tk === S.tkDetalhe && !silencioso) detalhe().replaceChildren(botaoVoltarMobile(), caixaErro(erro, () => partidaDetalhe(esp, liga, jogoLista, false)));
+    if (tk === S.tkDetalhe && !silencioso) detalhe().replaceChildren(caixaErro(erro, () => partidaDetalhe(esp, liga, jogoLista, false)));
     return;
   }
   if (tk !== S.tkDetalhe) return;
@@ -942,6 +889,8 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   }
 
   area.replaceChildren(...conteudoAba(aba));
+  // o topo da página mostra a liga e a rodada
+  if (!silencioso) definirTitulo(null, j.liga_nome || (esp.ligas.find((l) => l.id === liga) || esp).nome, j.nota || (j.semana ? `Semana ${j.semana}` : null));
   const favTime = (t) => (t.id ? { tipo: "time", esporte: esp.id, liga, id: String(t.id), nome: t.nome, logo: t.logo } : null);
   const placar = placarGrande({
     esquerda: { nome: esq.nome, logo: esq.logo, placar: placarComPenaltis(esq), sub: esq.campanha, aoClicar: () => abrirTime(esp.id, liga, esq.id, esq.nome), favorito: favTime(esq) },
@@ -950,7 +899,7 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
     status: j.estado === 1 ? j.status || hora(j.inicio) || "A definir" : j.status,
     info: [j.liga_nome, diaHora(j.inicio)].filter(Boolean).join(", "),
   });
-  detalhe().replaceChildren(botaoVoltarMobile(), h("section", { class: "cartao" }, placar, barra, area));
+  detalhe().replaceChildren(h("section", { class: "cartao" }, placar, barra, area));
 
   if (j.estado === 2) agendar("detalhe", () => partidaDetalhe(esp, liga, jogoLista, true), 20000);
 }
@@ -1342,20 +1291,10 @@ const ModuloEventos = {
           { id: "ranking", nome: "Ranking" },
         ],
 
-  lateral: (esp) => h("div", { class: "lateral-secao" }, h("div", { class: "lateral-acao" }, botaoFavorito(favLiga(esp, esp.ligas[0].id), { comTexto: true }))),
-
-  textoVazio: () => "Escolha um evento para ver os detalhes.",
-
   desenhar(esp, aba) {
     const liga = esp.ligas[0].id;
-    if (aba === "classificacao") {
-      layoutLargo(true);
-      return classificacaoEspn(esp, liga);
-    }
-    if (aba === "ranking") {
-      layoutLargo(true);
-      return rankingUfc(esp, liga);
-    }
+    if (aba === "classificacao") return classificacaoEspn(esp, liga);
+    if (aba === "ranking") return rankingUfc(esp, liga);
     return eventosLista(esp, liga);
   },
 };
@@ -1468,30 +1407,23 @@ async function eventosLista(esp, liga) {
   const atual = cal.eventos[cal.atual] || cal.eventos[cal.eventos.length - 1];
   const linhaAtual = lista().querySelector(`[data-id="${atual.id}"]`);
   if (linhaAtual) linhaAtual.scrollIntoView({ block: "center" });
-  if (!st.eventoAtual && window.matchMedia("(min-width: 861px)").matches) abrirEvento(esp, liga, atual);
-  else if (st.eventoAtual && window.matchMedia("(min-width: 861px)").matches) {
-    const anterior = cal.eventos.find((e) => e.id === st.eventoAtual);
-    if (anterior) abrirEvento(esp, liga, anterior);
-  }
 }
 
 function abrirEvento(esp, liga, ev) {
   const st = estadoDe(esp.id);
   st.eventoAtual = ev.id;
   marcarAtual(lista(), ev.id);
-  mostrarDetalhe();
-  cancelar("detalhe");
-  eventoDetalhe(esp, liga, ev, false);
+  Navegacao.abrir({ tipo: "evento", params: { esporte: esp.id, liga, id: String(ev.id) }, evento: ev });
 }
 
 async function eventoDetalhe(esp, liga, ev, silencioso) {
   const tk = silencioso ? S.tkDetalhe : novoTokenDetalhe();
-  if (!silencioso) detalhe().replaceChildren(botaoVoltarMobile(), carregando());
+  if (!silencioso) detalhe().replaceChildren(carregando());
   let e;
   try {
     e = await api(`/e/${esp.id}/${liga}/eventos/${ev.id}?data=${ev.data}`);
   } catch (erro) {
-    if (tk === S.tkDetalhe && !silencioso) detalhe().replaceChildren(botaoVoltarMobile(), caixaErro(erro, () => eventoDetalhe(esp, liga, ev, false)));
+    if (tk === S.tkDetalhe && !silencioso) detalhe().replaceChildren(caixaErro(erro, () => eventoDetalhe(esp, liga, ev, false)));
     return;
   }
   if (tk !== S.tkDetalhe) return;
@@ -1514,7 +1446,7 @@ async function eventoDetalhe(esp, liga, ev, silencioso) {
       ...(e.lutas.length ? e.lutas.map((l) => cartaoLuta(l, (id, nome) => abrirAtleta(esp.id, liga, id, nome))) : [secao(null, h("p", { class: "nota" }, "O card ainda não saiu."))]),
     ];
   }
-  detalhe().replaceChildren(botaoVoltarMobile(), h("section", { class: "cartao" }, cabeca, ...corpo));
+  detalhe().replaceChildren(h("section", { class: "cartao" }, cabeca, ...corpo));
   if (aoVivo) agendar("detalhe", () => eventoDetalhe(esp, liga, ev, true), 30000);
 }
 
@@ -1573,7 +1505,6 @@ function cartaoLuta(l, abrir) {
 
 registrarModulo("boxe", {
   abas: () => [{ id: "eventos", nome: "Eventos" }],
-  textoVazio: () => "Escolha uma noite de lutas para ver o card.",
   desenhar: (esp) => boxeLista(esp),
 });
 
@@ -1608,14 +1539,17 @@ async function boxeLista(esp) {
   if (passados.length) partes.push(h("p", { class: "titulo-dia", style: { marginTop: "16px" } }, "Já aconteceram"), h("div", { class: "cartao" }, passados.map(linha)));
   partes.push(h("p", { class: "nota" }, "A agenda de boxe vem do arquivo boxe_eventos.json. Depois de cada luta, anote o vencedor e o resultado nele."));
   lista().replaceChildren(...partes);
-  const inicial = eventos.find((e) => e.id === st.eventoAtual) || proximos[0];
-  if (inicial && window.matchMedia("(min-width: 861px)").matches) boxeAbrir(esp, inicial);
+  marcarAtual(lista(), st.eventoAtual);
 }
 
 function boxeAbrir(esp, ev) {
   estadoDe(esp.id).eventoAtual = ev.id;
   marcarAtual(lista(), ev.id);
-  mostrarDetalhe();
+  Navegacao.abrir({ tipo: "evento", params: { esporte: esp.id, liga: (esp.ligas[0] && esp.ligas[0].id) || esp.id, id: String(ev.id) }, evento: ev });
+}
+
+/** O card de uma noite de boxe, na página do evento. */
+function boxeEventoDetalhe(esp, ev) {
   const lutas = ev.lutas.map((l) => ({
     estado: ev.estado,
     card: null,
@@ -1625,7 +1559,6 @@ function boxeAbrir(esp, ev) {
     lutadores: l.lutadores.map((nome, i) => ({ nome, id: (l.ids || [])[i] || nome, vencedor: Boolean(l.vencedor) && l.vencedor === nome })),
   }));
   detalhe().replaceChildren(
-    botaoVoltarMobile(),
     h(
       "section",
       { class: "cartao" },
@@ -1639,13 +1572,13 @@ function boxeAbrir(esp, ev) {
 /* ---------- Perfil de boxeador (Wikipédia) ---------- */
 
 function abrirBoxeador(nome) {
-  Painel.abrir(nome, (corpo, ativo) => desenharBoxeador(corpo, ativo, nome));
+  Navegacao.abrir({ tipo: "boxeador", params: { nome } });
 }
 
 async function desenharBoxeador(corpo, ativo, nome) {
   const b = await api(`/boxe/lutador?nome=${encodeURIComponent(nome)}`);
   if (!ativo()) return;
-  $("#painel-titulo").textContent = b.nome || nome;
+  definirTitulo(corpo, b.nome || nome);
   const fav = { tipo: "jogador", esporte: "boxe", liga: "boxe", id: b.id, nome: b.nome || nome };
   const blocos = [
     h(
@@ -1709,7 +1642,7 @@ async function desenharBoxeador(corpo, ativo, nome) {
             h(
               "li",
               null,
-              h("span", null, "x ", h("button", { class: "botao-link", type: "button", onclick: () => Painel.empilhar(l.adversario, (c2, at2) => desenharBoxeador(c2, at2, l.adversario)) }, l.adversario), l.titulo ? h("span", { class: "sub" }, `, ${l.titulo}`) : null),
+              h("span", null, "x ", h("button", { class: "botao-link", type: "button", onclick: () => abrirBoxeador(l.adversario) }, l.adversario), l.titulo ? h("span", { class: "sub" }, `, ${l.titulo}`) : null),
               h("span", { class: "sub" }, l.resultado ? `${l.vencedor === (b.nome || nome) ? "Venceu" : "Resultado"}: ${l.resultado}` : dataCurta(l.data))
             )
           )
