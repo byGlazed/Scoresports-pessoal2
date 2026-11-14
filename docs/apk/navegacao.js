@@ -696,3 +696,18 @@ function irPara(esporteId, aba, liga) {
   const abaId = abas.some((a) => a.id === aba) ? aba : abas[0].id;
   Navegacao.abrir({ tipo: "liga", params: { esporte: esp.id, liga: ligaId, aba: abaId } });
 }
+
+/* ---------- Aviso de APK novo (chamado pelo app Android) ---------- */
+
+/** As telas atuais pedem um APK mais novo: mostra uma faixa acima da barra de baixo com o link do release. */
+window.mostrarAvisoApk = function (link) {
+  if (document.getElementById("aviso-apk")) return;
+  const faixa = h(
+    "div",
+    { class: "aviso-apk", id: "aviso-apk", role: "status" },
+    h("span", { class: "aviso-apk-texto" }, "Nova versão do app disponível"),
+    h("a", { class: "botao botao-principal aviso-apk-baixar", href: link }, "Baixar"),
+    h("button", { class: "aviso-apk-fechar", type: "button", "aria-label": "Fechar o aviso", onclick: () => faixa.remove() }, "×")
+  );
+  document.querySelector(".app").append(faixa);
+};
