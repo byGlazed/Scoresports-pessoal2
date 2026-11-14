@@ -1,0 +1,6 @@
+# texto sempre com LF no repositório: o manifesto do app (docs/apk/versao.txt) confere o SHA dos arquivos publicados
+* text=auto
+*.png binary
+*.woff2 binary
+*.keystore binary
+*.jar binary
