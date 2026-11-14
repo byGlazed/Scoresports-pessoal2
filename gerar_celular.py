@@ -94,6 +94,8 @@ def main():
         '<script src="./registrar.js"></script>', '<script src="./registrar.js"></script>\n  <script src="./android.js"></script>'
     )
     (APK_WWW / "index.html").write_text(html_apk, encoding="utf-8")
+    # o Android deixa de fora dos assets os arquivos que começam com ponto: o manifesto não pode contar com eles
+    (APK_WWW / ".nojekyll").unlink()
 
     # manifesto de versão: vai dentro do APK e, com a pasta inteira, para o Pages (docs/apk/)
     apk_minimo = int(APK_MINIMO.read_text(encoding="utf-8").strip() or "0")

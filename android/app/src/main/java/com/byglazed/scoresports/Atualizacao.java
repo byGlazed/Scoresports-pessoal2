@@ -86,6 +86,9 @@ public final class Atualizacao {
                     if (partes.length != 4) {
                         throw new IllegalArgumentException("linha de arquivo malformada: " + linha);
                     }
+                    if (!caminhoSeguro(partes[3])) {
+                        throw new IllegalArgumentException("caminho fora da pasta do app: " + partes[3]);
+                    }
                     try {
                         m.arquivos.put(partes[3], new Arquivo(partes[1], Long.parseLong(partes[2])));
                     } catch (NumberFormatException e) {
@@ -101,6 +104,19 @@ public final class Atualizacao {
             throw new IllegalArgumentException("manifesto sem versão");
         }
         return m;
+    }
+
+    /** Só caminhos relativos dentro da pasta www: sem "..", sem "/" no começo e sem "\". */
+    static boolean caminhoSeguro(String caminho) {
+        if (caminho.isEmpty() || caminho.startsWith("/") || caminho.contains("\\")) {
+            return false;
+        }
+        for (String parte : caminho.split("/")) {
+            if (parte.isEmpty() || parte.equals("..") || parte.equals(".")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** A parte da versão que diz respeito às telas (sem o "+d..." dos dados). */

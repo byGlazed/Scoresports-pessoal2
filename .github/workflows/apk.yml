@@ -1,10 +1,18 @@
 # Monta o APK do Scoresports na nuvem do GitHub a cada push (ou pelo botão "Run workflow")
 # e publica em: https://github.com/<seu-usuario>/<repositorio>/releases/latest
+# Nas branches "parte..." só monta e testa (não publica). Commits que mudam só dados
+# (os do robô diário, por exemplo) não geram APK: o app pega os dados novos pelo Pages.
 name: Gerar APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, "parte*"]
+    paths-ignore:
+      - "campeoes.json"
+      - "boxe_eventos.json"
+      - "transmissoes.json"
+      - "docs/**"
+      - "android/app/src/main/assets/www/**"
   workflow_dispatch:
 
 permissions:
@@ -28,6 +36,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Testar as regras de atualização do app (Java)
+        run: python testes/rodar_java.py
+
       - name: Preparar as telas do app
         run: python gerar_celular.py
 
@@ -49,6 +60,7 @@ jobs:
           path: Scoresports.apk
 
       - name: Publicar o APK (link fixo para baixar no celular)
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk

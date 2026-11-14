@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.WebResourceRequest;
@@ -15,6 +16,7 @@ import android.webkit.WebViewClient;
 import androidx.webkit.WebViewAssetLoader;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -25,7 +27,8 @@ import java.util.Map;
 /**
  * O app é a mesma página da versão do celular (pasta docs/), guardada dentro do APK.
  *
- * - As telas abrem de dentro do APK (funcionam sem internet).
+ * - As telas abrem de dentro do APK (funcionam sem internet) ou, se houver, da versão mais nova
+ *   baixada do GitHub Pages (Atualizador), no mesmo endereço: os favoritos continuam.
  * - Os pedidos à ESPN e à Wikipédia são feitos aqui pelo Android e entregues à página
  *   com a permissão de acesso (CORS), então o navegador nunca bloqueia nada.
  * - Links de fora (Wikipédia, NBA.com) abrem no navegador do celular.
@@ -34,15 +37,22 @@ public class MainActivity extends Activity {
 
     private static final String ENDERECO_APP = "https://appassets.androidplatform.net/assets/www/index.html";
     private WebView web;
+    private Atualizador atualizador;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle estadoSalvo) {
         super.onCreate(estadoSalvo);
 
-        final WebViewAssetLoader arquivos = new WebViewAssetLoader.Builder()
-                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
-                .build();
+        atualizador = new Atualizador(this, versaoDoApk());
+        WebViewAssetLoader.Builder construtor = new WebViewAssetLoader.Builder();
+        File baixada = atualizador.pastaParaServir();
+        if (baixada != null) {
+            // telas e dados baixados: servidos no mesmo endereço das que vêm no APK
+            construtor.addPathHandler("/assets/www/", new WebViewAssetLoader.InternalStoragePathHandler(this, baixada));
+        }
+        construtor.addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this));
+        final WebViewAssetLoader arquivos = construtor.build();
 
         web = new WebView(this);
         setContentView(web);
@@ -73,6 +83,14 @@ public class MainActivity extends Activity {
             }
 
             @Override
+            public void onPageFinished(WebView view, String endereco) {
+                // as telas atuais pedem um APK mais novo: a página mostra o aviso com o link do release
+                if (atualizador.precisaApkNovo()) {
+                    view.evaluateJavascript("window.mostrarAvisoApk && window.mostrarAvisoApk('" + Atualizador.RELEASE + "')", null);
+                }
+            }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest pedido) {
                 Uri uri = pedido.getUrl();
                 if ("appassets.androidplatform.net".equals(uri.getHost())) {
@@ -91,6 +109,17 @@ public class MainActivity extends Activity {
             web.restoreState(estadoSalvo);
         } else {
             web.loadUrl(ENDERECO_APP);
+        }
+        // procura telas e dados novos no Pages; valem na próxima abertura
+        atualizador.procurarEmSegundoPlano();
+    }
+
+    @SuppressWarnings("deprecation")
+    private int versaoDoApk() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException erro) {
+            return 0;
         }
     }
 

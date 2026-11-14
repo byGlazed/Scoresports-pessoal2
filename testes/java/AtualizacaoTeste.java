@@ -54,6 +54,15 @@ public class AtualizacaoTeste {
             lancou = true;
         }
         confere(lancou, "lerManifesto: linha malformada lança", "não lançou");
+        for (String ruim : new String[] {"../fora.js", "/raiz.js", "a/../../b.js", "a\\b.js"}) {
+            lancou = false;
+            try {
+                Atualizacao.ler("versao 1\narquivo aa 1 " + ruim + "\n");
+            } catch (IllegalArgumentException e) {
+                lancou = true;
+            }
+            confere(lancou, "lerManifesto: caminho fora da pasta lança (" + ruim + ")", "não lançou");
+        }
     }
 
     static void escolherPastaPorVersao() {
