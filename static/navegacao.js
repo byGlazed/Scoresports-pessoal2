@@ -231,15 +231,8 @@ registrarPagina("painel", {
 
 registrarPagina("jogos", {
   titulo: () => TITULO_ABA.jogos,
-  desenhar: () => {
-    const esp = esporteObj("futebol");
-    estadoDe("futebol").liga = "todas";
-    return partidasLista(esp);
-  },
-  aoMostrar: () => {
-    estadoDe("futebol").liga = "todas";
-    return partidasDia(esporteObj("futebol"), true);
-  },
+  desenhar: (corpo, params, ativo, p) => paginaJogos(corpo, p),
+  aoMostrar: () => desenharChipJogos(true),
 });
 
 registrarPagina("favoritos", {
@@ -330,6 +323,267 @@ registrarPagina("liga", {
     return desenharAba();
   },
 });
+
+/* ---------- Aba Jogos: chips de esporte e "Todos" ---------- */
+
+const JOGOS = { chip: lembrar("jogos:chip") || "todos", data: null };
+
+const ARTIGO_ESPORTE = { futebol: "o futebol", nba: "a NBA", nfl: "a NFL", mlb: "a MLB", nhl: "a NHL", f1: "a Fórmula 1", ufc: "o UFC", boxe: "o boxe" };
+
+function chipsDisponiveis() {
+  return Rotas.CHIPS_ESPORTE.filter(([id]) => id === "todos" || esporteObj(id));
+}
+
+/** A data que a tela de um esporte usa (cada uma guarda a sua): para manter o mesmo dia ao trocar de chip. */
+function dataDoChip(chip) {
+  if (chip === "todos") return JOGOS.data;
+  const esp = esporteObj(chip);
+  if (!esp) return null;
+  if (esp.tipo === "nba") return NBA.data;
+  if (esp.tipo === "partidas") return estadoDe(esp.id).data;
+  return null;
+}
+
+function paginaJogos(corpo, p) {
+  if (!chipsDisponiveis().some(([id]) => id === JOGOS.chip)) JOGOS.chip = "todos";
+  if (!JOGOS.data) JOGOS.data = hojeBR();
+  const area = h("div", { class: "area-jogos" });
+  p.alvo = area;
+  const barra = h("div", { class: "chips-esporte", role: "group", "aria-label": "Esportes" });
+  const pintar = () =>
+    barra.replaceChildren(
+      ...chipsDisponiveis().map(([id, nome]) =>
+        h("button", { class: "chip-esporte", type: "button", "aria-pressed": String(id === JOGOS.chip), onclick: () => escolher(id) }, nome)
+      )
+    );
+  const escolher = (id) => {
+    if (id === JOGOS.chip) return;
+    JOGOS.data = dataDoChip(JOGOS.chip) || JOGOS.data;
+    JOGOS.chip = id;
+    guardar("jogos:chip", id);
+    pintar();
+    window.scrollTo({ top: 0 });
+    desenharChipJogos(false);
+  };
+  pintar();
+  corpo.replaceChildren(barra, area);
+  return desenharChipJogos(false);
+}
+
+/** Desenha a lista do chip escolhido; silencioso = só atualiza o que já está na tela. */
+function desenharChipJogos(silencioso) {
+  cancelarTudo();
+  const chip = JOGOS.chip;
+  const esp = chip === "todos" ? null : esporteObj(chip);
+  if (!esp) return jogosTodos(silencioso);
+  if (!silencioso) {
+    novoTokenLista();
+    lista().replaceChildren(carregando());
+  }
+  if (esp.tipo === "partidas") {
+    const st = estadoDe(esp.id);
+    st.liga = esp.ligas.length > 1 ? "todas" : esp.ligas[0].id;
+    if (!silencioso) {
+      st.data = JOGOS.data;
+      return partidasLista(esp);
+    }
+    const semanas = esp.id === "nfl" && st.datas.nfl && st.datas.nfl.semanas;
+    return semanas && semanas.length ? partidasSemana(esp, true) : partidasDia(esp, true);
+  }
+  if (esp.tipo === "nba") {
+    if (!silencioso && NBA.datas && NBA.conjuntoDatas.has(JOGOS.data)) NBA.data = JOGOS.data;
+    return silencioso && NBA.datas ? nbaDia(true) : nbaJogos();
+  }
+  if (silencioso) return null;
+  if (esp.tipo === "boxe") return boxeLista(esp);
+  return eventosLista(esp, esp.ligas[0].id);
+}
+
+/** Linha de um evento (corrida, noite de lutas) na lista do dia. */
+function linhaEventoDoDia(esp, ev, abrir) {
+  return h(
+    "button",
+    { class: `evento${ev.estado === 3 ? " passado" : ""}`, type: "button", dataset: { id: ev.id }, onclick: abrir },
+    caixaData(ev.inicio || `${ev.data}T15:00:00Z`),
+    h("div", null, h("div", { class: "evento-nome" }, ev.nome), h("div", { class: "evento-sub" }, ev.local || rotuloEstadoEvento(ev.estado))),
+    canalNaLista(ev.transmissao, true)
+  );
+}
+
+/** Os grupos de um esporte no dia (uma competição por grupo). Rejeita se o esporte inteiro falhar. */
+async function gruposDoEsporte(esp, data) {
+  const vivo = (itens) => itens.some((x) => x.estado === 2);
+  if (esp.tipo === "partidas") {
+    const respostas = await Promise.allSettled(esp.ligas.map((l) => api(`/e/${esp.id}/${l.id}/jogos?de=${data}`)));
+    if (respostas.every((r) => r.status === "rejected")) throw respostas[0].reason;
+    const grupos = [];
+    const falhas = [];
+    respostas.forEach((r, i) => {
+      const liga = esp.ligas[i];
+      if (r.status === "rejected") {
+        falhas.push(liga.nome);
+        return;
+      }
+      const jogos = r.value;
+      if (!jogos.length) return;
+      const variasLigas = esp.ligas.length > 1;
+      grupos.push({
+        chave: `${esp.id}:${liga.id}`,
+        esporte: esp.id,
+        ordem: variasLigas ? ORDEM_GRUPOS.indexOf(grupoDaLiga(liga)) * 1000 + i : 0,
+        aoVivo: vivo(jogos),
+        jogos,
+        desenhar: (visiveis) =>
+          grupoDeJogos(esp, liga, visiveis, {
+            sub: variasLigas ? grupoDaLiga(liga) : null,
+            aoTocarLiga: () => irPara(esp.id, "classificacao", liga.id),
+            aoTocarJogo: (j) => abrirPartida(esp, liga.id, j),
+          }),
+      });
+    });
+    if (falhas.length) grupos.push({ chave: `${esp.id}:falhas`, esporte: esp.id, ordem: 1e6, aoVivo: false, jogos: [], nota: `Não carregou agora: ${falhas.join(", ")}.` });
+    return grupos;
+  }
+  if (esp.tipo === "nba") {
+    const jogos = await api(`/jogos?data=${data}`);
+    if (!jogos.length) return [];
+    return [
+      {
+        chave: "nba",
+        esporte: "nba",
+        ordem: 0,
+        aoVivo: vivo(jogos),
+        jogos,
+        desenhar: (visiveis) =>
+          h(
+            "section",
+            { class: "cartao grupo-liga" },
+            cabecaGrupo({ titulo: "NBA", aoClicar: () => irPara("nba", "classificacao"), favorito: { tipo: "liga", esporte: "nba", liga: "nba", id: "nba", nome: "NBA" } }),
+            visiveis.map((j) => nbaLinhaJogo(j))
+          ),
+      },
+    ];
+  }
+  let eventos;
+  let abrir;
+  if (esp.tipo === "boxe") {
+    eventos = (await api("/boxe/eventos")).filter((ev) => ev.data === data);
+    abrir = (ev) => boxeAbrir(esp, ev);
+  } else {
+    const liga = esp.ligas[0].id;
+    const cal = await api(`/e/${esp.id}/${liga}/eventos`);
+    eventos = cal.eventos.filter((ev) => (dataBR(ev.inicio) || ev.data) === data);
+    abrir = (ev) => abrirEvento(esp, liga, ev);
+  }
+  if (!eventos.length) return [];
+  return [
+    {
+      chave: esp.id,
+      esporte: esp.id,
+      ordem: 0,
+      aoVivo: vivo(eventos),
+      jogos: eventos,
+      desenhar: (visiveis) =>
+        h(
+          "section",
+          { class: "cartao grupo-liga" },
+          cabecaGrupo({ titulo: esp.nome, aoClicar: () => irPara(esp.id), favorito: esp.ligas.length ? favLiga(esp, esp.ligas[0].id) : null }),
+          visiveis.map((ev) => linhaEventoDoDia(esp, ev, () => abrir(ev)))
+        ),
+    },
+  ];
+}
+
+/** "Todos": os jogos e eventos do dia de todos os esportes, uma competição por grupo, os ao vivo primeiro. */
+async function jogosTodos(silencioso) {
+  const tk = silencioso ? S.tkLista : novoTokenLista();
+  const data = JOGOS.data || (JOGOS.data = hojeBR());
+  const hoje = hojeBR();
+  const barra = barraData({
+    data,
+    anterior: somarDias(data, -1),
+    proximo: somarDias(data, 1),
+    hoje,
+    aoMudar: (d) => {
+      JOGOS.data = d;
+      cancelar("lista");
+      window.scrollTo({ top: 0 });
+      jogosTodos(false);
+    },
+  });
+  const esportes = Rotas.ORDEM_ESPORTES.map(esporteObj).filter(Boolean);
+  const porEsporte = new Map(); // id do esporte -> lista de grupos, ou { erro }
+  const pendentes = new Set();
+
+  const avisoEsporte = (id) => {
+    const esp = esporteObj(id);
+    return h(
+      "section",
+      { class: "cartao grupo-liga" },
+      cabecaGrupo({ titulo: esp.nome }),
+      h(
+        "div",
+        { class: "secao" },
+        h("p", { class: "nota", style: { marginTop: 0 } }, `Não foi possível carregar ${ARTIGO_ESPORTE[id] || esp.nome} agora.`),
+        h("button", { class: "botao", type: "button", onclick: () => carregar(esp, true) }, "Tentar de novo")
+      )
+    );
+  };
+
+  function desenhar() {
+    if (tk !== S.tkLista) return;
+    const grupos = [];
+    porEsporte.forEach((valor, id) => {
+      if (Array.isArray(valor)) grupos.push(...valor);
+      else grupos.push({ chave: `${id}:erro`, esporte: id, ordem: 0, aoVivo: false, erro: valor.erro, jogos: [] });
+    });
+    const jogos = grupos.flatMap((g) => g.jogos);
+    const partes = [barra, barraFiltro(jogos, desenhar)];
+    let algum = false;
+    for (const g of Rotas.ordenarGrupos(grupos)) {
+      if (g.erro) {
+        partes.push(avisoEsporte(g.esporte));
+        continue;
+      }
+      if (g.nota) {
+        partes.push(h("p", { class: "nota nota-grupo" }, g.nota));
+        continue;
+      }
+      const visiveis = g.jogos.filter(passaFiltro);
+      if (!visiveis.length) continue;
+      algum = true;
+      partes.push(g.desenhar(visiveis));
+    }
+    if (pendentes.size) partes.push(carregando(algum ? "Carregando mais jogos…" : "Carregando…"));
+    else if (!algum) partes.push(vazio(jogos.length ? "Nenhum jogo com esse filtro." : "Nenhum jogo nesta data."));
+    lista().replaceChildren(...partes);
+  }
+
+  function carregar(esp, redesenharJa) {
+    pendentes.add(esp.id);
+    if (redesenharJa) {
+      porEsporte.delete(esp.id);
+      desenhar();
+    }
+    return gruposDoEsporte(esp, data)
+      .then((grupos) => porEsporte.set(esp.id, grupos))
+      .catch((erro) => porEsporte.set(esp.id, { erro }))
+      .finally(() => {
+        pendentes.delete(esp.id);
+        // na atualização silenciosa desenha uma vez só, no fim, para a tela não piscar
+        if (!silencioso || !pendentes.size) desenhar();
+      });
+  }
+
+  if (!silencioso) lista().replaceChildren(barra, carregando());
+  esportes.forEach((e) => pendentes.add(e.id));
+  await Promise.all(esportes.map((esp) => carregar(esp, false)));
+  if (tk !== S.tkLista) return;
+
+  const todos = [...porEsporte.values()].filter(Array.isArray).flat().flatMap((g) => g.jogos);
+  if (todos.some((j) => j.estado === 2)) agendar("lista", () => jogosTodos(true), 20000);
+  else if (data === hoje && todos.some((j) => j.estado === 1)) agendar("lista", () => jogosTodos(true), 60000);
+}
 
 /* ---------- Atalhos usados pelas telas ---------- */
 

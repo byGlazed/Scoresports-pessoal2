@@ -731,6 +731,7 @@ async function partidasDia(esp, silencioso) {
   const ligaUnica = st.liga !== "todas";
   const ligas = ligaUnica ? esp.ligas.filter((l) => l.id === st.liga) : esp.ligas;
   const tk = silencioso ? S.tkLista : novoTokenLista();
+  const naPaginaDaLiga = Navegacao.topo().tipo === "liga";
 
   // com uma competição escolhida, as setas pulam direto para o próximo dia com jogos
   let datasComJogos = [];
@@ -785,24 +786,12 @@ async function partidasDia(esp, silencioso) {
       .map(({ liga, jogos }) => ({ liga, jogos: jogos.filter(passaFiltro) }))
       .filter((g) => g.jogos.length)
       .map(({ liga, jogos }) =>
-        h(
-          "section",
-          { class: "cartao grupo-liga" },
-          cabecaGrupo({
-            titulo: liga.nome,
-            logo: jogos[0].liga_logo || null,
-            sub: ligaUnica ? null : grupoDaLiga(liga),
-            aoClicar: ligaUnica
-              ? null
-              : () => {
-                  st.liga = liga.id;
-                  guardar(`liga:${esp.id}`, liga.id);
-                  irPara(esp.id, "jogos");
-                },
-            favorito: favLiga(esp, liga.id),
-          }),
-          jogos.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, liga.id, j)))
-        )
+        grupoDeJogos(esp, liga, jogos, {
+          sub: ligaUnica ? null : grupoDaLiga(liga),
+          // na página da própria liga o cabeçalho não abre nada
+          aoTocarLiga: naPaginaDaLiga ? null : () => irPara(esp.id, "classificacao", liga.id),
+          aoTocarJogo: (j) => abrirPartida(esp, liga.id, j),
+        })
       );
     const partes = [barra, barraFiltro(todosJogos, desenhar)];
     if (grupos.length) partes.push(...grupos);
@@ -817,6 +806,16 @@ async function partidasDia(esp, silencioso) {
 
   if (todosJogos.some((j) => j.estado === 2)) agendar("lista", () => partidasDia(esp, true), 20000);
   else if (st.data === hoje && todosJogos.some((j) => j.estado === 1)) agendar("lista", () => partidasDia(esp, true), 60000);
+}
+
+/** Um grupo da lista do dia: o cabeçalho da competição (o toque abre a página dela) e os jogos. */
+function grupoDeJogos(esp, liga, jogos, { aoTocarLiga, aoTocarJogo, sub } = {}) {
+  return h(
+    "section",
+    { class: "cartao grupo-liga" },
+    cabecaGrupo({ titulo: liga.nome, logo: (jogos[0] && jogos[0].liga_logo) || null, sub, aoClicar: aoTocarLiga, favorito: favLiga(esp, liga.id) }),
+    jogos.map((j) => linhaPartida(esp, j, () => aoTocarJogo(j)))
+  );
 }
 
 function abrirPartida(esp, liga, jogo) {

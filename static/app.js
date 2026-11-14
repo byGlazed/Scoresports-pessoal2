@@ -514,7 +514,14 @@ function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub }) {
     "div",
     { class: "grupo-liga-titulo" },
     logo !== undefined ? imgLogo(logo) : null,
-    aoClicar ? h("button", { class: "botao-link", type: "button", onclick: aoClicar }, titulo) : h("span", null, titulo),
+    aoClicar
+      ? h(
+          "button",
+          { class: "botao-link abre-liga", type: "button", onclick: aoClicar },
+          titulo,
+          s("svg", { viewBox: "0 0 24 24", width: "14", height: "14", "aria-hidden": "true" }, s("path", { d: "M9 5l7 7-7 7", fill: "none", stroke: "currentColor", "stroke-width": "2.4", "stroke-linecap": "round", "stroke-linejoin": "round" }))
+        )
+      : h("span", null, titulo),
     sub ? h("span", { class: "nota", style: { margin: 0 } }, sub) : null,
     h("span", { style: { flex: 1 } }),
     favorito ? botaoFavorito(favorito) : null
