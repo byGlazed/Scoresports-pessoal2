@@ -8,11 +8,42 @@
    em Y = -47,5 — o mesmo sistema dos dados da NBA no PC.
    ========================================================================= */
 
-/** Coordenada da ESPN (pés, x 0-50, aro em 25,1) para o desenho; null se inválida (lance livre). */
+/**
+ * Coordenada da ESPN (pés inteiros, x 0-50, aro em 25,0) para o desenho; null se inválida (lance livre).
+ * O aro em y = 0 foi conferido com enterradas e bandejas de 12 jogos: assim 100% das bolas de três ficam
+ * a 23,75 pés ou mais e nenhuma de dois passa disso.
+ */
 function converterCoordenada(c) {
   if (!c || typeof c.x !== "number" || typeof c.y !== "number") return null;
-  if (c.x < -5 || c.x > 55 || c.y < -5 || c.y > 55) return null;
-  return { x: Math.round((c.x - 25) * 10), y: Math.round((c.y - 1) * 10) };
+  if (c.x < -5 || c.x > 55 || c.y < -6 || c.y > 55) return null;
+  return { x: Math.round((c.x - 25) * 10), y: Math.round(c.y * 10) };
+}
+
+const LINHA_3 = 237.5; // raio da linha de três, em décimos de pé
+const CANTO_3 = 220; // distância das retas do canto ao aro
+const FIM_DO_CANTO = Math.sqrt(LINHA_3 * LINHA_3 - CANTO_3 * CANTO_3); // onde a reta encontra o arco (~89,4)
+const MARGEM_ARREDONDAMENTO = 15; // a ESPN arredonda para pés inteiros: até 1,5 pé de diferença
+
+/**
+ * Posição no desenho, do lado certo da linha de três conforme o arremesso (de três ou de dois).
+ * Só corrige o que cabe na margem do arredondamento; acima disso o ponto fica como veio.
+ */
+function posicaoNoDesenho(c, tres) {
+  const pos = converterCoordenada(c);
+  if (!pos) return null;
+  const { x, y } = pos;
+  const r = Math.hypot(x, y);
+  const noCanto = y <= FIM_DO_CANTO;
+  const sinal = x < 0 ? -1 : 1;
+  const escala = (alvo) => ({ x: Math.round((x * alvo) / r), y: Math.round((y * alvo) / r) });
+  if (tres) {
+    if (noCanto && Math.abs(x) <= CANTO_3 && CANTO_3 - Math.abs(x) <= MARGEM_ARREDONDAMENTO) return { x: sinal * (CANTO_3 + 6), y };
+    if (!noCanto && r <= LINHA_3 && LINHA_3 - r <= MARGEM_ARREDONDAMENTO) return escala(LINHA_3 + 6);
+    return pos;
+  }
+  if (noCanto && Math.abs(x) >= CANTO_3 && Math.abs(x) - CANTO_3 <= MARGEM_ARREDONDAMENTO) return { x: sinal * (CANTO_3 - 6), y };
+  if (!noCanto && r >= LINHA_3 && r - LINHA_3 <= MARGEM_ARREDONDAMENTO) return escala(LINHA_3 - 6);
+  return pos;
 }
 
 /** Arremessos de quadra do jogo, prontos para o mapa. Lances livres ficam de fora. */
@@ -27,21 +58,21 @@ function arremessosDoJogo(plays) {
     // arremesso de desespero no fim do quarto que não entra não conta no FG (regra da NBA)
     if (/heave/i.test((p.type || {}).text || "") && !p.scoringPlay) continue;
     const time = String((p.team || {}).id || "");
-    const pos = converterCoordenada(p.coordinate);
-    if (!pos) {
+    if (!converterCoordenada(p.coordinate)) {
       semPosicao.total++;
       semPosicao.porTime[time] = (semPosicao.porTime[time] || 0) + 1;
       continue;
     }
     const cx = p.coordinate.x;
     const cy = p.coordinate.y;
-    const distancia = Math.round(Math.hypot(cx - 25, cy - 1));
+    const distancia = Math.round(Math.hypot(cx - 25, cy));
     const canto = Math.abs(cx - 25) >= 22 && cy <= 13;
     // acerto: o valor da cesta é exato; erro: texto, canto ou distância (as coordenadas vêm em pés inteiros,
     // então uma bola de três pode medir 23,6 pés)
     const tres = p.scoringPlay && typeof p.scoreValue === "number"
       ? p.scoreValue === 3
-      : /three point|de 3 pontos|de três/i.test(texto) || canto || Math.hypot(cx - 25, cy - 1) >= 23.5;
+      : /three point|de 3 pontos|de três/i.test(texto) || canto || Math.hypot(cx - 25, cy) >= 23.5;
+    const pos = posicaoNoDesenho(p.coordinate, tres);
     lista.push({
       x: pos.x,
       y: pos.y,
@@ -183,5 +214,5 @@ function quadraSVG(arremessos, { aoTocar } = {}) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { converterCoordenada, arremessosDoJogo, resumoArremessos, boxScoreDoTime, ordenarBox, quadraSVG };
+  module.exports = { converterCoordenada, posicaoNoDesenho, arremessosDoJogo, resumoArremessos, boxScoreDoTime, ordenarBox, quadraSVG };
 }

@@ -12,8 +12,9 @@ const jogo = JSON.parse(fs.readFileSync(path.join(__dirname, "amostras", "nba_jo
 const times = jogo.boxscore.players;
 
 test("converterCoordenada: aro na origem e coordenada inválida dá null", () => {
-  assert.deepEqual(Q.converterCoordenada({ x: 25, y: 1 }), { x: 0, y: 0 });
-  assert.deepEqual(Q.converterCoordenada({ x: 49, y: -1 }), { x: 240, y: -20 });
+  // o aro da ESPN fica em (25, 0): conferido com enterradas e bandejas de 12 jogos
+  assert.deepEqual(Q.converterCoordenada({ x: 25, y: 0 }), { x: 0, y: 0 });
+  assert.deepEqual(Q.converterCoordenada({ x: 49, y: -1 }), { x: 240, y: -10 });
   assert.equal(Q.converterCoordenada({ x: -214748340, y: -214748365 }), null);
   assert.equal(Q.converterCoordenada(null), null);
 });
@@ -119,4 +120,32 @@ test("arremessosDoJogo com o jogo real: arremessos do mapa e de três batem com 
     assert.equal(doTime.length + (semPosicao.porTime[String(t.team.id)] || 0), b.fg.t);
     assert.equal(doTime.filter((a) => a.tres).length, b.tres.t, `3PT ${t.team.displayName}`);
   }
+});
+
+/* ---------- Correção do mapa: proporção e lado certo da linha de três ---------- */
+
+const foraDaLinha = (a) => Math.abs(a.x) >= 220 || Math.hypot(a.x, a.y) >= 237.5;
+
+test("mapa do jogo real: toda bola de três desenhada fica fora da linha e toda de dois, dentro", () => {
+  const { lista } = Q.arremessosDoJogo(jogo.plays);
+  const tres = lista.filter((a) => a.tres);
+  const dois = lista.filter((a) => !a.tres);
+  assert.ok(tres.length > 20 && dois.length > 20);
+  const tresDentro = tres.filter((a) => !foraDaLinha(a) || (Math.abs(a.x) >= 219 && Math.abs(a.x) <= 221 && Math.hypot(a.x, a.y) < 237.5));
+  assert.deepEqual(tresDentro.map((a) => [a.x, a.y, a.texto.slice(0, 30)]), [], "três sobre ou dentro da linha");
+  assert.deepEqual(dois.filter(foraDaLinha).map((a) => [a.x, a.y, a.texto.slice(0, 30)]), [], "dois fora da linha");
+});
+
+test("posicaoNoDesenho: empurra para o lado certo da linha só dentro da margem do arredondamento", () => {
+  // três no canto, em cima da linha (x = 3 → X = -220): vai para fora
+  const canto = Q.posicaoNoDesenho({ x: 3, y: 2 }, true);
+  assert.ok(Math.abs(canto.x) > 220);
+  // três de frente a 23 pés (dentro): vai para atrás da linha
+  const frente = Q.posicaoNoDesenho({ x: 25, y: 23 }, true);
+  assert.ok(Math.hypot(frente.x, frente.y) > 237.5);
+  // dois logo atrás da linha (24 pés): volta para dentro
+  const dois = Q.posicaoNoDesenho({ x: 25, y: 24 }, false);
+  assert.ok(Math.hypot(dois.x, dois.y) < 237.5);
+  // longe demais para ser arredondamento (dois a 30 pés): não mexe
+  assert.deepEqual(Q.posicaoNoDesenho({ x: 25, y: 30 }, false), { x: 0, y: 300 });
 });
