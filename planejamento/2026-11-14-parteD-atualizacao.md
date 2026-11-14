@@ -13,7 +13,7 @@ O dono perguntou se o app "se autossustenta" e pediu para "fazer tudo se atualiz
 **Sucesso:** sem ele editar nada nem reinstalar, o celular passa a mostrar:
 - as telas novas, correções e dados novos depois de cada push;
 - os campeões novos;
-- as lutas de boxe dos campeões mundiais, com os resultados.
+- as lutas grandes de boxe (as que têm artigo na Wikipédia), com os resultados.
 
 ## Fatos que moldam a solução
 
@@ -77,12 +77,14 @@ O dono perguntou se o app "se autossustenta" e pediu para "fazer tudo se atualiz
   - **Na dúvida:** se não der para saber com segurança, não escreve.
   - O Wikidata pode servir de conferência, mas não pode ser necessário.
 - **Boxe (`boxe_eventos.json`):**
-  - **Fonte:** a página da Wikipédia (em inglês) dos campeões mundiais atuais, a partir de uma lista de campeões da própria Wikipédia. Do cartel de cada um, o robô tira:
-    - as lutas marcadas (sem resultado ainda) que ainda não estão no arquivo: data, adversário, local e cinturão;
-    - o resultado e o vencedor das lutas do arquivo que já aconteceram e estão sem resultado.
-  - **Limite:** lutas que não envolvem campeão continuam à mão; o README diz isso.
-  - **Quais campeões (decisão do construtor, o dono pode mudar):** os campeões mundiais atuais, masculinos e femininos, do CMB (WBC), da AMB (WBA, só o campeão principal de cada peso, sem o "regular" nem o interino), da FIB (IBF), da OMB (WBO) e da The Ring, como aparecem na lista da Wikipédia.
-  - **Horário e canal:** a Wikipédia não dá o horário nem o canal. O horário fica `null` (a tela já mostra "Horário a definir"). O canal também fica vazio, porque o padrão do boxe em `transmissoes.json` é vazio de propósito (cada evento tem o seu); a tela mostra "Canal a definir". O dono pode completar o canal à mão, e o robô nunca troca o que ele escreveu.
+  - **Fonte (revista no plano, 14/11/2026):** os artigos de luta da Wikipédia em inglês, das categorias "AAAA boxing matches" do ano atual e do seguinte (ex.: "Tyson Fury vs. Anthony Joshua", "Viddal Riley vs. Seydi Coupe"). Cada artigo tem uma ficha (infobox) com data, local, cinturões e, depois da luta, o resultado.
+  - **Por que não o cartel dos campeões:** o projeto de boxe da Wikipédia proíbe lutas futuras nas tabelas de cartel. Elas só trazem lutas já feitas, e o "marcado para" fica no texto, sem data certa.
+  - **O que o robô faz:**
+    - acrescenta as lutas marcadas que ainda não estão no arquivo;
+    - completa o vencedor e o resultado das lutas do arquivo que já aconteceram e estão sem resultado.
+  - **Limite:** cobre as lutas grandes, que têm artigo próprio, com cinturão ou não. Lutas menores sem artigo continuam à mão; o README diz isso.
+  - **Horário e canal:** a Wikipédia não dá o horário nem o canal. O horário fica `null` (a tela já mostra "Horário a definir"). O canal também fica vazio, porque o padrão do boxe em `transmissoes.json` é vazio de propósito (cada evento tem o seu); a tela mostra "Canal a definir". O dono pode completar à mão, e o robô nunca troca o que ele escreveu.
+  - **Bom vizinho:** a Wikipédia e o Wikidata limitaram os pedidos durante os testes (erro 429). O robô faz poucos pedidos, um de cada vez, se identifica com o endereço do repositório e, num 429, espera e tenta de novo poucas vezes. Se não der, desiste sem mudar nada.
 - **Temporada da NBA no PC:** `TEMPORADA` em `nba_dados.py` e `classificacao.py` passa a ser calculada pela data, no formato `"2026-27"`; a temporada nova começa em outubro.
 
 ### 3. README
@@ -114,7 +116,7 @@ Explicar o que se atualiza sozinho, o que ainda é à mão (canais de TV e lutas
 - Nomes de arquivos e funções.
 - Formato do manifesto.
 - Horário do robô.
-- Como achar a lista de campeões mundiais na Wikipédia e ler os cartéis.
+- Como ler as fichas das lutas na Wikipédia.
 - Como a ESPN diz que uma temporada acabou.
 - Texto e lugar do aviso de APK novo.
 - Como testar o Java sem Android aqui. O dono instala o APK do release e confere no celular; o plano diz o que ele precisa olhar.
