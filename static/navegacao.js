@@ -291,6 +291,18 @@ registrarPagina("liga", {
     const fav = esp && esp.ligas.length ? favLiga(esp, params.liga) : null;
     return fav ? botaoFavorito(fav) : null;
   },
+  // de volta à página (vindo de um jogo, por exemplo): a liga volta a ser a desta página e o jogo ao vivo se atualiza
+  aoMostrar: (corpo, params) => {
+    const esp = esporteObj(params.esporte);
+    if (!esp) return null;
+    if (esp.ligas.length) estadoDe(esp.id).liga = params.liga;
+    if (params.aba !== "jogos") return null;
+    if (esp.tipo === "nba") return NBA.datas ? nbaDia(true) : null;
+    if (esp.tipo !== "partidas") return null;
+    const st = estadoDe(esp.id);
+    const semanas = esp.id === "nfl" && st.datas.nfl && st.datas.nfl.semanas;
+    return semanas && semanas.length ? partidasSemana(esp, true) : partidasDia(esp, true);
+  },
   desenhar: (corpo, params, ativo, p) => {
     const esp = esporteObj(params.esporte);
     if (!esp) {

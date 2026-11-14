@@ -625,8 +625,8 @@ function favLiga(esp, ligaId) {
 
 const ModuloPartidas = {
   abas: (esp) => [
-    { id: "jogos", nome: "Jogos" },
     { id: "classificacao", nome: "Classificação" },
+    { id: "jogos", nome: "Jogos" },
     { id: "lideres", nome: esp.id === "futebol" ? "Artilharia e cartões" : "Líderes" },
   ],
 

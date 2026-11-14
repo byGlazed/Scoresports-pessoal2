@@ -290,28 +290,28 @@ const PESQUISA = { texto: "" };
 
 const ABAS_POR_ESPORTE = {
   nba: [
-    ["jogos", "Jogos"],
     ["classificacao", "Classificação"],
+    ["jogos", "Jogos"],
     ["lideres", "Líderes"],
   ],
   futebol: [
-    ["jogos", "Jogos"],
     ["classificacao", "Classificação"],
+    ["jogos", "Jogos"],
     ["lideres", "Artilharia e cartões"],
   ],
   nfl: [
-    ["jogos", "Jogos"],
     ["classificacao", "Classificação"],
+    ["jogos", "Jogos"],
     ["lideres", "Líderes"],
   ],
   mlb: [
-    ["jogos", "Jogos"],
     ["classificacao", "Classificação"],
+    ["jogos", "Jogos"],
     ["lideres", "Líderes"],
   ],
   nhl: [
-    ["jogos", "Jogos"],
     ["classificacao", "Classificação"],
+    ["jogos", "Jogos"],
     ["lideres", "Líderes"],
   ],
   f1: [

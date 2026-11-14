@@ -726,8 +726,8 @@ const nbaFoto = (id) => `https://cdn.nba.com/headshots/nba/latest/1040x760/${id}
 
 registrarModulo("nba", {
   abas: () => [
-    { id: "jogos", nome: "Jogos" },
     { id: "classificacao", nome: "Classificação" },
+    { id: "jogos", nome: "Jogos" },
     { id: "lideres", nome: "Líderes" },
     { id: "corridas", nome: "MVP e calouro" },
     { id: "jogadores", nome: "Jogadores" },
