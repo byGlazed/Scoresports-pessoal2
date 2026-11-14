@@ -9,25 +9,14 @@ const NOME_ESPORTE = { nba: "NBA", futebol: "Futebol", nfl: "NFL", mlb: "MLB", n
 
 const esporteObj = (id) => S.esportes.find((e) => e.id === id);
 
-/** Abre uma competição numa aba do esporte (jogos, classificação, líderes...). */
+/** Abre a página de uma competição numa aba (jogos, classificação, líderes...). */
 function abrirLiga(esporte, liga, aba) {
-  if (esporte === "futebol") {
-    estadoDe("futebol").liga = liga;
-    guardar("liga:futebol", liga);
-  }
-  irPara(esporte, aba);
+  irPara(esporte, aba, liga);
 }
 
 /* ---------- Início ---------- */
 
 const INICIO = { data: null };
-
-registrarModulo("inicio", {
-  abas: () => [{ id: "jogos", nome: "Seus jogos" }],
-  textoVazio: () => "Escolha um jogo para ver os detalhes.",
-  lateral: () => lateralFavoritos(),
-  desenhar: () => inicioDesenhar(false),
-});
 
 /** Favoritos na barra lateral, agrupados, com atalho e botão de tirar. */
 function lateralFavoritos() {
@@ -98,8 +87,8 @@ function inicioVazio() {
       h(
         "div",
         { class: "controles" },
-        h("button", { class: "botao botao-principal", type: "button", onclick: () => irPara("pesquisa") }, "Procurar time ou jogador"),
-        h("button", { class: "botao", type: "button", onclick: () => irPara("futebol") }, "Ver o futebol de hoje")
+        h("button", { class: "botao botao-principal", type: "button", onclick: () => Navegacao.trocarAba("pesquisa") }, "Procurar time ou jogador"),
+        h("button", { class: "botao", type: "button", onclick: () => Navegacao.trocarAba("jogos") }, "Ver os jogos de hoje")
       )
     )
   );
@@ -218,8 +207,8 @@ async function inicioDesenhar(silencioso) {
               class: "evento",
               type: "button",
               onclick: () => {
-                estadoDe(esporte).eventoAtual = ev.id;
-                irPara(esporte, "calendario");
+                const esp = esporteObj(esporte);
+                abrirEvento(esp, esp.ligas[0].id, ev);
               },
             },
             caixaData(ev.inicio),
@@ -248,7 +237,7 @@ async function inicioDesenhar(silencioso) {
           eventos: noDia.map((ev) =>
             h(
               "button",
-              { class: "evento", type: "button", onclick: () => { estadoDe("boxe").eventoAtual = ev.id; irPara("boxe"); } },
+              { class: "evento", type: "button", onclick: () => boxeAbrir(esp, ev) },
               caixaData(ev.inicio || `${ev.data}T15:00:00Z`),
               h("div", null, h("div", { class: "evento-nome" }, ev.nome), h("div", { class: "evento-sub" }, ev.local || "")),
               canalNaLista(ev.transmissao, true)
@@ -298,14 +287,6 @@ async function inicioDesenhar(silencioso) {
 /* ---------- Pesquisa ---------- */
 
 const PESQUISA = { texto: "" };
-
-registrarModulo("pesquisa", {
-  abas: () => [{ id: "buscar", nome: "Jogadores, times e competições" }],
-  desenhar: () => {
-    layoutLargo(true);
-    pesquisaDesenhar();
-  },
-});
 
 const ABAS_POR_ESPORTE = {
   nba: [

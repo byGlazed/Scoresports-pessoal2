@@ -9,41 +9,35 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23e8364c'/></svg>">
 </head>
 <body>
-  <header class="topo">
-    <div class="topo-linha">
-      <button class="botao-icone botao-menu" id="abrir-lateral" type="button" aria-label="Abrir seções e competições">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  <div class="app">
+    <header class="topo-pagina na-raiz" id="topo-pagina">
+      <button class="botao-topo" id="voltar-pagina" type="button" aria-label="Voltar" hidden>
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <a class="marca" href="/" aria-label="Scoresports, página inicial">
-        <span class="marca-ponto" aria-hidden="true"></span>Scoresports
-      </a>
-      <nav class="esportes" id="esportes" aria-label="Esportes"></nav>
-      <button class="busca-topo" id="busca-topo" type="button" aria-label="Procurar time, jogador ou competição">
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <span class="busca-topo-texto">Procurar time, jogador ou liga</span>
-        <kbd>/</kbd>
+      <h1 class="titulo-pagina" id="titulo-pagina">Scoresports</h1>
+      <div class="acoes-pagina" id="acoes-pagina"></div>
+      <button class="botao-topo" id="busca-pagina" type="button" aria-label="Procurar time, jogador ou competição">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
-    </div>
-  </header>
+    </header>
 
-  <div class="fundo-lateral" id="fundo-lateral" hidden></div>
+    <main class="pagina" id="pagina" aria-live="polite"></main>
 
-  <main class="palco">
-    <aside class="coluna-lateral" id="lateral" aria-label="Seções e competições"></aside>
-    <section class="coluna-lista" id="lista" aria-live="polite"></section>
-    <section class="coluna-detalhe" id="detalhe" aria-live="polite">
-      <div class="vazio-detalhe">Escolha um jogo para ver os detalhes.</div>
-    </section>
-  </main>
-
-  <dialog class="painel" id="painel" aria-labelledby="painel-titulo">
-    <div class="painel-topo">
-      <button class="botao-icone" id="painel-voltar" type="button" aria-label="Voltar" hidden>‹</button>
-      <h2 class="painel-titulo" id="painel-titulo"></h2>
-      <button class="botao-icone" id="painel-fechar" type="button" aria-label="Fechar">×</button>
-    </div>
-    <div class="painel-corpo" id="painel-corpo"></div>
-  </dialog>
+    <nav class="barra-baixo" id="barra-baixo" aria-label="Seções">
+      <button class="aba-baixo" type="button" data-aba="jogos" aria-current="page">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+        <span>Jogos</span>
+      </button>
+      <button class="aba-baixo" type="button" data-aba="favoritos">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 2.6l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.41l-5.8 3.05 1.11-6.46-4.7-4.58 6.49-.94z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+        <span>Favoritos</span>
+      </button>
+      <button class="aba-baixo" type="button" data-aba="pesquisa">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+        <span>Pesquisa</span>
+      </button>
+    </nav>
+  </div>
 
   <script src="/static/nba_quadra.js"></script>
   <script src="/static/rotas.js"></script>
@@ -51,5 +45,6 @@
   <script src="/static/esportes.js"></script>
   <script src="/static/busca_regras.js"></script>
   <script src="/static/inicio.js"></script>
+  <script src="/static/navegacao.js"></script>
 </body>
 </html>

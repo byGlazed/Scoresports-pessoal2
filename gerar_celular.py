@@ -18,7 +18,7 @@ from pathlib import Path
 RAIZ = Path(__file__).parent
 DOCS = RAIZ / "docs"
 APK_WWW = RAIZ / "android" / "app" / "src" / "main" / "assets" / "www"
-TELAS = ("nba_quadra.js", "rotas.js", "app.js", "esportes.js", "busca_regras.js", "inicio.js", "style.css")
+TELAS = ("nba_quadra.js", "rotas.js", "app.js", "esportes.js", "busca_regras.js", "inicio.js", "navegacao.js", "style.css")
 DADOS = ("transmissoes.json", "boxe_eventos.json", "campeoes.json")
 
 CABECA_CELULAR = """  <link rel="manifest" href="./manifest.webmanifest">
