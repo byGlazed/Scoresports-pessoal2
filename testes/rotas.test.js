@@ -125,6 +125,44 @@ test("ordenarGrupos: ao vivo primeiro, depois esporte, depois ordem da competiç
   assert.deepEqual(R.ordenarGrupos([g("a", "f1", 0), g("b", "f1", 0)]).map((x) => x.chave), ["a", "b"]);
 });
 
+/* ---------- Correções da revisão final ---------- */
+
+test("historico: ao abrir, arma uma entrada do app sobre a base só se ainda não está nela (recarregar não empilha)", () => {
+  assert.equal(R.iniciarHistorico(null), "armar");
+  assert.equal(R.iniciarHistorico({ base: true }), "armar");
+  assert.equal(R.iniciarHistorico({ app: true }), "manter");
+  // estados antigos (versão com contador n) também são rearmados
+  assert.equal(R.iniciarHistorico({ n: 2 }), "armar");
+});
+
+test("historico: voltar do navegador vira o voltar do app; na base, rearma; endereço digitado abre a página", () => {
+  assert.deepEqual(R.passoHistorico({ base: true }), { acao: "voltar", rearmar: true });
+  assert.deepEqual(R.passoHistorico({ app: true }), { acao: "voltar", rearmar: false });
+  assert.deepEqual(R.passoHistorico(null), { acao: "abrir", rearmar: false });
+});
+
+test("historico: recarregar numa página interna e voltar pelo navegador chega à raiz de Jogos", () => {
+  // simula: abriu #/jogo/..., recarregou (estado app), apertou voltar do navegador (cai na base)
+  let p = R.pilhasDeEndereco("#/jogo/nba/nba/1");
+  assert.equal(R.iniciarHistorico({ app: true }), "manter");
+  const passo = R.passoHistorico({ base: true });
+  assert.equal(passo.acao, "voltar");
+  p = R.voltar(p);
+  assert.deepEqual(R.topo(p), { tipo: "jogos", params: {} });
+  assert.equal(passo.rearmar, true);
+});
+
+test("eventoNoDia: um fim de semana de F1 aparece em todos os dias dele", () => {
+  const gp = { inicio: "2026-11-06T15:30:00Z", fim: "2026-11-08T19:00:00Z", data: "2026-11-06" };
+  const dia = (iso) => iso.slice(0, 10);
+  assert.equal(R.eventoNoDia(gp, "2026-11-06", dia), true);
+  assert.equal(R.eventoNoDia(gp, "2026-11-08", dia), true);
+  assert.equal(R.eventoNoDia(gp, "2026-11-09", dia), false);
+  assert.equal(R.eventoNoDia(gp, "2026-11-05", dia), false);
+  // sem início e fim (boxe): vale a data
+  assert.equal(R.eventoNoDia({ data: "2026-11-14" }, "2026-11-14", dia), true);
+});
+
 test("CHIPS_ESPORTE e ORDEM_ESPORTES na ordem da spec", () => {
   assert.deepEqual(R.CHIPS_ESPORTE.map((c) => c[0]), ["todos", "futebol", "nba", "nfl", "mlb", "nhl", "f1", "ufc", "boxe"]);
   assert.deepEqual(R.ORDEM_ESPORTES, ["futebol", "nba", "nfl", "mlb", "nhl", "f1", "ufc", "boxe"]);

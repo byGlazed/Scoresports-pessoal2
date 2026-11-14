@@ -20,14 +20,22 @@ const TITULO_ABA = { jogos: "Scoresports", favoritos: "Favoritos", pesquisa: "Pe
 
 const Navegacao = {
   pilhas: null,
-  n: 0, // quantas entradas este app empilhou no histórico do navegador
-  ignorarPop: false,
   mostrada: null,
 
   iniciar() {
     this.semHistorico = Boolean(window.APP_ANDROID);
     this.pilhas = Rotas.pilhasDeEndereco(location.hash);
-    history.replaceState({ n: 0 }, "", this.endereco());
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    if (this.semHistorico) {
+      // no app Android o botão voltar chama voltarAndroid; o WebView não tem histórico para onde ir
+      history.replaceState({ app: true }, "", this.endereco());
+    } else if (Rotas.iniciarHistorico(history.state) === "armar") {
+      // duas entradas: a base e a do app por cima (rotas.js explica)
+      history.replaceState({ base: true }, "", this.endereco());
+      history.pushState({ app: true }, "", this.endereco());
+    } else {
+      history.replaceState({ app: true }, "", this.endereco());
+    }
     window.addEventListener("popstate", (e) => this.aoVoltarNoNavegador(e));
     $("#barra-baixo").addEventListener("click", (e) => {
       const b = e.target.closest("[data-aba]");
@@ -58,16 +66,20 @@ const Navegacao = {
     return "#/jogos";
   },
 
+  /** Põe o endereço da página do topo na entrada atual do histórico. */
+  marcarEndereco() {
+    history.replaceState({ app: true }, "", this.endereco());
+  },
+
   /** pagina: { tipo, params, ...dados em memória (o jogo da lista, o contexto do atleta) } */
   abrir(pagina) {
     if (!PAGINAS[pagina.tipo]) return;
     pagina.params = pagina.params || {};
+    // toque duplo: a mesma página por cima dela mesma não abre de novo
+    const topo = this.topo();
+    if (topo && topo.tipo === pagina.tipo && Rotas.montarEndereco(topo) === Rotas.montarEndereco(pagina) && Rotas.montarEndereco(pagina)) return;
     this.pilhas = Rotas.empilhar(this.pilhas, pagina);
-    if (this.semHistorico) history.replaceState({ n: 0 }, "", this.endereco());
-    else {
-      this.n += 1;
-      history.pushState({ n: this.n }, "", this.endereco());
-    }
+    this.marcarEndereco();
     this.mostrar();
   },
 
@@ -82,52 +94,41 @@ const Navegacao = {
     } else {
       this.pilhas = Rotas.trocarAba(this.pilhas, aba);
     }
-    history.replaceState({ n: this.n }, "", this.endereco());
+    this.marcarEndereco();
     this.mostrar();
   },
 
-  /** Voltar do topo da página ou do Android. Devolve false só na raiz de Jogos (o app pode sair). */
+  /** Voltar do topo da página, do navegador ou do Android. Devolve false só na raiz de Jogos (o app pode sair). */
   voltar() {
     const acao = Rotas.acaoVoltar(this.pilhas);
     if (acao === "sair") return false;
     this.pilhas = Rotas.voltar(this.pilhas);
-    if (acao === "desempilhar" && this.n > 0 && !this.semHistorico) {
-      // tira a entrada do histórico também, para o voltar do navegador não repetir este passo
-      this.ignorarPop = true;
-      history.back();
-    } else {
-      history.replaceState({ n: this.n }, "", this.endereco());
-    }
+    this.marcarEndereco();
     this.mostrar();
     return true;
   },
 
   aoVoltarNoNavegador(e) {
-    if (!e.state) {
-      // endereço digitado ou link com # : abre aquela página como uma entrada nova
+    const passo = Rotas.passoHistorico(e.state);
+    if (passo.acao === "abrir") {
+      // endereço digitado ou link com #: abre aquela página
       const pagina = Rotas.lerEndereco(location.hash);
       this.pilhas = Rotas.ABAS.includes(pagina.tipo) ? Rotas.trocarAba(this.pilhas, pagina.tipo) : Rotas.empilhar(this.pilhas, pagina);
-      this.n += 1;
-      history.replaceState({ n: this.n }, "", this.endereco());
+      this.marcarEndereco();
       this.mostrar();
       return;
     }
-    const n = e.state.n || 0;
-    if (this.ignorarPop) {
-      this.ignorarPop = false;
-    } else if (n < this.n) {
-      for (let i = n; i < this.n; i++) {
-        if (Rotas.acaoVoltar(this.pilhas) !== "sair") this.pilhas = Rotas.voltar(this.pilhas);
-      }
-      this.mostrar();
-    } else if (n > this.n) {
-      // avançar do navegador: abre a página do endereço por cima
-      const pagina = Rotas.lerEndereco(location.hash);
-      if (!Rotas.ABAS.includes(pagina.tipo)) this.pilhas = Rotas.empilhar(this.pilhas, pagina);
+    // na raiz de Jogos o navegador não faz nada (a spec): só rearma
+    if (Rotas.acaoVoltar(this.pilhas) !== "sair") {
+      this.pilhas = Rotas.voltar(this.pilhas);
       this.mostrar();
     }
-    this.n = n;
-    history.replaceState({ n: this.n }, "", this.endereco());
+    if (passo.rearmar) {
+      history.replaceState({ base: true }, "", this.endereco());
+      history.pushState({ app: true }, "", this.endereco());
+    } else {
+      this.marcarEndereco();
+    }
   },
 
   /** Desenha de novo a página do topo, do zero. */
@@ -152,7 +153,10 @@ const Navegacao = {
     const anterior = this.mostrada;
     if (anterior && anterior !== p) {
       anterior.rolagem = window.scrollY;
-      if (anterior.aoSair) anterior.aoSair();
+      const defAnterior = PAGINAS[anterior.tipo];
+      if (defAnterior && defAnterior.aoSair) defAnterior.aoSair(anterior.corpo, anterior.params, anterior);
+      // saiu antes de terminar de carregar: desenha de novo quando voltar
+      if (anterior.pronta === null) anterior.pronta = false;
     }
     // o que estava na tela para de se atualizar e de desenhar
     cancelarTudo();
@@ -173,19 +177,31 @@ const Navegacao = {
     const corpo = h("div", { class: "corpo-pagina" });
     p.corpo = corpo;
     p.alvo = null;
-    p.pronta = null;
     area.replaceChildren(corpo);
     window.scrollTo({ top: 0 });
     const ativo = () => p.corpo === corpo && this.estaNaPilha(p);
     corpo.replaceChildren(carregando());
-    Promise.resolve()
-      .then(() => def.desenhar(corpo, p.params, ativo, p))
+    this.acompanhar(
+      p,
+      Promise.resolve().then(() => def.desenhar(corpo, p.params, ativo, p)),
+      (erro) => {
+        if (p.corpo === corpo) corpo.replaceChildren(caixaErro(erro, () => this.redesenhar()));
+      }
+    );
+  },
+
+  /** Marca a página como carregando até o desenho terminar. Se a pessoa sair antes, ela é desenhada de novo ao voltar.
+      Serve para o primeiro desenho e para os de troca de aba (liga) ou de chip (Jogos). */
+  acompanhar(p, promessa, aoFalhar) {
+    const vez = (p.desenho = (p.desenho || 0) + 1);
+    p.pronta = null;
+    Promise.resolve(promessa)
       .then(() => {
-        // se a pessoa saiu antes de terminar, desenha de novo quando voltar
-        if (p.corpo === corpo && p.pronta === null) p.pronta = this.topo() === p ? true : false;
+        if (p.desenho === vez && p.pronta === null) p.pronta = this.topo() === p;
       })
       .catch((erro) => {
-        if (p.corpo === corpo) corpo.replaceChildren(caixaErro(erro, () => this.redesenhar()));
+        if (p.desenho === vez && p.pronta === null) p.pronta = this.topo() === p;
+        if (aoFalhar) aoFalhar(erro);
       });
   },
 
@@ -232,10 +248,37 @@ function definirTitulo(corpo, texto, subtitulo) {
 
 /* ---------- Páginas ---------- */
 
+/** O dia (e a semana da NFL) que a tela de um esporte está mostrando. A aba Jogos e a página da liga
+    usam o mesmo estado do esporte: cada página guarda o seu ao sair e devolve ao voltar. */
+function guardarDia(esp) {
+  if (!esp) return null;
+  if (esp.tipo === "nba") return { nba: NBA.data };
+  const st = estadoDe(esp.id);
+  return { data: st.data, semana: st.semana };
+}
+
+function restaurarDia(esp, dia) {
+  if (!esp || !dia) return;
+  if (esp.tipo === "nba") {
+    if (dia.nba) NBA.data = dia.nba;
+    return;
+  }
+  const st = estadoDe(esp.id);
+  if (dia.data) st.data = dia.data;
+  if (dia.semana !== undefined) st.semana = dia.semana;
+}
+
 registrarPagina("jogos", {
   titulo: () => TITULO_ABA.jogos,
   desenhar: (corpo, params, ativo, p) => paginaJogos(corpo, p),
-  aoMostrar: () => desenharChipJogos(true),
+  aoSair: (corpo, params, p) => {
+    JOGOS.data = dataDoChip(JOGOS.chip) || JOGOS.data;
+    p.dia = { chip: JOGOS.chip, ...(guardarDia(esporteObj(JOGOS.chip)) || {}) };
+  },
+  aoMostrar: (corpo, params, p) => {
+    if (p.dia && p.dia.chip === JOGOS.chip) restaurarDia(esporteObj(JOGOS.chip), p.dia);
+    return desenharChipJogos(true);
+  },
 });
 
 registrarPagina("favoritos", {
@@ -327,11 +370,15 @@ registrarPagina("liga", {
     const fav = esp && esp.ligas.length ? favLiga(esp, params.liga) : null;
     return fav ? botaoFavorito(fav) : null;
   },
-  // de volta à página (vindo de um jogo, por exemplo): a liga volta a ser a desta página e o jogo ao vivo se atualiza
-  aoMostrar: (corpo, params) => {
+  aoSair: (corpo, params, p) => {
+    p.dia = guardarDia(esporteObj(params.esporte));
+  },
+  // de volta à página (vindo de um jogo, por exemplo): a liga e o dia voltam a ser os desta página e o jogo ao vivo se atualiza
+  aoMostrar: (corpo, params, p) => {
     const esp = esporteObj(params.esporte);
     if (!esp) return null;
     if (esp.ligas.length) estadoDe(esp.id).liga = params.liga;
+    restaurarDia(esp, p.dia);
     if (params.aba !== "jogos") return null;
     if (esp.tipo === "nba") return NBA.datas ? nbaDia(true) : null;
     if (esp.tipo !== "partidas") return null;
@@ -350,8 +397,11 @@ registrarPagina("liga", {
     if (!abas.some((a) => a.id === params.aba)) params.aba = abas[0].id;
     const area = h("div", { class: "area-liga" });
     p.alvo = area;
+    // a primeira vez, a aba Jogos da liga abre no dia que a aba Jogos do app está mostrando
+    if (!p.dia && esp.tipo === "partidas") p.dia = { data: JOGOS.data || hojeBR() };
     const desenharAba = () => {
       if (esp.ligas.length) estadoDe(esp.id).liga = params.liga;
+      restaurarDia(esp, p.dia);
       cancelarTudo();
       novoTokenLista();
       novoTokenDetalhe();
@@ -365,7 +415,8 @@ registrarPagina("liga", {
       const nb = abasDetalhe(abas, nova, trocar);
       barra.replaceWith(nb);
       barra = nb;
-      desenharAba();
+      p.dia = guardarDia(esp);
+      Navegacao.acompanhar(p, desenharAba());
     }
     corpo.replaceChildren(abas.length > 1 ? barra : h("span"), area);
     return desenharAba();
@@ -411,7 +462,7 @@ function paginaJogos(corpo, p) {
     guardar("jogos:chip", id);
     pintar();
     window.scrollTo({ top: 0 });
-    desenharChipJogos(false);
+    Navegacao.acompanhar(p, desenharChipJogos(false));
   };
   pintar();
   corpo.replaceChildren(barra, area);
@@ -515,12 +566,12 @@ async function gruposDoEsporte(esp, data) {
   let eventos;
   let abrir;
   if (esp.tipo === "boxe") {
-    eventos = (await api("/boxe/eventos")).filter((ev) => ev.data === data);
+    eventos = (await api("/boxe/eventos")).filter((ev) => Rotas.eventoNoDia(ev, data, dataBR));
     abrir = (ev) => boxeAbrir(esp, ev);
   } else {
     const liga = esp.ligas[0].id;
     const cal = await api(`/e/${esp.id}/${liga}/eventos`);
-    eventos = cal.eventos.filter((ev) => (dataBR(ev.inicio) || ev.data) === data);
+    eventos = cal.eventos.filter((ev) => Rotas.eventoNoDia(ev, data, dataBR));
     abrir = (ev) => abrirEvento(esp, liga, ev);
   }
   if (!eventos.length) return [];

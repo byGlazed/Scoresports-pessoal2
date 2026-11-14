@@ -126,7 +126,29 @@ const Rotas = (() => {
       .map((x) => x.g);
   }
 
+  /* Histórico do navegador: só duas entradas, a "base" e a do app por cima dela.
+     O voltar do navegador sempre cai na base; o app faz o próprio voltar e arma a entrada de novo.
+     Assim o histórico nunca sai de passo com as pilhas (recarregar, trocar de aba, avançar). */
+  function iniciarHistorico(estado) {
+    return estado && estado.app ? "manter" : "armar";
+  }
+
+  function passoHistorico(estado) {
+    if (!estado) return { acao: "abrir", rearmar: false }; // endereço digitado ou link com #
+    return { acao: "voltar", rearmar: Boolean(estado.base) };
+  }
+
+  /** Um evento (fim de semana de F1, noite de lutas) acontece no dia `data`? paraDia converte o horário no dia de Brasília. */
+  function eventoNoDia(ev, data, paraDia) {
+    const inicio = ev.inicio ? paraDia(ev.inicio) : ev.data;
+    const fim = ev.fim ? paraDia(ev.fim) : inicio;
+    return Boolean(inicio) && inicio <= data && data <= fim;
+  }
+
   return {
+    iniciarHistorico,
+    passoHistorico,
+    eventoNoDia,
     ABAS,
     ORDEM_ESPORTES,
     CHIPS_ESPORTE,
