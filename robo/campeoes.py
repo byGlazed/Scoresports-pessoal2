@@ -141,8 +141,14 @@ def campeao_final(eventos):
         return None
     notas = " ".join(n.get("headline") or "" for n in ultimo.get("notes") or [])
     citados = [n for n, _ in times if n in notas]
-    if len(citados) == 1:  # a nota diz quem levou (agregado, pênaltis)
+    da_serie = _vencedor_da_serie(ultimo)
+    if da_serie in [n for n, _ in times]:  # a ESPN diz quem levou o agregado ou a série
+        campeao = da_serie
+    elif len(citados) == 1:  # a nota diz quem levou (agregado, pênaltis)
         campeao = citados[0]
+    elif not ultimo.get("series") and _ida_e_volta(eventos, ultimo_evento, {n for n, _ in times}):
+        # final de ida e volta sem nota clara: quem venceu a volta pode não ter levado o título
+        return None
     else:
         vencedores = [n for n, venceu in times if venceu]
         if len(vencedores) != 1:
@@ -150,6 +156,33 @@ def campeao_final(eventos):
         campeao = vencedores[0]
     vice = [n for n, _ in times if n != campeao][0]
     return {"campeao": campeao, "vice": vice}
+
+
+def _vencedor_da_serie(competicao):
+    """O time que a ESPN marca como vencedor do confronto inteiro (agregado da ida e volta, ou série), se marcar."""
+    serie = competicao.get("series") or {}
+    if not serie.get("completed"):
+        return None
+    ids = [str(c.get("id")) for c in serie.get("competitors") or [] if c.get("winner")]
+    if len(ids) != 1:
+        return None
+    for c in competicao.get("competitors") or []:
+        if str(c.get("id")) == ids[0] or str((c.get("team") or {}).get("id")) == ids[0]:
+            return (c.get("team") or {}).get("displayName")
+    return None
+
+
+def _ida_e_volta(eventos, ultimo_evento, nomes):
+    """Há outro jogo encerrado entre os mesmos dois times (o jogo de ida)?"""
+    for e in eventos:
+        if e is ultimo_evento:
+            continue
+        c = (e.get("competitions") or [{}])[0]
+        if (c.get("status") or {}).get("type", {}).get("state") != "post":
+            continue
+        if {((x.get("team") or {}).get("displayName")) for x in c.get("competitors") or []} == nomes:
+            return True
+    return False
 
 
 def campeao_f1(classificacao):

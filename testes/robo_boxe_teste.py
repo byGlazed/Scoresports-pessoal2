@@ -107,6 +107,27 @@ class TesteJuntar(unittest.TestCase):
         self.assertIsNone(boxe.juntar_luta(arquivo, self.feita, date(2026, 11, 15)))
         self.assertEqual(arquivo, antes)
 
+    def test_vencedor_com_o_nome_do_arquivo(self):
+        # a tela compara o vencedor com o nome escrito no arquivo: vale o nome do arquivo, não o da Wikipédia
+        arquivo = {"eventos": [evento("x", "2026-05-02", "N. Inoue", "Junto Nakatani")]}
+        boxe.juntar_luta(arquivo, self.feita, date(2026, 11, 15))
+        self.assertEqual(arquivo["eventos"][0]["lutas"][0]["vencedor"], "N. Inoue")
+
+    def test_luta_de_baixo_do_card_nao_duplica(self):
+        ev = evento("x", "2026-12-13", "Outro Principal", "Mais Um")
+        ev["lutas"].append({"lutadores": ["Tim Tszyu", "Erislandy Lara"], "categoria": "", "titulo": "", "vencedor": None, "resultado": None})
+        arquivo = {"eventos": [ev]}
+        antes = copy.deepcopy(arquivo)
+        self.assertIsNone(boxe.juntar_luta(arquivo, self.futura, date(2026, 11, 15)))
+        self.assertEqual(arquivo, antes)
+
+    def test_luta_adiada_nao_duplica(self):
+        # a mesma dupla em outra data: a luta foi adiada; o robô avisa e não acrescenta uma segunda
+        arquivo = {"eventos": [evento("x", "2026-11-29", "Tim Tszyu", "Erislandy Lara")]}
+        antes = copy.deepcopy(arquivo)
+        self.assertIsNone(boxe.juntar_luta(arquivo, self.futura, date(2026, 11, 15)))
+        self.assertEqual(arquivo, antes)
+
     def test_fonte_fora_nao_muda(self):
         arquivo = json.loads((RAIZ / "boxe_eventos.json").read_text(encoding="utf-8"))
         antes = copy.deepcopy(arquivo)

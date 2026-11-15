@@ -52,6 +52,23 @@ class TesteRegras(unittest.TestCase):
         ultimo["notes"] = [{"headline": "Volta - Corinthians vence 3-2 no agregado"}]
         self.assertEqual(campeoes.campeao_final(eventos), {"campeao": "Corinthians", "vice": "Vasco da Gama"})
 
+    def test_final_de_ida_e_volta_sem_nota_nao_escreve(self):
+        # jogo de volta sem nota dizendo quem levou: o vencedor da volta pode não ser o do agregado
+        eventos = copy.deepcopy(amostra("espn_jogos_copa_do_brasil_2025.json")["events"])
+        ultimo = eventos[-1]["competitions"][0]
+        ultimo["notes"] = [{"headline": "Vasco win 4-3 on aggregate"}]  # nome curto: não cita ninguém
+        del ultimo["series"]  # sem o placar agregado da ESPN
+        self.assertIsNone(campeoes.campeao_final(eventos))
+
+    def test_final_de_ida_e_volta_pelo_agregado_da_espn(self):
+        # a ESPN dá o vencedor do agregado em "series": vale mais que o vencedor do jogo e que a nota
+        eventos = copy.deepcopy(amostra("espn_jogos_copa_do_brasil_2025.json")["events"])
+        ultimo = eventos[-1]["competitions"][0]
+        ultimo["notes"] = []
+        for c in ultimo["competitors"]:
+            c["winner"] = c["team"]["displayName"] == "Vasco da Gama"  # Vasco venceu a volta...
+        self.assertEqual(campeoes.campeao_final(eventos), {"campeao": "Corinthians", "vice": "Vasco da Gama"})  # ...mas o título é do Corinthians
+
     def test_campeao_final_serie(self):
         eventos = amostra("espn_jogos_nba_final_2026.json")["events"]
         self.assertEqual(campeoes.campeao_final(eventos), {"campeao": "New York Knicks", "vice": "San Antonio Spurs"})

@@ -115,7 +115,23 @@ public class AtualizacaoTeste {
                 Atualizacao.sha256("abc".getBytes(StandardCharsets.UTF_8)), "sha256Conhecido");
     }
 
+    /** Uma pasta com arquivos faltando ou corrompidos não pode ser servida (nem virar a pasta baixada). */
+    static void conferirPastaNoDisco() {
+        Manifesto m = Atualizacao.ler("versao 2\napk_minimo 0\narquivo "
+                + Atualizacao.sha256("abc".getBytes(StandardCharsets.UTF_8)) + " 3 app.js\narquivo "
+                + Atualizacao.sha256("{}".getBytes(StandardCharsets.UTF_8)) + " 2 dados/c.json\n");
+        Map<String, byte[]> disco = new HashMap<>();
+        disco.put("app.js", "abc".getBytes(StandardCharsets.UTF_8));
+        disco.put("dados/c.json", "{}".getBytes(StandardCharsets.UTF_8));
+        igual(Arrays.asList(), Atualizacao.arquivosRuins(m, disco::get), "arquivosRuins: tudo certo");
+        disco.remove("app.js");
+        igual(Arrays.asList("app.js"), Atualizacao.arquivosRuins(m, disco::get), "arquivosRuins: faltando");
+        disco.put("app.js", "abd".getBytes(StandardCharsets.UTF_8));
+        igual(Arrays.asList("app.js"), Atualizacao.arquivosRuins(m, disco::get), "arquivosRuins: corrompido");
+    }
+
     public static void main(String[] args) {
+        conferirPastaNoDisco();
         lerManifesto();
         escolherPastaPorVersao();
         aBaixarSoOQueMudou();

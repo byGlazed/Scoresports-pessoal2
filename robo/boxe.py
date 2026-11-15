@@ -144,29 +144,58 @@ def id_da_luta(data, lutadores):
     return f"{data}-" + "-".join(_sobrenome(l) for l in lutadores)
 
 
-def mesma_luta(evento, ficha):
+def _mesmos_lutadores(luta, ficha):
+    sobrenomes = {_sobrenome(n) for n in luta.get("lutadores") or []}
+    return all(_sobrenome(l) in sobrenomes for l in ficha["lutadores"])
+
+
+def _perto(evento, ficha):
     try:
         dia = date.fromisoformat(evento.get("data", ""))
     except ValueError:
         return False
-    if abs(dia - date.fromisoformat(ficha["data"])) > timedelta(days=1):
-        return False
-    principal = (evento.get("lutas") or [{}])[0].get("lutadores") or []
-    sobrenomes = {_sobrenome(n) for n in principal}
-    return all(_sobrenome(l) in sobrenomes for l in ficha["lutadores"])
+    return abs(dia - date.fromisoformat(ficha["data"])) <= timedelta(days=1)
+
+
+def mesma_luta(evento, ficha):
+    """A luta da ficha está neste evento (em qualquer posição do card), na mesma data (±1 dia)?"""
+    return _perto(evento, ficha) and any(_mesmos_lutadores(l, ficha) for l in evento.get("lutas") or [])
+
+
+def _achar(eventos, ficha):
+    """(evento, luta, mesma_data) da luta com os mesmos dois lutadores, em qualquer evento do arquivo."""
+    em_outra_data = (None, None, False)
+    for evento in eventos:
+        for luta in evento.get("lutas") or []:
+            if _mesmos_lutadores(luta, ficha):
+                if _perto(evento, ficha):
+                    return evento, luta, True
+                if em_outra_data[0] is None:
+                    em_outra_data = (evento, luta, False)
+    return em_outra_data
+
+
+def _nome_no_arquivo(luta, vencedor):
+    """O vencedor escrito como no arquivo (a tela compara o nome exato com o dos lutadores)."""
+    if not vencedor:
+        return None
+    return next((n for n in luta.get("lutadores") or [] if _sobrenome(n) == _sobrenome(vencedor)), vencedor)
 
 
 def juntar_luta(arquivo, ficha, hoje):
     """Acrescenta a luta futura ou completa o resultado. Devolve o que mudou, ou None."""
     eventos = arquivo.setdefault("eventos", [])
-    existente = next((e for e in eventos if mesma_luta(e, ficha)), None)
+    evento, luta, mesma_data = _achar(eventos, ficha)
     nome = f"{ficha['lutadores'][0]} x {ficha['lutadores'][1]}"
-    if existente:
-        luta = existente["lutas"][0]
+    if luta is not None and mesma_data:
         if ficha["resultado"] and not luta.get("vencedor") and not luta.get("resultado"):
-            luta["vencedor"] = ficha["vencedor"]
+            luta["vencedor"] = _nome_no_arquivo(luta, ficha["vencedor"])
             luta["resultado"] = ficha["resultado"]
             return f"boxe {nome}: resultado {ficha['resultado']}"
+        return None
+    if luta is not None:
+        # a mesma dupla em outra data: a luta foi adiada ou a data do arquivo está diferente; o dono decide
+        aviso(f"boxe {nome}: está no arquivo em {evento.get('data')}, a Wikipédia diz {ficha['data']}; não mexi")
         return None
     if date.fromisoformat(ficha["data"]) < hoje:
         return None  # luta passada que não estava no arquivo: fica de fora

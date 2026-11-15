@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Baixa do GitHub Pages as telas e os dados novos e os deixa prontos para a próxima abertura.
@@ -26,12 +27,18 @@ import java.util.Set;
  * - www-nova/: o download em andamento; só vira www-baixada depois que todo arquivo confere.
  *
  * As regras (o que baixar, qual pasta servir) ficam em Atualizacao, testada no PC.
+ *
+ * Uma busca por vez no app inteiro (TRAVA é estática: cada abertura cria um Atualizador novo,
+ * e uma busca da abertura anterior pode ainda estar rodando). A pasta nova é conferida no disco
+ * antes da troca, e a baixada é conferida de novo a cada abertura: se faltar ou estiver errado
+ * algum arquivo, ela é apagada e o app abre com as telas do APK.
  */
 final class Atualizador {
 
     static final String ENDERECO = "https://byglazed.github.io/Scoresports-pessoal2/apk/";
     static final String RELEASE = "https://github.com/byGlazed/Scoresports-pessoal2/releases/latest";
     private static final String LOG = "Atualizador";
+    private static final ReentrantLock TRAVA = new ReentrantLock();
 
     private final Context ctx;
     private final int versionCode;
@@ -51,17 +58,25 @@ final class Atualizador {
     }
 
     /** A pasta baixada, se ela deve ser servida; null para servir as telas do APK. */
-    synchronized File pastaParaServir() {
+    File pastaParaServir() {
         Atualizacao.Manifesto daBaixada = lerBaixada();
         if (daBaixada == null) {
             return null;
         }
         Atualizacao.Manifesto embutido = lerEmbutido();
-        if (embutido == null || "baixada".equals(Atualizacao.escolherPasta(embutido.versao, daBaixada.versao))) {
+        boolean maisNova = embutido == null || "baixada".equals(Atualizacao.escolherPasta(embutido.versao, daBaixada.versao));
+        if (maisNova && Atualizacao.arquivosRuins(daBaixada, caminho -> lerArquivo(new File(baixada, caminho))).isEmpty()) {
             return baixada;
         }
-        // um APK mais novo foi instalado por cima: as telas dele valem e a pasta baixada sai
-        apagar(baixada);
+        // um APK mais novo foi instalado por cima, ou a pasta está incompleta: valem as telas do APK.
+        // A pasta só é apagada se nenhuma busca estiver mexendo nela agora.
+        if (TRAVA.tryLock()) {
+            try {
+                apagar(baixada);
+            } finally {
+                TRAVA.unlock();
+            }
+        }
         return null;
     }
 
@@ -71,10 +86,19 @@ final class Atualizador {
     }
 
     void procurarEmSegundoPlano() {
-        new Thread(this::procurar, "atualizador").start();
+        new Thread(() -> {
+            if (!TRAVA.tryLock()) {
+                return; // outra busca já está rodando
+            }
+            try {
+                procurar();
+            } finally {
+                TRAVA.unlock();
+            }
+        }, "atualizador").start();
     }
 
-    private synchronized void procurar() {
+    private void procurar() {
         try {
             Atualizacao.Manifesto remoto = Atualizacao.ler(new String(baixar(ENDERECO + "versao.txt"), StandardCharsets.UTF_8));
             preferencias.edit().putInt("apk_minimo", remoto.apkMinimo).apply();
@@ -126,6 +150,11 @@ final class Atualizador {
                 }
                 escrever(new File(nova, caminho), conteudo);
             }
+            // confere no disco o que foi gravado antes de trocar
+            List<String> ruins = Atualizacao.arquivosRuins(alvo, c -> lerArquivo(new File(nova, c)));
+            if (!ruins.isEmpty()) {
+                throw new IOException("arquivos gravados não conferem: " + ruins);
+            }
             escrever(new File(nova, "versao.txt"), alvo.comoTexto().getBytes(StandardCharsets.UTF_8));
 
             // troca: a pasta antiga sai só depois que a nova está inteira
@@ -162,6 +191,18 @@ final class Atualizador {
         try (InputStream entrada = new FileInputStream(arquivo)) {
             return Atualizacao.ler(new String(lerTudo(entrada), StandardCharsets.UTF_8));
         } catch (Exception erro) {
+            return null;
+        }
+    }
+
+    /** O conteúdo do arquivo, ou null se ele não existe ou não dá para ler. */
+    private static byte[] lerArquivo(File arquivo) {
+        if (!arquivo.isFile()) {
+            return null;
+        }
+        try (InputStream entrada = new FileInputStream(arquivo)) {
+            return lerTudo(entrada);
+        } catch (IOException erro) {
             return null;
         }
     }
