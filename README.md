@@ -81,7 +81,9 @@ Se quiser gerar sem mudar nada, em **Actions > Gerar APK** clique em **Run workf
 3. Se o Play Protect avisar que o app não é conhecido, toque em **Mais detalhes > Instalar mesmo assim**. O aviso aparece porque o app não veio da Play Store.
 
 ### Atualizar
-Mudou alguma coisa? Rode `python gerar_celular.py`, faça commit e push. Quando o Actions terminar, baixe o APK de novo pelo mesmo link e instale por cima: os favoritos e os dados guardados continuam.
+O app se atualiza sozinho: a cada abertura ele confere no GitHub Pages se há telas ou dados novos, baixa só o que mudou e passa a usar na abertura seguinte. Os favoritos continuam, e sem internet ele abre com a última versão baixada.
+
+Mudou alguma tela? Rode `python gerar_celular.py`, faça commit e push na `main`: o celular pega sozinho. Só mudanças no Java (a pasta `android/`) pedem um APK novo; nesse caso aumente o número em `celular/apk_minimo.txt` para o `versionCode` do APK novo, e o app mostra o aviso "Nova versão do app" com o link para baixar e instalar por cima.
 
 ### Se o Actions falhar
 - **Erro 403 ao publicar:** em **Settings > Actions > General > Workflow permissions**, marque **Read and write permissions** e rode de novo.
@@ -170,6 +172,8 @@ Scoresports-pessoal2/
 ├── placar_nba.py       # script de terminal: placar do dia
 ├── box_score.py        # script de terminal: box score de um jogo
 ├── classificacao.py    # script de terminal: classificação das conferências
+├── temporada.py       # temporada da NBA pela data
+├── robo/              # robô diário: campeões (ESPN) e lutas de boxe (Wikipédia)
 ├── requirements.txt
 └── static/
     ├── index.html
@@ -190,9 +194,10 @@ celular/
 ├── android.js         # botão voltar do Android (só no APK)
 testes/                # testes das regras (time, busca, NBA, navegação), com amostras reais da ESPN e do Wikidata
 planejamento/          # especificações e planos de cada parte
-docs/                  # versão do celular pronta (gerada pelo gerar_celular.py)
+docs/                  # versão do celular pronta (gerada pelo gerar_celular.py); docs/apk/ é o pacote que o app baixa
 android/               # projeto do app Android (o GitHub Actions monta o APK)
 .github/workflows/apk.yml  # automação que monta e publica o APK
+.github/workflows/robo.yml # robô diário que atualiza os dados
 ```
 
 ## Rotas da API
@@ -292,13 +297,29 @@ node --test testes/*.test.js
 
 A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-27"`) no início do `nba_dados.py`. O `classificacao.py` tem a sua própria. Quando uma nova temporada começar, é só atualizar esse valor. Os outros esportes acompanham a temporada atual da ESPN sozinhos.
 
+## O que se atualiza sozinho
+
+| O quê | Como |
+|-------|------|
+| Jogos, placares, classificações, elencos | direto da ESPN, sempre |
+| Telas e dados no APK | o app baixa do GitHub Pages ao abrir e usa na próxima abertura |
+| Campeões (`campeoes.json`) | o robô diário lê na ESPN quem ganhou cada temporada encerrada |
+| Lutas grandes de boxe (`boxe_eventos.json`) | o robô diário lê as fichas das lutas na Wikipédia (categorias "AAAA boxing matches"): acrescenta as lutas marcadas e completa os resultados |
+| Temporada da NBA no PC | calculada pela data (`temporada.py`) |
+
+O robô (`robo/`, `.github/workflows/robo.yml`) roda todo dia às 7h de Brasília. Para rodar na hora: aba **Actions > Robô diário > Run workflow**. Ele só acrescenta ou completa: nunca apaga nem troca o que foi escrito à mão, e se a ESPN ou a Wikipédia estiverem fora do ar, não muda nada. As lutas novas entram sem horário e sem canal: complete à mão se quiser, e o robô não mexe no que você escreveu.
+
+Ainda é à mão: os canais de TV (`transmissoes.json`; não existe fonte aberta com a grade do Brasil) e as lutas de boxe que não têm artigo na Wikipédia.
+
+Para testar o robô sem gravar nada: `python -m robo --seco`.
+
 ## Limitações conhecidas
 
 - Os dados vêm de endpoints **não oficiais** da NBA e da ESPN. Eles podem mudar, ficar lentos ou bloquear consultas sem aviso. O cache ameniza isso, mas não elimina.
 - Os recordes da temporada consideram apenas a **temporada regular**. Na carreira, há números de temporada regular e de playoffs.
 - A ESPN não publica estatísticas de carreira de todos os atletas; quando falta, a página avisa.
 - A Globo transmite só 15 dos 24 GPs de F1 em TV aberta, e quais são varia. O padrão aponta SporTV e Globoplay, que passam todos.
-- A agenda de boxe depende do arquivo `boxe_eventos.json`, atualizado à mão; o perfil dos lutadores depende de a Wikipédia ter uma página sobre eles.
+- A agenda de boxe fica no arquivo `boxe_eventos.json`. O robô acrescenta as lutas grandes que têm artigo na Wikipédia; as menores continuam à mão. O perfil dos lutadores depende de a Wikipédia ter uma página sobre eles.
 - Os favoritos ficam guardados no navegador: em outro navegador ou celular eles começam vazios.
 - Líderes, ranking do UFC, lutas e carreira no futebol usam o Core API da ESPN, que entrega os dados em vários pedaços. A primeira abertura de cada tela pode levar alguns segundos; depois fica no cache.
 - Em algumas competições a ESPN não publica cartões entre os líderes; a página avisa quando isso acontece.
@@ -307,8 +328,9 @@ A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-2
 ## Próximos passos
 
 - [ ] Opção de ver playoffs no calendário da NBA
-- [ ] Atualizar a grade de transmissões automaticamente a partir das páginas das emissoras
 - [ ] Mais esportes da ESPN (NHL, MLB, tênis)
+
+A grade de transmissões automática saiu da lista: a ESPN não informa os canais do Brasil e não existe uma fonte aberta com a programação das emissoras.
 
 ## Aviso
 

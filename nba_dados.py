@@ -5,8 +5,9 @@ from html import unescape
 from zoneinfo import ZoneInfo
 
 import transmissoes
+from temporada import temporada_nba
 
-TEMPORADA = "2026-27"
+TEMPORADA = temporada_nba(date.today())  # calculada pela data (temporada.py)
 FUSO_BRASILIA = ZoneInfo("America/Sao_Paulo")
 
 
