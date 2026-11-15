@@ -1,7 +1,10 @@
+from datetime import date
+
 import cache
+from temporada import temporada_nba
 from nba_api.stats.endpoints import leaguestandingsv3
 
-TEMPORADA = "2026-27"
+TEMPORADA = temporada_nba(date.today())  # calculada pela data (temporada.py)
 UMA_HORA = 3600
 
 

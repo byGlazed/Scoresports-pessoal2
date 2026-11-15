@@ -1181,3 +1181,26 @@ select.campo-data { cursor: pointer; }
 .seletor-jogador { flex: 1; min-width: 160px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--linha); background: var(--superficie); color: var(--texto); }
 .resumo-arremessos { font-weight: 600; margin: 4px 0; }
 .info-arremesso { font-size: 13px; color: var(--texto-2); min-height: 18px; margin: 0 0 6px; }
+
+/* ---------- Aviso de APK novo ---------- */
+.aviso-apk {
+  position: fixed;
+  left: 50%;
+  bottom: calc(57px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 31;
+  width: calc(100% - 16px);
+  max-width: 584px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px 6px 14px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+}
+.aviso-apk-texto { flex: 1; min-width: 0; font-size: 0.875rem; font-weight: 600; }
+.aviso-apk-baixar { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
+.aviso-apk-fechar { width: 44px; height: 44px; border: 0; background: none; color: var(--texto-3); font-size: 22px; border-radius: 50%; }
+.aviso-apk-fechar:hover { background: var(--superficie-2); color: var(--texto); }

@@ -35,6 +35,11 @@ CABECA_CELULAR = """  <link rel="manifest" href="./manifest.webmanifest">
 """
 
 
+def carimbo(segundos=None) -> str:
+    """A versão: data e hora em UTC (o PC em Brasília e o GitHub em UTC carimbam do mesmo jeito)."""
+    return time.strftime("%Y%m%d-%H%M%S", time.gmtime(segundos))
+
+
 def como_no_git(conteudo: bytes) -> bytes:
     """O arquivo como o Git guarda e o Pages publica: texto com LF (o .gitattributes pede isso).
     No Windows a cópia de trabalho tem CRLF; sem isto o SHA do manifesto não bateria com o publicado.
@@ -58,7 +63,7 @@ def montar_manifesto(pasta: Path, versao: str, apk_minimo: int) -> str:
 
 
 def main():
-    versao = time.strftime("%Y%m%d-%H%M%S")
+    versao = carimbo()
     if DOCS.exists():
         shutil.rmtree(DOCS)
     (DOCS / "dados").mkdir(parents=True)

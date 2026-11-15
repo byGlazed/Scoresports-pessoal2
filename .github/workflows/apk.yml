@@ -39,8 +39,13 @@ jobs:
       - name: Testar as regras de atualização do app (Java)
         run: python testes/rodar_java.py
 
-      - name: Preparar as telas do app
-        run: python gerar_celular.py
+      # o APK leva exatamente o pacote que está no Pages (docs/apk/, com o versao.txt),
+      # para o app não achar que a mesma versão é "outra" e baixar tudo de novo
+      - name: Preparar as telas do app (o mesmo pacote publicado no Pages)
+        run: |
+          rm -rf android/app/src/main/assets/www
+          mkdir -p android/app/src/main/assets
+          cp -r docs/apk android/app/src/main/assets/www
 
       - name: Instalar o Gradle
         uses: gradle/actions/setup-gradle@v4

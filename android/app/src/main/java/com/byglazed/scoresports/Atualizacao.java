@@ -197,6 +197,24 @@ public final class Atualizacao {
         return m;
     }
 
+    /** Lê um arquivo da pasta; devolve null se ele não existe ou não dá para ler. */
+    public interface Leitor {
+        byte[] ler(String caminho);
+    }
+
+    /** Os arquivos do manifesto que faltam na pasta ou não conferem com o SHA (lista ordenada). */
+    public static List<String> arquivosRuins(Manifesto m, Leitor leitor) {
+        List<String> ruins = new ArrayList<>();
+        for (Map.Entry<String, Arquivo> e : m.arquivos.entrySet()) {
+            byte[] conteudo = leitor.ler(e.getKey());
+            if (conteudo == null || !sha256(conteudo).equals(e.getValue().sha256)) {
+                ruins.add(e.getKey());
+            }
+        }
+        Collections.sort(ruins);
+        return ruins;
+    }
+
     public static String sha256(byte[] dados) {
         try {
             byte[] h = MessageDigest.getInstance("SHA-256").digest(dados);

@@ -41,6 +41,11 @@ class TesteManifesto(unittest.TestCase):
             self.assertIn(f"arquivo {sha(b'linha 1' + bytes([10]) + b'linha 2' + bytes([10]))} 16 a.js", texto)
             self.assertIn(f"arquivo {sha(bytes([137]) + b'PNG' + bytes([0, 13, 10]))} 7 b.png", texto)
 
+    def test_carimbo_em_utc(self):
+        # o PC (Brasília) e o GitHub (UTC) têm de carimbar a mesma hora do mesmo jeito
+        self.assertEqual(gerar_celular.carimbo(0), "19700101-000000")
+        self.assertEqual(gerar_celular.carimbo(1794700800), "20261115-000000")
+
     def test_caminho_com_espaco(self):
         with tempfile.TemporaryDirectory() as tmp:
             pasta = Path(tmp)
