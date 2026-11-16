@@ -105,3 +105,82 @@ test("temChave e nomeDaAba", () => {
   assert.equal(Chave.nomeDaAba("nfl", "nfl"), "Playoffs");
   assert.equal(Chave.nomeDaAba("futebol", "usa.1"), "Playoffs");
 });
+
+/* ---------- Playoffs americanos ---------- */
+
+const campeao = (colunas) => {
+  const final = colunas[colunas.length - 1].confrontos[0];
+  return final && (final.lados.find((l) => l.passou) || {}).nome;
+};
+
+test("faseAmericana: notas em português ou inglês, e o que não é playoff fica de fora", () => {
+  const a = Chave.faseAmericana("nba", "Leste 1ª rodada - Jogo 1");
+  const b = Chave.faseAmericana("nba", "East 1st Round - Game 3");
+  assert.deepEqual([a.ordem, a.conferencia], [1, "Leste"]);
+  assert.deepEqual([b.ordem, b.conferencia], [1, "Leste"]);
+  assert.equal(Chave.faseAmericana("nba", "NBA Finals - Game 5").ordem, 4);
+  assert.equal(Chave.faseAmericana("nba", "West Finals - Game 2").ordem, 3);
+  assert.equal(Chave.faseAmericana("nhl", "Oeste 2ª rodada - Jogo 1").ordem, 2);
+  assert.equal(Chave.faseAmericana("nhl", "Stanley Cup Final - Game 6").ordem, 4);
+  assert.equal(Chave.faseAmericana("nfl", "AFC Divisional Playoffs").ordem, 2);
+  assert.equal(Chave.faseAmericana("nfl", "Super Bowl LX").ordem, 4);
+  assert.equal(Chave.faseAmericana("mlb", "ALCS - Game 4 Rain").ordem, 3);
+  assert.equal(Chave.faseAmericana("mlb", "NLWC - Game 1").ordem, 1);
+  assert.equal(Chave.faseAmericana("mls", null, "eastern-conference-playoffs---round-one").ordem, 1);
+  assert.equal(Chave.faseAmericana("mls", null, "mls-cup").ordem, 4);
+  assert.equal(Chave.faseAmericana("nfl", "Pro Bowl Games"), null);
+  assert.equal(Chave.faseAmericana("nba", "NBA Play-In - East"), null);
+  assert.equal(Chave.faseAmericana("nba", "NBA Cup - Quarterfinals"), null);
+});
+
+test("playoffs da NBA 2026: Play-In separado e Knicks campeões em 4-1", () => {
+  const { playIn, colunas } = Chave.playoffs("nba", amostra("nba_2026").jogos);
+  assert.equal(playIn.length, 6);
+  assert.deepEqual(colunas.map((c) => c.confrontos.length), [8, 4, 2, 1]);
+  assert.ok(colunas.every((c) => c.confrontos.every(Boolean)));
+  const final = colunas[3].confrontos[0];
+  assert.deepEqual(nomes(final).sort(), ["New York Knicks", "San Antonio Spurs"]);
+  const knicks = final.lados.find((l) => l.nome === "New York Knicks");
+  assert.deepEqual([knicks.passou, knicks.placar], [true, 4]);
+  assert.equal(final.lados.find((l) => !l.passou).placar, 1);
+  assert.equal(final.resumo, "4-1 na série");
+  assert.equal(colunas[3].nome, "Finais da NBA");
+});
+
+test("playoffs da NFL 2025: Wild Card de 6 para Divisional de 4, sem o Pro Bowl", () => {
+  const { colunas } = Chave.playoffs("nfl", amostra("nfl_2025").jogos);
+  assert.deepEqual(colunas.map((c) => c.confrontos.length), [6, 4, 2, 1]);
+  assert.equal(campeao(colunas), "Seattle Seahawks");
+  assert.ok(!colunas.some((c) => c.confrontos.some((x) => x && x.lados.some((l) => l.sigla === "AFC"))), "o Pro Bowl não entra");
+  // quem pulou o Wild Card (DEN, SEA) chega à Divisional sem linha
+  const div = colunas[1];
+  for (const sigla of ["DEN", "SEA"]) {
+    const i = div.confrontos.findIndex((c) => c.lados.some((l) => l.sigla === sigla));
+    assert.equal(div.alimenta[i].length, 1, `${sigla} pulou o Wild Card`);
+  }
+});
+
+test("playoffs da MLB 2026 e da NHL 2026", () => {
+  const mlb = Chave.playoffs("mlb", amostra("mlb_2026").jogos).colunas;
+  assert.deepEqual(mlb.map((c) => c.confrontos.length), [4, 4, 2, 1]);
+  assert.equal(campeao(mlb), "Milwaukee Brewers");
+  const nhl = Chave.playoffs("nhl", amostra("nhl_2026").jogos).colunas;
+  assert.deepEqual(nhl.map((c) => c.confrontos.length), [8, 4, 2, 1]);
+  assert.equal(campeao(nhl), "Carolina Hurricanes");
+});
+
+test("playoffs da MLS 2026 antes de começar: estrutura, vagas e times a definir", () => {
+  const { colunas } = Chave.playoffs("mls", amostra("mls_2026").jogos);
+  assert.deepEqual(colunas.map((c) => c.confrontos.length), [2, 8, 4, 2, 1]);
+  assert.ok(colunas[1].confrontos.every((c) => c && c.jogos.length === 3), "a 1ª rodada é melhor de 3");
+  const comVaga = colunas[1].confrontos.filter((c) => c.lados.some((l) => l.aDefinir));
+  assert.equal(comVaga.length, 2, "os dois que esperam o vencedor do Wild Card");
+  assert.ok(colunas[2].confrontos.every((c) => c === null));
+});
+
+test("playoffs com a NBA cortada no fim da 1ª rodada: vagas nas fases seguintes", () => {
+  const jogos = amostra("nba_2026").jogos.filter((j) => j.date < "2026-05-04");
+  const { colunas } = Chave.playoffs("nba", jogos);
+  assert.deepEqual(colunas.map((c) => c.confrontos.length), [8, 4, 2, 1]);
+  assert.ok(colunas[0].confrontos.every(Boolean));
+});

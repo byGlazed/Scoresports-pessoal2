@@ -18,7 +18,31 @@ const Chave = (() => {
   // quantos confrontos tem cada fase quando ela não corta a anterior pela metade
   const FORMATOS = {
     futebol: { "knockout-round-playoffs": 8, "round-of-16": 8 },
+    nba: { 1: 8, 2: 4, 3: 2, 4: 1 },
+    nhl: { 1: 8, 2: 4, 3: 2, 4: 1 },
+    nfl: { 1: 6, 2: 4, 3: 2, 4: 1 },
+    mlb: { 1: 4, 2: 4, 3: 2, 4: 1 },
+    mls: { 0: 2, 1: 8, 2: 4, 3: 2, 4: 1 },
   };
+
+  // nome de cada fase dos playoffs (a ordem 0 é o Wild Card da MLS)
+  const NOMES_PLAYOFFS = {
+    nba: { 1: "1ª rodada", 2: "Semifinais de conferência", 3: "Finais de conferência", 4: "Finais da NBA" },
+    nhl: { 1: "1ª rodada", 2: "2ª rodada", 3: "Finais de conferência", 4: "Final da Stanley Cup" },
+    nfl: { 1: "Wild Card", 2: "Divisional", 3: "Finais de conferência", 4: "Super Bowl" },
+    mlb: { 1: "Wild Card", 2: "Division Series", 3: "Championship Series", 4: "World Series" },
+    mls: { 0: "Wild Card", 1: "1ª rodada", 2: "Semifinais de conferência", 3: "Finais de conferência", 4: "MLS Cup" },
+  };
+
+  // padrões da nota (ou do slug, na MLS) para a ordem da fase, do mais específico para o mais geral
+  const PADROES_PLAYOFFS = {
+    nba: [[/NBA Finals|Finais da NBA/i, 4], [/(East|West|Leste|Oeste)\s+Finals?|Finais? d[ae] conferência/i, 3], [/Semifinals|Semifinais|2ª rodada|2nd Round/i, 2], [/1ª rodada|1st Round/i, 1]],
+    nhl: [[/Stanley Cup Final/i, 4], [/(East|West|Leste|Oeste)\s+Finals?|Finais? d[ae] conferência/i, 3], [/2ª rodada|2nd Round|Semifinals/i, 2], [/1ª rodada|1st Round/i, 1]],
+    nfl: [[/Super Bowl/i, 4], [/Championship/i, 3], [/Divisional/i, 2], [/Wild Card/i, 1]],
+    mlb: [[/World Series/i, 4], [/\b(AL|NL)CS\b/i, 3], [/\b(AL|NL)DS\b/i, 2], [/\b(AL|NL)WC\b|Wild Card/i, 1]],
+    mls: [[/mls-cup|MLS Cup/i, 4], [/---final$|conference-final|Conference.*Final$/i, 3], [/semifinal/i, 2], [/round-one|Round One/i, 1], [/wild-card|Wild Card/i, 0]],
+  };
+  const FORA_DOS_PLAYOFFS = /Pro Bowl|Play-In|NBA Cup|All-Star/i;
 
   const NOMES_FASE = [
     [/knockout-round-playoffs|playoff/i, "Playoff"],
@@ -97,31 +121,38 @@ const Chave = (() => {
   };
   const time = (c) => {
     const t = c.team || {};
-    return { id: String(t.id ?? c.id), nome: t.displayName || "", curto: t.shortDisplayName || t.displayName || "", sigla: t.abbreviation || "", logo: t.logo || null };
+    const id = String(t.id ?? c.id);
+    // vaga ainda sem time (a ESPN escreve "TBD Away", "TBD Home")
+    if (/^TBD\b/i.test(t.displayName || "")) return { id: `tbd:${id}`, nome: "A definir", curto: "A definir", sigla: "", logo: null, aDefinir: true };
+    return { id, nome: t.displayName || "", curto: t.shortDisplayName || t.displayName || "", sigla: t.abbreviation || "", logo: t.logo || null };
   };
 
   /** Os jogos da mesma fase entre os mesmos dois times viram um confronto (ida e volta, série ou jogo único). */
-  function confrontos(jogos, faseDe = (j) => (j.season || {}).type) {
+  function confrontos(jogos, faseDe = (j) => (j.season || {}).type, opcoes = {}) {
     const grupos = new Map();
     for (const j of jogos || []) {
       const cs = competicao(j).competitors || [];
       if (cs.length !== 2) continue;
       const fase = faseDe(j);
       if (fase === null || fase === undefined) continue;
-      const ids = cs.map((c) => time(c).id).sort();
+      // a vaga "TBD" pode vir com um id diferente em cada jogo da mesma série: conta como um lado só
+      const ids = cs.map((c) => (time(c).aDefinir ? "tbd" : time(c).id)).sort();
       const chave = `${fase}|${ids.join("|")}`;
       if (!grupos.has(chave)) grupos.set(chave, { fase, jogos: [] });
       grupos.get(chave).jogos.push(j);
     }
-    return [...grupos.values()].map(({ fase, jogos: lista }) => montarConfronto(fase, lista));
+    return [...grupos.values()].map(({ fase, jogos: lista }) => montarConfronto(fase, lista, opcoes));
   }
 
-  function montarConfronto(fase, jogos) {
+  function montarConfronto(fase, jogos, opcoes = {}) {
     jogos = [...jogos].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
     const primeiro = competicao(jogos[0]);
     const ordem = [...primeiro.competitors].sort((a, b) => (a.homeAway === "home" ? -1 : 0) - (b.homeAway === "home" ? -1 : 0));
     const lados = ordem.map((c) => ({ ...time(c), placar: 0, vitorias: 0, penaltis: null, passou: false }));
-    const lado = (c) => lados.find((l) => l.id === time(c).id);
+    const lado = (c) => {
+      const t = time(c);
+      return lados.find((l) => l.id === t.id) || (t.aDefinir ? lados.find((l) => l.aDefinir) : undefined);
+    };
     let comPlacar = false;
     let serie = null;
     for (const j of jogos) {
@@ -142,7 +173,9 @@ const Chave = (() => {
       }
     }
     const estados = jogos.map(estadoDoJogo);
-    const americano = serie && serie.type === "playoff";
+    const americano = (serie && serie.type === "playoff") || Boolean(opcoes.serie);
+    // série melhor de N sem o resumo da ESPN (1ª rodada da MLS): passa quem chegou às vitórias
+    const precisa = opcoes.vitoriasPara ? opcoes.vitoriasPara(fase) : null;
 
     // quem passou: o confronto inteiro (agregado ou série) pela ESPN; senão, o jogo único encerrado
     let passouId = null;
@@ -153,6 +186,8 @@ const Chave = (() => {
         const ultimo = competicao(jogos[jogos.length - 1]).competitors.find((c) => c.winner);
         if (ultimo) passouId = time(ultimo).id;
       }
+    } else if (precisa && lados.some((l) => l.vitorias >= precisa)) {
+      passouId = lados.find((l) => l.vitorias >= precisa).id;
     } else if (jogos.length === 1 && estados[0] === 3) {
       const venc = primeiro.competitors.find((c) => c.winner);
       if (venc) passouId = time(venc).id;
@@ -274,7 +309,48 @@ const Chave = (() => {
     return i < 0 ? colunas.length - 1 : i;
   }
 
+  /* ---------- Playoffs americanos ---------- */
+
+  /** A fase dos playoffs pela nota do jogo (ou pelo slug, na MLS); null para o que não é playoff. */
+  function faseAmericana(esporte, nota, slug) {
+    const texto = esporte === "mls" ? `${slug || ""} ${nota || ""}` : nota || "";
+    if (!texto.trim() || FORA_DOS_PLAYOFFS.test(texto)) return null;
+    for (const [padrao, ordem] of PADROES_PLAYOFFS[esporte] || []) {
+      if (padrao.test(texto)) {
+        const conf = /Leste|East|eastern|AFC|\bAL/i.test(texto) ? (/AFC/.test(texto) ? "AFC" : /\bAL/.test(texto) ? "AL" : "Leste")
+          : /Oeste|West|western|NFC|\bNL/i.test(texto) ? (/NFC/.test(texto) ? "NFC" : /\bNL/.test(texto) ? "NL" : "Oeste") : null;
+        return { ordem, nome: NOMES_PLAYOFFS[esporte][ordem], conferencia: ordem === 4 ? null : conf };
+      }
+    }
+    return null;
+  }
+
+  const notaDe = (j) => ((competicao(j).notes || [])[0] || {}).headline || null;
+
+  /** A chave dos playoffs (NBA, NFL, MLB, NHL, MLS) e, na NBA, os jogos do Play-In à parte. */
+  function playoffs(esporte, jogos) {
+    const ehPlayIn = (j) => esporte === "nba" && (j.season || {}).type === 5;
+    const playIn = confrontos((jogos || []).filter(ehPlayIn), () => "play-in", { serie: false });
+    const faseDe = (j) => {
+      if (ehPlayIn(j)) return null;
+      const f = faseAmericana(esporte, notaDe(j), (j.season || {}).slug);
+      return f ? f.ordem : null;
+    };
+    const lista = confrontos(jogos, faseDe, {
+      serie: esporte === "mls" ? true : undefined,
+      vitoriasPara: esporte === "mls" ? (ordem) => (ordem === 1 ? 2 : null) : null,
+    });
+    const formato = FORMATOS[esporte] || {};
+    const fases = Object.keys(formato)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map((ordem) => ({ type: ordem, slug: String(ordem), nome: NOMES_PLAYOFFS[esporte][ordem] }));
+    return { playIn, colunas: montar({ fases, confrontos: lista, formato }) };
+  }
+
   return {
+    faseAmericana,
+    playoffs,
     COM_CHAVE,
     FORMATOS,
     temChave,
