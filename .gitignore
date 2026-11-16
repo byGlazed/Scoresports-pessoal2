@@ -223,3 +223,6 @@ __marimo__/
 .venv/
 cache.db
 .superpowers/
+
+# chave da PandaScore (parte F): nunca vai para o repositório público
+chave_pandascore.txt
