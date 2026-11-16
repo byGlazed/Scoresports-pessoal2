@@ -218,3 +218,26 @@ test("copaNba durante a fase de grupos: chave só com vagas", () => {
   assert.deepEqual(colunas.map((c) => c.confrontos.length), [4, 2, 1]);
   assert.ok(colunas.every((c) => c.confrontos.every((x) => x === null)));
 });
+
+test("colunaInicial: a chave começa onde os grandes entram (fase maior que a anterior)", () => {
+  const colunas = (contagens) => contagens.map((n) => ({ confrontos: Array(n).fill(null) }));
+  // Copa do Brasil 2026: 1ª rodada 14, 2ª 44, 3ª 24, 4ª 12, 5ª 16 (entram os grandes), oitavas 8...
+  assert.equal(Chave.colunaInicial(colunas([14, 44, 24, 12, 16, 8, 4, 2, 1])), 4);
+  // Champions: playoff 8 e oitavas 8 (não cresce): começa no playoff
+  assert.equal(Chave.colunaInicial(colunas([8, 8, 4, 2, 1])), 0);
+  // Copa do Brasil 2025: 40, 20, 16...: começa na primeira com até 16
+  assert.equal(Chave.colunaInicial(colunas([40, 20, 16, 8, 4, 2, 1])), 2);
+});
+
+test("FA Cup antes da 3ª rodada: nomes em inglês traduzidos e o formato da competição nas vagas", () => {
+  const nomes = ["First Round", "Second Round", "Third Round", "Fourth Round", "Fifth Round", "Quarterfinals", "Semifinals", "Final"];
+  const tipos = nomes.map((name, i) => ({ type: 100 + i, name, startDate: `2026-${String(i + 1).padStart(2, "0")}-01T00:00Z` }));
+  const fases = Chave.fasesDoFutebol(tipos, []);
+  assert.deepEqual(fases.eliminatorias.map((f) => f.slug), ["first-round", "second-round", "third-round", "fourth-round", "fifth-round", "quarterfinals", "semifinals", "final"]);
+  assert.equal(fases.eliminatorias[4].nome, "5ª rodada");
+  const conf = (fase, n) => Array.from({ length: n }, (_, i) => ({ fase, lados: [{ id: `${fase}a${i}`, passou: true }, { id: `${fase}b${i}`, passou: false }], primeiraData: "2026-01-01" }));
+  const colunas = Chave.montar({ fases: fases.eliminatorias, confrontos: [...conf(100, 40), ...conf(101, 20)], formato: Chave.formatoDe("eng.fa") });
+  assert.deepEqual(colunas.map((c) => c.confrontos.length), [40, 20, 32, 16, 8, 4, 2, 1]);
+  assert.equal(Chave.formatoDe("bra.copa_do_brazil")["third-round"], undefined);
+  assert.equal(Chave.formatoDe("uefa.champions")["knockout-round-playoffs"], 8);
+});

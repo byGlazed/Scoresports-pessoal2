@@ -1971,6 +1971,181 @@ async function buscarBoxeadoresWiki(texto) {
   });
 }
 
+/* ---------- Chave (mata-mata e playoffs) e Copa NBA ---------- */
+
+// as regras de montagem ficam em chave_regras.js (objeto Chave), testadas no Node
+
+const semConsulta = (url) => String(url).split("?")[0].replace("http://", "https://");
+
+/** As temporadas mais recentes da competição, da mais nova para a mais velha (ex.: [2027, 2026]). */
+async function anosDaCompeticao(cfgEsporte, liga) {
+  const lista = await espnGet(`${D_CORE}/${cfgEsporte}/leagues/${liga}/seasons`, { limit: 3 });
+  return ((lista || {}).items || [])
+    .map((i) => Number((String(i.$ref || "").match(/seasons\/(\d{4})/) || [])[1]))
+    .filter(Number.isFinite)
+    .sort((a, b) => b - a);
+}
+
+async function rotuloDaTemporada(cfgEsporte, liga, ano) {
+  try {
+    const t = await espnGet(`${D_CORE}/${cfgEsporte}/leagues/${liga}/seasons/${ano}`);
+    const m = String(t.displayName || "").match(/^\s*(\d{4}(-\d{2})?)/);
+    return m ? m[1] : String(ano);
+  } catch (_) {
+    return String(ano);
+  }
+}
+
+async function tiposDaTemporada(cfgEsporte, liga, ano) {
+  const lista = await espnGet(`${D_CORE}/${cfgEsporte}/leagues/${liga}/seasons/${ano}/types`);
+  const tipos = await Promise.all(((lista || {}).items || []).map((i) => espnGet(semConsulta(i.$ref)).catch(() => null)));
+  return tipos.filter(Boolean).map((t) => ({ id: t.id, type: t.type, name: t.name, abbreviation: t.abbreviation, startDate: t.startDate, endDate: t.endDate }));
+}
+
+/** Os meses (AAAAMM) entre duas datas, sem passar do mês que vem (não adianta buscar jogos que ainda não existem). */
+function mesesEntre(inicioIso, fimIso) {
+  const limite = somarDiasIso(hojeEmBR(), 45).slice(0, 7).replace("-", "");
+  const meses = [];
+  let [a, m] = [Number(inicioIso.slice(0, 4)), Number(inicioIso.slice(5, 7))];
+  const fim = fimIso.slice(0, 7).replace("-", "");
+  for (let i = 0; i < 24; i++) {
+    const chave = `${a}${String(m).padStart(2, "0")}`;
+    if (chave > fim || chave > limite) break;
+    meses.push(chave);
+    m += 1;
+    if (m === 13) [a, m] = [a + 1, 1];
+  }
+  return meses;
+}
+
+async function jogosDosMeses(cfgEsporte, liga, meses) {
+  const vistos = new Set();
+  const eventos = [];
+  const respostas = await Promise.all(meses.map((mes) => espnGet(`${D_BASE}/${cfgEsporte}/${liga}/scoreboard`, { dates: mes, limit: 1000 })));
+  for (const r of respostas) {
+    for (const ev of r.events || []) {
+      if (vistos.has(String(ev.id))) continue;
+      vistos.add(String(ev.id));
+      eventos.push(ev);
+    }
+  }
+  return eventos;
+}
+
+const PLAYOFFS_POR_TIPO = { nba: [3, 5], nfl: [3], mlb: [3], nhl: [3] };
+
+async function chaveDaTemporada(esporte, liga, ano) {
+  const [cfg] = dConfig(esporte, liga);
+  const tipos = await tiposDaTemporada(cfg.esporte, liga, ano);
+  const mls = liga === "usa.1";
+  let alvo;
+  if (PLAYOFFS_POR_TIPO[esporte]) alvo = tipos.filter((t) => PLAYOFFS_POR_TIPO[esporte].includes(Number(t.type)));
+  else if (mls) alvo = tipos.filter((t) => /playoff|wild card|mls cup/i.test(`${t.name} ${t.abbreviation}`));
+  else {
+    const f = Chave.fasesDoFutebol(tipos, []);
+    alvo = [...f.preliminares, ...f.eliminatorias].map((fase) => tipos.find((t) => t.type === fase.type)).filter(Boolean);
+  }
+  const vazio = { temporada: { ano, rotulo: await rotuloDaTemporada(cfg.esporte, liga, ano) }, comecou: false, preliminares: [], playIn: [], colunas: [], jogos: {} };
+  if (!alvo.length) return vazio;
+  const inicio = alvo.map((t) => t.startDate).sort()[0];
+  const fim = alvo.map((t) => t.endDate).sort().slice(-1)[0];
+  const tiposAlvo = new Set(alvo.map((t) => Number(t.type)));
+  const eventos = (await jogosDosMeses(cfg.esporte, liga, mesesEntre(inicio, fim))).filter((ev) => {
+    const s = ev.season || {};
+    return Number(s.year) === Number(ano) || !s.year ? tiposAlvo.has(Number(s.type)) : false;
+  });
+
+  let preliminares = [];
+  let playIn = [];
+  let colunas;
+  if (PLAYOFFS_POR_TIPO[esporte] || mls) {
+    const r = Chave.playoffs(mls ? "mls" : esporte, eventos);
+    colunas = r.colunas;
+    playIn = r.playIn;
+  } else {
+    const fases = Chave.fasesDoFutebol(tipos, eventos);
+    const lista = Chave.confrontos(eventos);
+    const todas = Chave.montar({ fases: fases.eliminatorias, confrontos: lista, formato: Chave.formatoDe(liga) });
+    const ini = Chave.colunaInicial(todas);
+    preliminares = [
+      ...fases.preliminares.map((fase) => ({ nome: fase.nome, confrontos: lista.filter((c) => c.fase === fase.type) })),
+      ...todas.slice(0, ini).map((c) => ({ nome: c.nome, confrontos: c.confrontos.filter(Boolean) })),
+    ].filter((p) => p.confrontos.length);
+    colunas = todas.slice(ini);
+    if (colunas.length) colunas[0] = { ...colunas[0], alimenta: colunas[0].confrontos.map(() => []) };
+  }
+  const agora = new Date().toISOString();
+  const jogos = {};
+  for (const ev of eventos) {
+    try {
+      jogos[String(ev.id)] = partida(ev, esporte, liga);
+    } catch (_) {
+      /* jogo sem dados suficientes: fica só no cartão */
+    }
+  }
+  return { ...vazio, comecou: eventos.some((ev) => (ev.date || "") <= agora), preliminares, playIn, colunas, jogos };
+}
+
+/** A chave da temporada pedida; sem pedido, a atual se o mata-mata dela já começou, senão a anterior. */
+async function buscarChave(esporte, liga, anoPedido) {
+  const [cfg] = dConfig(esporte, liga);
+  const anos = await anosDaCompeticao(cfg.esporte, liga);
+  if (!anos.length) throw new ErroRota("A ESPN não tem temporadas desta competição.");
+  let ano = anoPedido && anos.includes(anoPedido) ? anoPedido : anos[0];
+  let r = await chaveDaTemporada(esporte, liga, ano);
+  if (!anoPedido && !r.comecou && anos[1]) {
+    ano = anos[1];
+    r = await chaveDaTemporada(esporte, liga, ano);
+  }
+  const outroAno = anos.slice(0, 2).find((a) => a !== ano);
+  r.outra = outroAno ? { ano: outroAno, rotulo: await rotuloDaTemporada(cfg.esporte, liga, outroAno) } : null;
+  return r;
+}
+
+const chaveEstavel = (r) => r.colunas.length > 0 && r.colunas.every((c) => c.confrontos.every((x) => x && x.estado === 3));
+
+/** A Copa NBA da temporada (grupos em novembro, mata-mata em dezembro do ano em que ela começa). */
+async function copaNbaDaTemporada(ano, conferenciaDe) {
+  const comeco = ano - 1; // a temporada 2026 (2025-26) começa em 2025
+  const eventos = (await jogosDosMeses("basketball", "nba", [`${comeco}10`, `${comeco}11`, `${comeco}12`])).filter((ev) =>
+    ((ev.competitions || [{}])[0].notes || []).some((n) => /NBA Cup/i.test((n && n.headline) || ""))
+  );
+  const { grupos, colunas } = Chave.copaNba(eventos, conferenciaDe);
+  const jogos = {};
+  for (const ev of eventos) {
+    try {
+      jogos[String(ev.id)] = partida(ev, "nba", "nba");
+    } catch (_) {
+      /* sem dados suficientes */
+    }
+  }
+  return { temporada: { ano, rotulo: `${comeco}-${String(ano).slice(2)}` }, comecou: eventos.length > 0, grupos, colunas, jogos };
+}
+
+async function buscarCopaNba(anoPedido) {
+  const anos = await anosDaCompeticao("basketball", "nba");
+  const conferencias = {};
+  try {
+    const c = await buscarClassificacao("nba", "nba");
+    for (const g of c.grupos || []) {
+      const conf = /Leste|East/i.test(g.nome) ? "Leste" : /Oeste|West/i.test(g.nome) ? "Oeste" : null;
+      for (const l of g.linhas || []) if (conf && l.id) conferencias[String(l.id)] = conf;
+    }
+  } catch (_) {
+    /* sem a classificação, os grupos ficam "Grupo 1..6" */
+  }
+  const conferenciaDe = (id) => conferencias[String(id)] || null;
+  let ano = anoPedido && anos.includes(anoPedido) ? anoPedido : anos[0];
+  let r = await copaNbaDaTemporada(ano, conferenciaDe);
+  if (!anoPedido && !r.comecou && anos[1]) {
+    ano = anos[1];
+    r = await copaNbaDaTemporada(ano, conferenciaDe);
+  }
+  const outroAno = anos.slice(0, 2).find((a) => a !== ano);
+  r.outra = outroAno ? { ano: outroAno, rotulo: `${outroAno - 1}-${String(outroAno).slice(2)}` } : null;
+  return r;
+}
+
 const ROTAS = [
   [/^\/esportes$/, () => [
     ...Object.entries(D_ESPORTES).map(([id, v]) => ({ id, nome: v.nome, tipo: v.tipo, ligas: v.ligas })),
@@ -1995,6 +2170,8 @@ const ROTAS = [
     return { ...r, hoje: hojeEmBR() };
   }],
   [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v1:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3)],
+  [/^\/e\/nba\/nba\/copa$/, (m, q) => viaEspn(`espn_copa_nba_v1:${q.temporada || "atual"}`, 120, () => buscarCopaNba(q.temporada ? Number(q.temporada) : null), chaveEstavel)],
+  [/^\/e\/([^/]+)\/([^/]+)\/chave$/, (m, q) => viaEspn(`espn_chave_v1:${m[1]}:${m[2]}:${q.temporada || "atual"}`, 120, () => buscarChave(m[1], m[2], q.temporada ? Number(q.temporada) : null), chaveEstavel)],
   [/^\/e\/([^/]+)\/([^/]+)\/classificacao$/, (m) => viaEspn(`espn_classificacao_v1:${m[1]}:${m[2]}`, 1800, () => buscarClassificacao(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)$/, (m) => viaEspn(`espn_time_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarTime(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/jogos$/, (m) => viaEspn(`espn_time_jogos_v1:${m[1]}:${m[2]}:${m[3]}`, 900, () => buscarJogosTime(m[1], m[2], m[3]))],

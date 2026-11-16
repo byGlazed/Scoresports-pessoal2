@@ -18,6 +18,8 @@ const Chave = (() => {
   // quantos confrontos tem cada fase quando ela não corta a anterior pela metade
   const FORMATOS = {
     futebol: { "knockout-round-playoffs": 8, "round-of-16": 8 },
+    // na FA Cup os clubes da Premier League entram na 3ª rodada: 64 times
+    "eng.fa": { "third-round": 32, "fourth-round": 16, "fifth-round": 8 },
     nba: { 1: 8, 2: 4, 3: 2, 4: 1 },
     nhl: { 1: 8, 2: 4, 3: 2, 4: 1 },
     nfl: { 1: 6, 2: 4, 3: 2, 4: 1 },
@@ -55,14 +57,19 @@ const Chave = (() => {
     [/first-stage|first stage|1ª fase/i, "1ª fase"],
     [/second-stage|second stage|2ª fase/i, "2ª fase"],
     [/third-stage|third stage|3ª fase/i, "3ª fase"],
-    [/first-round|primeira rodada|1a\s+rodada/i, "1ª rodada"],
-    [/second-round|segunda rodada|2a\s+rodada/i, "2ª rodada"],
-    [/third-round|3a\s+rodada/i, "3ª rodada"],
-    [/fourth-round|4a\s+rodada/i, "4ª rodada"],
-    [/fifth-round|5a\s+rodada/i, "5ª rodada"],
+    [/first[- ]round|primeira rodada|1a\s+rodada/i, "1ª rodada"],
+    [/second[- ]round|segunda rodada|2a\s+rodada/i, "2ª rodada"],
+    [/third[- ]round|3a\s+rodada/i, "3ª rodada"],
+    [/fourth[- ]round|4a\s+rodada/i, "4ª rodada"],
+    [/fifth[- ]round|5a\s+rodada/i, "5ª rodada"],
   ];
 
   const SLUG_PELO_NOME = [
+    [/first[- ]round|primeira rodada|1a\s+rodada/i, "first-round"],
+    [/second[- ]round|segunda rodada|2a\s+rodada/i, "second-round"],
+    [/third[- ]round|3a\s+rodada/i, "third-round"],
+    [/fourth[- ]round|4a\s+rodada/i, "fourth-round"],
+    [/fifth[- ]round|5a\s+rodada/i, "fifth-round"],
     [/playoff/i, "knockout-round-playoffs"],
     [/oitavas|round of 16/i, "round-of-16"],
     [/quartas|quarter/i, "quarterfinals"],
@@ -76,6 +83,11 @@ const Chave = (() => {
     for (const [padrao, pt] of NOMES_FASE) if (padrao.test(slug || "")) return pt;
     for (const [padrao, pt] of NOMES_FASE) if (padrao.test(nome || "")) return pt;
     return nome || slug || "";
+  }
+
+  /** O formato das fases que não cortam pela metade, juntando o geral do futebol e o da competição. */
+  function formatoDe(liga) {
+    return { ...FORMATOS.futebol, ...(FORMATOS[liga] || {}) };
   }
 
   function temChave(esporte, liga) {
@@ -305,10 +317,18 @@ const Chave = (() => {
     return pos;
   }
 
-  /** A primeira coluna com até 16 confrontos: as anteriores ficam na lista simples acima da chave. */
+  /**
+   * Onde a chave começa: a primeira coluna a partir da qual todas têm até 16 confrontos e
+   * nenhuma cresce em relação à anterior (crescer = times novos entrando, como os grandes na Copa do Brasil).
+   * As colunas antes dela ficam na lista simples acima da chave.
+   */
   function colunaInicial(colunas) {
-    const i = colunas.findIndex((c) => c.confrontos.length <= 16);
-    return i < 0 ? colunas.length - 1 : i;
+    const n = colunas.map((c) => c.confrontos.length);
+    let inicio = 0;
+    n.forEach((qtd, i) => {
+      if (qtd > 16 || (i > 0 && qtd > n[i - 1])) inicio = qtd > 16 ? i + 1 : i;
+    });
+    return Math.min(inicio, Math.max(colunas.length - 1, 0));
   }
 
   /* ---------- Playoffs americanos ---------- */
@@ -435,6 +455,7 @@ const Chave = (() => {
     playoffs,
     COM_CHAVE,
     FORMATOS,
+    formatoDe,
     temChave,
     nomeDaAba,
     nomeDaFase,
