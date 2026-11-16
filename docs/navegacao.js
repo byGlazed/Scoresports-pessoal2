@@ -380,6 +380,7 @@ registrarPagina("liga", {
     if (esp.ligas.length) estadoDe(esp.id).liga = params.liga;
     restaurarDia(esp, p.dia);
     if (params.aba === "chave" && esp.tipo === "partidas") return chaveLista(esp, params.liga, true);
+    if (params.aba === "copa" && esp.tipo === "partidas") return copaNbaLista(esp, true);
     if (params.aba !== "jogos") return null;
     if (esp.tipo === "nba") return NBA.datas ? nbaDia(true) : null;
     if (esp.tipo !== "partidas") return null;

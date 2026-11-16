@@ -205,3 +205,74 @@ async function chaveLista(esp, liga, silencioso) {
   const listas = [...r.colunas.map((c) => c.confrontos), r.playIn, ...r.preliminares.map((p) => p.confrontos)];
   if (temAoVivo(listas)) agendar("lista", () => chaveLista(esp, liga, true), 20000);
 }
+
+
+/* ---------- Copa NBA ---------- */
+
+/** A aba "Copa NBA": os 6 grupos (V-D e saldo) e a chave das quartas até a final. */
+async function copaNbaLista(esp, silencioso) {
+  const tk = silencioso ? S.tkLista : novoTokenLista();
+  const ano = ESTADO_CHAVE["copa-nba"];
+  if (!silencioso) lista().replaceChildren(carregando("Montando a Copa NBA…"));
+  let r;
+  try {
+    r = await api(`/e/nba/nba/copa${ano ? `?temporada=${ano}` : ""}`);
+  } catch (erro) {
+    if (tk === S.tkLista && !silencioso) lista().replaceChildren(caixaErro(erro, () => copaNbaLista(esp)));
+    return;
+  }
+  if (tk !== S.tkLista) return;
+  const abrir = (c) => abrirConfronto("nba", "nba", c, r.jogos);
+  completarLogos(r.colunas.map((c) => c.confrontos), r.jogos);
+  const logos = {};
+  for (const j of Object.values(r.jogos || {})) for (const t of [j.casa, j.fora]) if (t && t.id && t.logo) logos[String(t.id)] = t.logo;
+  const partes = [
+    linhaTemporada(r, (novo) => {
+      ESTADO_CHAVE["copa-nba"] = novo;
+      cancelar("lista");
+      copaNbaLista(esp);
+    }),
+  ];
+  if (!r.grupos.length) partes.push(vazio("A Copa NBA desta temporada ainda não começou."));
+  else {
+    partes.push(
+      h(
+        "div",
+        { class: "grade-cartoes grupos-copa" },
+        r.grupos.map((g) =>
+          h(
+            "section",
+            { class: "cartao" },
+            h("div", { class: "cartao-cabeca" }, h("h3", null, g.nome)),
+            tabela(
+              [
+                { nome: "#", valor: (l, i) => i + 1 },
+                {
+                  nome: "Time",
+                  esq: true,
+                  valor: (l) =>
+                    h(
+                      "span",
+                      { class: "time-celula" },
+                      imgLogo(l.time.logo || logos[l.time.id] || null),
+                      h("button", { class: "botao-link", type: "button", onclick: () => abrirTime("nba", "nba", l.time.id, l.time.nome) }, l.time.curto || l.time.nome)
+                    ),
+                },
+                { nome: "V", valor: (l) => l.v },
+                { nome: "D", valor: (l) => l.d },
+                { nome: "Saldo", valor: (l) => (l.saldo > 0 ? `+${l.saldo}` : String(l.saldo)) },
+              ],
+              g.linhas,
+              { classeLinha: (l, i) => (i === 0 ? "linha-destaque" : null) }
+            )
+          )
+        )
+      ),
+      h("p", { class: "nota" }, "Desempate aproximado: vitórias, saldo e pontos marcados. O 1º de cada grupo e o melhor 2º de cada conferência vão às quartas.")
+    );
+  }
+  partes.push(h("p", { class: "titulo-dia", style: { marginTop: "16px" } }, "Mata-mata"));
+  partes.push(desenharChave(r.colunas, { aoTocar: abrir }));
+  trocarConteudo(partes);
+  if (temAoVivo(r.colunas.map((c) => c.confrontos))) agendar("lista", () => copaNbaLista(esp, true), 20000);
+}

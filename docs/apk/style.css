@@ -1229,6 +1229,7 @@ button.confronto-chave:hover { border-color: var(--texto-3); }
 .chave-resumo { font-size: 0.6875rem; color: var(--texto-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .confronto-chave.ao-vivo .chave-resumo { color: var(--ao-vivo); font-weight: 700; }
 .chave-lista { margin-bottom: 10px; }
+.grupos-copa { grid-template-columns: minmax(0, 1fr); }
 .chave-lista summary { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 14px; font-weight: 700; cursor: pointer; }
 .linha-confronto { display: grid; gap: 2px; width: 100%; padding: 8px 14px; border: 0; border-top: 1px solid var(--linha); background: none; color: inherit; font: inherit; text-align: left; }
 .linha-confronto:hover { background: var(--superficie-2); }

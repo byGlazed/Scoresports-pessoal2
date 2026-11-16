@@ -631,6 +631,7 @@ const ModuloPartidas = {
     // a chave (mata-mata ou playoffs) só no app: o site do PC usa o servidor Python, que não tem a rota
     const ligaDaAba = liga || (esp.ligas.length === 1 ? esp.ligas[0].id : null);
     if (window.MODO_CELULAR && ligaDaAba && Chave.temChave(esp.id, ligaDaAba)) abas.push({ id: "chave", nome: Chave.nomeDaAba(esp.id, ligaDaAba) });
+    if (window.MODO_CELULAR && esp.id === "nba") abas.push({ id: "copa", nome: "Copa NBA" });
     abas.push({ id: "lideres", nome: esp.id === "futebol" ? "Artilharia e cartões" : "Líderes" });
     return abas;
   },
@@ -642,6 +643,7 @@ const ModuloPartidas = {
     if (aba === "classificacao") return classificacaoEspn(esp, ligaEscolhida);
     if (aba === "lideres") return lideresEspn(esp, ligaEscolhida);
     if (aba === "chave") return chaveLista(esp, ligaEscolhida);
+    if (aba === "copa") return copaNbaLista(esp);
     return partidasLista(esp);
   },
 };
