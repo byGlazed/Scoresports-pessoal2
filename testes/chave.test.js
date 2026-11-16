@@ -184,3 +184,37 @@ test("playoffs com a NBA cortada no fim da 1ª rodada: vagas nas fases seguintes
   assert.deepEqual(colunas.map((c) => c.confrontos.length), [8, 4, 2, 1]);
   assert.ok(colunas[0].confrontos.every(Boolean));
 });
+
+/* ---------- Copa NBA ---------- */
+
+test("copaNba 2025: 6 grupos de 5, tabela certa e Knicks campeões", () => {
+  const { jogos } = amostra("copa_nba_2025");
+  const leste = new Set(["1", "2", "17", "18", "20", "4", "5", "8", "11", "14", "15", "19", "27", "28", "30"]); // ids da ESPN da Conferência Leste
+  const { grupos, colunas } = Chave.copaNba(jogos, (id) => (leste.has(String(id)) ? "Leste" : "Oeste"));
+  assert.equal(grupos.length, 6);
+  assert.ok(grupos.every((g) => g.linhas.length === 5));
+  const todos = grupos.flatMap((g) => g.linhas.map((l) => l.time.id));
+  assert.equal(new Set(todos).size, 30, "cada time em um grupo só");
+  for (const g of grupos) {
+    const v = g.linhas.reduce((s, l) => s + l.v, 0);
+    const d = g.linhas.reduce((s, l) => s + l.d, 0);
+    assert.deepEqual([v, d], [10, 10], `${g.nome}: 10 jogos`);
+    const ordem = g.linhas.map((l) => [l.v, l.saldo]);
+    for (let i = 1; i < ordem.length; i++) assert.ok(ordem[i - 1][0] > ordem[i][0] || (ordem[i - 1][0] === ordem[i][0] && ordem[i - 1][1] >= ordem[i][1]), `${g.nome} em ordem`);
+  }
+  assert.deepEqual(grupos.map((g) => g.nome), ["Leste A", "Leste B", "Leste C", "Oeste A", "Oeste B", "Oeste C"]);
+  assert.deepEqual(colunas.map((c) => c.confrontos.length), [4, 2, 1]);
+  const final = colunas[2].confrontos[0];
+  assert.deepEqual(nomes(final).sort(), ["New York Knicks", "San Antonio Spurs"]);
+  assert.equal(final.lados.find((l) => l.passou).nome, "New York Knicks");
+  assert.equal(final.lados.find((l) => l.nome === "New York Knicks").placar, 124);
+});
+
+test("copaNba durante a fase de grupos: chave só com vagas", () => {
+  const jogos = amostra("copa_nba_2025").jogos.filter((j) => j.date < "2025-12-01");
+  const { grupos, colunas } = Chave.copaNba(jogos, () => null);
+  assert.ok(grupos.length >= 1);
+  assert.ok(grupos[0].nome.startsWith("Grupo"));
+  assert.deepEqual(colunas.map((c) => c.confrontos.length), [4, 2, 1]);
+  assert.ok(colunas.every((c) => c.confrontos.every((x) => x === null)));
+});

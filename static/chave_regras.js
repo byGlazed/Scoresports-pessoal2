@@ -173,7 +173,8 @@ const Chave = (() => {
       }
     }
     const estados = jogos.map(estadoDoJogo);
-    const americano = (serie && serie.type === "playoff") || Boolean(opcoes.serie);
+    // série de verdade (melhor de N): o placar é de vitórias; jogo único (Copa NBA, NFL) mostra o placar do jogo
+    const americano = (serie && serie.type === "playoff" && (serie.totalCompetitions || 0) > 1) || Boolean(opcoes.serie);
     // série melhor de N sem o resumo da ESPN (1ª rodada da MLS): passa quem chegou às vitórias
     const precisa = opcoes.vitoriasPara ? opcoes.vitoriasPara(fase) : null;
 
@@ -348,7 +349,87 @@ const Chave = (() => {
     return { playIn, colunas: montar({ fases, confrontos: lista, formato }) };
   }
 
+  /* ---------- Copa NBA ---------- */
+
+  const FASES_COPA_NBA = [
+    [/Championship|Final$/i, 3, "Final"],
+    [/Semifinal/i, 2, "Semifinal"],
+    [/Quarterfinal|Quartas/i, 1, "Quartas de final"],
+  ];
+
+  /**
+   * A Copa NBA: os grupos saem dos confrontos da fase de grupos (cada time só enfrenta os do próprio grupo),
+   * com V-D, saldo e pontos; e a chave das quartas até a final.
+   */
+  function copaNba(jogos, conferenciaDe = () => null) {
+    const daCopa = (jogos || []).filter((j) => /NBA Cup/i.test(notaDe(j) || ""));
+    const deGrupo = daCopa.filter((j) => /Group/i.test(notaDe(j) || ""));
+
+    // grupos: componentes conexos dos confrontos
+    const pai = {};
+    const raiz = (x) => (pai[x] === x ? x : (pai[x] = raiz(pai[x])));
+    const times = {};
+    for (const j of deGrupo) {
+      const ids = (competicao(j).competitors || []).map((c) => {
+        const t = time(c);
+        times[t.id] = t;
+        if (!(t.id in pai)) pai[t.id] = t.id;
+        return t.id;
+      });
+      if (ids.length === 2) pai[raiz(ids[0])] = raiz(ids[1]);
+    }
+    const porRaiz = {};
+    for (const id of Object.keys(pai)) (porRaiz[raiz(id)] = porRaiz[raiz(id)] || []).push(id);
+
+    const linhaDe = {};
+    for (const id of Object.keys(times)) linhaDe[id] = { time: times[id], v: 0, d: 0, saldo: 0, pontos: 0 };
+    for (const j of deGrupo) {
+      if (estadoDoJogo(j) !== 3) continue;
+      const cs = competicao(j).competitors || [];
+      if (cs.length !== 2) continue;
+      const [a, b] = cs.map((c) => ({ id: time(c).id, pts: num(c.score) || 0, venceu: Boolean(c.winner) }));
+      for (const [x, y] of [[a, b], [b, a]]) {
+        const l = linhaDe[x.id];
+        l.pontos += x.pts;
+        l.saldo += x.pts - y.pts;
+        if (x.venceu) l.v += 1;
+        else l.d += 1;
+      }
+    }
+    const menor = (ids) => Math.min(...ids.map(Number).filter(Number.isFinite));
+    let grupos = Object.values(porRaiz).map((ids) => {
+      const confs = ids.map((id) => conferenciaDe(id)).filter(Boolean);
+      const conferencia = confs.length ? confs.sort((x, y) => confs.filter((c) => c === y).length - confs.filter((c) => c === x).length)[0] : null;
+      const linhas = ids.map((id) => linhaDe[id]).sort((x, y) => y.v - x.v || y.saldo - x.saldo || y.pontos - x.pontos);
+      return { conferencia, menor: menor(ids), linhas };
+    });
+    grupos.sort((x, y) => (x.conferencia || "~").localeCompare(y.conferencia || "~") || x.menor - y.menor);
+    const letras = {};
+    grupos = grupos.map((g, i) => {
+      let nome;
+      if (g.conferencia) {
+        letras[g.conferencia] = (letras[g.conferencia] || 0) + 1;
+        nome = `${g.conferencia} ${String.fromCharCode(64 + letras[g.conferencia])}`;
+      } else {
+        nome = `Grupo ${i + 1}`;
+      }
+      return { nome, conferencia: g.conferencia, linhas: g.linhas };
+    });
+
+    // a chave: quartas, semifinal e final
+    const faseDe = (j) => {
+      const n = notaDe(j) || "";
+      if (/Group/i.test(n)) return null;
+      const f = FASES_COPA_NBA.find(([p]) => p.test(n));
+      return f ? f[1] : null;
+    };
+    const fases = [...FASES_COPA_NBA].reverse().map(([, ordem, nome]) => ({ type: ordem, slug: String(ordem), nome }));
+    const colunas = montar({ fases, confrontos: confrontos(daCopa, faseDe), formato: { 1: 4, 2: 2, 3: 1 } });
+    return { grupos, colunas };
+  }
+
   return {
+    copaNba,
     faseAmericana,
     playoffs,
     COM_CHAVE,
