@@ -241,3 +241,74 @@ test("FA Cup antes da 3ª rodada: nomes em inglês traduzidos e o formato da com
   assert.equal(Chave.formatoDe("bra.copa_do_brazil")["third-round"], undefined);
   assert.equal(Chave.formatoDe("uefa.champions")["knockout-round-playoffs"], 8);
 });
+
+/* ---------- Correções da revisão final ---------- */
+
+const copia = (x) => JSON.parse(JSON.stringify(x));
+
+test("MLS: fase de jogo único mostra o placar do jogo, não vitórias na série", () => {
+  const jogos = copia(amostra("mls_2026").jogos);
+  const wc = jogos.find((j) => /wild-card/.test(j.season.slug));
+  const comp = wc.competitions[0];
+  comp.status.type = { state: "post", completed: true, name: "STATUS_FULL_TIME" };
+  comp.competitors[0].score = "3";
+  comp.competitors[0].winner = true;
+  comp.competitors[1].score = "1";
+  const { colunas } = Chave.playoffs("mls", jogos);
+  const c = colunas[0].confrontos.find((x) => x && x.jogos.includes(String(wc.id)));
+  assert.deepEqual(c.lados.map((l) => l.placar).sort(), [1, 3]);
+  assert.equal(c.resumo, null);
+});
+
+test("Copa do Mundo: a disputa do 3º lugar fica fora da chave e a fase de 32 tem 16 vagas", () => {
+  const nomes = ["Group Stage", "Round of 32", "Round of 16", "Quarterfinals", "Semifinals", "3rd-Place Match", "Final"];
+  const tipos = nomes.map((name, i) => ({ type: 200 + i, name, startDate: `2026-06-${String(10 + i * 3).padStart(2, "0")}T00:00Z` }));
+  const jogos = [{ id: "x", date: "2026-07-18T20:00Z", season: { type: 205, slug: "3rd-place-match" }, competitions: [{ competitors: [] }] }];
+  const fases = Chave.fasesDoFutebol(tipos, jogos);
+  assert.deepEqual(fases.eliminatorias.map((f) => f.slug), ["round-of-32", "round-of-16", "quarterfinals", "semifinals", "final"]);
+  assert.equal(fases.terceiro.nome, "Disputa do 3º lugar");
+  const colunas = Chave.montar({ fases: fases.eliminatorias, confrontos: [], formato: Chave.formatoDe("fifa.world") });
+  assert.deepEqual(colunas.map((c) => c.confrontos.length), [16, 8, 4, 2, 1]);
+});
+
+test("vagas A definir x A definir de jogos diferentes não viram um confronto só", () => {
+  const { jogos } = amostra("copa_nba_2025");
+  const final = jogos.find((j) => /Championship/.test(j.competitions[0].notes[0].headline));
+  const quartas = [1, 2, 3, 4].map((n) => {
+    const j = copia(final);
+    j.id = `tbd${n}`;
+    j.competitions[0].notes = [{ headline: "NBA Cup - Quarterfinals" }];
+    j.competitions[0].status.type = { state: "pre", completed: false };
+    j.competitions[0].competitors.forEach((c, i) => {
+      c.team = { id: String(-1 - i), displayName: i ? "TBD Home" : "TBD Away" };
+      c.winner = false;
+    });
+    return j;
+  });
+  const { colunas } = Chave.copaNba(quartas, () => null);
+  assert.equal(colunas[0].confrontos.filter(Boolean).length, 4);
+});
+
+test("playoffs antes da 2ª rodada: Leste e Oeste separados e sem linhas inventadas para as vagas", () => {
+  const jogos = amostra("nba_2026").jogos.filter((j) => j.date < "2026-04-25");
+  const { colunas } = Chave.playoffs("nba", jogos);
+  assert.deepEqual(colunas[0].confrontos.map((c) => c.conferencia), ["Leste", "Leste", "Leste", "Leste", "Oeste", "Oeste", "Oeste", "Oeste"]);
+  assert.ok(colunas[1].confrontos.every((c) => c === null));
+  assert.ok(colunas[1].ligado.every((l) => l === false), "não se sabe quem enfrenta quem: sem linhas");
+  const completo = Chave.playoffs("nba", amostra("nba_2026").jogos).colunas;
+  assert.ok(completo[3].ligado[0], "um confronto real tem as suas linhas");
+});
+
+test("jogo adiado não conta como jogado", () => {
+  const { colunas } = Chave.playoffs("mlb", amostra("mlb_2026").jogos);
+  const todos = colunas.flatMap((c) => c.confrontos).filter(Boolean);
+  assert.ok(!todos.some((c) => c.jogos.includes("401908026")), "o jogo 4 adiado pela chuva fica de fora");
+  assert.ok(todos.every((c) => c.lados.some((l) => l.passou)), "toda série encerrada tem quem passou");
+});
+
+test("só a ida de um confronto de ida e volta: ninguém passou ainda", () => {
+  const ida = amostra("copa_do_brasil_2025").jogos.filter((j) => j.id === "755894");
+  const [c] = Chave.confrontos(ida);
+  assert.ok(c.lados.every((l) => !l.passou));
+  assert.notEqual(c.estado, 3);
+});

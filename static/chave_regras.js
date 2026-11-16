@@ -17,7 +17,7 @@ const Chave = (() => {
 
   // quantos confrontos tem cada fase quando ela não corta a anterior pela metade
   const FORMATOS = {
-    futebol: { "knockout-round-playoffs": 8, "round-of-16": 8 },
+    futebol: { "knockout-round-playoffs": 8, "round-of-32": 16, "round-of-16": 8 },
     // na FA Cup os clubes da Premier League entram na 3ª rodada: 64 times
     "eng.fa": { "third-round": 32, "fourth-round": 16, "fifth-round": 8 },
     nba: { 1: 8, 2: 4, 3: 2, 4: 1 },
@@ -52,7 +52,7 @@ const Chave = (() => {
     [/round-of-16|oitavas|round of 16/i, "Oitavas de final"],
     [/quarter|quartas/i, "Quartas de final"],
     [/semi/i, "Semifinal"],
-    [/third-place|terceiro/i, "Disputa do 3º lugar"],
+    [/third-place|3rd-place|3rd place|terceiro/i, "Disputa do 3º lugar"],
     [/^final|finals?$|final de jogo/i, "Final"],
     [/first-stage|first stage|1ª fase/i, "1ª fase"],
     [/second-stage|second stage|2ª fase/i, "2ª fase"],
@@ -65,6 +65,8 @@ const Chave = (() => {
   ];
 
   const SLUG_PELO_NOME = [
+    [/3rd[- ]place|third[- ]place|terceiro/i, "3rd-place-match"],
+    [/round of 32|16-?avos/i, "round-of-32"],
     [/first[- ]round|primeira rodada|1a\s+rodada/i, "first-round"],
     [/second[- ]round|segunda rodada|2a\s+rodada/i, "second-round"],
     [/third[- ]round|3a\s+rodada/i, "third-round"],
@@ -112,11 +114,16 @@ const Chave = (() => {
         if (!slug) slug = (SLUG_PELO_NOME.find(([p]) => p.test(t.name || "")) || [])[1] || null;
         return { type: t.type, slug, nome: nomeDaFase(slug, t.name), inicio: t.startDate || null, fim: t.endDate || null, grupo: ehGrupo({ ...t, slug }) };
       });
-    const ultimoGrupo = fases.map((f) => f.grupo).lastIndexOf(true);
+    // a disputa do 3º lugar não é uma fase da chave: fica à parte (embaixo da chave)
+    const ehTerceiro = (f) => /3rd-place|third-place/i.test(f.slug || "") || /3rd[- ]place|third[- ]place|terceiro/i.test(f.nome || "");
+    const terceiro = fases.find(ehTerceiro) || null;
+    const semTerceiro = fases.filter((f) => !ehTerceiro(f));
+    const ultimoGrupo = semTerceiro.map((f) => f.grupo).lastIndexOf(true);
     const limpa = ({ grupo, ...f }) => f;
     return {
-      preliminares: fases.slice(0, Math.max(ultimoGrupo, 0)).filter((f) => !f.grupo).map(limpa),
-      eliminatorias: fases.slice(ultimoGrupo + 1).filter((f) => !f.grupo).map(limpa),
+      preliminares: semTerceiro.slice(0, Math.max(ultimoGrupo, 0)).filter((f) => !f.grupo).map(limpa),
+      eliminatorias: semTerceiro.slice(ultimoGrupo + 1).filter((f) => !f.grupo).map(limpa),
+      terceiro: terceiro ? { ...limpa(terceiro), nome: "Disputa do 3º lugar" } : null,
     };
   }
 
@@ -124,8 +131,14 @@ const Chave = (() => {
 
   const competicao = (j) => (j.competitions || [{}])[0];
   const estadoDoJogo = (j) => {
-    const s = ((competicao(j).status || {}).type || {}).state;
-    return s === "in" ? 2 : s === "post" ? 3 : 1;
+    const tipo = (competicao(j).status || {}).type || {};
+    if (tipo.state === "in") return 2;
+    // "post" com completed false é adiado ou cancelado: não foi jogado
+    return tipo.state === "post" && tipo.completed !== false ? 3 : 1;
+  };
+  const adiadoOuCancelado = (j) => {
+    const tipo = (competicao(j).status || {}).type || {};
+    return /POSTPONED|CANCELED|CANCELLED|SUSPENDED/i.test(tipo.name || "") || (tipo.state === "post" && tipo.completed === false);
   };
   const num = (v) => {
     const n = Number(typeof v === "object" && v !== null ? v.value ?? v.displayValue : v);
@@ -146,14 +159,21 @@ const Chave = (() => {
       const cs = competicao(j).competitors || [];
       if (cs.length !== 2) continue;
       const fase = faseDe(j);
-      if (fase === null || fase === undefined) continue;
-      // a vaga "TBD" pode vir com um id diferente em cada jogo da mesma série: conta como um lado só
+      if (fase === null || fase === undefined || adiadoOuCancelado(j)) continue;
+      // a vaga "TBD" pode vir com um id diferente em cada jogo da mesma série: conta como um lado só;
+      // mas dois lados "TBD" são jogos diferentes (cada um é um confronto)
+      const tbds = cs.filter((c) => time(c).aDefinir).length;
       const ids = cs.map((c) => (time(c).aDefinir ? "tbd" : time(c).id)).sort();
-      const chave = `${fase}|${ids.join("|")}`;
+      const grupo = opcoes.grupoDe ? opcoes.grupoDe(j) || "" : "";
+      const chave = tbds === 2 ? `${fase}|jogo:${j.id}` : `${fase}|${grupo}|${ids.join("|")}`;
       if (!grupos.has(chave)) grupos.set(chave, { fase, jogos: [] });
       grupos.get(chave).jogos.push(j);
     }
-    return [...grupos.values()].map(({ fase, jogos: lista }) => montarConfronto(fase, lista, opcoes));
+    return [...grupos.values()].map(({ fase, jogos: lista }) => {
+      const c = montarConfronto(fase, lista, opcoes);
+      if (opcoes.grupoDe) c.conferencia = opcoes.grupoDe(lista[0]) || null;
+      return c;
+    });
   }
 
   function montarConfronto(fase, jogos, opcoes = {}) {
@@ -187,7 +207,8 @@ const Chave = (() => {
     }
     const estados = jogos.map(estadoDoJogo);
     // série de verdade (melhor de N): o placar é de vitórias; jogo único (Copa NBA, NFL) mostra o placar do jogo
-    const americano = (serie && serie.type === "playoff" && (serie.totalCompetitions || 0) > 1) || Boolean(opcoes.serie);
+    const serieOpcao = typeof opcoes.serie === "function" ? opcoes.serie(fase) : opcoes.serie;
+    const americano = (serie && serie.type === "playoff" && (serie.totalCompetitions || 0) > 1) || Boolean(serieOpcao);
     // série melhor de N sem o resumo da ESPN (1ª rodada da MLS): passa quem chegou às vitórias
     const precisa = opcoes.vitoriasPara ? opcoes.vitoriasPara(fase) : null;
 
@@ -202,7 +223,7 @@ const Chave = (() => {
       }
     } else if (precisa && lados.some((l) => l.vitorias >= precisa)) {
       passouId = lados.find((l) => l.vitorias >= precisa).id;
-    } else if (jogos.length === 1 && estados[0] === 3) {
+    } else if (jogos.length === 1 && estados[0] === 3 && (!serie || (serie.totalCompetitions || 1) <= 1)) {
       const venc = primeiro.competitors.find((c) => c.winner);
       if (venc) passouId = time(venc).id;
     }
@@ -240,7 +261,12 @@ const Chave = (() => {
    * (os confrontos de onde vieram seus lados), e assim por diante. Vagas (null) completam as fases futuras.
    */
   function montar({ fases, confrontos: lista, formato = {} }) {
-    const porFase = fases.map((f) => (lista || []).filter((c) => c.fase === f.type).sort((a, b) => (a.primeiraData || "").localeCompare(b.primeiraData || "")));
+    // em cada fase: por conferência (Leste antes de Oeste), depois pela data do primeiro jogo
+    const porFase = fases.map((f) =>
+      (lista || [])
+        .filter((c) => c.fase === f.type)
+        .sort((a, b) => (a.conferencia || "").localeCompare(b.conferencia || "") || (a.primeiraData || "").localeCompare(b.primeiraData || ""))
+    );
 
     // quantidade de cada coluna: o formato conhecido, senão metade da anterior
     const tamanhos = [];
@@ -269,7 +295,8 @@ const Chave = (() => {
     const colunas = fases.map((fase, k) => {
       const confrontosDaColuna = ordenadas[k].slice();
       while (confrontosDaColuna.length < tamanhos[k]) confrontosDaColuna.push(null);
-      return { fase, nome: fase.nome, confrontos: confrontosDaColuna, alimenta: confrontosDaColuna.map(() => []) };
+      // ligado: a linha só é desenhada quando o confronto existe (com vaga, ninguém sabe quem enfrenta quem)
+      return { fase, nome: fase.nome, confrontos: confrontosDaColuna, alimenta: confrontosDaColuna.map(() => []), ligado: confrontosDaColuna.map((c) => Boolean(c)) };
     });
 
     // quem alimenta quem: confrontos reais pelos times; vagas pelos que sobraram, de dois em dois (ou um a um)
@@ -359,8 +386,13 @@ const Chave = (() => {
       return f ? f.ordem : null;
     };
     const lista = confrontos(jogos, faseDe, {
-      serie: esporte === "mls" ? true : undefined,
+      // na MLS só a 1ª rodada é série (melhor de 3); o resto é jogo único
+      serie: esporte === "mls" ? (ordem) => ordem === 1 : undefined,
       vitoriasPara: esporte === "mls" ? (ordem) => (ordem === 1 ? 2 : null) : null,
+      grupoDe: (j) => {
+        const f = faseAmericana(esporte, notaDe(j), (j.season || {}).slug);
+        return f ? f.conferencia : null;
+      },
     });
     const formato = FORMATOS[esporte] || {};
     const fases = Object.keys(formato)

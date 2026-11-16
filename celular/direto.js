@@ -2043,9 +2043,9 @@ async function chaveDaTemporada(esporte, liga, ano) {
   else if (mls) alvo = tipos.filter((t) => /playoff|wild card|mls cup/i.test(`${t.name} ${t.abbreviation}`));
   else {
     const f = Chave.fasesDoFutebol(tipos, []);
-    alvo = [...f.preliminares, ...f.eliminatorias].map((fase) => tipos.find((t) => t.type === fase.type)).filter(Boolean);
+    alvo = [...f.preliminares, ...f.eliminatorias, ...(f.terceiro ? [f.terceiro] : [])].map((fase) => tipos.find((t) => t.type === fase.type)).filter(Boolean);
   }
-  const vazio = { temporada: { ano, rotulo: await rotuloDaTemporada(cfg.esporte, liga, ano) }, comecou: false, preliminares: [], playIn: [], colunas: [], jogos: {} };
+  const vazio = { temporada: { ano, rotulo: await rotuloDaTemporada(cfg.esporte, liga, ano) }, comecou: false, preliminares: [], playIn: [], colunas: [], depois: [], jogos: {} };
   if (!alvo.length) return vazio;
   const inicio = alvo.map((t) => t.startDate).sort()[0];
   const fim = alvo.map((t) => t.endDate).sort().slice(-1)[0];
@@ -2057,6 +2057,7 @@ async function chaveDaTemporada(esporte, liga, ano) {
 
   let preliminares = [];
   let playIn = [];
+  let depois = [];
   let colunas;
   if (PLAYOFFS_POR_TIPO[esporte] || mls) {
     const r = Chave.playoffs(mls ? "mls" : esporte, eventos);
@@ -2073,6 +2074,10 @@ async function chaveDaTemporada(esporte, liga, ano) {
     ].filter((p) => p.confrontos.length);
     colunas = todas.slice(ini);
     if (colunas.length) colunas[0] = { ...colunas[0], alimenta: colunas[0].confrontos.map(() => []) };
+    if (fases.terceiro) {
+      const doTerceiro = lista.filter((c) => c.fase === fases.terceiro.type);
+      if (doTerceiro.length) depois = [{ nome: fases.terceiro.nome, confrontos: doTerceiro }];
+    }
   }
   const agora = new Date().toISOString();
   const jogos = {};
@@ -2083,7 +2088,7 @@ async function chaveDaTemporada(esporte, liga, ano) {
       /* jogo sem dados suficientes: fica só no cartão */
     }
   }
-  return { ...vazio, comecou: eventos.some((ev) => (ev.date || "") <= agora), preliminares, playIn, colunas, jogos };
+  return { ...vazio, comecou: eventos.some((ev) => (ev.date || "") <= agora), preliminares, playIn, colunas, depois, jogos };
 }
 
 /** A chave da temporada pedida; sem pedido, a atual se o mata-mata dela já começou, senão a anterior. */
@@ -2170,8 +2175,9 @@ const ROTAS = [
     return { ...r, hoje: hojeEmBR() };
   }],
   [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v1:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3)],
-  [/^\/e\/nba\/nba\/copa$/, (m, q) => viaEspn(`espn_copa_nba_v1:${q.temporada || "atual"}`, 120, () => buscarCopaNba(q.temporada ? Number(q.temporada) : null), chaveEstavel)],
-  [/^\/e\/([^/]+)\/([^/]+)\/chave$/, (m, q) => viaEspn(`espn_chave_v1:${m[1]}:${m[2]}:${q.temporada || "atual"}`, 120, () => buscarChave(m[1], m[2], q.temporada ? Number(q.temporada) : null), chaveEstavel)],
+  // a temporada "atual" nunca é guardada por muito tempo: quando o mata-mata novo começar, ela tem de trocar
+  [/^\/e\/nba\/nba\/copa$/, (m, q) => viaEspn(`espn_copa_nba_v1:${q.temporada || "atual"}`, 120, () => buscarCopaNba(q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
+  [/^\/e\/([^/]+)\/([^/]+)\/chave$/, (m, q) => viaEspn(`espn_chave_v1:${m[1]}:${m[2]}:${q.temporada || "atual"}`, 120, () => buscarChave(m[1], m[2], q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
   [/^\/e\/([^/]+)\/([^/]+)\/classificacao$/, (m) => viaEspn(`espn_classificacao_v1:${m[1]}:${m[2]}`, 1800, () => buscarClassificacao(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)$/, (m) => viaEspn(`espn_time_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarTime(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/jogos$/, (m) => viaEspn(`espn_time_jogos_v1:${m[1]}:${m[2]}:${m[3]}`, 900, () => buscarJogosTime(m[1], m[2], m[3]))],

@@ -102,6 +102,7 @@ function desenharChave(colunas, { aoTocar }) {
   colunas.forEach((col, k) => {
     if (k === 0) return;
     col.alimenta.forEach((feeders, i) => {
+      if (col.ligado && !col.ligado[i]) return; // vaga: ainda não se sabe quem enfrenta quem
       const y2 = topo(k, i) + M.cartao / 2;
       const x2 = esquerda(k);
       for (const j of feeders) {
@@ -201,8 +202,9 @@ async function chaveLista(esp, liga, silencioso) {
   for (const p of r.preliminares) partes.push(listaDeFase(p.nome, p.confrontos, abrir));
   if (r.colunas.length) partes.push(desenharChave(r.colunas, { aoTocar: abrir }));
   else partes.push(vazio("A ESPN ainda não tem o mata-mata desta temporada."));
+  for (const p of r.depois || []) partes.push(listaDeFase(p.nome, p.confrontos, abrir));
   trocarConteudo(partes);
-  const listas = [...r.colunas.map((c) => c.confrontos), r.playIn, ...r.preliminares.map((p) => p.confrontos)];
+  const listas = [...r.colunas.map((c) => c.confrontos), r.playIn, ...r.preliminares.map((p) => p.confrontos), ...(r.depois || []).map((p) => p.confrontos)];
   if (temAoVivo(listas)) agendar("lista", () => chaveLista(esp, liga, true), 20000);
 }
 
