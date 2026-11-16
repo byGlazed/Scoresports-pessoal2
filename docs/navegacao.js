@@ -379,6 +379,8 @@ registrarPagina("liga", {
     if (!esp) return null;
     if (esp.ligas.length) estadoDe(esp.id).liga = params.liga;
     restaurarDia(esp, p.dia);
+    if (params.aba === "chave" && esp.tipo === "partidas") return chaveLista(esp, params.liga, true);
+    if (params.aba === "copa" && esp.tipo === "partidas") return copaNbaLista(esp, true);
     if (params.aba !== "jogos") return null;
     if (esp.tipo === "nba") return NBA.datas ? nbaDia(true) : null;
     if (esp.tipo !== "partidas") return null;
@@ -393,7 +395,7 @@ registrarPagina("liga", {
       return;
     }
     const modulo = MODULOS[esp.tipo];
-    const abas = modulo.abas(esp);
+    const abas = modulo.abas(esp, params.liga);
     if (!abas.some((a) => a.id === params.aba)) params.aba = abas[0].id;
     const area = h("div", { class: "area-liga" });
     p.alvo = area;

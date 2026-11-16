@@ -10,6 +10,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - No estilo do Sofascore e do Flashscore: uma **barra embaixo** com **Jogos**, **Favoritos** e **Pesquisa**, e cada coisa que você abre (partida, time, competição, atleta, boxeador, evento) vira uma **página com voltar**.
 - **Jogos:** a tela inicial mostra só os jogos do dia. Os **chips** no topo escolhem o esporte (Todos, Futebol, NBA, NFL, MLB, NHL, F1, UFC, Boxe). Em "Todos", os jogos de todos os esportes aparecem juntos, agrupados por competição, com os que estão **ao vivo primeiro**. Se um esporte não carregar, só ele mostra o aviso, com um botão para tentar de novo.
 - **Competição:** tocar no nome dela abre a página da liga, com as abas **Classificação**, Jogos e Líderes (no futebol, Artilharia e cartões). Na F1 são Calendário e Classificação; no UFC, Eventos e Ranking.
+- **Chaveamento (no app):** nas copas e competições com mata-mata (Copa do Brasil, Libertadores, Champions, FA Cup, Copa do Mundo…) a página da liga ganha a aba **Mata-mata**, e na NBA, NFL, MLB, NHL e MLS a aba **Playoffs**: a chave em colunas, arrastando para os lados, com as linhas ligando quem passa, o agregado da ida e volta, os pênaltis, as vitórias na série e quem está ao vivo. Tocar num confronto abre o jogo (ou os jogos de ida e volta e da série). As fases preliminares e o Play-In da NBA ficam numa lista acima da chave. Se o mata-mata desta temporada ainda não começou, aparece o da anterior, com um botão para trocar.
 - **Voltar:** cada aba guarda as suas páginas. Trocar de aba e voltar mantém onde você estava; tocar na aba de novo volta ao começo dela. No Android, o botão voltar volta uma página por vez e só sai do app no começo da aba Jogos. Cada página tem um endereço próprio (por exemplo `#/liga/futebol/bra.1/classificacao`), então recarregar mantém a página aberta.
 - **Faixa de dias** com ontem, hoje e amanhã, setas e calendário. Na NBA e numa competição escolhida, os dias sem jogo ficam apagados.
 - **Filtros** Todos, Ao vivo, Encerrados e Próximos, com a contagem de cada um.
@@ -32,6 +33,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
   - *Arremessos no jogo:* mapa de acertos e erros na quadra.
 - **Busca de jogadores:** toda a história da NBA, aposentados incluídos.
 - **Classificação, líderes da temporada e corridas pelo MVP e pelo calouro do ano.**
+- **Copa NBA (no app):** os 6 grupos com vitórias, derrotas e saldo, e a chave das quartas até a final.
 - **No app e na pasta `docs/`:** box score com titulares, reservas e totais, **ordenável por qualquer estatística** (toque no nome da coluna), e **mapa de arremessos** de cada time e de cada jogador, em escala real, com os dados da ESPN.
 
 ### Futebol e NFL
@@ -185,6 +187,8 @@ Scoresports-pessoal2/
     ├── nba_quadra.js   # NBA: box score, arremessos e desenho da quadra (PC e app)
     ├── inicio.js       # abas Favoritos e Pesquisa
     ├── navegacao.js    # barra de baixo, páginas com voltar, aba Jogos e página da liga
+    ├── chave_regras.js # regras da chave: fases, confrontos (ida e volta, séries), ordem e posições, Copa NBA
+    ├── chave.js        # a chave em colunas, a aba Mata-mata/Playoffs e a aba Copa NBA (só no app)
     └── fontes/         # fonte Inter (licença SIL OFL)
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
