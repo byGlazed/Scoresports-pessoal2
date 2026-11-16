@@ -21,7 +21,7 @@ from pathlib import Path
 RAIZ = Path(__file__).parent
 DOCS = RAIZ / "docs"
 APK_WWW = RAIZ / "android" / "app" / "src" / "main" / "assets" / "www"
-TELAS = ("nba_quadra.js", "rotas.js", "app.js", "esportes.js", "busca_regras.js", "inicio.js", "chave_regras.js", "navegacao.js", "style.css")
+TELAS = ("nba_quadra.js", "rotas.js", "app.js", "esportes.js", "busca_regras.js", "inicio.js", "chave_regras.js", "navegacao.js", "chave.js", "style.css")
 DADOS = ("transmissoes.json", "boxe_eventos.json", "campeoes.json")
 APK_MINIMO = RAIZ / "celular" / "apk_minimo.txt"  # menor versionCode de APK que as telas atuais aceitam
 

@@ -1182,6 +1182,57 @@ select.campo-data { cursor: pointer; }
 .resumo-arremessos { font-weight: 600; margin: 4px 0; }
 .info-arremesso { font-size: 13px; color: var(--texto-2); min-height: 18px; margin: 0 0 6px; }
 
+/* ---------- Chave (mata-mata e playoffs) ---------- */
+.chave-cabeca { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 0 10px; }
+.chave-rolagem { overflow-x: auto; margin: 0 -12px; padding: 4px 12px 12px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.chave { position: relative; }
+.chave-linhas { position: absolute; inset: 0; pointer-events: none; }
+.chave-linhas path { fill: none; stroke: var(--linha); stroke-width: 1.5; }
+.chave-fase {
+  position: absolute;
+  top: 0;
+  width: 168px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.confronto-chave {
+  position: absolute;
+  width: 168px;
+  height: 72px;
+  display: grid;
+  align-content: center;
+  gap: 1px;
+  padding: 4px 8px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  box-shadow: var(--sombra);
+}
+button.confronto-chave:hover { border-color: var(--texto-3); }
+.confronto-chave.ao-vivo { border-color: var(--ao-vivo); box-shadow: inset 3px 0 0 var(--ao-vivo); }
+.confronto-chave.vaga { place-items: center; border-style: dashed; box-shadow: none; color: var(--texto-3); font-size: 0.8125rem; background: transparent; }
+.chave-lado { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: 6px; font-size: 0.8125rem; line-height: 1.25; }
+.chave-lado img { width: 20px; height: 20px; object-fit: contain; }
+.chave-lado .nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chave-lado .placar { font-weight: 700; font-variant-numeric: tabular-nums; }
+.chave-lado.passou { font-weight: 700; }
+.chave-lado.saiu { color: var(--texto-3); }
+.chave-resumo { font-size: 0.6875rem; color: var(--texto-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.confronto-chave.ao-vivo .chave-resumo { color: var(--ao-vivo); font-weight: 700; }
+.chave-lista { margin-bottom: 10px; }
+.chave-lista summary { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 14px; font-weight: 700; cursor: pointer; }
+.linha-confronto { display: grid; gap: 2px; width: 100%; padding: 8px 14px; border: 0; border-top: 1px solid var(--linha); background: none; color: inherit; font: inherit; text-align: left; }
+.linha-confronto:hover { background: var(--superficie-2); }
+
 /* ---------- Aviso de APK novo ---------- */
 .aviso-apk {
   position: fixed;
