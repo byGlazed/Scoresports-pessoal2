@@ -157,7 +157,8 @@ const Chave = (() => {
     let serie = null;
     for (const j of jogos) {
       const comp = competicao(j);
-      if (comp.series) serie = comp.series;
+      // a ESPN às vezes pendura num jogo a série de outra competição entre os mesmos times (Copa NBA x Finais)
+      if (comp.series && !opcoes.ignorarSerie) serie = comp.series;
       const encerrado = estadoDoJogo(j) === 3;
       for (const c of comp.competitors || []) {
         const l = lado(c);
@@ -424,7 +425,7 @@ const Chave = (() => {
       return f ? f[1] : null;
     };
     const fases = [...FASES_COPA_NBA].reverse().map(([, ordem, nome]) => ({ type: ordem, slug: String(ordem), nome }));
-    const colunas = montar({ fases, confrontos: confrontos(daCopa, faseDe), formato: { 1: 4, 2: 2, 3: 1 } });
+    const colunas = montar({ fases, confrontos: confrontos(daCopa, faseDe, { ignorarSerie: true }), formato: { 1: 4, 2: 2, 3: 1 } });
     return { grupos, colunas };
   }
 
