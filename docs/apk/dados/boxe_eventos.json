@@ -1,5 +1,5 @@
 {
-  "_como_usar": "O boxe não tem uma liga única nem uma fonte de dados aberta, então a agenda fica neste arquivo. Cada item de 'eventos' é uma noite de lutas. 'inicio' é o horário do card principal em Brasília (deixe null se ainda não saiu). 'lutas' vai da principal para a menos importante. Depois da luta, preencha 'vencedor' e 'resultado' (ex.: 'Nocaute técnico no 7º round', 'Decisão unânime'). Salve e atualize a página.",
+  "_como_usar": "O boxe não tem uma liga única nem uma fonte de dados aberta, então a agenda fica neste arquivo. Cada item de 'eventos' é uma noite de lutas. 'inicio' é o horário do card principal em Brasília (deixe null se ainda não saiu). 'lutas' vai da principal para a menos importante. Depois da luta, preencha 'vencedor' e 'resultado' (ex.: 'Nocaute técnico no 7º round', 'Decisão unânime'). Salve e atualize a página. O robô acrescenta as lutas grandes que têm artigo na Wikipédia e completa os resultados.",
   "eventos": [
     {
       "id": "2026-11-12-orobio-cedeno",
@@ -7,9 +7,20 @@
       "inicio": "2026-11-12T19:30:00-03:00",
       "nome": "Jhon Orobio x Hendri Cedeno",
       "local": "Montreal, Canadá",
-      "canais": ["DAZN"],
+      "canais": [
+        "DAZN"
+      ],
       "lutas": [
-        {"lutadores": ["Jhon Orobio", "Hendri Cedeno"], "categoria": "", "titulo": "", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Jhon Orobio",
+            "Hendri Cedeno"
+          ],
+          "categoria": "",
+          "titulo": "",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -18,9 +29,20 @@
       "inicio": "2026-11-14T16:00:00-03:00",
       "nome": "Viddal Riley x Seydi Coupe",
       "local": "Londres, Inglaterra",
-      "canais": ["DAZN"],
+      "canais": [
+        "DAZN"
+      ],
       "lutas": [
-        {"lutadores": ["Viddal Riley", "Seydi Coupe"], "categoria": "Cruzador", "titulo": "Cinturão europeu dos cruzadores", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Viddal Riley",
+            "Seydi Coupe"
+          ],
+          "categoria": "Cruzador",
+          "titulo": "Cinturão europeu dos cruzadores",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -29,9 +51,20 @@
       "inicio": "2026-11-14T21:00:00-03:00",
       "nome": "Diego Pacheco x Darius Fulghum",
       "local": "",
-      "canais": ["DAZN"],
+      "canais": [
+        "DAZN"
+      ],
       "lutas": [
-        {"lutadores": ["Diego Pacheco", "Darius Fulghum"], "categoria": "Supermédio", "titulo": "12 rounds", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Diego Pacheco",
+            "Darius Fulghum"
+          ],
+          "categoria": "Supermédio",
+          "titulo": "12 rounds",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -40,9 +73,20 @@
       "inicio": "2026-11-20T22:00:00-03:00",
       "nome": "Amari Jones x DeAundre Pettus",
       "local": "Indio, Califórnia (EUA)",
-      "canais": ["DAZN"],
+      "canais": [
+        "DAZN"
+      ],
       "lutas": [
-        {"lutadores": ["Amari Jones", "DeAundre Pettus"], "categoria": "Médio", "titulo": "12 rounds", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Amari Jones",
+            "DeAundre Pettus"
+          ],
+          "categoria": "Médio",
+          "titulo": "12 rounds",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -51,9 +95,20 @@
       "inicio": "2026-11-28T15:00:00-03:00",
       "nome": "Agit Kabayel x Nelson Hysa",
       "local": "",
-      "canais": ["DAZN"],
+      "canais": [
+        "DAZN"
+      ],
       "lutas": [
-        {"lutadores": ["Agit Kabayel", "Nelson Hysa"], "categoria": "Pesado", "titulo": "Cinturão dos pesados do CMB (WBC)", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Agit Kabayel",
+            "Nelson Hysa"
+          ],
+          "categoria": "Pesado",
+          "titulo": "Cinturão dos pesados do CMB (WBC)",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -62,9 +117,20 @@
       "inicio": null,
       "nome": "Adam Azim x Gabriel Gollaz Valenzuela",
       "local": "Londres, Inglaterra",
-      "canais": ["DAZN"],
+      "canais": [
+        "DAZN"
+      ],
       "lutas": [
-        {"lutadores": ["Adam Azim", "Gabriel Gollaz Valenzuela"], "categoria": "Superleve", "titulo": "", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Adam Azim",
+            "Gabriel Gollaz Valenzuela"
+          ],
+          "categoria": "Superleve",
+          "titulo": "",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -73,9 +139,20 @@
       "inicio": "2026-12-05T22:00:00-03:00",
       "nome": "David Benavidez x Michal Cieslak",
       "local": "Glendale, Arizona (EUA)",
-      "canais": ["DAZN (pay-per-view)"],
+      "canais": [
+        "DAZN (pay-per-view)"
+      ],
       "lutas": [
-        {"lutadores": ["David Benavidez", "Michal Cieslak"], "categoria": "Cruzador", "titulo": "Unificação AMB, OMB e CMB (WBA, WBO e WBC)", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "David Benavidez",
+            "Michal Cieslak"
+          ],
+          "categoria": "Cruzador",
+          "titulo": "Unificação AMB, OMB e CMB (WBA, WBO e WBC)",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -84,9 +161,20 @@
       "inicio": "2026-12-05T16:00:00-03:00",
       "nome": "Conah Walker x Alexis Rocha",
       "local": "Wolverhampton, Inglaterra",
-      "canais": ["DAZN"],
+      "canais": [
+        "DAZN"
+      ],
       "lutas": [
-        {"lutadores": ["Conah Walker", "Alexis Rocha"], "categoria": "Meio-médio", "titulo": "", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Conah Walker",
+            "Alexis Rocha"
+          ],
+          "categoria": "Meio-médio",
+          "titulo": "",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -95,9 +183,40 @@
       "inicio": null,
       "nome": "Tyson Fury x Anthony Joshua",
       "local": "Principality Stadium, Cardiff (País de Gales)",
-      "canais": ["Netflix"],
+      "canais": [
+        "Netflix"
+      ],
       "lutas": [
-        {"lutadores": ["Tyson Fury", "Anthony Joshua"], "categoria": "Pesado", "titulo": "", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Tyson Fury",
+            "Anthony Joshua"
+          ],
+          "categoria": "Pesado",
+          "titulo": "",
+          "vencedor": null,
+          "resultado": null
+        }
+      ]
+    },
+    {
+      "id": "2026-12-13-tszyu-lara",
+      "data": "2026-12-13",
+      "inicio": null,
+      "nome": "Tim Tszyu x Erislandy Lara",
+      "local": "Cbus Super Stadium, Gold Coast, Queensland, Australia",
+      "canais": [],
+      "lutas": [
+        {
+          "lutadores": [
+            "Tim Tszyu",
+            "Erislandy Lara"
+          ],
+          "categoria": "",
+          "titulo": "WBA middleweight title WBA (Regular) super-featherweight title",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -106,9 +225,20 @@
       "inicio": "2026-12-19T16:00:00-03:00",
       "nome": "Anthony Cacace x Nick Ball",
       "local": "The O2, Belfast (Irlanda do Norte)",
-      "canais": ["DAZN"],
+      "canais": [
+        "DAZN"
+      ],
       "lutas": [
-        {"lutadores": ["Anthony Cacace", "Nick Ball"], "categoria": "Superpena", "titulo": "Cinturão dos superpenas da AMB (WBA)", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Anthony Cacace",
+            "Nick Ball"
+          ],
+          "categoria": "Superpena",
+          "titulo": "Cinturão dos superpenas da AMB (WBA)",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     },
     {
@@ -117,9 +247,20 @@
       "inicio": "2026-12-19T22:00:00-03:00",
       "nome": "Devin Haney x Liam Paro",
       "local": "Chase Center, San Francisco (EUA)",
-      "canais": ["DAZN (pay-per-view)"],
+      "canais": [
+        "DAZN (pay-per-view)"
+      ],
       "lutas": [
-        {"lutadores": ["Devin Haney", "Liam Paro"], "categoria": "Meio-médio", "titulo": "Unificação OMB e FIB (WBO e IBF)", "vencedor": null, "resultado": null}
+        {
+          "lutadores": [
+            "Devin Haney",
+            "Liam Paro"
+          ],
+          "categoria": "Meio-médio",
+          "titulo": "Unificação OMB e FIB (WBO e IBF)",
+          "vencedor": null,
+          "resultado": null
+        }
       ]
     }
   ]

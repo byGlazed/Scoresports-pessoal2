@@ -1,156 +1,581 @@
 {
   "_como_usar": "Últimos campeões de cada competição, do mais recente para o mais antigo. A chave é o esporte (nba, nfl, f1) ou 'futebol:<liga>'. Quando sair um campeão novo, acrescente uma linha no topo da lista. Conferido em 10/11/2026.",
   "nba": [
-    {"temporada": "2025-26", "campeao": "New York Knicks", "vice": "San Antonio Spurs"},
-    {"temporada": "2024-25", "campeao": "Oklahoma City Thunder"},
-    {"temporada": "2023-24", "campeao": "Boston Celtics"},
-    {"temporada": "2022-23", "campeao": "Denver Nuggets"},
-    {"temporada": "2021-22", "campeao": "Golden State Warriors"}
+    {
+      "temporada": "2025-26",
+      "campeao": "New York Knicks",
+      "vice": "San Antonio Spurs"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Oklahoma City Thunder"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Boston Celtics"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Denver Nuggets"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Golden State Warriors"
+    }
   ],
   "nfl": [
-    {"temporada": "2025 (Super Bowl LX)", "campeao": "Seattle Seahawks", "vice": "New England Patriots"},
-    {"temporada": "2024 (Super Bowl LIX)", "campeao": "Philadelphia Eagles"},
-    {"temporada": "2023 (Super Bowl LVIII)", "campeao": "Kansas City Chiefs"},
-    {"temporada": "2022 (Super Bowl LVII)", "campeao": "Kansas City Chiefs"},
-    {"temporada": "2021 (Super Bowl LVI)", "campeao": "Los Angeles Rams"}
+    {
+      "temporada": "2025 (Super Bowl LX)",
+      "campeao": "Seattle Seahawks",
+      "vice": "New England Patriots"
+    },
+    {
+      "temporada": "2024 (Super Bowl LIX)",
+      "campeao": "Philadelphia Eagles"
+    },
+    {
+      "temporada": "2023 (Super Bowl LVIII)",
+      "campeao": "Kansas City Chiefs"
+    },
+    {
+      "temporada": "2022 (Super Bowl LVII)",
+      "campeao": "Kansas City Chiefs"
+    },
+    {
+      "temporada": "2021 (Super Bowl LVI)",
+      "campeao": "Los Angeles Rams"
+    }
   ],
   "mlb": [
-    {"temporada": "2026", "campeao": "Milwaukee Brewers", "vice": "Tampa Bay Rays"},
-    {"temporada": "2025", "campeao": "Los Angeles Dodgers"},
-    {"temporada": "2024", "campeao": "Los Angeles Dodgers"},
-    {"temporada": "2023", "campeao": "Texas Rangers"},
-    {"temporada": "2022", "campeao": "Houston Astros"}
+    {
+      "temporada": "2026",
+      "campeao": "Milwaukee Brewers",
+      "vice": "Tampa Bay Rays"
+    },
+    {
+      "temporada": "2025",
+      "campeao": "Los Angeles Dodgers"
+    },
+    {
+      "temporada": "2024",
+      "campeao": "Los Angeles Dodgers"
+    },
+    {
+      "temporada": "2023",
+      "campeao": "Texas Rangers"
+    },
+    {
+      "temporada": "2022",
+      "campeao": "Houston Astros"
+    }
   ],
   "nhl": [
-    {"temporada": "2025-26", "campeao": "Carolina Hurricanes", "vice": "Vegas Golden Knights"},
-    {"temporada": "2024-25", "campeao": "Florida Panthers"},
-    {"temporada": "2023-24", "campeao": "Florida Panthers"},
-    {"temporada": "2022-23", "campeao": "Vegas Golden Knights"},
-    {"temporada": "2021-22", "campeao": "Colorado Avalanche"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Carolina Hurricanes",
+      "vice": "Vegas Golden Knights"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Florida Panthers"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Florida Panthers"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Vegas Golden Knights"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Colorado Avalanche"
+    }
   ],
   "f1": [
-    {"temporada": "2025", "campeao": "Lando Norris", "extra": "Construtores: McLaren"},
-    {"temporada": "2024", "campeao": "Max Verstappen", "extra": "Construtores: McLaren"},
-    {"temporada": "2023", "campeao": "Max Verstappen", "extra": "Construtores: Red Bull"},
-    {"temporada": "2022", "campeao": "Max Verstappen", "extra": "Construtores: Red Bull"},
-    {"temporada": "2021", "campeao": "Max Verstappen", "extra": "Construtores: Mercedes"}
+    {
+      "temporada": "2025",
+      "campeao": "Lando Norris",
+      "extra": "Construtores: McLaren"
+    },
+    {
+      "temporada": "2024",
+      "campeao": "Max Verstappen",
+      "extra": "Construtores: McLaren"
+    },
+    {
+      "temporada": "2023",
+      "campeao": "Max Verstappen",
+      "extra": "Construtores: Red Bull"
+    },
+    {
+      "temporada": "2022",
+      "campeao": "Max Verstappen",
+      "extra": "Construtores: Red Bull"
+    },
+    {
+      "temporada": "2021",
+      "campeao": "Max Verstappen",
+      "extra": "Construtores: Mercedes"
+    }
   ],
   "futebol:bra.1": [
-    {"temporada": "2025", "campeao": "Flamengo"},
-    {"temporada": "2024", "campeao": "Botafogo"},
-    {"temporada": "2023", "campeao": "Palmeiras"},
-    {"temporada": "2022", "campeao": "Palmeiras"},
-    {"temporada": "2021", "campeao": "Atlético-MG"}
+    {
+      "temporada": "2025",
+      "campeao": "Flamengo"
+    },
+    {
+      "temporada": "2024",
+      "campeao": "Botafogo"
+    },
+    {
+      "temporada": "2023",
+      "campeao": "Palmeiras"
+    },
+    {
+      "temporada": "2022",
+      "campeao": "Palmeiras"
+    },
+    {
+      "temporada": "2021",
+      "campeao": "Atlético-MG"
+    }
   ],
   "futebol:bra.copa_do_brazil": [
-    {"temporada": "2025", "campeao": "Corinthians", "vice": "Vasco"},
-    {"temporada": "2024", "campeao": "Flamengo"},
-    {"temporada": "2023", "campeao": "São Paulo"},
-    {"temporada": "2022", "campeao": "Flamengo"},
-    {"temporada": "2021", "campeao": "Atlético-MG"}
+    {
+      "temporada": "2025",
+      "campeao": "Corinthians",
+      "vice": "Vasco"
+    },
+    {
+      "temporada": "2024",
+      "campeao": "Flamengo"
+    },
+    {
+      "temporada": "2023",
+      "campeao": "São Paulo"
+    },
+    {
+      "temporada": "2022",
+      "campeao": "Flamengo"
+    },
+    {
+      "temporada": "2021",
+      "campeao": "Atlético-MG"
+    }
   ],
   "futebol:conmebol.libertadores": [
-    {"temporada": "2025", "campeao": "Flamengo", "vice": "Palmeiras"},
-    {"temporada": "2024", "campeao": "Botafogo"},
-    {"temporada": "2023", "campeao": "Fluminense"},
-    {"temporada": "2022", "campeao": "Flamengo"},
-    {"temporada": "2021", "campeao": "Palmeiras"}
+    {
+      "temporada": "2025",
+      "campeao": "Flamengo",
+      "vice": "Palmeiras"
+    },
+    {
+      "temporada": "2024",
+      "campeao": "Botafogo"
+    },
+    {
+      "temporada": "2023",
+      "campeao": "Fluminense"
+    },
+    {
+      "temporada": "2022",
+      "campeao": "Flamengo"
+    },
+    {
+      "temporada": "2021",
+      "campeao": "Palmeiras"
+    }
   ],
   "futebol:conmebol.sudamericana": [
-    {"temporada": "2025", "campeao": "Lanús", "vice": "Atlético-MG"},
-    {"temporada": "2024", "campeao": "Racing"},
-    {"temporada": "2023", "campeao": "LDU Quito"},
-    {"temporada": "2022", "campeao": "Independiente del Valle"},
-    {"temporada": "2021", "campeao": "Athletico-PR"}
+    {
+      "temporada": "2025",
+      "campeao": "Lanús",
+      "vice": "Atlético-MG"
+    },
+    {
+      "temporada": "2024",
+      "campeao": "Racing"
+    },
+    {
+      "temporada": "2023",
+      "campeao": "LDU Quito"
+    },
+    {
+      "temporada": "2022",
+      "campeao": "Independiente del Valle"
+    },
+    {
+      "temporada": "2021",
+      "campeao": "Athletico-PR"
+    }
   ],
   "futebol:uefa.champions": [
-    {"temporada": "2025-26", "campeao": "Paris Saint-Germain", "vice": "Arsenal"},
-    {"temporada": "2024-25", "campeao": "Paris Saint-Germain"},
-    {"temporada": "2023-24", "campeao": "Real Madrid"},
-    {"temporada": "2022-23", "campeao": "Manchester City"},
-    {"temporada": "2021-22", "campeao": "Real Madrid"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Paris Saint-Germain",
+      "vice": "Arsenal"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Paris Saint-Germain"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Real Madrid"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Manchester City"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Real Madrid"
+    }
   ],
   "futebol:uefa.europa": [
-    {"temporada": "2025-26", "campeao": "Aston Villa", "vice": "Freiburg"},
-    {"temporada": "2024-25", "campeao": "Tottenham"},
-    {"temporada": "2023-24", "campeao": "Atalanta"},
-    {"temporada": "2022-23", "campeao": "Sevilla"},
-    {"temporada": "2021-22", "campeao": "Eintracht Frankfurt"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Aston Villa",
+      "vice": "Freiburg"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Tottenham"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Atalanta"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Sevilla"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Eintracht Frankfurt"
+    }
   ],
   "futebol:eng.1": [
-    {"temporada": "2025-26", "campeao": "Arsenal"},
-    {"temporada": "2024-25", "campeao": "Liverpool"},
-    {"temporada": "2023-24", "campeao": "Manchester City"},
-    {"temporada": "2022-23", "campeao": "Manchester City"},
-    {"temporada": "2021-22", "campeao": "Manchester City"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Arsenal"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Liverpool"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Manchester City"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Manchester City"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Manchester City"
+    }
   ],
   "futebol:esp.1": [
-    {"temporada": "2025-26", "campeao": "Barcelona"},
-    {"temporada": "2024-25", "campeao": "Barcelona"},
-    {"temporada": "2023-24", "campeao": "Real Madrid"},
-    {"temporada": "2022-23", "campeao": "Barcelona"},
-    {"temporada": "2021-22", "campeao": "Real Madrid"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Barcelona"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Barcelona"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Real Madrid"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Barcelona"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Real Madrid"
+    }
   ],
   "futebol:ita.1": [
-    {"temporada": "2025-26", "campeao": "Inter de Milão"},
-    {"temporada": "2024-25", "campeao": "Napoli"},
-    {"temporada": "2023-24", "campeao": "Inter de Milão"},
-    {"temporada": "2022-23", "campeao": "Napoli"},
-    {"temporada": "2021-22", "campeao": "Milan"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Inter de Milão"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Napoli"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Inter de Milão"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Napoli"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Milan"
+    }
   ],
   "futebol:ger.1": [
-    {"temporada": "2025-26", "campeao": "Bayern de Munique"},
-    {"temporada": "2024-25", "campeao": "Bayern de Munique"},
-    {"temporada": "2023-24", "campeao": "Bayer Leverkusen"},
-    {"temporada": "2022-23", "campeao": "Bayern de Munique"},
-    {"temporada": "2021-22", "campeao": "Bayern de Munique"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Bayern de Munique"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Bayern de Munique"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Bayer Leverkusen"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Bayern de Munique"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Bayern de Munique"
+    }
   ],
   "futebol:fra.1": [
-    {"temporada": "2025-26", "campeao": "Paris Saint-Germain"},
-    {"temporada": "2024-25", "campeao": "Paris Saint-Germain"},
-    {"temporada": "2023-24", "campeao": "Paris Saint-Germain"},
-    {"temporada": "2022-23", "campeao": "Paris Saint-Germain"},
-    {"temporada": "2021-22", "campeao": "Paris Saint-Germain"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Paris Saint-Germain"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Paris Saint-Germain"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Paris Saint-Germain"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Paris Saint-Germain"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Paris Saint-Germain"
+    }
   ],
   "futebol:por.1": [
-    {"temporada": "2025-26", "campeao": "Porto"},
-    {"temporada": "2024-25", "campeao": "Sporting"},
-    {"temporada": "2023-24", "campeao": "Sporting"},
-    {"temporada": "2022-23", "campeao": "Benfica"},
-    {"temporada": "2021-22", "campeao": "Porto"}
+    {
+      "temporada": "2025-26",
+      "campeao": "Porto"
+    },
+    {
+      "temporada": "2024-25",
+      "campeao": "Sporting"
+    },
+    {
+      "temporada": "2023-24",
+      "campeao": "Sporting"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Benfica"
+    },
+    {
+      "temporada": "2021-22",
+      "campeao": "Porto"
+    }
   ],
   "futebol:usa.1": [
-    {"temporada": "2025", "campeao": "Inter Miami", "vice": "Vancouver Whitecaps"},
-    {"temporada": "2024", "campeao": "LA Galaxy"},
-    {"temporada": "2023", "campeao": "Columbus Crew"},
-    {"temporada": "2022", "campeao": "Los Angeles FC"},
-    {"temporada": "2021", "campeao": "New York City FC"}
+    {
+      "temporada": "2025",
+      "campeao": "Inter Miami",
+      "vice": "Vancouver Whitecaps"
+    },
+    {
+      "temporada": "2024",
+      "campeao": "LA Galaxy"
+    },
+    {
+      "temporada": "2023",
+      "campeao": "Columbus Crew"
+    },
+    {
+      "temporada": "2022",
+      "campeao": "Los Angeles FC"
+    },
+    {
+      "temporada": "2021",
+      "campeao": "New York City FC"
+    }
   ],
   "futebol:fifa.world": [
-    {"temporada": "2026", "campeao": "Espanha", "vice": "Argentina"},
-    {"temporada": "2022", "campeao": "Argentina"},
-    {"temporada": "2018", "campeao": "França"},
-    {"temporada": "2014", "campeao": "Alemanha"},
-    {"temporada": "2010", "campeao": "Espanha"}
+    {
+      "temporada": "2026",
+      "campeao": "Espanha",
+      "vice": "Argentina"
+    },
+    {
+      "temporada": "2022",
+      "campeao": "Argentina"
+    },
+    {
+      "temporada": "2018",
+      "campeao": "França"
+    },
+    {
+      "temporada": "2014",
+      "campeao": "Alemanha"
+    },
+    {
+      "temporada": "2010",
+      "campeao": "Espanha"
+    }
   ],
   "futebol:conmebol.america": [
-    {"temporada": "2024", "campeao": "Argentina"},
-    {"temporada": "2021", "campeao": "Argentina"},
-    {"temporada": "2019", "campeao": "Brasil"},
-    {"temporada": "2016", "campeao": "Chile"},
-    {"temporada": "2015", "campeao": "Chile"}
+    {
+      "temporada": "2024",
+      "campeao": "Argentina"
+    },
+    {
+      "temporada": "2021",
+      "campeao": "Argentina"
+    },
+    {
+      "temporada": "2019",
+      "campeao": "Brasil"
+    },
+    {
+      "temporada": "2016",
+      "campeao": "Chile"
+    },
+    {
+      "temporada": "2015",
+      "campeao": "Chile"
+    }
   ],
   "futebol:uefa.euro": [
-    {"temporada": "2024", "campeao": "Espanha"},
-    {"temporada": "2020", "campeao": "Itália"},
-    {"temporada": "2016", "campeao": "Portugal"},
-    {"temporada": "2012", "campeao": "Espanha"},
-    {"temporada": "2008", "campeao": "Espanha"}
+    {
+      "temporada": "2024",
+      "campeao": "Espanha"
+    },
+    {
+      "temporada": "2020",
+      "campeao": "Itália"
+    },
+    {
+      "temporada": "2016",
+      "campeao": "Portugal"
+    },
+    {
+      "temporada": "2012",
+      "campeao": "Espanha"
+    },
+    {
+      "temporada": "2008",
+      "campeao": "Espanha"
+    }
   ],
   "futebol:uefa.nations": [
-    {"temporada": "2024-25", "campeao": "Portugal"},
-    {"temporada": "2022-23", "campeao": "Espanha"},
-    {"temporada": "2020-21", "campeao": "França"},
-    {"temporada": "2018-19", "campeao": "Portugal"}
+    {
+      "temporada": "2024-25",
+      "campeao": "Portugal"
+    },
+    {
+      "temporada": "2022-23",
+      "campeao": "Espanha"
+    },
+    {
+      "temporada": "2020-21",
+      "campeao": "França"
+    },
+    {
+      "temporada": "2018-19",
+      "campeao": "Portugal"
+    }
+  ],
+  "futebol:bra.2": [
+    {
+      "temporada": "2025",
+      "campeao": "Coritiba"
+    }
+  ],
+  "futebol:ned.1": [
+    {
+      "temporada": "2025-26",
+      "campeao": "PSV Eindhoven"
+    }
+  ],
+  "futebol:esp.copa_del_rey": [
+    {
+      "temporada": "2025-26",
+      "campeao": "Real Sociedad",
+      "vice": "Atlético de Madrid"
+    }
+  ],
+  "futebol:esp.super_cup": [
+    {
+      "temporada": "2025-26",
+      "campeao": "Barcelona",
+      "vice": "Real Madrid"
+    }
+  ],
+  "futebol:eng.fa": [
+    {
+      "temporada": "2025-26",
+      "campeao": "Manchester City",
+      "vice": "Chelsea"
+    }
+  ],
+  "futebol:eng.league_cup": [
+    {
+      "temporada": "2025-26",
+      "campeao": "Manchester City",
+      "vice": "Arsenal"
+    }
+  ],
+  "futebol:ger.dfb_pokal": [
+    {
+      "temporada": "2025-26",
+      "campeao": "Bayern Munich",
+      "vice": "VfB Stuttgart"
+    }
+  ],
+  "futebol:ita.coppa_italia": [
+    {
+      "temporada": "2025-26",
+      "campeao": "Internazionale",
+      "vice": "Lázio"
+    }
+  ],
+  "futebol:fra.coupe_de_france": [
+    {
+      "temporada": "2025-26",
+      "campeao": "Lens",
+      "vice": "Nice"
+    }
+  ],
+  "futebol:por.taca.portugal": [
+    {
+      "temporada": "2025-26",
+      "campeao": "Torreense",
+      "vice": "Sporting CP"
+    }
+  ],
+  "futebol:ned.cup": [
+    {
+      "temporada": "2025-26",
+      "campeao": "AZ Alkmaar",
+      "vice": "NEC Nijmegen"
+    }
+  ],
+  "futebol:fifa.cwc": [
+    {
+      "temporada": "2025",
+      "campeao": "Chelsea",
+      "vice": "Paris Saint-Germain"
+    }
   ]
 }
