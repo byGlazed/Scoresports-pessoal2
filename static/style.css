@@ -1361,6 +1361,17 @@ select.campo-data { cursor: pointer; }
 .destaque-box { font-weight: 700; }
 .nao-jogou td { color: var(--texto-3); }
 .total-box td { font-weight: 700; border-top: 1px solid var(--linha); }
+/* seletor [time] [Os dois] [time] e a nota no box score */
+.seletor-box { display: flex; width: 100%; margin-bottom: 10px; border-radius: 10px; }
+.seletor-box button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 4px 8px; font-size: 14px; }
+.seletor-box .logo { width: 24px; height: 24px; }
+.seletor-box button[aria-pressed="true"] .logo { filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)); }
+.box-nba .logo-box { width: 16px; height: 16px; margin-right: 5px; vertical-align: -3px; }
+/* o nome encurta com "…" em vez de sumir inteiro quando não cabe */
+.box-nba .coluna-jogador .botao-link { display: inline; white-space: nowrap; }
+.box-nba .celula-nota { padding-top: 3px; padding-bottom: 3px; }
+.box-nba .celula-nota .selo-nota { min-width: 32px; }
+.nota-com-info { display: flex; align-items: center; gap: 4px; }
 .controles-mapa { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
 .seletor-jogador { flex: 1; min-width: 160px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--linha); background: var(--superficie); color: var(--texto); }
 .resumo-arremessos { font-weight: 600; margin: 4px 0; }

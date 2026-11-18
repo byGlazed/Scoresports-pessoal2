@@ -209,6 +209,7 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
 /* ---------- NBA: box score ordenável e mapa de arremessos (dados da ESPN) ---------- */
 
 const COLUNAS_BOX_NBA = [
+  ["nota", "Nota", "Nota do Scoresports"],
   ["minutos", "MIN", "Minutos"],
   ["pts", "PTS", "Pontos"],
   ["reb", "REB", "Rebotes"],
@@ -235,75 +236,129 @@ function maioresDoBox(jogadores) {
   return maior;
 }
 
+/** Box score da NBA: seletor [time da esquerda] [Os dois] [time da direita], com a nota do Scoresports.
+    "Os dois" (o padrão) junta os jogadores dos dois times numa tabela, por pontos, como no Sofascore. */
 function boxScoreNBA(esp, liga, r, estado, redesenhar) {
   const ordemLados = ordemTimes(esp.id, r.jogo);
-  const caixaDe = (lado) => r.nba.box.find((b) => b.time_id === String(lado.id)) || null;
+  const caixas = ordemLados.map((lado) => ({ lado, b: r.nba.box.find((b) => b.time_id === String(lado.id)) || null })).filter((x) => x.b);
+  if (!caixas.length) return [];
+  if (estado.visao !== "ambos" && !caixas.some((x) => String(x.lado.id) === estado.visao)) estado.visao = "ambos";
+  const ambos = estado.visao === "ambos";
+  // em "Os dois" a ordem padrão é por pontos (a seta aparece no PTS)
+  const coluna = estado.coluna || (ambos ? "pts" : null);
+  const direcao = estado.coluna ? estado.direcao : "desc";
   const tocarColuna = (chave) => {
-    if (estado.coluna !== chave) Object.assign(estado, { coluna: chave, direcao: "desc" });
-    else if (estado.direcao === "desc") estado.direcao = "asc";
+    if (coluna !== chave) Object.assign(estado, { coluna: chave, direcao: "desc" });
+    else if (direcao === "desc") Object.assign(estado, { coluna: chave, direcao: "asc" });
     else Object.assign(estado, { coluna: null, direcao: "desc" });
     redesenhar();
   };
+  const escolherVisao = (v) => {
+    if (v === estado.visao) return;
+    Object.assign(estado, { visao: v, coluna: null, direcao: "desc" });
+    redesenhar();
+  };
   const arremessosDe = (id) => r.nba.lista.filter((a) => a.atleta_id === String(id));
+  const comNota = (lado) => (j) => ({ ...j, nota: Notas.notaNba(j), time_logo: lado.logo, time_nome: lado.nome });
 
-  return ordemLados
-    .map((lado) => {
-      const b = caixaDe(lado);
-      if (!b) return null;
-      const jogaram = [...b.titulares, ...b.reservas];
-      const maior = maioresDoBox(jogaram);
-      const cabecalho = h(
-        "tr",
-        null,
-        h("th", { class: "esq coluna-jogador" }, "Jogador"),
-        COLUNAS_BOX_NBA.map(([chave, sigla, titulo]) => {
-          const ativa = estado.coluna === chave;
-          return h(
-            "th",
-            { "aria-sort": ativa ? (estado.direcao === "desc" ? "descending" : "ascending") : "none", title: titulo },
-            h("button", { class: "box-ordem", type: "button", onclick: () => tocarColuna(chave) }, sigla, ativa ? (estado.direcao === "desc" ? " ▼" : " ▲") : "")
-          );
-        })
-      );
-      const linhaJogador = (j, naoJogou = false) =>
+  const seletor = h(
+    "div",
+    { class: "alternar seletor-box", role: "group", "aria-label": "Times do box score" },
+    [
+      [String(caixas[0].lado.id), caixas[0].lado],
+      ["ambos", null],
+      caixas[1] ? [String(caixas[1].lado.id), caixas[1].lado] : null,
+    ]
+      .filter(Boolean)
+      .map(([valor, lado]) =>
         h(
-          "tr",
-          { class: naoJogou ? "nao-jogou" : null },
-          h(
-            "td",
-            { class: "esq coluna-jogador" },
-            h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta("nba", liga, j.id, j.nome, { arremessos: arremessosDe(j.id) }) }, j.nome_curto || j.nome),
-            j.posicao ? h("span", { class: "sub" }, ` ${j.posicao}`) : null
-          ),
-          naoJogou
-            ? h("td", { colspan: COLUNAS_BOX_NBA.length, class: "esq" }, "Não jogou")
-            : COLUNAS_BOX_NBA.map(([chave]) => {
-                const v = j[chave];
-                const n = v && typeof v === "object" ? v.f : v;
-                return h("td", { class: n !== null && n === maior[chave] && maior[chave] > 0 ? "destaque-box" : null }, textoBox(v));
-              })
+          "button",
+          { type: "button", "aria-pressed": String(valor === estado.visao), "aria-label": lado ? lado.nome : "Os dois times", onclick: () => escolherVisao(valor) },
+          lado ? [imgLogo(lado.logo), h("span", { class: "seletor-box-sigla" }, lado.sigla || lado.nome_curto || lado.nome)] : "Os dois"
+        )
+      )
+  );
+
+  /** A tabela: jogadores que jogaram (já na ordem), os que não jogaram e, num time só, a linha de total. */
+  function tabela({ jogaram, naoJogaram, comSeparadores, totais, chaveRolagem }) {
+    const maior = maioresDoBox(jogaram);
+    const cabecalho = h(
+      "tr",
+      null,
+      h("th", { class: "esq coluna-jogador" }, "Jogador"),
+      COLUNAS_BOX_NBA.map(([chave, sigla, titulo]) => {
+        const ativa = coluna === chave;
+        return h(
+          "th",
+          { "aria-sort": ativa ? (direcao === "desc" ? "descending" : "ascending") : "none", title: titulo },
+          h("button", { class: "box-ordem", type: "button", onclick: () => tocarColuna(chave) }, sigla, ativa ? (direcao === "desc" ? " ▼" : " ▲") : "")
         );
-      const separador = (texto) => h("tr", { class: "separador-linha" }, h("td", { colspan: COLUNAS_BOX_NBA.length + 1 }, texto));
-      const corpo = [];
-      if (estado.coluna) corpo.push(...ordenarBox(jogaram, estado.coluna, estado.direcao).map((j) => linhaJogador(j)));
-      else {
-        corpo.push(separador("Titulares"), ...b.titulares.map((j) => linhaJogador(j)));
-        if (b.reservas.length) corpo.push(separador("Reservas"), ...b.reservas.map((j) => linhaJogador(j)));
-      }
-      corpo.push(...b.naoJogaram.map((j) => linhaJogador(j, true)));
-      const total = h("tr", { class: "total-box" }, h("td", { class: "esq coluna-jogador" }, "Total"), COLUNAS_BOX_NBA.map(([chave]) => h("td", null, chave === "minutos" || chave === "mais_menos" ? "" : textoBox(b.totais[chave]))));
-      // a rolagem para o lado fica guardada no estado: a atualização do jogo ao vivo redesenha a tabela
-      const chaveRolagem = String(lado.id);
-      const rolagem = h(
-        "div",
-        { class: "rolagem box-nba", onscroll: (e) => ((estado.rolagem = estado.rolagem || {})[chaveRolagem] = e.target.scrollLeft) },
-        h("table", { class: "tabela" }, h("thead", null, cabecalho), h("tbody", null, corpo), h("tfoot", null, total))
+      })
+    );
+    const celula = (j, chave) => {
+      if (chave === "nota") return h("td", { class: "celula-nota" }, seloNota(j.nota));
+      const v = j[chave];
+      const n = v && typeof v === "object" ? v.f : v;
+      return h("td", { class: n !== null && n === maior[chave] && maior[chave] > 0 ? "destaque-box" : null }, textoBox(v));
+    };
+    const linhaJogador = (j, naoJogou = false) =>
+      h(
+        "tr",
+        { class: naoJogou ? "nao-jogou" : null },
+        h(
+          "td",
+          { class: "esq coluna-jogador" },
+          ambos ? imgLogo(j.time_logo, "logo logo-box") : null,
+          h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta("nba", liga, j.id, j.nome, { arremessos: arremessosDe(j.id) }) }, j.nome_curto || j.nome),
+          j.posicao ? h("span", { class: "sub" }, ` ${j.posicao}`) : null
+        ),
+        naoJogou ? h("td", { colspan: COLUNAS_BOX_NBA.length, class: "esq" }, "Não jogou") : COLUNAS_BOX_NBA.map(([chave]) => celula(j, chave))
       );
-      queueMicrotask(() => (rolagem.scrollLeft = (estado.rolagem || {})[chaveRolagem] || 0)); // logo depois de a tabela entrar na tela
-      return secao(lado.nome, rolagem);
-    })
-    .filter(Boolean)
-    .concat(h("p", { class: "nota" }, "Toque no nome de uma coluna para ordenar; de novo inverte, e uma terceira vez volta ao normal. Toque no jogador para ver os arremessos dele."));
+    const separador = (texto) => h("tr", { class: "separador-linha" }, h("td", { colspan: COLUNAS_BOX_NBA.length + 1 }, texto));
+    const corpo = comSeparadores
+      ? [separador("Titulares"), ...comSeparadores.titulares.map((j) => linhaJogador(j)), ...(comSeparadores.reservas.length ? [separador("Reservas"), ...comSeparadores.reservas.map((j) => linhaJogador(j))] : [])]
+      : jogaram.map((j) => linhaJogador(j));
+    corpo.push(...naoJogaram.map((j) => linhaJogador(j, true)));
+    const total = totais
+      ? h("tfoot", null, h("tr", { class: "total-box" }, h("td", { class: "esq coluna-jogador" }, "Total"), COLUNAS_BOX_NBA.map(([chave]) => h("td", null, ["nota", "minutos", "mais_menos"].includes(chave) ? "" : textoBox(totais[chave])))))
+      : null;
+    // a rolagem para o lado fica guardada no estado: a atualização do jogo ao vivo redesenha a tabela
+    const rolagem = h(
+      "div",
+      { class: "rolagem box-nba", onscroll: (e) => ((estado.rolagem = estado.rolagem || {})[chaveRolagem] = e.target.scrollLeft) },
+      h("table", { class: "tabela" }, h("thead", null, cabecalho), h("tbody", null, corpo), total)
+    );
+    queueMicrotask(() => (rolagem.scrollLeft = (estado.rolagem || {})[chaveRolagem] || 0)); // logo depois de a tabela entrar na tela
+    return rolagem;
+  }
+
+  let conteudo;
+  if (ambos) {
+    const jogaram = caixas.flatMap(({ lado, b }) => [...b.titulares, ...b.reservas].map(comNota(lado)));
+    const naoJogaram = caixas.flatMap(({ lado, b }) => b.naoJogaram.map(comNota(lado)));
+    conteudo = secao(null, seletor, tabela({ jogaram: ordenarBox(jogaram, coluna, direcao), naoJogaram, chaveRolagem: "ambos" }));
+  } else {
+    const { lado, b } = caixas.find((x) => String(x.lado.id) === estado.visao);
+    const titulares = b.titulares.map(comNota(lado));
+    const reservas = b.reservas.map(comNota(lado));
+    const jogaram = [...titulares, ...reservas];
+    conteudo = secao(
+      null,
+      seletor,
+      tabela({
+        jogaram: coluna ? ordenarBox(jogaram, coluna, direcao) : jogaram,
+        naoJogaram: b.naoJogaram.map(comNota(lado)),
+        comSeparadores: coluna ? null : { titulares, reservas },
+        totais: b.totais,
+        chaveRolagem: String(lado.id),
+      })
+    );
+  }
+  return [
+    conteudo,
+    h("p", { class: "nota" }, "Toque no nome de uma coluna para ordenar; de novo inverte, e uma terceira vez volta ao normal. Toque no jogador para ver os arremessos dele."),
+    h("p", { class: "nota nota-com-info" }, "Nota: calculada pelo app ", botaoInfoNota()),
+  ];
 }
 
 /** Resumo, linha de informação e quadra, para uma lista de arremessos. */

@@ -149,3 +149,9 @@ test("posicaoNoDesenho: empurra para o lado certo da linha só dentro da margem 
   // longe demais para ser arredondamento (dois a 30 pés): não mexe
   assert.deepEqual(Q.posicaoNoDesenho({ x: 25, y: 30 }, false), { x: 0, y: 300 });
 });
+
+test("ordenar pela nota: quem não tem nota fica por último", () => {
+  const jogadores = [{ nota: null }, { nota: 7 }, { nota: 8 }];
+  assert.deepEqual(Q.ordenarBox(jogadores, "nota", "desc").map((j) => j.nota), [8, 7, null]);
+  assert.deepEqual(Q.ordenarBox(jogadores, "nota", "asc").map((j) => j.nota), [7, 8, null]);
+});
