@@ -2180,11 +2180,131 @@ async function buscarCopaNba(anoPedido) {
   return r;
 }
 
+/* =========================================================================
+   E-sports (CS2, Valorant e LoL) pela PandaScore, plano grátis, por meio do repasse da Cloudflare.
+   A chave da PandaScore fica só no repasse, como segredo PANDASCORE_TOKEN: o app nunca vê a chave.
+   As regras (tradução das partidas, filtro do dia, grupos) ficam em esports_regras.js.
+   ========================================================================= */
+
+// o endereço do repasse não é segredo; no celular dá para trocar com localStorage["ss:esports"]
+const REPASSE_ESPORTS_PADRAO = "https://scoresports.sodpl258.workers.dev";
+const REPASSE_ESPORTS = (() => {
+  try {
+    return ((localStorage.getItem("ss:esports") || "").trim() || REPASSE_ESPORTS_PADRAO).replace(/\/+$/, "");
+  } catch (_) {
+    return REPASSE_ESPORTS_PADRAO;
+  }
+})();
+
+class ErroEsports extends Error {}
+
+const SLUGS_ESPORTS = Esports.JOGOS.map((j) => j.slug).join(",");
+
+/** Um pedido à PandaScore pelo repasse; os erros viram mensagens que a tela mostra. */
+async function pandascore(caminho, params = {}) {
+  if (!REPASSE_ESPORTS) throw new ErroEsports("O repasse dos e-sports não está configurado.");
+  const u = new URL(`${REPASSE_ESPORTS}/pandascore/${caminho}`);
+  for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== null) u.searchParams.set(k, v);
+  let r;
+  try {
+    r = await fetch(u.toString());
+  } catch (_) {
+    throw new ErroEsports("Não foi possível falar com o repasse dos e-sports agora.");
+  }
+  // 500 é o repasse sem o segredo; 401 e 403, a PandaScore recusando a chave
+  if ([401, 403, 500].includes(r.status)) throw new ErroEsports("A chave da PandaScore no repasse está errada ou faltando.");
+  if (r.status === 429) throw new ErroEsports("Limite da PandaScore atingido. Volte em alguns minutos.");
+  if (!r.ok) throw new ErroEsports(`A PandaScore respondeu com erro ${r.status}.`);
+  try {
+    return await r.json();
+  } catch (_) {
+    throw new ErroEsports("A resposta da PandaScore não veio em JSON.");
+  }
+}
+
+async function viaEsports(chave, ttl, buscar, estavel) {
+  try {
+    return await obter(chave, ttl, buscar, estavel);
+  } catch (erro) {
+    if (erro instanceof ErroRota) throw erro;
+    throw new Error(erro instanceof ErroEsports ? erro.message : `Não foi possível obter os e-sports agora. Motivo: ${motivo(erro)}`);
+  }
+}
+
+function jogoEsportsOu404(id) {
+  const jogo = Esports.jogoDoId(id);
+  if (!jogo) throw new ErroRota(404, "Jogo de e-sports desconhecido.");
+  return jogo;
+}
+
+/** Todas as partidas do dia (dia de Brasília) dos três jogos, sem filtro: uma página de 100 costuma bastar. */
+async function esportsDoDia(de) {
+  const [ini, fim] = Esports.intervaloDoDia(de);
+  const todas = [];
+  for (let pagina = 1; pagina <= 5; pagina++) {
+    const lote = await pandascore("matches", { "filter[videogame]": SLUGS_ESPORTS, "range[begin_at]": `${ini},${fim}`, sort: "begin_at", per_page: 100, page: pagina });
+    todas.push(...lote);
+    if (lote.length < 100) break;
+  }
+  return todas.map((m) => Esports.partida(m));
+}
+
+const encerradaDeVez = (p) => p.estado === 3;
+
+/** O elenco ativo de um time (não derruba a página se falhar). */
+async function elencoEsports(timeId) {
+  if (timeId === null || timeId === undefined) return [];
+  try {
+    const t = await obter(`esports_time_v1:${timeId}`, 86400, () => pandascore(`teams/${timeId}`));
+    return (t.players || []).filter((p) => p.active !== false).map(Esports.jogador);
+  } catch (_) {
+    return [];
+  }
+}
+
 const ROTAS = [
   [/^\/esportes$/, () => [
     ...Object.entries(D_ESPORTES).map(([id, v]) => ({ id, nome: v.nome, tipo: v.tipo, ligas: v.ligas })),
     { id: "boxe", nome: "Boxe", tipo: "boxe", ligas: [{ id: "boxe", nome: "Boxe" }] },
+    { id: "esports", nome: "E-sports", tipo: "esports", ligas: Esports.JOGOS.map((j) => ({ id: j.id, nome: j.nome })) },
   ]],
+  [/^\/esports\/jogos$/, async (m, q) => {
+    const de = q.de || hojeEmBR();
+    const hoje = hojeEmBR();
+    const ttl = de === hoje ? 30 : de < hoje ? 3600 : 120;
+    const todas = await viaEsports(`esports_dia_v1:${de}`, ttl, () => esportsDoDia(de), (lista) => de < hoje && lista.every(encerradaDeVez));
+    const favoritos = new Set(String(q.favoritos || "").split(",").filter(Boolean));
+    if (q.so_favoritos === "1") return todas.filter((p) => p.lados.some((l) => l.id !== null && favoritos.has(String(l.id))));
+    return todas.filter((p) => Esports.entraNoDia(p, favoritos));
+  }],
+  [/^\/esports\/aovivo$/, () =>
+    viaEsports("esports_aovivo_v1", 25, async () => (await pandascore("matches/running", { "filter[videogame]": SLUGS_ESPORTS, per_page: 100 })).map((m) => Esports.partida(m)))],
+  [/^\/esports\/jogos\/([^/]+)\/([^/]+)$/, async (m) => {
+    jogoEsportsOu404(m[1]);
+    const partida = Esports.partida(await viaEsports(`esports_partida_v1:${m[2]}`, 30, () => pandascore(`matches/${m[2]}`), (x) => Esports.partida(x).estado === 3), m[1]);
+    const elencos = await Promise.all(partida.lados.map((l) => elencoEsports(l.id)));
+    return { partida, elencos };
+  }],
+  [/^\/esports\/times\/([^/]+)\/([^/]+)$/, async (m) => {
+    const jogo = jogoEsportsOu404(m[1]);
+    const id = m[2];
+    const t = await viaEsports(`esports_time_v1:${id}`, 86400, () => pandascore(`teams/${id}`));
+    const lista = (caminho, params, ttl) =>
+      viaEsports(`esports_time_${caminho.replace(/\W/g, "_")}_v1:${id}`, ttl, () => pandascore(`${jogo.caminho}/matches/${caminho}`, { "filter[opponent_id]": id, ...params }))
+        .then((ms) => ms.map((x) => Esports.partida(x, jogo.id)))
+        .catch(() => []);
+    const [ultimas, aoVivo, proximas] = await Promise.all([
+      lista("past", { "filter[status]": "finished", sort: "-begin_at", per_page: 10 }, 900),
+      lista("running", { per_page: 5 }, 30),
+      lista("upcoming", { sort: "begin_at", per_page: 5 }, 900),
+    ]);
+    return {
+      time: { id: t.id, nome: t.name, sigla: t.acronym || null, logo: t.image_url || null, pais: t.location || null, jogo: jogo.id },
+      elenco: (t.players || []).filter((p) => p.active !== false).map(Esports.jogador),
+      ultimas,
+      proximas: [...aoVivo, ...proximas],
+    };
+  }],
   [/^\/e\/([^/]+)\/([^/]+)\/jogos$/, (m, q) => {
     dConfig(m[1], m[2]);
     const de = q.de || hojeEmBR();
