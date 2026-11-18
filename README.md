@@ -1,6 +1,6 @@
 # Scoresports
 
-App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, NFL, Fórmula 1, UFC e boxe, com horários no fuso de Brasília e a informação de onde cada jogo passa no Brasil.
+App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, NFL, MLB, NHL, Fórmula 1, UFC, boxe e e-sports (CS2, Valorant e LoL), com horários no fuso de Brasília e a informação de onde cada jogo passa no Brasil.
 
 > Projeto de estudo, para uso pessoal. Não é afiliado à NBA, à ESPN nem a nenhuma liga, e não tem fins comerciais.
 
@@ -57,6 +57,20 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **F1:** calendário da temporada, horários e resultados de cada sessão, classificação de pilotos.
 - **UFC:** eventos da temporada com o card completo, cartel dos lutadores e resultado de cada luta; **ranking** de cada categoria de peso (e o peso por peso) e o **histórico de lutas** de cada lutador.
 - **Boxe:** agenda das principais noites de luta, lida do arquivo `boxe_eventos.json`.
+
+### Nota do Scoresports e escalação no campinho
+- **Campinho (futebol, no app e no PC):** a aba Escalações desenha os titulares no campo, pela formação ("4-2-3-1") e pelo lugar de cada um que a ESPN informa. O campo é visto de cima com o time atacando para baixo, então o lado esquerdo do time fica à direita da tela, como no Sofascore. Cada jogador tem foto (ou o número), a nota colorida, os ícones de gol, assistência, cartão e substituição; embaixo vêm os reservas, com o minuto em que entraram. Formação desconhecida mostra a lista de sempre.
+- **Nota do Scoresports:** de 3,0 a 10,0, calculada pelo próprio app a partir das estatísticas do jogo. **Não é a nota do Sofascore**, que não sai em fonte aberta; o ⓘ ao lado da média explica isso. Cores: abaixo de 6,0 vermelho, até 6,4 laranja, até 6,9 amarelo, até 7,9 verde, até 8,9 verde-azulado, 9,0 ou mais azul.
+  - *Futebol:* parte de 6,5 e soma ou tira por gols, assistências, chutes no gol, faltas, cartões, gol contra, defesas e gols sofridos (goleiro), jogo sem sofrer gol e resultado. Quem jogou menos de 10 minutos fica sem nota. O cabeçalho mostra a média do time.
+  - *NBA:* sai do Game Score de John Hollinger, calibrado nas notas de um jogo real (Jazz 132 x 107 Clippers, 17/11/2026): fica a até 0,3 delas. Menos de 5 minutos: sem nota.
+- **Box score da NBA (no app):** o seletor [time] [Os dois] [time] junta os jogadores dos dois times numa tabela só, ordenada por pontos, com a coluna **Nota**.
+
+### E-sports (no app e na pasta `docs/`)
+- **Chip E-sports** na aba Jogos (e o grupo dos e-sports em "Todos"): as partidas do dia de **CS2, Valorant e League of Legends**, agrupadas por torneio, as ao vivo primeiro (com o mapa em andamento). Aparecem os torneios grandes (nível S e A da PandaScore), as partidas de **times brasileiros** em qualquer torneio e as dos seus **times favoritos**.
+- **Página da partida:** placar da série, "Melhor de N" com as bolinhas, os **mapas** (quem venceu cada um, a hora de início e a duração), os **elencos** lado a lado (nick, nome e foto) e onde assistir (as transmissões em português primeiro).
+- **Página do time:** elenco, próximas e últimas partidas e a estrela de favorito. Os times de e-sports favoritos aparecem na aba Favoritos.
+- **De onde vem:** da [PandaScore](https://pandascore.co), plano grátis, por meio do repasse da Cloudflare (a chave fica só lá, veja abaixo). O plano grátis **não traz o nome do mapa, o placar de rounds nem o KDA** dos jogadores; a página avisa isso. O KDA do CS2 pode entrar depois pelo [GRID Open Access](https://grid.gg/open-access/), se a inscrição for aprovada.
+- **Ao vivo:** a lista e a partida se atualizam a cada 30 s, para caber no limite grátis da PandaScore (cerca de 1.000 pedidos por hora).
 
 ### Onde assistir no Brasil
 Cada jogo mostra os canais. A informação vem do `transmissoes.json`, em duas camadas:
@@ -116,8 +130,13 @@ Mudou alguma tela ou um arquivo de dados (`transmissoes.json`, `boxe_eventos.jso
 - Os favoritos e o banco de dados ficam no celular, separados dos do PC.
 - Sem internet, o app abre e mostra o que já estava guardado.
 
-### Se aparecer "acesso bloqueado"
-Se a ESPN recusar os pedidos vindos do navegador, crie um repasse gratuito na Cloudflare com o arquivo `repasse_cloudflare.js` (o passo a passo está no começo do arquivo) e abra o app uma vez com `?repasse=ENDEREÇO-DO-REPASSE/?url=` no fim do link. O endereço fica guardado no celular.
+### O repasse da Cloudflare (e-sports e "acesso bloqueado")
+O arquivo `repasse_cloudflare.js` é um worker gratuito da Cloudflare com duas funções (o passo a passo para criar está no começo do arquivo):
+
+1. **E-sports:** o app pede `ENDEREÇO-DO-REPASSE/pandascore/...` e o repasse pede à PandaScore com a chave guardada como **segredo** do worker (`PANDASCORE_TOKEN`, em Settings > Variables and Secrets, tipo Secret). A chave nunca fica no código, no APK nem no GitHub. O repasse só aceita GET, só caminhos da PandaScore de CS2, Valorant e LoL (partidas, times, jogadores, torneios), e guarda cada resposta por alguns segundos na memória para poupar o limite grátis. O endereço do repasse fica em `REPASSE_ESPORTS_PADRAO`, no `celular/direto.js`; para usar outro no celular, guarde-o em `localStorage["ss:esports"]`.
+2. **"Acesso bloqueado" da ESPN:** se a ESPN recusar os pedidos vindos do navegador, abra o app uma vez com `?repasse=ENDEREÇO-DO-REPASSE/?url=` no fim do link. O endereço fica guardado no celular.
+
+Mudou o `repasse_cloudflare.js`? Cole a versão nova no worker (Edit code > Deploy): o segredo continua lá.
 
 ## Tecnologias
 
@@ -189,6 +208,11 @@ Scoresports-pessoal2/
     ├── navegacao.js    # barra de baixo, páginas com voltar, aba Jogos e página da liga
     ├── chave_regras.js # regras da chave: fases, confrontos (ida e volta, séries), ordem e posições, Copa NBA
     ├── chave.js        # a chave em colunas, a aba Mata-mata/Playoffs e a aba Copa NBA (só no app)
+    ├── notas_regras.js # regras da nota do Scoresports (futebol e NBA) e das cores
+    ├── campinho_regras.js # regras do campinho: linhas de cada formação, lado espelhado, minutos jogados
+    ├── campinho.js     # a escalação no campinho, com as notas
+    ├── esports_regras.js # regras dos e-sports: partida da PandaScore, filtro do dia, grupos, bolinhas
+    ├── esports.js      # telas dos e-sports: lista do dia, partida e time (só no app)
     └── fontes/         # fonte Inter (licença SIL OFL)
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
@@ -196,7 +220,7 @@ celular/
 ├── regras_esportes.js # regras de MLB e NHL (placar ao vivo, série, pontuações, líderes)
 ├── sw.js, registrar.js, manifest.webmanifest, ícones
 ├── android.js         # botão voltar do Android (só no APK)
-testes/                # testes das regras (time, busca, NBA, navegação), com amostras reais da ESPN e do Wikidata
+testes/                # testes das regras (time, busca, NBA, navegação, notas, campinho, e-sports, repasse), com amostras reais da ESPN, do Wikidata e da PandaScore
 planejamento/          # especificações e planos de cada parte
 docs/                  # versão do celular pronta (gerada pelo gerar_celular.py); docs/apk/ é o pacote que o app baixa
 android/               # projeto do app Android (o GitHub Actions monta o APK)
@@ -291,10 +315,16 @@ Quando uma competição terminar, acrescente o novo campeão no topo da lista de
 
 ## Testes
 
-As regras da página do time têm testes automáticos. Com o Node 18 ou superior instalado, rode na pasta do projeto:
+As regras do app (página do time, busca, chave, NBA, navegação, nota, campinho, e-sports e o repasse da Cloudflare) têm testes automáticos. Com o Node 18 ou superior instalado, rode na pasta do projeto:
 
 ```
 node --test testes/*.test.js
+```
+
+Os testes do Python (robô e escalação do PC) rodam com o ambiente virtual ativado:
+
+```
+python -m unittest discover -s testes -p "*_teste.py"
 ```
 
 ## Configuração
@@ -306,6 +336,7 @@ A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-2
 | O quê | Como |
 |-------|------|
 | Jogos, placares, classificações, elencos | direto da ESPN, sempre |
+| E-sports (partidas, mapas, elencos) | da PandaScore, pelo repasse da Cloudflare |
 | Telas e dados no APK | o app baixa do GitHub Pages ao abrir e usa na próxima abertura |
 | Campeões (`campeoes.json`) | o robô diário lê na ESPN quem ganhou cada temporada encerrada |
 | Lutas grandes de boxe (`boxe_eventos.json`) | o robô diário lê as fichas das lutas na Wikipédia (categorias "AAAA boxing matches"): acrescenta as lutas marcadas e completa os resultados |
@@ -328,6 +359,8 @@ Para testar o robô sem gravar nada: `python -m robo --seco`.
 - Líderes, ranking do UFC, lutas e carreira no futebol usam o Core API da ESPN, que entrega os dados em vários pedaços. A primeira abertura de cada tela pode levar alguns segundos; depois fica no cache.
 - Em algumas competições a ESPN não publica cartões entre os líderes; a página avisa quando isso acontece.
 - A pré-temporada não aparece no calendário.
+- A nota do Scoresports é uma conta do próprio app com as estatísticas que a ESPN publica (no futebol não há passes, desarmes nem minutos jogados, que saem das substituições). Ela se parece com a do Sofascore, mas não é igual.
+- E-sports: o plano grátis da PandaScore não tem o nome do mapa, o placar de rounds nem o KDA. Um jogo ao vivo que começou antes da meia-noite aparece no dia em que começou.
 
 ## Próximos passos
 
