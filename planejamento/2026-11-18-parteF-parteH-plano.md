@@ -31,6 +31,7 @@
   - alvos de toque de 44 px;
   - nenhuma rolagem lateral da página inteira em 375 px;
   - tudo na branch `main` (pedido do dono).
+- **Commits:** em português e **sem nenhuma linha de coautor ou menção a Claude** (pedido do dono, desde a parte D).
 - **Telas novas:** toda tela nova entra em três lugares:
   - `static/index.html` (tag `<script>`);
   - `TELAS` em `gerar_celular.py`;
