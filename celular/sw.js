@@ -9,6 +9,8 @@ const ARQUIVOS = [
   "./style.css",
   "./fontes/inter.woff2",
   "./nba_quadra.js",
+  "./notas_regras.js",
+  "./campinho_regras.js",
   "./rotas.js",
   "./app.js",
   "./esportes.js",

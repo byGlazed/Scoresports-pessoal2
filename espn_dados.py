@@ -656,9 +656,44 @@ def _stat(stats, *nomes):
     return None
 
 
-def _jogador_escalacao(p):
+def _numero_stat(stats, *nomes):
+    """O número de uma estatística do jogador (0 quando não vem)."""
+    try:
+        return int(float(_stat(stats, *nomes)))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _minuto_do_texto(texto):
+    """ "67'" -> 67, "90'+3'" -> 93 (igual ao Campinho.minutoDoTexto do app)."""
+    m = re.match(r"^\s*(\d+)'?(?:\s*\+\s*(\d+)'?)?", str(texto or ""))
+    return int(m.group(1)) + int(m.group(2) or 0) if m else None
+
+
+def _substituicoes(lances):
+    """Quem entrou e quem saiu, e quando: nos lances da ESPN, participants[0] entra e participants[1] sai."""
+    saida = {}
+    for e in lances or []:
+        tipo = str((e.get("type") or {}).get("type") or (e.get("type") or {}).get("text") or "").lower()
+        if "substitution" not in tipo:
+            continue
+        minuto = _minuto_do_texto((e.get("clock") or {}).get("displayValue"))
+        ids = [str((p.get("athlete") or {}).get("id") or "") for p in e.get("participants") or []]
+        if len(ids) > 0 and ids[0]:
+            saida.setdefault(ids[0], {})["entrou_aos"] = minuto
+        if len(ids) > 1 and ids[1]:
+            saida.setdefault(ids[1], {})["saiu_aos"] = minuto
+    return saida
+
+
+def _jogador_escalacao(p, subs=None):
     atleta = p.get("athlete") or {}
     stats = p.get("stats") or []
+    troca = (subs or {}).get(str(atleta.get("id") or ""), {})
+    try:
+        lugar = int(p.get("formationPlace")) or None
+    except (TypeError, ValueError):
+        lugar = None
     return {
         "id": atleta.get("id"),
         "nome": atleta.get("displayName") or atleta.get("shortName"),
@@ -667,10 +702,20 @@ def _jogador_escalacao(p):
         "titular": bool(p.get("starter")),
         "entrou": bool(p.get("subbedIn")),
         "saiu": bool(p.get("subbedOut")),
-        "gols": _stat(stats, "totalGoals", "G"),
-        "assistencias": _stat(stats, "goalAssists", "A"),
-        "amarelos": _stat(stats, "yellowCards", "YC"),
-        "vermelhos": _stat(stats, "redCards", "RC"),
+        "lugar": lugar,
+        "foto": (atleta.get("headshot") or {}).get("href"),
+        "entrou_aos": troca.get("entrou_aos"),
+        "saiu_aos": troca.get("saiu_aos"),
+        "gols": _numero_stat(stats, "totalGoals", "G"),
+        "assistencias": _numero_stat(stats, "goalAssists", "A"),
+        "amarelos": _numero_stat(stats, "yellowCards", "YC"),
+        "vermelhos": _numero_stat(stats, "redCards", "RC"),
+        "chutes_no_gol": _numero_stat(stats, "shotsOnTarget", "SOG"),
+        "faltas_cometidas": _numero_stat(stats, "foulsCommitted", "FC"),
+        "faltas_sofridas": _numero_stat(stats, "foulsSuffered", "FA"),
+        "gols_contra": _numero_stat(stats, "ownGoals", "OG"),
+        "defesas": _numero_stat(stats, "saves", "SV"),
+        "gols_sofridos": _numero_stat(stats, "goalsConceded", "GA"),
         "stats": {
             (s.get("abbreviation") or s.get("name")): s.get("displayValue")
             for s in stats
@@ -680,16 +725,24 @@ def _jogador_escalacao(p):
 
 
 def _escalacoes(dados):
-    """Escalações do futebol (titulares, reservas e quem entrou)."""
+    """Escalações do futebol: titulares com o lugar no campo, reservas, minutos das trocas e o placar do time."""
+    subs = _substituicoes(dados.get("keyEvents"))
+    competidores = (((dados.get("header") or {}).get("competitions") or [{}])[0]).get("competitors") or []
+    placar = {str((c.get("team") or {}).get("id") or c.get("id")): _placar(c.get("score")) for c in competidores}
     saida = []
     for r in dados.get("rosters") or []:
         time = r.get("team") or {}
-        jogadores = [_jogador_escalacao(p) for p in r.get("roster") or []]
+        tid = str(time.get("id"))
+        jogadores = [_jogador_escalacao(p, subs) for p in r.get("roster") or []]
+        pro = placar.get(tid)
+        contra = next((v for k, v in placar.items() if k != tid), None)
         saida.append(
             {
                 "lado": "casa" if r.get("homeAway") == "home" else "fora",
                 "time": {"id": time.get("id"), "nome": time.get("displayName"), "logo": _logo(time)},
                 "formacao": r.get("formation"),
+                "gols_pro": pro if isinstance(pro, int) else None,
+                "gols_contra_time": contra if isinstance(contra, int) else None,
                 "titulares": [j for j in jogadores if j["titular"]],
                 "reservas": [j for j in jogadores if not j["titular"]],
             }

@@ -800,12 +800,26 @@ function statDe(stats, ...nomes) {
   return null;
 }
 
+/** O número de uma estatística do jogador (0 quando não vem). */
+function numeroStat(stats, ...nomes) {
+  const n = Math.trunc(Number(statDe(stats, ...nomes)));
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** Escalações do futebol: titulares com o lugar no campo, reservas, minutos das trocas e o placar do time.
+    Os nomes dos campos são os mesmos de espn_dados._escalacoes (PC). */
 function escalacoes(dados) {
+  const subs = Campinho.substituicoes(dados.keyEvents);
+  const competidores = ((((dados.header || {}).competitions) || [{}])[0] || {}).competitors || [];
+  const placar = new Map(competidores.map((c) => [String((c.team || {}).id || c.id), placarDe(c.score)]));
   return (dados.rosters || []).map((r) => {
     const time = r.team || {};
+    const tid = String(time.id);
     const jogadores = (r.roster || []).map((p) => {
       const at = p.athlete || {};
       const st = p.stats || [];
+      const troca = subs[String(at.id || "")] || {};
+      const lugar = Number(p.formationPlace);
       return {
         id: at.id,
         nome: at.displayName || at.shortName,
@@ -814,17 +828,32 @@ function escalacoes(dados) {
         titular: Boolean(p.starter),
         entrou: Boolean(p.subbedIn),
         saiu: Boolean(p.subbedOut),
-        gols: statDe(st, "totalGoals", "G"),
-        assistencias: statDe(st, "goalAssists", "A"),
-        amarelos: statDe(st, "yellowCards", "YC"),
-        vermelhos: statDe(st, "redCards", "RC"),
+        lugar: Number.isInteger(lugar) && lugar > 0 ? lugar : null,
+        foto: (at.headshot || {}).href || null,
+        entrou_aos: troca.entrou_aos ?? null,
+        saiu_aos: troca.saiu_aos ?? null,
+        gols: numeroStat(st, "totalGoals", "G"),
+        assistencias: numeroStat(st, "goalAssists", "A"),
+        amarelos: numeroStat(st, "yellowCards", "YC"),
+        vermelhos: numeroStat(st, "redCards", "RC"),
+        chutes_no_gol: numeroStat(st, "shotsOnTarget", "SOG"),
+        faltas_cometidas: numeroStat(st, "foulsCommitted", "FC"),
+        faltas_sofridas: numeroStat(st, "foulsSuffered", "FA"),
+        gols_contra: numeroStat(st, "ownGoals", "OG"),
+        defesas: numeroStat(st, "saves", "SV"),
+        gols_sofridos: numeroStat(st, "goalsConceded", "GA"),
         stats: {},
       };
     });
+    const pro = placar.get(tid);
+    const contra = [...placar].find(([k]) => k !== tid);
+    const inteiro = (v) => (Number.isInteger(v) ? v : null);
     return {
       lado: r.homeAway === "home" ? "casa" : "fora",
       time: { id: time.id, nome: time.displayName, logo: logoDe(time) },
       formacao: r.formation || null,
+      gols_pro: inteiro(pro),
+      gols_contra_time: inteiro(contra ? contra[1] : null),
       titulares: jogadores.filter((j) => j.titular),
       reservas: jogadores.filter((j) => !j.titular),
     };
