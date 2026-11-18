@@ -1,0 +1,1830 @@
+[
+ {
+  "videogame_version": null,
+  "opponents": [],
+  "winner": null,
+  "end_at": null,
+  "slug": "2026-10-02-569db72c-c3b8-4c58-badd-9bb49a0f55a5",
+  "videogame_title": null,
+  "serie_id": 10993,
+  "winner_id": null,
+  "draw": false,
+  "tournament_id": 21986,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [],
+  "original_scheduled_at": "2026-10-02T16:00:00Z",
+  "rescheduled": false,
+  "status": "canceled",
+  "league": {
+   "id": 4996,
+   "name": "EMEA Masters",
+   "url": null,
+   "slug": "league-of-legends-emea-masters",
+   "modified_at": "2023-04-01T08:10:00Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4996/emea_masters_2023-png"
+  },
+  "forfeit": false,
+  "games": [
+   {
+    "complete": false,
+    "id": 284652,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1702827,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 284653,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1702827,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 284654,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1702827,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [],
+  "tournament": {
+   "id": 21986,
+   "name": "Swiss Stage",
+   "type": "online",
+   "country": null,
+   "begin_at": "2026-09-26T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-10-02T18:53:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-emea-masters-summer-2026-swiss-stage",
+   "region": "EEU",
+   "serie_id": 10993,
+   "modified_at": "2026-10-22T20:02:39Z",
+   "league_id": 4996,
+   "prizepool": null,
+   "tier": "c",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 3,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-10-02T16:00:00Z",
+  "match_type": "best_of",
+  "id": 1702827,
+  "name": "Round 7: TBD vs TBD",
+  "modified_at": "2026-10-01T21:29:46Z",
+  "begin_at": null,
+  "league_id": 4996,
+  "serie": {
+   "id": 10993,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-09-21T15:00:00Z",
+   "end_at": "2026-10-22T16:40:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-emea-masters-summer-2026",
+   "modified_at": "2026-10-22T20:02:39Z",
+   "league_id": 4996,
+   "season": "Summer",
+   "full_name": "Summer 2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 136547,
+     "name": "The Secret Club",
+     "location": "HR",
+     "slug": "the-secret-club-esport",
+     "modified_at": "2026-10-02T19:45:03Z",
+     "acronym": "TSC",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/136547/the_secret_club_esportlogo_square.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 137931,
+     "name": "SU Esports",
+     "location": "TR",
+     "slug": "su-esports",
+     "modified_at": "2026-09-24T06:52:52Z",
+     "acronym": "SU",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/137931/447px_su_esports_allmode.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "winner": {
+   "id": 136547,
+   "name": "The Secret Club",
+   "location": "HR",
+   "slug": "the-secret-club-esport",
+   "modified_at": "2026-10-02T19:45:03Z",
+   "acronym": "TSC",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/136547/the_secret_club_esportlogo_square.png",
+   "dark_mode_image_url": null
+  },
+  "end_at": null,
+  "slug": "2026-09-30-abbb1df4-3680-451f-92e3-9c325debe63f",
+  "videogame_title": null,
+  "serie_id": 10993,
+  "winner_id": 136547,
+  "draw": false,
+  "tournament_id": 21986,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 136547
+   },
+   {
+    "score": 0,
+    "team_id": 137931
+   }
+  ],
+  "original_scheduled_at": "2026-09-30T16:00:00Z",
+  "rescheduled": true,
+  "status": "canceled",
+  "league": {
+   "id": 4996,
+   "name": "EMEA Masters",
+   "url": null,
+   "slug": "league-of-legends-emea-masters",
+   "modified_at": "2023-04-01T08:10:00Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4996/emea_masters_2023-png"
+  },
+  "forfeit": true,
+  "games": [
+   {
+    "complete": false,
+    "id": 284607,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1702809,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 284608,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1702809,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 284609,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1702809,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": true,
+    "language": "tr",
+    "embed_url": "https://player.twitch.tv/?channel=riotgamesturkish",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/riotgamesturkish"
+   }
+  ],
+  "tournament": {
+   "id": 21986,
+   "name": "Swiss Stage",
+   "type": "online",
+   "country": null,
+   "begin_at": "2026-09-26T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-10-02T18:53:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-emea-masters-summer-2026-swiss-stage",
+   "region": "EEU",
+   "serie_id": 10993,
+   "modified_at": "2026-10-22T20:02:39Z",
+   "league_id": 4996,
+   "prizepool": null,
+   "tier": "c",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 3,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-09-30T18:00:00Z",
+  "match_type": "best_of",
+  "id": 1702809,
+  "name": "Round 5: TSC vs SU",
+  "modified_at": "2026-09-30T16:25:27Z",
+  "begin_at": null,
+  "league_id": 4996,
+  "serie": {
+   "id": 10993,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-09-21T15:00:00Z",
+   "end_at": "2026-10-22T16:40:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-emea-masters-summer-2026",
+   "modified_at": "2026-10-22T20:02:39Z",
+   "league_id": 4996,
+   "season": "Summer",
+   "full_name": "Summer 2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 128268,
+     "name": "Karmine Corp Blue",
+     "location": "FR",
+     "slug": "karmine-corp",
+     "modified_at": "2026-10-04T22:19:18Z",
+     "acronym": "KCB",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/128268/600px_karmine_corp_allmode.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 128425,
+     "name": "White Dragons",
+     "location": "PT",
+     "slug": "white-dragons",
+     "modified_at": "2026-09-24T06:52:37Z",
+     "acronym": "WD",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/128425/white_dragonslogo_square.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "winner": {
+   "id": 128268,
+   "name": "Karmine Corp Blue",
+   "location": "FR",
+   "slug": "karmine-corp",
+   "modified_at": "2026-10-04T22:19:18Z",
+   "acronym": "KCB",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/128268/600px_karmine_corp_allmode.png",
+   "dark_mode_image_url": null
+  },
+  "end_at": null,
+  "slug": "2026-09-26-8570227f-ab56-4021-b4a8-969768f8d81e",
+  "videogame_title": null,
+  "serie_id": 10993,
+  "winner_id": 128268,
+  "draw": false,
+  "tournament_id": 21986,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 128268
+   },
+   {
+    "score": 0,
+    "team_id": 128425
+   }
+  ],
+  "original_scheduled_at": "2026-09-26T18:00:00Z",
+  "rescheduled": false,
+  "status": "canceled",
+  "league": {
+   "id": 4996,
+   "name": "EMEA Masters",
+   "url": null,
+   "slug": "league-of-legends-emea-masters",
+   "modified_at": "2023-04-01T08:10:00Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4996/emea_masters_2023-png"
+  },
+  "forfeit": true,
+  "games": [
+   {
+    "complete": false,
+    "id": 284518,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1702733,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": true,
+    "language": "pt",
+    "embed_url": "https://player.twitch.tv/?channel=rtparenalol",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/rtparenalol"
+   }
+  ],
+  "tournament": {
+   "id": 21986,
+   "name": "Swiss Stage",
+   "type": "online",
+   "country": null,
+   "begin_at": "2026-09-26T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-10-02T18:53:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-emea-masters-summer-2026-swiss-stage",
+   "region": "EEU",
+   "serie_id": 10993,
+   "modified_at": "2026-10-22T20:02:39Z",
+   "league_id": 4996,
+   "prizepool": null,
+   "tier": "c",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 1,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-09-26T18:00:00Z",
+  "match_type": "best_of",
+  "id": 1702733,
+  "name": "Round 1: KCB vs WD",
+  "modified_at": "2026-09-26T18:14:15Z",
+  "begin_at": null,
+  "league_id": 4996,
+  "serie": {
+   "id": 10993,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-09-21T15:00:00Z",
+   "end_at": "2026-10-22T16:40:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-emea-masters-summer-2026",
+   "modified_at": "2026-10-22T20:02:39Z",
+   "league_id": 4996,
+   "season": "Summer",
+   "full_name": "Summer 2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 1449,
+     "name": "Solary",
+     "location": "FR",
+     "slug": "solary",
+     "modified_at": "2026-11-17T21:15:37Z",
+     "acronym": "SLY",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/1449/123px_solarylogo_square.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/1449/solary_darkmode.png"
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 138127,
+     "name": "Saigon Warriors",
+     "location": "VN",
+     "slug": "saigon-warriors",
+     "modified_at": "2026-10-23T11:59:23Z",
+     "acronym": "SGW",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/138127/ezgif_5e268d1a7560187d.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "winner": {
+   "id": 1449,
+   "name": "Solary",
+   "location": "FR",
+   "slug": "solary",
+   "modified_at": "2026-11-17T21:15:37Z",
+   "acronym": "SLY",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/1449/123px_solarylogo_square.png",
+   "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/1449/solary_darkmode.png"
+  },
+  "end_at": null,
+  "slug": "solary-vs-saigon-warriors-2026-09-25",
+  "videogame_title": null,
+  "serie_id": 10932,
+  "winner_id": 1449,
+  "draw": false,
+  "tournament_id": 21979,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 1449
+   },
+   {
+    "score": 0,
+    "team_id": 138127
+   }
+  ],
+  "original_scheduled_at": "2026-09-25T12:00:00Z",
+  "rescheduled": false,
+  "status": "canceled",
+  "league": {
+   "id": 5558,
+   "name": "World Star Challengers Invitational",
+   "url": null,
+   "slug": "league-of-legends-world-star-challengers-invitational",
+   "modified_at": "2026-09-05T08:56:44Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/5558/ezgif-7ec1465c1faa44c5-png"
+  },
+  "forfeit": true,
+  "games": [
+   {
+    "complete": false,
+    "id": 284294,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1697648,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": false,
+    "language": "zh",
+    "embed_url": "https://www.youtube.com/embed/pplmZrVUPnA",
+    "official": false,
+    "raw_url": "https://www.youtube.com/watch?v=pplmZrVUPnA"
+   },
+   {
+    "main": true,
+    "language": "zh",
+    "embed_url": "https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=21622795",
+    "official": true,
+    "raw_url": "https://live.bilibili.com/21622795"
+   }
+  ],
+  "tournament": {
+   "id": 21979,
+   "name": "Group D",
+   "type": "offline",
+   "country": "KR",
+   "begin_at": "2026-09-21T08:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-09-25T11:31:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-world-star-challengers-invitational-2026-group-d",
+   "region": "ASIA",
+   "serie_id": 10932,
+   "modified_at": "2026-10-03T16:26:49Z",
+   "league_id": 5558,
+   "prizepool": null,
+   "tier": "c",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 1,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-09-25T12:00:00Z",
+  "match_type": "best_of",
+  "id": 1697648,
+  "name": "SLY vs SGW",
+  "modified_at": "2026-09-25T06:30:01Z",
+  "begin_at": null,
+  "league_id": 5558,
+  "serie": {
+   "id": 10932,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-09-19T22:00:00Z",
+   "end_at": "2026-10-02T12:38:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-world-star-challengers-invitational-2026",
+   "modified_at": "2026-10-03T16:26:49Z",
+   "league_id": 5558,
+   "season": null,
+   "full_name": "2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139276,
+     "name": "ZSK",
+     "location": "CN",
+     "slug": "zsk",
+     "modified_at": "2026-09-22T06:09:24Z",
+     "acronym": "ZSK",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139276/zsk_29logo_square.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 138127,
+     "name": "Saigon Warriors",
+     "location": "VN",
+     "slug": "saigon-warriors",
+     "modified_at": "2026-10-23T11:59:23Z",
+     "acronym": "SGW",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/138127/ezgif_5e268d1a7560187d.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "winner": {
+   "id": 139276,
+   "name": "ZSK",
+   "location": "CN",
+   "slug": "zsk",
+   "modified_at": "2026-09-22T06:09:24Z",
+   "acronym": "ZSK",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/139276/zsk_29logo_square.png",
+   "dark_mode_image_url": null
+  },
+  "end_at": null,
+  "slug": "zsk-vs-saigon-warriors-2026-09-25",
+  "videogame_title": null,
+  "serie_id": 10932,
+  "winner_id": 139276,
+  "draw": false,
+  "tournament_id": 21979,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 139276
+   },
+   {
+    "score": 0,
+    "team_id": 138127
+   }
+  ],
+  "original_scheduled_at": "2026-09-25T08:00:00Z",
+  "rescheduled": false,
+  "status": "canceled",
+  "league": {
+   "id": 5558,
+   "name": "World Star Challengers Invitational",
+   "url": null,
+   "slug": "league-of-legends-world-star-challengers-invitational",
+   "modified_at": "2026-09-05T08:56:44Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/5558/ezgif-7ec1465c1faa44c5-png"
+  },
+  "forfeit": true,
+  "games": [
+   {
+    "complete": false,
+    "id": 284290,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1697644,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": false,
+    "language": "zh",
+    "embed_url": "https://www.youtube.com/embed/pplmZrVUPnA",
+    "official": false,
+    "raw_url": "https://www.youtube.com/watch?v=pplmZrVUPnA"
+   },
+   {
+    "main": true,
+    "language": "zh",
+    "embed_url": "https://www.bilibili.com/blackboard/live/live-activity-player.html?cid=21622795",
+    "official": true,
+    "raw_url": "https://live.bilibili.com/21622795"
+   }
+  ],
+  "tournament": {
+   "id": 21979,
+   "name": "Group D",
+   "type": "offline",
+   "country": "KR",
+   "begin_at": "2026-09-21T08:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-09-25T11:31:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-world-star-challengers-invitational-2026-group-d",
+   "region": "ASIA",
+   "serie_id": 10932,
+   "modified_at": "2026-10-03T16:26:49Z",
+   "league_id": 5558,
+   "prizepool": null,
+   "tier": "c",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 1,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-09-25T08:00:00Z",
+  "match_type": "best_of",
+  "id": 1697644,
+  "name": "ZSK vs SGW",
+  "modified_at": "2026-09-25T06:29:54Z",
+  "begin_at": null,
+  "league_id": 5558,
+  "serie": {
+   "id": 10932,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-09-19T22:00:00Z",
+   "end_at": "2026-10-02T12:38:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-world-star-challengers-invitational-2026",
+   "modified_at": "2026-10-03T16:26:49Z",
+   "league_id": 5558,
+   "season": null,
+   "full_name": "2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 129409,
+     "name": "Team Phantasma",
+     "location": "GR",
+     "slug": "team-phantasma",
+     "modified_at": "2026-09-24T06:47:58Z",
+     "acronym": "TP",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/129409/190px_team_phantasma_teamcard.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 126215,
+     "name": "WLGaming Esports",
+     "location": "GR",
+     "slug": "wlgaming-esports-league-of-legends",
+     "modified_at": "2026-08-12T07:18:16Z",
+     "acronym": "WLG",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/126215/we_love_gaminglogo_square.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "winner": null,
+  "end_at": null,
+  "slug": "team-phantasma-2026-08-28",
+  "videogame_title": null,
+  "serie_id": 10743,
+  "winner_id": null,
+  "draw": false,
+  "tournament_id": 21670,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 129409
+   },
+   {
+    "score": 0,
+    "team_id": 126215
+   }
+  ],
+  "original_scheduled_at": "2026-08-28T13:00:00Z",
+  "rescheduled": false,
+  "status": "canceled",
+  "league": {
+   "id": 5355,
+   "name": "HLL",
+   "url": null,
+   "slug": "league-of-legends-hll",
+   "modified_at": "2025-01-14T14:06:04Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/5355/hellenic_legends_league_logo-png"
+  },
+  "forfeit": false,
+  "games": [
+   {
+    "complete": false,
+    "id": 283159,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631699,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283160,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631699,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283161,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631699,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283162,
+    "position": 4,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631699,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283163,
+    "position": 5,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631699,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": true,
+    "language": "el",
+    "embed_url": "https://player.twitch.tv/?channel=helleniclegends",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/helleniclegends"
+   }
+  ],
+  "tournament": {
+   "id": 21670,
+   "name": "Playoffs",
+   "type": "online",
+   "country": "GR",
+   "begin_at": "2026-08-25T13:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-09-12T20:00:00Z",
+   "winner_id": 138853,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hll-summer-2026-playoffs",
+   "region": "WEU",
+   "serie_id": 10743,
+   "modified_at": "2026-09-12T19:38:57Z",
+   "league_id": 5355,
+   "prizepool": "3,000 Euro",
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 5,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-08-28T13:00:00Z",
+  "match_type": "best_of",
+  "id": 1631699,
+  "name": "Upper bracket semifinal 2: TP vs WLG",
+  "modified_at": "2026-08-27T08:48:12Z",
+  "begin_at": null,
+  "league_id": 5355,
+  "serie": {
+   "id": 10743,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-06-30T13:00:00Z",
+   "end_at": "2026-09-12T20:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hll-summer-2026",
+   "modified_at": "2026-08-25T06:59:45Z",
+   "league_id": 5355,
+   "season": "Summer",
+   "full_name": "Summer 2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 138853,
+     "name": "Valerion",
+     "location": "GR",
+     "slug": "valerion",
+     "modified_at": "2026-10-04T22:19:13Z",
+     "acronym": "VLR",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/138853/ezgif_868bc1cd08695395.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 128776,
+     "name": "Gamespace Mediterranean College Esports",
+     "location": "GR",
+     "slug": "gamespace-mce",
+     "modified_at": "2026-09-24T06:52:53Z",
+     "acronym": "GSMC",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/128776/gamespace_mediterranean_college_esportslogo_square.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "winner": null,
+  "end_at": null,
+  "slug": "valerion-2026-08-27",
+  "videogame_title": null,
+  "serie_id": 10743,
+  "winner_id": null,
+  "draw": false,
+  "tournament_id": 21670,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 138853
+   },
+   {
+    "score": 0,
+    "team_id": 128776
+   }
+  ],
+  "original_scheduled_at": "2026-08-27T13:00:00Z",
+  "rescheduled": false,
+  "status": "canceled",
+  "league": {
+   "id": 5355,
+   "name": "HLL",
+   "url": null,
+   "slug": "league-of-legends-hll",
+   "modified_at": "2025-01-14T14:06:04Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/5355/hellenic_legends_league_logo-png"
+  },
+  "forfeit": false,
+  "games": [
+   {
+    "complete": false,
+    "id": 283154,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631698,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283155,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631698,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283156,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631698,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283157,
+    "position": 4,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631698,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283158,
+    "position": 5,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1631698,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": true,
+    "language": "el",
+    "embed_url": "https://player.twitch.tv/?channel=helleniclegends",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/helleniclegends"
+   }
+  ],
+  "tournament": {
+   "id": 21670,
+   "name": "Playoffs",
+   "type": "online",
+   "country": "GR",
+   "begin_at": "2026-08-25T13:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-09-12T20:00:00Z",
+   "winner_id": 138853,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hll-summer-2026-playoffs",
+   "region": "WEU",
+   "serie_id": 10743,
+   "modified_at": "2026-09-12T19:38:57Z",
+   "league_id": 5355,
+   "prizepool": "3,000 Euro",
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 5,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-08-27T13:00:00Z",
+  "match_type": "best_of",
+  "id": 1631698,
+  "name": "Upper bracket semifinal 1: VLR vs GSMC",
+  "modified_at": "2026-08-27T08:48:09Z",
+  "begin_at": null,
+  "league_id": 5355,
+  "serie": {
+   "id": 10743,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-06-30T13:00:00Z",
+   "end_at": "2026-09-12T20:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hll-summer-2026",
+   "modified_at": "2026-08-25T06:59:45Z",
+   "league_id": 5355,
+   "season": "Summer",
+   "full_name": "Summer 2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 138054,
+     "name": "Onion Team",
+     "location": "",
+     "slug": "onion-team",
+     "modified_at": "2026-09-07T19:34:13Z",
+     "acronym": "OT",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/138054/onion_teamlogo_square.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 135610,
+     "name": "EXILE esports",
+     "location": "CZ",
+     "slug": "exile-esports",
+     "modified_at": "2026-09-08T17:01:10Z",
+     "acronym": "EXE",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/135610/exile_esportslogo_square.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "winner": {
+   "id": 135610,
+   "name": "EXILE esports",
+   "location": "CZ",
+   "slug": "exile-esports",
+   "modified_at": "2026-09-08T17:01:10Z",
+   "acronym": "EXE",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/135610/exile_esportslogo_square.png",
+   "dark_mode_image_url": null
+  },
+  "end_at": null,
+  "slug": "onion-team-vs-exile-esports-2026-09-05",
+  "videogame_title": null,
+  "serie_id": 10860,
+  "winner_id": 135610,
+  "draw": false,
+  "tournament_id": 21658,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 138054
+   },
+   {
+    "score": 0,
+    "team_id": 135610
+   }
+  ],
+  "original_scheduled_at": "2026-09-05T10:00:00Z",
+  "rescheduled": true,
+  "status": "canceled",
+  "league": {
+   "id": 4433,
+   "name": "Hitpoint Masters",
+   "url": "https://hitpoint.cz/",
+   "slug": "league-of-legends-hitpoint-masters",
+   "modified_at": "2023-12-26T22:44:39Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4433/800px-hitpoint_masters_lightmode-png"
+  },
+  "forfeit": true,
+  "games": [
+   {
+    "complete": false,
+    "id": 283133,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630225,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283134,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630225,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283135,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630225,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": true,
+    "language": "cs",
+    "embed_url": "https://player.twitch.tv/?channel=hitpointcz",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/hitpointcz"
+   },
+   {
+    "main": false,
+    "language": "cs",
+    "embed_url": "https://www.youtube.com/embed/_fghuXWQ_LA",
+    "official": false,
+    "raw_url": "https://www.youtube.com/watch?v=_fghuXWQ_LA"
+   }
+  ],
+  "tournament": {
+   "id": 21658,
+   "name": "Regular Season",
+   "type": "online",
+   "country": "CZ",
+   "begin_at": "2026-08-11T14:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-09-06T13:55:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hitpoint-masters-summer-2026-regular-season",
+   "region": "EEU",
+   "serie_id": 10860,
+   "modified_at": "2026-09-20T14:01:09Z",
+   "league_id": 4433,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 3,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-09-04T14:00:00Z",
+  "match_type": "best_of",
+  "id": 1630225,
+  "name": "OT vs EXE",
+  "modified_at": "2026-09-04T15:05:07Z",
+  "begin_at": null,
+  "league_id": 4433,
+  "serie": {
+   "id": 10860,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-08-11T14:00:00Z",
+   "end_at": "2026-09-20T15:00:00Z",
+   "winner_id": 136087,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hitpoint-masters-summer-2026",
+   "modified_at": "2026-09-20T14:01:09Z",
+   "league_id": 4433,
+   "season": "Summer",
+   "full_name": "Summer 2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 136087,
+     "name": "NightBirds",
+     "location": "CZ",
+     "slug": "nightbirds",
+     "modified_at": "2026-10-20T15:31:41Z",
+     "acronym": "NBS",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/136087/nightbirdslogo_square.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/136087/600px_nightbirds_darkmode.png"
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 138535,
+     "name": "Bohemian Guardians",
+     "location": "CZ",
+     "slug": "bohemian-guardians",
+     "modified_at": "2026-08-27T20:10:54Z",
+     "acronym": "BG",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/138535/bohemian_guardianslogo_square.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/138535/bohemian_guardianslogo_square.png"
+    }
+   }
+  ],
+  "winner": {
+   "id": 136087,
+   "name": "NightBirds",
+   "location": "CZ",
+   "slug": "nightbirds",
+   "modified_at": "2026-10-20T15:31:41Z",
+   "acronym": "NBS",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/136087/nightbirdslogo_square.png",
+   "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/136087/600px_nightbirds_darkmode.png"
+  },
+  "end_at": null,
+  "slug": "nightbirds-vs-bohemian-guardians-2026-09-02",
+  "videogame_title": null,
+  "serie_id": 10860,
+  "winner_id": 136087,
+  "draw": false,
+  "tournament_id": 21658,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 136087
+   },
+   {
+    "score": 0,
+    "team_id": 138535
+   }
+  ],
+  "original_scheduled_at": "2026-09-02T14:00:00Z",
+  "rescheduled": true,
+  "status": "canceled",
+  "league": {
+   "id": 4433,
+   "name": "Hitpoint Masters",
+   "url": "https://hitpoint.cz/",
+   "slug": "league-of-legends-hitpoint-masters",
+   "modified_at": "2023-12-26T22:44:39Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4433/800px-hitpoint_masters_lightmode-png"
+  },
+  "forfeit": true,
+  "games": [
+   {
+    "complete": false,
+    "id": 283121,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630221,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283122,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630221,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283123,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630221,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": true,
+    "language": "cs",
+    "embed_url": "https://player.twitch.tv/?channel=hitpointcz",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/hitpointcz"
+   },
+   {
+    "main": false,
+    "language": "cs",
+    "embed_url": "https://www.youtube.com/embed/oVdvi5jEVQ0",
+    "official": false,
+    "raw_url": "https://www.youtube.com/watch?v=oVdvi5jEVQ0"
+   }
+  ],
+  "tournament": {
+   "id": 21658,
+   "name": "Regular Season",
+   "type": "online",
+   "country": "CZ",
+   "begin_at": "2026-08-11T14:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-09-06T13:55:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hitpoint-masters-summer-2026-regular-season",
+   "region": "EEU",
+   "serie_id": 10860,
+   "modified_at": "2026-09-20T14:01:09Z",
+   "league_id": 4433,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 3,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-09-02T14:30:00Z",
+  "match_type": "best_of",
+  "id": 1630221,
+  "name": "NBS vs BG",
+  "modified_at": "2026-09-02T14:35:38Z",
+  "begin_at": null,
+  "league_id": 4433,
+  "serie": {
+   "id": 10860,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-08-11T14:00:00Z",
+   "end_at": "2026-09-20T15:00:00Z",
+   "winner_id": 136087,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hitpoint-masters-summer-2026",
+   "modified_at": "2026-09-20T14:01:09Z",
+   "league_id": 4433,
+   "season": "Summer",
+   "full_name": "Summer 2026"
+  },
+  "game_advantage": null
+ },
+ {
+  "videogame_version": null,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 138054,
+     "name": "Onion Team",
+     "location": "",
+     "slug": "onion-team",
+     "modified_at": "2026-09-07T19:34:13Z",
+     "acronym": "OT",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/138054/onion_teamlogo_square.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 136343,
+     "name": "CITA Kaizen",
+     "location": "CZ",
+     "slug": "130-cm-peak",
+     "modified_at": "2026-10-02T12:02:05Z",
+     "acronym": "CKZ",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/136343/285px_cita_kaizen_allmode.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "winner": {
+   "id": 136343,
+   "name": "CITA Kaizen",
+   "location": "CZ",
+   "slug": "130-cm-peak",
+   "modified_at": "2026-10-02T12:02:05Z",
+   "acronym": "CKZ",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/136343/285px_cita_kaizen_allmode.png",
+   "dark_mode_image_url": null
+  },
+  "end_at": null,
+  "slug": "onion-team-vs-cita-kaizen-2026-08-25",
+  "videogame_title": null,
+  "serie_id": 10860,
+  "winner_id": 136343,
+  "draw": false,
+  "tournament_id": 21658,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "results": [
+   {
+    "score": 0,
+    "team_id": 138054
+   },
+   {
+    "score": 0,
+    "team_id": 136343
+   }
+  ],
+  "original_scheduled_at": "2026-08-25T14:00:00Z",
+  "rescheduled": true,
+  "status": "canceled",
+  "league": {
+   "id": 4433,
+   "name": "Hitpoint Masters",
+   "url": "https://hitpoint.cz/",
+   "slug": "league-of-legends-hitpoint-masters",
+   "modified_at": "2023-12-26T22:44:39Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4433/800px-hitpoint_masters_lightmode-png"
+  },
+  "forfeit": true,
+  "games": [
+   {
+    "complete": false,
+    "id": 283097,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630213,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283098,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630213,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 283099,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "match_id": 1630213,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "streams_list": [
+   {
+    "main": true,
+    "language": "cs",
+    "embed_url": "https://player.twitch.tv/?channel=hitpointcz",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/hitpointcz"
+   },
+   {
+    "main": false,
+    "language": "cs",
+    "embed_url": "https://www.youtube.com/embed/fRIr0Ka96P4",
+    "official": false,
+    "raw_url": "https://www.youtube.com/watch?v=fRIr0Ka96P4"
+   }
+  ],
+  "tournament": {
+   "id": 21658,
+   "name": "Regular Season",
+   "type": "online",
+   "country": "CZ",
+   "begin_at": "2026-08-11T14:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-09-06T13:55:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hitpoint-masters-summer-2026-regular-season",
+   "region": "EEU",
+   "serie_id": 10860,
+   "modified_at": "2026-09-20T14:01:09Z",
+   "league_id": 4433,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "number_of_games": 3,
+  "detailed_stats": true,
+  "videogame": {
+   "id": 1,
+   "name": "LoL",
+   "slug": "league-of-legends"
+  },
+  "winner_type": "Team",
+  "scheduled_at": "2026-08-25T15:00:00Z",
+  "match_type": "best_of",
+  "id": 1630213,
+  "name": "OT vs CKZ",
+  "modified_at": "2026-08-25T16:00:00Z",
+  "begin_at": null,
+  "league_id": 4433,
+  "serie": {
+   "id": 10860,
+   "name": "",
+   "year": 2026,
+   "begin_at": "2026-08-11T14:00:00Z",
+   "end_at": "2026-09-20T15:00:00Z",
+   "winner_id": 136087,
+   "winner_type": "Team",
+   "slug": "league-of-legends-hitpoint-masters-summer-2026",
+   "modified_at": "2026-09-20T14:01:09Z",
+   "league_id": 4433,
+   "season": "Summer",
+   "full_name": "Summer 2026"
+  },
+  "game_advantage": null
+ }
+]

@@ -1,0 +1,230 @@
+{
+ "number_of_games": 5,
+ "opponents": [
+  {
+   "type": "Team",
+   "opponent": {
+    "id": 124523,
+    "name": "Spirit",
+    "location": "RU",
+    "slug": "spirit",
+    "modified_at": "2026-11-16T16:10:31Z",
+    "acronym": "TS",
+    "image_url": "https://cdn-api.pandascore.co/images/team/image/124523/153px_team_spirit_2022_lightmode.png",
+    "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/124523/153px_team_spirit_2022_darkmode.png"
+   }
+  },
+  {
+   "type": "Team",
+   "opponent": {
+    "id": 124530,
+    "name": "FURIA",
+    "location": "BR",
+    "slug": "furia",
+    "modified_at": "2026-11-16T16:10:24Z",
+    "acronym": "FURIA",
+    "image_url": "https://cdn-api.pandascore.co/images/team/image/124530/8297.png",
+    "dark_mode_image_url": null
+   }
+  }
+ ],
+ "slug": "spirit-2026-11-15",
+ "scheduled_at": "2026-11-15T08:00:00Z",
+ "winner_id": 124530,
+ "league_id": 5386,
+ "winner": {
+  "id": 124530,
+  "name": "FURIA",
+  "location": "BR",
+  "slug": "furia",
+  "modified_at": "2026-11-16T16:10:24Z",
+  "acronym": "FURIA",
+  "image_url": "https://cdn-api.pandascore.co/images/team/image/124530/8297.png",
+  "dark_mode_image_url": null
+ },
+ "streams_list": [
+  {
+   "main": false,
+   "language": "en",
+   "embed_url": "https://www.youtube.com/embed/Hhw5YxvloNE",
+   "official": false,
+   "raw_url": "https://www.youtube.com/watch?v=Hhw5YxvloNE"
+  },
+  {
+   "main": false,
+   "language": "fr",
+   "embed_url": "https://player.twitch.tv/?channel=krl_stream",
+   "official": false,
+   "raw_url": "https://www.twitch.tv/krl_stream"
+  },
+  {
+   "main": false,
+   "language": "de",
+   "embed_url": "https://player.twitch.tv/?channel=zonixxcs",
+   "official": false,
+   "raw_url": "https://www.twitch.tv/zonixxcs"
+  },
+  {
+   "main": false,
+   "language": "pt",
+   "embed_url": "https://player.kick.com/gaules",
+   "official": false,
+   "raw_url": "https://kick.com/gaules"
+  },
+  {
+   "main": false,
+   "language": "ru",
+   "embed_url": "https://player.twitch.tv/?channel=shadowkekw",
+   "official": false,
+   "raw_url": "https://www.twitch.tv/shadowkekw"
+  },
+  {
+   "main": true,
+   "language": "en",
+   "embed_url": "https://player.twitch.tv/?channel=BLASTPremier",
+   "official": true,
+   "raw_url": "https://www.twitch.tv/BLASTPremier"
+  }
+ ],
+ "end_at": "2026-11-15T11:00:12Z",
+ "original_scheduled_at": "2026-11-15T07:00:00Z",
+ "begin_at": "2026-11-15T08:05:35Z",
+ "modified_at": "2026-11-15T11:04:39Z",
+ "serie_id": 11137,
+ "serie": {
+  "id": 11137,
+  "name": "",
+  "year": 2026,
+  "begin_at": "2026-11-11T02:00:00Z",
+  "end_at": "2026-11-15T11:00:00Z",
+  "winner_id": 124530,
+  "winner_type": "Team",
+  "slug": "cs-go-blast-rivals-fall-2026",
+  "modified_at": "2026-11-15T11:00:56Z",
+  "league_id": 5386,
+  "season": "Fall",
+  "full_name": "Fall 2026"
+ },
+ "games": [
+  {
+   "complete": true,
+   "id": 236656,
+   "position": 1,
+   "status": "finished",
+   "length": 3227,
+   "finished": true,
+   "begin_at": "2026-11-15T08:05:35Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-15T08:59:22Z",
+   "forfeit": false,
+   "match_id": 1762449,
+   "winner_type": "Team",
+   "winner": {
+    "id": 124530,
+    "type": "Team"
+   }
+  },
+  {
+   "complete": true,
+   "id": 236657,
+   "position": 2,
+   "status": "finished",
+   "length": 2508,
+   "finished": true,
+   "begin_at": "2026-11-15T09:16:57Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-15T09:58:45Z",
+   "forfeit": false,
+   "match_id": 1762449,
+   "winner_type": "Team",
+   "winner": {
+    "id": 124530,
+    "type": "Team"
+   }
+  },
+  {
+   "complete": true,
+   "id": 236658,
+   "position": 3,
+   "status": "finished",
+   "length": 2645,
+   "finished": true,
+   "begin_at": "2026-11-15T10:16:07Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-15T11:00:12Z",
+   "forfeit": false,
+   "match_id": 1762449,
+   "winner_type": "Team",
+   "winner": {
+    "id": 124530,
+    "type": "Team"
+   }
+  }
+ ],
+ "draw": false,
+ "rescheduled": true,
+ "videogame": {
+  "id": 3,
+  "name": "Counter-Strike",
+  "slug": "cs-go"
+ },
+ "status": "finished",
+ "forfeit": false,
+ "tournament": {
+  "id": 22271,
+  "name": "Playoffs",
+  "type": "offline",
+  "country": "HK",
+  "begin_at": "2026-11-13T07:00:00Z",
+  "detailed_stats": true,
+  "end_at": "2026-11-15T11:00:00Z",
+  "winner_id": 124530,
+  "winner_type": "Team",
+  "slug": "cs-go-blast-rivals-fall-2026-playoffs",
+  "region": "ASIA",
+  "serie_id": 11137,
+  "modified_at": "2026-11-15T21:33:40Z",
+  "league_id": 5386,
+  "prizepool": "1,000,000 United States Dollar",
+  "tier": "s",
+  "has_bracket": true,
+  "live_supported": true
+ },
+ "results": [
+  {
+   "team_id": 124523,
+   "score": 0
+  },
+  {
+   "team_id": 124530,
+   "score": 3
+  }
+ ],
+ "match_type": "best_of",
+ "winner_type": "Team",
+ "videogame_title": {
+  "id": 13,
+  "name": "Counter-Strike 2",
+  "slug": "cs-2",
+  "videogame_id": 3
+ },
+ "detailed_stats": true,
+ "game_advantage": null,
+ "live": {
+  "supported": true,
+  "url": "wss://live.pandascore.co/matches/1762449",
+  "opens_at": "2026-11-15T07:45:00.000000Z"
+ },
+ "id": 1762449,
+ "name": "Grand Final: TS vs FURIA",
+ "league": {
+  "id": 5386,
+  "name": "BLAST Rivals",
+  "url": null,
+  "slug": "cs-go-blast-rivals",
+  "modified_at": "2025-04-16T11:33:16Z",
+  "image_url": null
+ },
+ "tournament_id": 22271,
+ "videogame_version": null
+}

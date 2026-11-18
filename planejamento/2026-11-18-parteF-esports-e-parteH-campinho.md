@@ -20,13 +20,24 @@ O dono quer o app mais perto do Sofascore, que é o que ele usa para comparar. T
 ### PandaScore
 - **Plano grátis ("Fixtures"):** listas de partidas por jogo, `/{jogo}/matches/upcoming`, `/past` e `/running` (o prefixo do CS2 é `csgo`). Também vêm times com elenco, jogadores, ligas, torneios e séries. São cerca de 1.000 pedidos por hora.
 - **Só nos planos pagos:** o detalhe da partida por jogo (`/csgo/matches/{id}` é "Historical"), os jogos (mapas) de uma partida, o nome do mapa, o placar de rounds e as estatísticas por jogador (KDA). O Valorant pede o plano "Valorant Historical", separado. Fonte: https://developers.pandascore.co/docs/plan-reference.
-- **A conferir com a chave de verdade (primeiro passo da construção):**
-  - se as partidas das listas trazem `games[]` com o vencedor, a ordem e a duração de cada mapa;
-  - se o `/matches/{id}` genérico funciona no grátis (a documentação se contradiz);
-  - se o nome do mapa vem em algum lugar;
-  - como vêm `tournament.tier` (s, a, b, c, d), `opponents[].opponent.location` (país do time, "BR") e `streams_list`.
+- **Conferido com a chave de verdade em 18/11/2026, pelo repasse do dono (amostras em `testes/amostras/pandascore_*.json`):**
+  - **Mapas:** as listas e o `/matches/{id}` trazem `games[]`, com `position`, `status`, `winner.id`, `length` (em segundos), `begin_at`, `finished` e `forfeit`. **O nome do mapa e o placar de rounds não vêm.** Exemplo: FURIA x Vitality (BLAST Rivals, Grupo A) tem os mapas 1 (VIT, 2413 s), 2 (FURIA, 3134 s) e 3 (FURIA, 1578 s), os mesmos 40/52/26 min do print do Sofascore;
+  - **Endpoints:**
+    - `/matches/{id}` funciona no grátis;
+    - `/csgo/matches/{id}` e `/csgo/games/{id}` dão 403 (plano pago);
+    - `/matches?filter[videogame]=cs-go,valorant,league-of-legends&range[begin_at]=…` traz o dia dos três jogos num pedido só (71 partidas em 17/11, uma página de 100);
+    - `/matches/running?filter[videogame]=…` traz o ao vivo dos três num pedido só;
+    - `filter[id]`, `filter[opponent_id]` e `filter[status]` funcionam;
+  - **Valores reais:**
+    - `videogame.slug`: `cs-go`, `valorant`, `league-of-legends`;
+    - `tournament.tier`: de `s` a `d`;
+    - `opponent.location`: país ISO, "BR" para FURIA;
+    - `status`: `not_started`, `running`, `finished`, `canceled`, `postponed`, além de `forfeit`;
+    - `results`: `[{team_id, score}]`;
+    - `streams_list`: `[{language, raw_url, official, main}]`;
+  - **Time:** `/teams/{id}` traz `players` com `name` (nick), `first_name`, `last_name`, `nationality` e `image_url` (às vezes nulo).
 
-  O que não vier simplesmente não aparece.
+  O que não vem (nome do mapa, placar de rounds, KDA) não aparece.
 - **A chave não pode ir no código nem no APK:** o repositório é público (decisão da parte D).
 
 ### GRID Open Access (para depois)

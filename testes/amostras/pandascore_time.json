@@ -1,0 +1,101 @@
+{
+ "id": 124530,
+ "name": "FURIA",
+ "location": "BR",
+ "slug": "furia",
+ "players": [
+  {
+   "active": true,
+   "id": 17497,
+   "name": "FalleN",
+   "role": null,
+   "slug": "fallen",
+   "modified_at": "2026-11-16T16:10:21Z",
+   "age": 35,
+   "birthday": "1991-05-30",
+   "first_name": "Gabriel",
+   "last_name": "Toledo",
+   "nationality": "BR",
+   "image_url": "https://cdn-api.pandascore.co/images/player/image/17497/900px_falle_n_dho_anaheim_2020.png"
+  },
+  {
+   "active": true,
+   "id": 18732,
+   "name": "YEKINDAR",
+   "role": null,
+   "slug": "yekindar",
+   "modified_at": "2026-11-16T16:10:23Z",
+   "age": 27,
+   "birthday": "1999-10-04",
+   "first_name": "Mareks",
+   "last_name": "Gaļinskis",
+   "nationality": "LV",
+   "image_url": "https://cdn-api.pandascore.co/images/player/image/18732/600px_yekindar___iem_cologne_2021.png"
+  },
+  {
+   "active": true,
+   "id": 19664,
+   "name": "yuurih",
+   "role": null,
+   "slug": "yuurih",
+   "modified_at": "2026-11-16T16:10:24Z",
+   "age": 26,
+   "birthday": "1999-12-22",
+   "first_name": "Yuri",
+   "last_name": "Santos",
+   "nationality": "BR",
+   "image_url": "https://cdn-api.pandascore.co/images/player/image/19664/yurrih_moche_xl_esports_2019.png"
+  },
+  {
+   "active": true,
+   "id": 19667,
+   "name": "KSCERATO",
+   "role": null,
+   "slug": "kscerato",
+   "modified_at": "2026-11-16T16:10:23Z",
+   "age": 27,
+   "birthday": "1999-09-12",
+   "first_name": "Kaike",
+   "last_name": "Cerato",
+   "nationality": "BR",
+   "image_url": "https://cdn-api.pandascore.co/images/player/image/19667/900px_kscerato___ccf.png"
+  },
+  {
+   "active": true,
+   "id": 36730,
+   "name": "guerri",
+   "role": null,
+   "slug": "guerri-a22af903-8258-49a1-8cde-02444efcae98",
+   "modified_at": "2026-09-09T07:44:08Z",
+   "age": 36,
+   "birthday": "1990-05-25",
+   "first_name": "Nicholas",
+   "last_name": "Nogueira",
+   "nationality": "BR",
+   "image_url": null
+  },
+  {
+   "active": true,
+   "id": 55593,
+   "name": "molodoy",
+   "role": null,
+   "slug": "molodoy",
+   "modified_at": "2026-11-16T16:10:23Z",
+   "age": 21,
+   "birthday": null,
+   "first_name": "Danil",
+   "last_name": "Golubenko",
+   "nationality": "KZ",
+   "image_url": null
+  }
+ ],
+ "modified_at": "2026-11-16T16:10:24Z",
+ "acronym": "FURIA",
+ "image_url": "https://cdn-api.pandascore.co/images/team/image/124530/8297.png",
+ "dark_mode_image_url": null,
+ "current_videogame": {
+  "id": 3,
+  "name": "Counter-Strike",
+  "slug": "cs-go"
+ }
+}

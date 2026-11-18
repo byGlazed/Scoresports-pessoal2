@@ -1,0 +1,1787 @@
+[
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 136225,
+     "name": "Pixel Lumina",
+     "location": "HU",
+     "slug": "pixel-lumina",
+     "modified_at": "2026-11-09T18:56:27Z",
+     "acronym": "PL",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/136225/6783b1e6d26f8.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139567,
+     "name": "xXxMasterProMegaTeamxXx",
+     "location": "",
+     "slug": "xxxmasterpromegateamxxx",
+     "modified_at": "2026-11-10T17:50:24Z",
+     "acronym": null,
+     "image_url": null,
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "slug": "pixel-lumina-2026-11-10",
+  "scheduled_at": "2026-11-10T18:45:00Z",
+  "winner_id": null,
+  "league_id": 4531,
+  "winner": null,
+  "streams_list": [],
+  "end_at": null,
+  "original_scheduled_at": "2026-11-10T18:30:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-10T19:55:25Z",
+  "serie_id": 11196,
+  "serie": {
+   "id": 11196,
+   "name": "EMEA Kickoff: Europe Qualifier",
+   "year": 2027,
+   "begin_at": "2026-11-10T16:00:00Z",
+   "end_at": "2026-11-10T22:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-vct-2021-north-america-stage-1-challengers-1-emea-kickoff-europe-qualifier-2027",
+   "modified_at": "2026-11-09T18:59:47Z",
+   "league_id": 4531,
+   "season": null,
+   "full_name": "EMEA Kickoff: Europe Qualifier 2027"
+  },
+  "games": [
+   {
+    "complete": false,
+    "id": 52875,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1802841,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 52876,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1802841,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 52877,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1802841,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": true,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "canceled",
+  "forfeit": false,
+  "tournament": {
+   "id": 22427,
+   "name": "Playoffs",
+   "type": "online",
+   "country": null,
+   "begin_at": "2026-11-10T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-10T20:55:00Z",
+   "winner_id": 139566,
+   "winner_type": "Team",
+   "slug": "valorant-vct-2021-north-america-stage-1-challengers-1-emea-kickoff-europe-qualifier-2027-playoffs",
+   "region": "EEU",
+   "serie_id": 11196,
+   "modified_at": "2026-11-11T12:56:53Z",
+   "league_id": 4531,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": true,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 136225,
+    "score": 0
+   },
+   {
+    "team_id": 139567,
+    "score": 0
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1802841,
+  "name": "3rd place match: PL vs xXxMasterProMegaTeamxXx",
+  "league": {
+   "id": 4531,
+   "name": "VCT",
+   "url": null,
+   "slug": "valorant-vct-2021-north-america-stage-1-challengers-1",
+   "modified_at": "2023-02-13T19:07:55Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4531/800px-vct_2023_logo_lightmode-png"
+  },
+  "tournament_id": 22427,
+  "videogame_version": null
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139555,
+     "name": "Alter Ego x Kertanegara",
+     "location": "",
+     "slug": "alter-ego-x-kertanegara",
+     "modified_at": "2026-11-10T16:46:26Z",
+     "acronym": null,
+     "image_url": null,
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139558,
+     "name": "GAS Esports",
+     "location": "ID",
+     "slug": "gas-esports",
+     "modified_at": "2026-11-08T18:27:03Z",
+     "acronym": "GAS",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139558/800px_logo_gas_esports.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139558/800px_logo_gas_esports.png"
+    }
+   }
+  ],
+  "slug": "alter-ego-x-kertanegara-vs-gas-esports-2026-11-10",
+  "scheduled_at": "2026-11-10T14:30:00Z",
+  "winner_id": null,
+  "league_id": 4860,
+  "winner": null,
+  "streams_list": [
+   {
+    "main": true,
+    "language": "id",
+    "embed_url": null,
+    "official": true,
+    "raw_url": "https://www.youtube.com/@PredatorGamingIndonesia/live"
+   }
+  ],
+  "end_at": null,
+  "original_scheduled_at": "2026-11-10T14:30:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-10T07:33:53Z",
+  "serie_id": 11194,
+  "serie": {
+   "id": 11194,
+   "name": "Indonesia",
+   "year": 2027,
+   "begin_at": "2026-11-10T12:00:00Z",
+   "end_at": "2026-11-22T14:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-predator-league-indonesia-2027",
+   "modified_at": "2026-11-16T07:15:45Z",
+   "league_id": 4860,
+   "season": null,
+   "full_name": "Indonesia 2027"
+  },
+  "games": [
+   {
+    "complete": false,
+    "id": 52860,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1800760,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 52861,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1800760,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 52862,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1800760,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "canceled",
+  "forfeit": false,
+  "tournament": {
+   "id": 22424,
+   "name": "Playoffs",
+   "type": "online/offline",
+   "country": "ID",
+   "begin_at": "2026-11-10T12:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-22T14:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-predator-league-indonesia-2027-playoffs",
+   "region": "ASIA",
+   "serie_id": 11194,
+   "modified_at": "2026-11-16T09:44:48Z",
+   "league_id": 4860,
+   "prizepool": "102,000,000 Indonesian Rupiah",
+   "tier": "d",
+   "has_bracket": true,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 139555,
+    "score": 0
+   },
+   {
+    "team_id": 139558,
+    "score": 0
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1800760,
+  "name": "Upper Bracket Quarterfinal 3: Alter Ego x Kertanegara vs GAS",
+  "league": {
+   "id": 4860,
+   "name": "Asia Pacific Predator League",
+   "url": null,
+   "slug": "valorant-predator-league",
+   "modified_at": "2024-01-06T09:08:33Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4860/asia_pacific_predator_league_2024_allmode-png"
+  },
+  "tournament_id": 22424,
+  "videogame_version": null
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 128744,
+     "name": "BOOM Esports",
+     "location": "ID",
+     "slug": "boom-esports-valorant",
+     "modified_at": "2026-11-14T12:59:58Z",
+     "acronym": "BOOM",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/128744/600px_boom_esports_logo.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139559,
+     "name": "Rojali",
+     "location": "ID",
+     "slug": "rojali",
+     "modified_at": "2026-11-14T12:52:38Z",
+     "acronym": "RJL",
+     "image_url": null,
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "slug": "boom-esports-vs-gas-esports-2026-11-10",
+  "scheduled_at": "2026-11-10T12:00:00Z",
+  "winner_id": null,
+  "league_id": 4860,
+  "winner": null,
+  "streams_list": [
+   {
+    "main": true,
+    "language": "id",
+    "embed_url": null,
+    "official": true,
+    "raw_url": "https://www.youtube.com/@PredatorGamingIndonesia/live"
+   }
+  ],
+  "end_at": null,
+  "original_scheduled_at": "2026-11-10T12:00:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-10T07:33:55Z",
+  "serie_id": 11194,
+  "serie": {
+   "id": 11194,
+   "name": "Indonesia",
+   "year": 2027,
+   "begin_at": "2026-11-10T12:00:00Z",
+   "end_at": "2026-11-22T14:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-predator-league-indonesia-2027",
+   "modified_at": "2026-11-16T07:15:45Z",
+   "league_id": 4860,
+   "season": null,
+   "full_name": "Indonesia 2027"
+  },
+  "games": [
+   {
+    "complete": false,
+    "id": 52854,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1800758,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 52855,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1800758,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 52856,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1800758,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "canceled",
+  "forfeit": false,
+  "tournament": {
+   "id": 22424,
+   "name": "Playoffs",
+   "type": "online/offline",
+   "country": "ID",
+   "begin_at": "2026-11-10T12:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-22T14:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-predator-league-indonesia-2027-playoffs",
+   "region": "ASIA",
+   "serie_id": 11194,
+   "modified_at": "2026-11-16T09:44:48Z",
+   "league_id": 4860,
+   "prizepool": "102,000,000 Indonesian Rupiah",
+   "tier": "d",
+   "has_bracket": true,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 128744,
+    "score": 0
+   },
+   {
+    "team_id": 139559,
+    "score": 0
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1800758,
+  "name": "Upper Bracket Quarterfinal 1: BOOM vs RJL",
+  "league": {
+   "id": 4860,
+   "name": "Asia Pacific Predator League",
+   "url": null,
+   "slug": "valorant-predator-league",
+   "modified_at": "2024-01-06T09:08:33Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4860/asia_pacific_predator_league_2024_allmode-png"
+  },
+  "tournament_id": 22424,
+  "videogame_version": null
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139530,
+     "name": "thirst for victory",
+     "location": "JP",
+     "slug": "thirst-for-victory",
+     "modified_at": "2026-11-07T06:31:35Z",
+     "acronym": "TFV",
+     "image_url": null,
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139531,
+     "name": "SETOUCHI SPARKS",
+     "location": "JP",
+     "slug": "setouchi-sparks",
+     "modified_at": "2026-11-07T21:32:48Z",
+     "acronym": "3S",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139531/531px_setouchi_sparks_allmode.png",
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "slug": "thirst-for-victory-vs-setouchi-sparks-2026-11-07",
+  "scheduled_at": "2026-11-07T05:30:00Z",
+  "winner_id": 139531,
+  "league_id": 4860,
+  "winner": {
+   "id": 139531,
+   "name": "SETOUCHI SPARKS",
+   "location": "JP",
+   "slug": "setouchi-sparks",
+   "modified_at": "2026-11-07T21:32:48Z",
+   "acronym": "3S",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/139531/531px_setouchi_sparks_allmode.png",
+   "dark_mode_image_url": null
+  },
+  "streams_list": [],
+  "end_at": null,
+  "original_scheduled_at": "2026-11-07T05:30:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-07T06:27:09Z",
+  "serie_id": 11186,
+  "serie": {
+   "id": 11186,
+   "name": "Japan",
+   "year": 2027,
+   "begin_at": "2026-11-07T05:30:00Z",
+   "end_at": "2026-11-15T10:12:00Z",
+   "winner_id": 139541,
+   "winner_type": "Team",
+   "slug": "valorant-predator-league-japan-2027",
+   "modified_at": "2026-11-15T21:43:02Z",
+   "league_id": 4860,
+   "season": null,
+   "full_name": "Japan 2027"
+  },
+  "games": [
+   {
+    "complete": false,
+    "id": 52794,
+    "position": 1,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1794441,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 52795,
+    "position": 2,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1794441,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": false,
+    "id": 52796,
+    "position": 3,
+    "status": "not_started",
+    "length": null,
+    "finished": false,
+    "begin_at": null,
+    "detailed_stats": true,
+    "end_at": null,
+    "forfeit": false,
+    "match_id": 1794441,
+    "winner_type": "Team",
+    "winner": {
+     "id": null,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "canceled",
+  "forfeit": true,
+  "tournament": {
+   "id": 22403,
+   "name": "Playoffs",
+   "type": "online",
+   "country": "JP",
+   "begin_at": "2026-11-07T05:30:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-15T10:12:00Z",
+   "winner_id": 139541,
+   "winner_type": "Team",
+   "slug": "valorant-predator-league-japan-2027-playoffs",
+   "region": "ASIA",
+   "serie_id": 11186,
+   "modified_at": "2026-11-15T21:43:02Z",
+   "league_id": 4860,
+   "prizepool": "1000000 Japanese Yen",
+   "tier": "d",
+   "has_bracket": true,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 139530,
+    "score": 0
+   },
+   {
+    "team_id": 139531,
+    "score": 0
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1794441,
+  "name": "Round 1 match 1: thirst for victory vs SETOUCHI SPARKS",
+  "league": {
+   "id": 4860,
+   "name": "Asia Pacific Predator League",
+   "url": null,
+   "slug": "valorant-predator-league",
+   "modified_at": "2024-01-06T09:08:33Z",
+   "image_url": "https://cdn-api.pandascore.co/images/league/image/4860/asia_pacific_predator_league_2024_allmode-png"
+  },
+  "tournament_id": 22403,
+  "videogame_version": null
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 136020,
+     "name": "Glacial Guardians",
+     "location": "DE",
+     "slug": "glacial-guardians",
+     "modified_at": "2026-11-04T19:28:59Z",
+     "acronym": "GG",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/136020/200px_glacial_guardians_allmode.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139186,
+     "name": "HooK Esport",
+     "location": "",
+     "slug": "hook-esport",
+     "modified_at": "2026-11-04T19:32:28Z",
+     "acronym": "HK",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139186/hoo_k_esport_lightmode.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139186/hoo_k_esport_darkmode.png"
+    }
+   }
+  ],
+  "slug": "glacial-guardians-vs-hook-esport-2026-11-01",
+  "scheduled_at": "2026-11-01T17:00:00Z",
+  "winner_id": 139186,
+  "league_id": 5583,
+  "winner": {
+   "id": 139186,
+   "name": "HooK Esport",
+   "location": "",
+   "slug": "hook-esport",
+   "modified_at": "2026-11-04T19:32:28Z",
+   "acronym": "HK",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/139186/hoo_k_esport_lightmode.png",
+   "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139186/hoo_k_esport_darkmode.png"
+  },
+  "streams_list": [
+   {
+    "main": true,
+    "language": "de",
+    "embed_url": "https://player.twitch.tv/?channel=spikeseriesdach",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/spikeseriesdach"
+   }
+  ],
+  "end_at": null,
+  "original_scheduled_at": "2026-11-01T17:00:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-04T19:39:06Z",
+  "serie_id": 11183,
+  "serie": {
+   "id": 11183,
+   "name": "Convergence EMEA - DACH",
+   "year": 2026,
+   "begin_at": "2026-10-19T16:00:00Z",
+   "end_at": "2026-12-18T20:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "league_id": 5583,
+   "season": null,
+   "full_name": "Convergence EMEA - DACH 2026"
+  },
+  "games": [
+   {
+    "complete": true,
+    "id": 52734,
+    "position": 1,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-11-01T17:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-11-01T17:50:00Z",
+    "forfeit": false,
+    "match_id": 1792373,
+    "winner_type": "Team",
+    "winner": {
+     "id": 136020,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": true,
+    "id": 52735,
+    "position": 2,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-11-01T18:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-11-01T18:50:00Z",
+    "forfeit": false,
+    "match_id": 1792373,
+    "winner_type": "Team",
+    "winner": {
+     "id": 139186,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": true,
+    "id": 52736,
+    "position": 3,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-11-01T19:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-11-01T19:50:00Z",
+    "forfeit": false,
+    "match_id": 1792373,
+    "winner_type": "Team",
+    "winner": {
+     "id": 139186,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "finished",
+  "forfeit": false,
+  "tournament": {
+   "id": 22393,
+   "name": "Group A",
+   "type": "online",
+   "country": "DE",
+   "begin_at": "2026-10-19T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-29T21:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026-group-a",
+   "region": "WEU",
+   "serie_id": 11183,
+   "modified_at": "2026-11-15T20:05:36Z",
+   "league_id": 5583,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 136020,
+    "score": 1
+   },
+   {
+    "team_id": 139186,
+    "score": 2
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1792373,
+  "name": "GG vs HK",
+  "league": {
+   "id": 5583,
+   "name": "Spike Series",
+   "url": null,
+   "slug": "valorant-spike-series",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "image_url": null
+  },
+  "tournament_id": 22393,
+  "videogame_version": {
+   "name": "13.09",
+   "current": true
+  }
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139527,
+     "name": "Team International",
+     "location": "DE",
+     "slug": "team-international",
+     "modified_at": "2026-11-04T19:02:21Z",
+     "acronym": null,
+     "image_url": null,
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139184,
+     "name": "BERG",
+     "location": "DE",
+     "slug": "berg",
+     "modified_at": "2026-11-08T19:10:13Z",
+     "acronym": "BERG",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139184/800px_esport_berg_2020_lightmode.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139184/esport_berg_2020_darkmode.png"
+    }
+   }
+  ],
+  "slug": "team-international-vs-berg-2026-11-01",
+  "scheduled_at": "2026-11-01T16:00:00Z",
+  "winner_id": 139527,
+  "league_id": 5583,
+  "winner": {
+   "id": 139527,
+   "name": "Team International",
+   "location": "DE",
+   "slug": "team-international",
+   "modified_at": "2026-11-04T19:02:21Z",
+   "acronym": null,
+   "image_url": null,
+   "dark_mode_image_url": null
+  },
+  "streams_list": [
+   {
+    "main": true,
+    "language": "de",
+    "embed_url": "https://player.twitch.tv/?channel=spikeseriesdach",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/spikeseriesdach"
+   }
+  ],
+  "end_at": null,
+  "original_scheduled_at": "2026-11-01T16:00:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-04T19:35:22Z",
+  "serie_id": 11183,
+  "serie": {
+   "id": 11183,
+   "name": "Convergence EMEA - DACH",
+   "year": 2026,
+   "begin_at": "2026-10-19T16:00:00Z",
+   "end_at": "2026-12-18T20:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "league_id": 5583,
+   "season": null,
+   "full_name": "Convergence EMEA - DACH 2026"
+  },
+  "games": [
+   {
+    "complete": true,
+    "id": 52731,
+    "position": 1,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-11-01T17:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-11-01T17:50:00Z",
+    "forfeit": false,
+    "match_id": 1792372,
+    "winner_type": "Team",
+    "winner": {
+     "id": 139527,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": true,
+    "id": 52732,
+    "position": 2,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-11-01T18:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-11-01T18:50:00Z",
+    "forfeit": false,
+    "match_id": 1792372,
+    "winner_type": "Team",
+    "winner": {
+     "id": 139527,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "finished",
+  "forfeit": false,
+  "tournament": {
+   "id": 22393,
+   "name": "Group A",
+   "type": "online",
+   "country": "DE",
+   "begin_at": "2026-10-19T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-29T21:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026-group-a",
+   "region": "WEU",
+   "serie_id": 11183,
+   "modified_at": "2026-11-15T20:05:36Z",
+   "league_id": 5583,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 139527,
+    "score": 2
+   },
+   {
+    "team_id": 139184,
+    "score": 0
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1792372,
+  "name": "Team International vs BERG",
+  "league": {
+   "id": 5583,
+   "name": "Spike Series",
+   "url": null,
+   "slug": "valorant-spike-series",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "image_url": null
+  },
+  "tournament_id": 22393,
+  "videogame_version": {
+   "name": "13.09",
+   "current": true
+  }
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139186,
+     "name": "HooK Esport",
+     "location": "",
+     "slug": "hook-esport",
+     "modified_at": "2026-11-04T19:32:28Z",
+     "acronym": "HK",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139186/hoo_k_esport_lightmode.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139186/hoo_k_esport_darkmode.png"
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 130398,
+     "name": "CGN Esports",
+     "location": "DE",
+     "slug": "cgn-esports",
+     "modified_at": "2026-11-04T16:44:04Z",
+     "acronym": "CGN",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/130398/121px_cgn_esports_lightmode.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/130398/140px_cgn_esports_darkmode.png"
+    }
+   }
+  ],
+  "slug": "hook-esport-vs-cgn-esports-2026-10-28",
+  "scheduled_at": "2026-10-28T18:00:00Z",
+  "winner_id": 130398,
+  "league_id": 5583,
+  "winner": {
+   "id": 130398,
+   "name": "CGN Esports",
+   "location": "DE",
+   "slug": "cgn-esports",
+   "modified_at": "2026-11-04T16:44:04Z",
+   "acronym": "CGN",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/130398/121px_cgn_esports_lightmode.png",
+   "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/130398/140px_cgn_esports_darkmode.png"
+  },
+  "streams_list": [
+   {
+    "main": true,
+    "language": "de",
+    "embed_url": "https://player.twitch.tv/?channel=spikeseriesdach",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/spikeseriesdach"
+   }
+  ],
+  "end_at": null,
+  "original_scheduled_at": "2026-10-28T18:00:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-04T19:32:54Z",
+  "serie_id": 11183,
+  "serie": {
+   "id": 11183,
+   "name": "Convergence EMEA - DACH",
+   "year": 2026,
+   "begin_at": "2026-10-19T16:00:00Z",
+   "end_at": "2026-12-18T20:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "league_id": 5583,
+   "season": null,
+   "full_name": "Convergence EMEA - DACH 2026"
+  },
+  "games": [
+   {
+    "complete": true,
+    "id": 52728,
+    "position": 1,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-10-28T18:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-10-28T18:50:00Z",
+    "forfeit": false,
+    "match_id": 1792371,
+    "winner_type": "Team",
+    "winner": {
+     "id": 130398,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": true,
+    "id": 52729,
+    "position": 2,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-10-28T19:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-10-28T19:50:00Z",
+    "forfeit": false,
+    "match_id": 1792371,
+    "winner_type": "Team",
+    "winner": {
+     "id": 130398,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "finished",
+  "forfeit": false,
+  "tournament": {
+   "id": 22393,
+   "name": "Group A",
+   "type": "online",
+   "country": "DE",
+   "begin_at": "2026-10-19T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-29T21:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026-group-a",
+   "region": "WEU",
+   "serie_id": 11183,
+   "modified_at": "2026-11-15T20:05:36Z",
+   "league_id": 5583,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 139186,
+    "score": 0
+   },
+   {
+    "team_id": 130398,
+    "score": 2
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1792371,
+  "name": "HK vs CGN",
+  "league": {
+   "id": 5583,
+   "name": "Spike Series",
+   "url": null,
+   "slug": "valorant-spike-series",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "image_url": null
+  },
+  "tournament_id": 22393,
+  "videogame_version": {
+   "name": "13.09",
+   "current": true
+  }
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 136020,
+     "name": "Glacial Guardians",
+     "location": "DE",
+     "slug": "glacial-guardians",
+     "modified_at": "2026-11-04T19:28:59Z",
+     "acronym": "GG",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/136020/200px_glacial_guardians_allmode.png",
+     "dark_mode_image_url": null
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 137958,
+     "name": "FRG",
+     "location": "",
+     "slug": "frg",
+     "modified_at": "2026-11-04T16:44:05Z",
+     "acronym": "FRG",
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/137958/285px_fragging_friends_2025_lightmode.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/137958/800px_fragging_friends_2025_darkmode.png"
+    }
+   }
+  ],
+  "slug": "glacial-guardians-vs-frg-2026-10-25",
+  "scheduled_at": "2026-10-25T16:00:00Z",
+  "winner_id": 137958,
+  "league_id": 5583,
+  "winner": {
+   "id": 137958,
+   "name": "FRG",
+   "location": "",
+   "slug": "frg",
+   "modified_at": "2026-11-04T16:44:05Z",
+   "acronym": "FRG",
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/137958/285px_fragging_friends_2025_lightmode.png",
+   "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/137958/800px_fragging_friends_2025_darkmode.png"
+  },
+  "streams_list": [
+   {
+    "main": true,
+    "language": "de",
+    "embed_url": "https://player.twitch.tv/?channel=spikeseriesdach",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/spikeseriesdach"
+   }
+  ],
+  "end_at": null,
+  "original_scheduled_at": "2026-10-25T16:00:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-04T19:29:29Z",
+  "serie_id": 11183,
+  "serie": {
+   "id": 11183,
+   "name": "Convergence EMEA - DACH",
+   "year": 2026,
+   "begin_at": "2026-10-19T16:00:00Z",
+   "end_at": "2026-12-18T20:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "league_id": 5583,
+   "season": null,
+   "full_name": "Convergence EMEA - DACH 2026"
+  },
+  "games": [
+   {
+    "complete": true,
+    "id": 52725,
+    "position": 1,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-10-25T16:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-10-25T16:50:00Z",
+    "forfeit": false,
+    "match_id": 1792370,
+    "winner_type": "Team",
+    "winner": {
+     "id": 137958,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": true,
+    "id": 52726,
+    "position": 2,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-10-25T17:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-10-25T17:50:00Z",
+    "forfeit": false,
+    "match_id": 1792370,
+    "winner_type": "Team",
+    "winner": {
+     "id": 137958,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "finished",
+  "forfeit": false,
+  "tournament": {
+   "id": 22393,
+   "name": "Group A",
+   "type": "online",
+   "country": "DE",
+   "begin_at": "2026-10-19T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-29T21:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026-group-a",
+   "region": "WEU",
+   "serie_id": 11183,
+   "modified_at": "2026-11-15T20:05:36Z",
+   "league_id": 5583,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 136020,
+    "score": 0
+   },
+   {
+    "team_id": 137958,
+    "score": 2
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1792370,
+  "name": "GG vs FRG",
+  "league": {
+   "id": 5583,
+   "name": "Spike Series",
+   "url": null,
+   "slug": "valorant-spike-series",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "image_url": null
+  },
+  "tournament_id": 22393,
+  "videogame_version": {
+   "name": "13.09",
+   "current": true
+  }
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139525,
+     "name": "REH Gaming",
+     "location": "DE",
+     "slug": "reh-gaming",
+     "modified_at": "2026-11-08T17:57:40Z",
+     "acronym": null,
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139525/103px_reh_gaming_2023_allmode.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139525/103px_reh_gaming_2023_allmode.png"
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139526,
+     "name": "Frankfurt Bahnhofsviertel",
+     "location": "DE",
+     "slug": "frankfurt-bahnhofsviertel",
+     "modified_at": "2026-11-15T20:05:36Z",
+     "acronym": null,
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139526/100px_frankfurt_bahnhofsviertel_allmode.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139526/100px_frankfurt_bahnhofsviertel_allmode.png"
+    }
+   }
+  ],
+  "slug": "reh-gaming-vs-frankfurt-bahnhofsviertel-2026-10-23",
+  "scheduled_at": "2026-10-23T17:00:00Z",
+  "winner_id": 139525,
+  "league_id": 5583,
+  "winner": {
+   "id": 139525,
+   "name": "REH Gaming",
+   "location": "DE",
+   "slug": "reh-gaming",
+   "modified_at": "2026-11-08T17:57:40Z",
+   "acronym": null,
+   "image_url": "https://cdn-api.pandascore.co/images/team/image/139525/103px_reh_gaming_2023_allmode.png",
+   "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139525/103px_reh_gaming_2023_allmode.png"
+  },
+  "streams_list": [
+   {
+    "main": true,
+    "language": "de",
+    "embed_url": "https://player.twitch.tv/?channel=spikeseriesdach",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/spikeseriesdach"
+   }
+  ],
+  "end_at": null,
+  "original_scheduled_at": "2026-10-23T17:00:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-04T19:26:45Z",
+  "serie_id": 11183,
+  "serie": {
+   "id": 11183,
+   "name": "Convergence EMEA - DACH",
+   "year": 2026,
+   "begin_at": "2026-10-19T16:00:00Z",
+   "end_at": "2026-12-18T20:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "league_id": 5583,
+   "season": null,
+   "full_name": "Convergence EMEA - DACH 2026"
+  },
+  "games": [
+   {
+    "complete": true,
+    "id": 52722,
+    "position": 1,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-10-23T17:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-10-23T17:50:00Z",
+    "forfeit": false,
+    "match_id": 1792369,
+    "winner_type": "Team",
+    "winner": {
+     "id": 139525,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": true,
+    "id": 52723,
+    "position": 2,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-10-23T18:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-10-23T18:50:00Z",
+    "forfeit": false,
+    "match_id": 1792369,
+    "winner_type": "Team",
+    "winner": {
+     "id": 139525,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "finished",
+  "forfeit": false,
+  "tournament": {
+   "id": 22393,
+   "name": "Group A",
+   "type": "online",
+   "country": "DE",
+   "begin_at": "2026-10-19T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-29T21:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026-group-a",
+   "region": "WEU",
+   "serie_id": 11183,
+   "modified_at": "2026-11-15T20:05:36Z",
+   "league_id": 5583,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 139525,
+    "score": 2
+   },
+   {
+    "team_id": 139526,
+    "score": 0
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1792369,
+  "name": "REH Gaming vs Frankfurt Bahnhofsviertel",
+  "league": {
+   "id": 5583,
+   "name": "Spike Series",
+   "url": null,
+   "slug": "valorant-spike-series",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "image_url": null
+  },
+  "tournament_id": 22393,
+  "videogame_version": {
+   "name": "13.09",
+   "current": true
+  }
+ },
+ {
+  "number_of_games": 3,
+  "opponents": [
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139526,
+     "name": "Frankfurt Bahnhofsviertel",
+     "location": "DE",
+     "slug": "frankfurt-bahnhofsviertel",
+     "modified_at": "2026-11-15T20:05:36Z",
+     "acronym": null,
+     "image_url": "https://cdn-api.pandascore.co/images/team/image/139526/100px_frankfurt_bahnhofsviertel_allmode.png",
+     "dark_mode_image_url": "https://cdn-api.pandascore.co/dark_images/team/dark_image/139526/100px_frankfurt_bahnhofsviertel_allmode.png"
+    }
+   },
+   {
+    "type": "Team",
+    "opponent": {
+     "id": 139527,
+     "name": "Team International",
+     "location": "DE",
+     "slug": "team-international",
+     "modified_at": "2026-11-04T19:02:21Z",
+     "acronym": null,
+     "image_url": null,
+     "dark_mode_image_url": null
+    }
+   }
+  ],
+  "slug": "frankfurt-bahnhofsviertel-vs-team-international-2026-10-19",
+  "scheduled_at": "2026-10-19T18:00:00Z",
+  "winner_id": 139527,
+  "league_id": 5583,
+  "winner": {
+   "id": 139527,
+   "name": "Team International",
+   "location": "DE",
+   "slug": "team-international",
+   "modified_at": "2026-11-04T19:02:21Z",
+   "acronym": null,
+   "image_url": null,
+   "dark_mode_image_url": null
+  },
+  "streams_list": [
+   {
+    "main": true,
+    "language": "de",
+    "embed_url": "https://player.twitch.tv/?channel=spikeseriesdach",
+    "official": true,
+    "raw_url": "https://www.twitch.tv/spikeseriesdach"
+   }
+  ],
+  "end_at": null,
+  "original_scheduled_at": "2026-10-19T18:00:00Z",
+  "begin_at": null,
+  "modified_at": "2026-11-04T19:24:00Z",
+  "serie_id": 11183,
+  "serie": {
+   "id": 11183,
+   "name": "Convergence EMEA - DACH",
+   "year": 2026,
+   "begin_at": "2026-10-19T16:00:00Z",
+   "end_at": "2026-12-18T20:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "league_id": 5583,
+   "season": null,
+   "full_name": "Convergence EMEA - DACH 2026"
+  },
+  "games": [
+   {
+    "complete": true,
+    "id": 52719,
+    "position": 1,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-10-19T18:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-10-19T18:50:00Z",
+    "forfeit": false,
+    "match_id": 1792367,
+    "winner_type": "Team",
+    "winner": {
+     "id": 139527,
+     "type": "Team"
+    }
+   },
+   {
+    "complete": true,
+    "id": 52720,
+    "position": 2,
+    "status": "finished",
+    "length": null,
+    "finished": true,
+    "begin_at": "2026-10-19T19:00:00Z",
+    "detailed_stats": true,
+    "end_at": "2026-10-19T19:50:00Z",
+    "forfeit": false,
+    "match_id": 1792367,
+    "winner_type": "Team",
+    "winner": {
+     "id": 139527,
+     "type": "Team"
+    }
+   }
+  ],
+  "draw": false,
+  "rescheduled": false,
+  "videogame": {
+   "id": 26,
+   "name": "Valorant",
+   "slug": "valorant"
+  },
+  "status": "finished",
+  "forfeit": false,
+  "tournament": {
+   "id": 22393,
+   "name": "Group A",
+   "type": "online",
+   "country": "DE",
+   "begin_at": "2026-10-19T16:00:00Z",
+   "detailed_stats": true,
+   "end_at": "2026-11-29T21:00:00Z",
+   "winner_id": null,
+   "winner_type": "Team",
+   "slug": "valorant-spike-series-convergence-emea-dach-2026-group-a",
+   "region": "WEU",
+   "serie_id": 11183,
+   "modified_at": "2026-11-15T20:05:36Z",
+   "league_id": 5583,
+   "prizepool": null,
+   "tier": "d",
+   "has_bracket": false,
+   "live_supported": false
+  },
+  "results": [
+   {
+    "team_id": 139526,
+    "score": 0
+   },
+   {
+    "team_id": 139527,
+    "score": 2
+   }
+  ],
+  "match_type": "best_of",
+  "winner_type": "Team",
+  "videogame_title": null,
+  "detailed_stats": true,
+  "game_advantage": null,
+  "live": {
+   "supported": false,
+   "url": null,
+   "opens_at": null
+  },
+  "id": 1792367,
+  "name": "Frankfurt Bahnhofsviertel vs Team International",
+  "league": {
+   "id": 5583,
+   "name": "Spike Series",
+   "url": null,
+   "slug": "valorant-spike-series",
+   "modified_at": "2026-11-04T16:25:32Z",
+   "image_url": null
+  },
+  "tournament_id": 22393,
+  "videogame_version": {
+   "name": "13.09",
+   "current": true
+  }
+ }
+]
