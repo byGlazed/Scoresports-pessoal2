@@ -192,7 +192,7 @@ Logo, nome, país e jogo, mais o elenco com foto, nick, nome e país. Também mo
     | Peterson | 8,1 | 6,6 |
     | J. Green | 4,6 | 6,3 |
 
-  - **ponto de partida da conversão:** nota = 5,85 + 0,1 × Game Score, entre 3 e 10. Ela já acerta todos esses com erro de até 0,35;
+  - **conversão:** nota = 5,9 + 0,095 × Game Score, entre 3 e 10. Ela acerta todos esses com erro de até 0,3 (5,85 + 0,1 errava o K. George por 0,4 depois do arredondamento);
   - menos de 5 minutos: sem nota.
 - **Outros esportes (NFL, MLB, NHL):** sem nota nesta parte.
 

@@ -120,6 +120,8 @@ function linhaBox(nomes, valores) {
     minutos: numeroBox(v.MIN),
     pts: numeroBox(v.PTS),
     reb: numeroBox(v.REB),
+    oreb: numeroBox(v.OREB),
+    dreb: numeroBox(v.DREB),
     ast: numeroBox(v.AST),
     stl: numeroBox(v.STL),
     blk: numeroBox(v.BLK),
