@@ -2207,7 +2207,8 @@ async function pandascore(caminho, params = {}) {
   for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== null) u.searchParams.set(k, v);
   let r;
   try {
-    r = await fetch(u.toString());
+    // sem o cache HTTP do navegador: quem decide quanto tempo guardar é o banco do celular (obter)
+    r = await fetch(u.toString(), { cache: "no-store" });
   } catch (_) {
     throw new ErroEsports("Não foi possível falar com o repasse dos e-sports agora.");
   }
@@ -2249,7 +2250,10 @@ async function esportsDoDia(de) {
   return todas.map((m) => Esports.partida(m));
 }
 
-const encerradaDeVez = (p) => p.estado === 3;
+/** As partidas ao vivo dos três jogos: /matches/running fica só 30 s na memória do repasse (as listas, 2 min). */
+function esportsAoVivo() {
+  return viaEsports("esports_aovivo_v1", 25, async () => (await pandascore("matches/running", { "filter[videogame]": SLUGS_ESPORTS, per_page: 100 })).map((m) => Esports.partida(m)));
+}
 
 /** O elenco ativo de um time (não derruba a página se falhar). */
 async function elencoEsports(timeId) {
@@ -2272,16 +2276,33 @@ const ROTAS = [
     const de = q.de || hojeEmBR();
     const hoje = hojeEmBR();
     const ttl = de === hoje ? 30 : de < hoje ? 3600 : 120;
-    const todas = await viaEsports(`esports_dia_v1:${de}`, ttl, () => esportsDoDia(de), (lista) => de < hoje && lista.every(encerradaDeVez));
+    let todas = await viaEsports(`esports_dia_v1:${de}`, ttl, () => esportsDoDia(de), (lista) => de < hoje && lista.every(Esports.encerradaDeVez));
+    // com partida ao vivo, o placar vem de /running (fresco a cada 30 s), também no dia anterior depois da meia-noite
+    if (todas.some((p) => p.estado === 2)) {
+      try {
+        todas = Esports.juntarAoVivo(todas, await esportsAoVivo());
+      } catch (_) {
+        /* fica a lista como estava */
+      }
+    }
     const favoritos = new Set(String(q.favoritos || "").split(",").filter(Boolean));
     if (q.so_favoritos === "1") return todas.filter((p) => p.lados.some((l) => l.id !== null && favoritos.has(String(l.id))));
     return todas.filter((p) => Esports.entraNoDia(p, favoritos));
   }],
-  [/^\/esports\/aovivo$/, () =>
-    viaEsports("esports_aovivo_v1", 25, async () => (await pandascore("matches/running", { "filter[videogame]": SLUGS_ESPORTS, per_page: 100 })).map((m) => Esports.partida(m)))],
+  [/^\/esports\/aovivo$/, () => esportsAoVivo()],
   [/^\/esports\/jogos\/([^/]+)\/([^/]+)$/, async (m) => {
     jogoEsportsOu404(m[1]);
-    const partida = Esports.partida(await viaEsports(`esports_partida_v1:${m[2]}`, 30, () => pandascore(`matches/${m[2]}`), (x) => Esports.partida(x).estado === 3), m[1]);
+    let bruta = await viaEsports(`esports_partida_v1:${m[2]}`, 30, () => pandascore(`matches/${m[2]}`), (x) => Esports.encerradaDeVez(Esports.partida(x)));
+    // ao vivo: a versão de /matches/running (30 s no repasse) em vez da de /matches/{id} (2 min)
+    if (Esports.partida(bruta).estado === 2) {
+      try {
+        const vivo = await obter(`esports_partida_vivo_v1:${m[2]}`, 25, () => pandascore("matches/running", { "filter[id]": m[2] }));
+        if (vivo.length) bruta = vivo[0];
+      } catch (_) {
+        /* fica a versão que já veio */
+      }
+    }
+    const partida = Esports.partida(bruta, m[1]);
     const elencos = await Promise.all(partida.lados.map((l) => elencoEsports(l.id)));
     return { partida, elencos };
   }],

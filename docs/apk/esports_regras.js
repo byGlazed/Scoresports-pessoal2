@@ -83,6 +83,7 @@ const Esports = (() => {
       estado,
       status,
       melhor_de: m.number_of_games || null,
+      tipo: m.match_type || null, // best_of; all_games_played (MD2 pode empatar); first_to...
       torneio: { id: t.id ?? null, nome: t.name || null, tier: t.tier || null, liga: liga.name || null, serie: serie.full_name || serie.name || null, logo: liga.image_url || null },
       lados,
       placar: [placarDe(lados[0]), placarDe(lados[1])],
@@ -123,6 +124,8 @@ const Esports = (() => {
   /** As bolinhas do "Melhor de N": quantos mapas cada lado precisa vencer, cheias as que venceu. */
   function bolinhas(p) {
     if (!p.melhor_de || ["Cancelada", "Adiada", "W.O."].includes(p.status)) return null;
+    // só no "melhor de N": numa MD2 (todos os mapas jogados) os dois podem vencer um mapa
+    if (p.tipo && p.tipo !== "best_of") return null;
     const precisa = Math.ceil(p.melhor_de / 2);
     const cheias = (n) => Array.from({ length: precisa }, (_, i) => i < (Number(n) || 0));
     return { esquerda: cheias(p.placar[0]), direita: cheias(p.placar[1]) };
@@ -134,7 +137,8 @@ const Esports = (() => {
     const itens = [];
     for (const s of lista || []) {
       const url = s && s.raw_url;
-      if (!url || vistas.has(url)) continue;
+      // só links da web: nada de javascript: ou outro esquema vindo dos dados
+      if (!url || !/^https?:\/\//i.test(url) || vistas.has(url)) continue;
       vistas.add(url);
       let nome = url;
       try {
@@ -147,6 +151,17 @@ const Esports = (() => {
     }
     const peso = (t) => (String(t.idioma || "").startsWith("pt") ? 0 : t.oficial ? 1 : 2);
     return itens.map((t, i) => ({ t, i })).sort((a, b) => peso(a.t) - peso(b.t) || a.i - b.i).map(({ t }) => ({ nome: t.nome, url: t.url, idioma: t.idioma }));
+  }
+
+  /** Encerrada de vez (pode ficar guardada por muito tempo): encerrada, cancelada ou W.O. Adiada ainda volta. */
+  function encerradaDeVez(p) {
+    return p.estado === 3 && p.status !== "Adiada";
+  }
+
+  /** A lista do dia com as partidas ao vivo trocadas pela versão mais nova (de /matches/running), na mesma ordem. */
+  function juntarAoVivo(partidas, aoVivo) {
+    const novas = new Map((aoVivo || []).map((p) => [p.id, p]));
+    return partidas.map((p) => (novas.has(p.id) ? { ...novas.get(p.id), jogo: p.jogo || novas.get(p.id).jogo } : p));
   }
 
   /** Um jogador do elenco (/teams/{id}). */
@@ -166,7 +181,7 @@ const Esports = (() => {
     return Array.from({ length: n }, (_, i) => [(a || [])[i] ?? null, (b || [])[i] ?? null]);
   }
 
-  return { JOGOS, jogoDoSlug, jogoDoId, intervaloDoDia, partida, entraNoDia, grupos, bolinhas, transmissoes, jogador, elencoLadoALado };
+  return { JOGOS, jogoDoSlug, jogoDoId, intervaloDoDia, partida, entraNoDia, grupos, bolinhas, transmissoes, jogador, elencoLadoALado, encerradaDeVez, juntarAoVivo };
 })();
 
 if (typeof module !== "undefined") module.exports = Esports;

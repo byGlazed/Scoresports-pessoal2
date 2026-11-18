@@ -138,3 +138,43 @@ test("elenco: jogador e lado a lado", () => {
   const pares = Esports.elencoLadoALado([1, 2, 3], ["a"]);
   assert.deepEqual(pares, [[1, "a"], [2, null], [3, null]]);
 });
+
+/* ---------- Revisão final ---------- */
+
+test("melhor de 2 (todos os mapas jogados) não tem bolinhas", () => {
+  const md2 = Esports.partida({ ...FURIA_VIT, match_type: "all_games_played", number_of_games: 2, results: [{ team_id: FURIA, score: 1 }, { team_id: VITALITY, score: 1 }] });
+  assert.equal(md2.tipo, "all_games_played");
+  assert.equal(Esports.bolinhas(md2), null);
+  assert.equal(Esports.partida(FURIA_VIT).tipo, "best_of");
+});
+
+test("adiada não fica guardada como encerrada de vez", () => {
+  const com = (extra) => Esports.encerradaDeVez(Esports.partida({ ...FURIA_VIT, ...extra }));
+  assert.equal(com({ status: "postponed" }), false);
+  assert.equal(com({ status: "running" }), false);
+  assert.equal(com({ status: "not_started" }), false);
+  assert.equal(com({ status: "finished" }), true);
+  assert.equal(com({ status: "canceled", forfeit: false, winner_id: null }), true);
+  assert.equal(com({ status: "finished", forfeit: true, winner_id: FURIA }), true);
+});
+
+test("junta o ao vivo na lista do dia", () => {
+  const vivo = amostra("running").map((m) => Esports.partida(m));
+  const antiga = { ...vivo[0], placar: [0, 0], mapas: [] };
+  const outra = Esports.partida(FURIA_VIT);
+  const juntas = Esports.juntarAoVivo([outra, antiga], vivo);
+  assert.deepEqual(juntas.map((p) => p.id), [outra.id, antiga.id]); // a ordem fica
+  assert.equal(juntas[0], outra);
+  assert.deepEqual(juntas[1].placar, vivo[0].placar);
+  assert.deepEqual(juntas[1].mapas, vivo[0].mapas);
+  assert.deepEqual(Esports.juntarAoVivo([outra], []), [outra]);
+});
+
+test("transmissões só com endereço http(s)", () => {
+  const t = Esports.transmissoes([
+    { language: "pt", raw_url: "javascript:alert(1)" },
+    { language: "pt", raw_url: "ftp://exemplo.com/x" },
+    { language: "en", raw_url: "https://www.twitch.tv/blast" },
+  ]);
+  assert.deepEqual(t.map((x) => x.url), ["https://www.twitch.tv/blast"]);
+});
