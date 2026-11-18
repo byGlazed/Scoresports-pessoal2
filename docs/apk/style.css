@@ -1451,3 +1451,76 @@ button.confronto-chave:hover { border-color: var(--texto-3); }
 .aviso-apk-baixar { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
 .aviso-apk-fechar { width: 44px; height: 44px; border: 0; background: none; color: var(--texto-3); font-size: 22px; border-radius: 50%; }
 .aviso-apk-fechar:hover { background: var(--superficie-2); color: var(--texto); }
+
+/* ---------- E-sports (página da partida e do time) ---------- */
+.linha-torneio { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--texto-2); }
+.melhor-de {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--raio);
+  background: var(--superficie-2);
+}
+.melhor-de strong { font-size: 15px; }
+.bolinhas { display: flex; gap: 8px; }
+.bolinha { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--texto-3); }
+.bolinha.cheia { border-color: var(--vitoria); background: var(--vitoria); }
+
+.mapas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mapa {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 10px 14px;
+  border-radius: var(--raio);
+  background: linear-gradient(100deg, var(--superficie-3), var(--superficie-2));
+  border-left: 3px solid transparent;
+}
+.mapa.venceu-esquerda { border-left-color: var(--vitoria); }
+.mapa.venceu-direita { border-left-color: var(--marca); }
+.mapa.ao-vivo { border-left-color: var(--ao-vivo); }
+.mapa-hora { font-weight: 600; color: var(--texto-2); font-variant-numeric: tabular-nums; }
+.mapa-meio { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+.mapa-resultado { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.mapa-resultado .logo { width: 22px; height: 22px; }
+.mapa-resultado.ao-vivo { color: var(--ao-vivo); }
+.mapa-resultado.a-jogar { color: var(--texto-2); font-weight: 600; }
+.mapa-duracao { font-size: 12.5px; color: var(--texto-2); }
+.mapa-nome { display: flex; flex-direction: column; align-items: flex-end; font-size: 13.5px; }
+
+.lista-transmissoes { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.lista-transmissoes a { display: flex; align-items: center; gap: 8px; min-height: 40px; overflow-wrap: anywhere; }
+.lista-transmissoes .idioma {
+  flex: none;
+  min-width: 28px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--superficie-3);
+  color: var(--texto-2);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.elencos-cabeca { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 12.5px; font-weight: 700; color: var(--texto-2); }
+.elencos { display: grid; gap: 2px; }
+.elencos-linha { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid var(--linha); padding: 6px 0; }
+.elencos-linha:first-child { border-top: 0; }
+.jogador-esports { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 44px; }
+.jogador-esports.direita { flex-direction: row-reverse; text-align: right; }
+.jogador-esports-texto { display: flex; flex-direction: column; min-width: 0; }
+.jogador-esports-texto strong, .jogador-esports-texto .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jogador-esports-texto .sub { font-size: 12.5px; color: var(--texto-2); }
+.foto-esports { flex: none; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: top; background: var(--superficie-3); }
+.foto-esports.vazia { display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: var(--texto-2); }
+.elenco-esports { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; }
+
+.cabecalho-time-esports { display: flex; align-items: center; gap: 12px; padding: 14px; }
+.cabecalho-time-esports .logo { width: 52px; height: 52px; }
+.cabecalho-time-esports h2 { margin: 0; font-size: 18px; }
+.cabecalho-time-esports .sub { margin: 2px 0 0; color: var(--texto-2); font-size: 13px; }
+.cabecalho-time-esports > div { flex: 1; min-width: 0; }

@@ -5,7 +5,7 @@
    Usa a base de app.js e as telas de esportes.js.
    ========================================================================= */
 
-const NOME_ESPORTE = { nba: "NBA", futebol: "Futebol", nfl: "NFL", mlb: "MLB", nhl: "NHL", f1: "Fórmula 1", ufc: "UFC", boxe: "Boxe" };
+const NOME_ESPORTE = { nba: "NBA", futebol: "Futebol", nfl: "NFL", mlb: "MLB", nhl: "NHL", f1: "Fórmula 1", ufc: "UFC", boxe: "Boxe", esports: "E-sports" };
 
 const esporteObj = (id) => S.esportes.find((e) => e.id === id);
 
@@ -235,6 +235,17 @@ async function inicioDesenhar(silencioso) {
         })
       );
     }
+  }
+
+  // e-sports: as partidas do dia dos times favoritos (pelo repasse da PandaScore)
+  if (plano.esports && plano.esports.times.size && esporteObj("esports")) {
+    tarefas.push(
+      api(`/esports/jogos?de=${data}&favoritos=${[...plano.esports.times].join(",")}&so_favoritos=1`).then((partidas) => ({
+        jogos: partidas,
+        desenhar: (visiveis) =>
+          h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo: "E-sports" }), visiveis.map((p) => linhaPartidaEsports(p, () => abrirPartidaEsports(p)))),
+      }))
+    );
   }
 
   // F1 e UFC: eventos no dia (ou o próximo)

@@ -217,7 +217,7 @@ const Navegacao = {
     const partes = [h("span", { class: "titulo-texto" }, texto), p.subtitulo ? h("span", { class: "subtitulo-pagina" }, p.subtitulo) : null];
     // na partida, o título (a liga) é um botão que abre a página da liga
     $("#titulo-pagina").replaceChildren(
-      def.aoTocarTitulo && !raiz
+      def.aoTocarTitulo && !raiz && !(def.tituloSemLiga && def.tituloSemLiga(p.params))
         ? h("button", { class: "titulo-botao", type: "button", onclick: () => def.aoTocarTitulo(p.params, p) }, h("span", { class: "titulo-bloco" }, ...partes), s("svg", { viewBox: "0 0 24 24", width: "14", height: "14", "aria-hidden": "true" }, s("path", { d: "M9 5l7 7-7 7", fill: "none", stroke: "currentColor", "stroke-width": "2.4", "stroke-linecap": "round", "stroke-linejoin": "round" })))
         : h("span", { class: "titulo-bloco" }, ...partes)
     );
@@ -296,6 +296,7 @@ registrarPagina("pesquisa", {
 registrarPagina("time", {
   titulo: (params, p) => p.nome || "Time",
   desenhar: (corpo, params, ativo, p) => {
+    if (params.esporte === "esports") return desenharTimeEsports(corpo, ativo, params.liga, params.id, p.nome);
     p.lembrar = p.lembrar || { aba: "jogos" };
     return desenharTime(corpo, ativo, params.esporte, params.liga, params.id, p.nome, p.lembrar);
   },
@@ -324,15 +325,18 @@ registrarPagina("jogo", {
     return (l && l.nome) || (esp && esp.nome) || "Jogo";
   },
   aoTocarTitulo: (params) => irPara(params.esporte, "classificacao", params.liga),
+  tituloSemLiga: (params) => params.esporte === "esports",
   desenhar: (corpo, params, ativo, p) => {
     const esp = esporteObj(params.esporte);
     if (!esp) return corpo.replaceChildren(vazio("Jogo não encontrado."));
     if (esp.tipo === "nba") return p.jogo ? nbaMostrarJogo(p.jogo) : nbaJogoPeloId(params.id, p);
+    if (esp.tipo === "esports") return esportsPartida(params.liga, params.id, false, p.jogo);
     return partidaDetalhe(esp, params.liga, p.jogo || { id: params.id }, false);
   },
   aoMostrar: (corpo, params, p) => {
     const esp = esporteObj(params.esporte);
     if (esp.tipo === "nba") return p.jogo ? nbaMostrarJogo(p.jogo, true) : null;
+    if (esp.tipo === "esports") return esportsPartida(params.liga, params.id, true, p.jogo);
     return partidaDetalhe(esp, params.liga, p.jogo || { id: params.id }, true);
   },
 });
@@ -429,7 +433,7 @@ registrarPagina("liga", {
 
 const JOGOS = { chip: lembrar("jogos:chip") || "todos", data: null };
 
-const ARTIGO_ESPORTE = { futebol: "o futebol", nba: "a NBA", nfl: "a NFL", mlb: "a MLB", nhl: "a NHL", f1: "a Fórmula 1", ufc: "o UFC", boxe: "o boxe" };
+const ARTIGO_ESPORTE = { futebol: "o futebol", nba: "a NBA", nfl: "a NFL", mlb: "a MLB", nhl: "a NHL", f1: "a Fórmula 1", ufc: "o UFC", boxe: "o boxe", esports: "os e-sports" };
 
 function chipsDisponiveis() {
   return Rotas.CHIPS_ESPORTE.filter(([id]) => id === "todos" || esporteObj(id));
@@ -441,7 +445,7 @@ function dataDoChip(chip) {
   const esp = esporteObj(chip);
   if (!esp) return null;
   if (esp.tipo === "nba") return NBA.data;
-  if (esp.tipo === "partidas") return estadoDe(esp.id).data;
+  if (esp.tipo === "partidas" || esp.tipo === "esports") return estadoDe(esp.id).data;
   return null;
 }
 
@@ -495,6 +499,10 @@ function desenharChipJogos(silencioso) {
     if (!silencioso && NBA.datas && NBA.conjuntoDatas.has(JOGOS.data)) NBA.data = JOGOS.data;
     return silencioso && NBA.datas ? nbaDia(true) : nbaJogos();
   }
+  if (esp.tipo === "esports") {
+    if (!silencioso) estadoDe(esp.id).data = JOGOS.data || estadoDe(esp.id).data;
+    return esportsLista(silencioso);
+  }
   if (silencioso) return null;
   if (esp.tipo === "boxe") return boxeLista(esp);
   return eventosLista(esp, esp.ligas[0].id);
@@ -513,6 +521,7 @@ function linhaEventoDoDia(esp, ev, abrir) {
 
 /** Os grupos de um esporte no dia (uma competição por grupo). Rejeita se o esporte inteiro falhar. */
 async function gruposDoEsporte(esp, data) {
+  if (esp.tipo === "esports") return gruposEsports(data);
   const vivo = (itens) => itens.some((x) => x.estado === 2);
   if (esp.tipo === "partidas") {
     const respostas = await Promise.allSettled(esp.ligas.map((l) => api(`/e/${esp.id}/${l.id}/jogos?de=${data}`)));
