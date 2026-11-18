@@ -1,0 +1,600 @@
+{
+ "3-4-2-1": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LM"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 7,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 9,
+   "posicao": "F"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CF-R"
+  },
+  {
+   "lugar": 11,
+   "posicao": "CF-L"
+  }
+ ],
+ "4-3-3": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CM"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 7,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 8,
+   "posicao": "LM"
+  },
+  {
+   "lugar": 9,
+   "posicao": "F"
+  },
+  {
+   "lugar": 10,
+   "posicao": "RF"
+  },
+  {
+   "lugar": 11,
+   "posicao": "LF"
+  }
+ ],
+ "4-2-3-1": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "LM"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 7,
+   "posicao": "AM-R"
+  },
+  {
+   "lugar": 8,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 9,
+   "posicao": "F"
+  },
+  {
+   "lugar": 10,
+   "posicao": "AM"
+  },
+  {
+   "lugar": 11,
+   "posicao": "AM-L"
+  }
+ ],
+ "5-3-2": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 7,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM"
+  },
+  {
+   "lugar": 9,
+   "posicao": "CF-L"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CF-R"
+  },
+  {
+   "lugar": 11,
+   "posicao": "CM-L"
+  }
+ ],
+ "3-4-1-2": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LM"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 7,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 9,
+   "posicao": "AM"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CF-R"
+  },
+  {
+   "lugar": 11,
+   "posicao": "CF-L"
+  }
+ ],
+ "4-4-2": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 7,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 9,
+   "posicao": "CF-L"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CF-R"
+  },
+  {
+   "lugar": 11,
+   "posicao": "LM"
+  }
+ ],
+ "3-5-2": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LM"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 7,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 9,
+   "posicao": "CF-L"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CF-R"
+  },
+  {
+   "lugar": 11,
+   "posicao": "AM"
+  }
+ ],
+ "3-4-3": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LM"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 7,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 9,
+   "posicao": "F"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CF-R"
+  },
+  {
+   "lugar": 11,
+   "posicao": "CF-L"
+  }
+ ],
+ "4-3-2-1": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CM"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 7,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 9,
+   "posicao": "F"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CF-R"
+  },
+  {
+   "lugar": 11,
+   "posicao": "CF-L"
+  }
+ ],
+ "4-5-1": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 7,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 9,
+   "posicao": "F"
+  },
+  {
+   "lugar": 10,
+   "posicao": "AM"
+  },
+  {
+   "lugar": 11,
+   "posicao": "LM"
+  }
+ ],
+ "5-4-1": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 7,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 9,
+   "posicao": "F"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 11,
+   "posicao": "LM"
+  }
+ ],
+ "4-1-4-1": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "DM"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 7,
+   "posicao": "RM"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 9,
+   "posicao": "F"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 11,
+   "posicao": "LM"
+  }
+ ],
+ "4-2-2-2": [
+  {
+   "lugar": 1,
+   "posicao": "G"
+  },
+  {
+   "lugar": 2,
+   "posicao": "RB"
+  },
+  {
+   "lugar": 3,
+   "posicao": "LB"
+  },
+  {
+   "lugar": 4,
+   "posicao": "CM-R"
+  },
+  {
+   "lugar": 5,
+   "posicao": "CD-R"
+  },
+  {
+   "lugar": 6,
+   "posicao": "CD-L"
+  },
+  {
+   "lugar": 7,
+   "posicao": "AM-R"
+  },
+  {
+   "lugar": 8,
+   "posicao": "CM-L"
+  },
+  {
+   "lugar": 9,
+   "posicao": "CF-L"
+  },
+  {
+   "lugar": 10,
+   "posicao": "CF-R"
+  },
+  {
+   "lugar": 11,
+   "posicao": "AM-L"
+  }
+ ]
+}
