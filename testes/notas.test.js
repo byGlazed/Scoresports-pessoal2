@@ -94,6 +94,12 @@ test("futebol: a nota fica entre 3 e 10", () => {
   assert.ok(Notas.notaFutebol({ posicao: "CD", minutos: 30, vermelhos: 1, gols_contra: 3, amarelos: 1, faltas_cometidas: 8 }, { resultado: "derrota", sofridos_do_time: 7 }) >= 3);
 });
 
+test("futebol: papel pela posição, em inglês (PC) e em português (celular)", () => {
+  for (const p of ["G"]) assert.equal(Notas.papel(p), "goleiro", p);
+  for (const p of ["CD", "CD-L", "CD-R", "LB", "RB", "SW", "LWB", "RWB", "ZC", "ZE", "ZCD", "ZD"]) assert.equal(Notas.papel(p), "defensor", p);
+  for (const p of ["DM", "CM", "AM", "F", "MD", "ME", "MA", "A", "ACI", "ATCD", "MC", "MCE", null]) assert.equal(Notas.papel(p), "linha", String(p));
+});
+
 test("média do time", () => {
   assert.equal(Notas.media([7.8, 6.7, null, 6.5]), 7.0);
   assert.equal(Notas.media([]), null);

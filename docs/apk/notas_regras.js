@@ -70,7 +70,8 @@ const Notas = (() => {
   function papel(posicao) {
     const p = String(posicao || "").toUpperCase();
     if (p === "G" || p === "GK") return "goleiro";
-    if (/^(CD|CB|LB|RB|SW|LWB|RWB|D)/.test(p)) return "defensor";
+    // inglês (PC): CD, CD-L, LB, RB, SW, LWB...; português (celular, lang=pt): ZC, ZE, ZCD (zagueiros). "DM" é volante, não defensor.
+    if (/^(CD|CB|SW|LB|RB|LWB|RWB|WB|D)(-[LR])?$/.test(p) || /^Z[A-Z]*$/.test(p)) return "defensor";
     return "linha";
   }
 
@@ -97,7 +98,7 @@ const Notas = (() => {
       n -= 0.3 * num(j.gols_sofridos);
       if (semSofrer) n += 0.5;
     } else if (quem === "defensor") {
-      n -= 0.1 * num(ctx.sofridos_do_time);
+      n -= 0.05 * num(ctx.sofridos_do_time);
       if (semSofrer) n += 0.3;
     }
     return umaCasa(limitar(n));

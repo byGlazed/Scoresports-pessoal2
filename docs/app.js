@@ -277,6 +277,36 @@ function botaoFavorito(item, { comTexto = false } = {}) {
   return botao;
 }
 
+/* ---------- Nota do Scoresports (notas_regras.js) ---------- */
+
+/** Selo colorido da nota; nada quando o jogador não tem nota. */
+function seloNota(n, casas = 1) {
+  const cor = Notas.corDaNota(n);
+  if (!cor) return null;
+  return h("span", { class: `selo-nota nota-${cor}`, title: "Nota do Scoresports" }, Notas.formatar(n, casas));
+}
+
+/** Botão ⓘ que explica de onde vem a nota (abre e fecha um balão). */
+function botaoInfoNota() {
+  const balao = h("span", { class: "info-nota-balao", role: "note", hidden: true }, Notas.TEXTO_INFO);
+  const botao = h(
+    "button",
+    {
+      class: "info-nota-botao",
+      type: "button",
+      "aria-label": "Sobre a nota",
+      "aria-expanded": "false",
+      onclick: (e) => {
+        e.stopPropagation();
+        balao.hidden = !balao.hidden;
+        botao.setAttribute("aria-expanded", String(!balao.hidden));
+      },
+    },
+    h("span", { class: "info-nota-i", "aria-hidden": "true" }, "i")
+  );
+  return h("span", { class: "info-nota" }, botao, balao);
+}
+
 /* ---------- Últimos campeões (campeoes.json) ---------- */
 
 let CAMPEOES = null;

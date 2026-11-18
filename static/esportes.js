@@ -876,7 +876,7 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
 
   function conteudoAba(id) {
     if (id === "estatisticas") return [secao(null, comparacaoEstatisticas(r.estatisticas, j, futebol))];
-    if (id === "escalacoes") return escalacoesFutebol(esp, liga, r.escalacoes);
+    if (id === "escalacoes") return campinhoFutebol(esp, liga, r.escalacoes, j);
     // estados guardados por jogo: resistem à atualização automática do jogo ao vivo
     const guardado = (sufixo, inicial) => (S.abaDetalhe[`${chaveAba}:${sufixo}`] = S.abaDetalhe[`${chaveAba}:${sufixo}`] || inicial);
     if (id === "jogadores" && nba) return boxScoreNBA(esp, liga, r, guardado("ordem", { coluna: null, direcao: "desc" }), () => area.replaceChildren(...conteudoAba("jogadores")));
