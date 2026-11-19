@@ -162,35 +162,45 @@ const TRINTA_DIAS = 30 * 86400;
 /** Igual ao cache.obter do Python: guarda tudo, só pergunta de novo quando vence. */
 // Dado vencido mas recente (até 6 h) é entregue na hora, e o novo é buscado em segundo plano
 // (stale-while-revalidate): a tela aparece sem "Carregando…" e se redesenha quando o novo chega.
-const VELHO_MAXIMO = 6 * 3600;
-const revalidando = new Map();
+// A decisão fica em cache_regras.js. Um pedido igual que já está em andamento é reaproveitado.
+const emAndamento = new Map();
 let avisoDadosNovos = null;
+let ultimoAviso = null;
 
 function avisarDadosNovos() {
-  clearTimeout(avisoDadosNovos);
-  avisoDadosNovos = setTimeout(() => window.dispatchEvent(new CustomEvent("ss:dados-novos")), 300);
+  if (avisoDadosNovos) return; // já tem um aviso marcado
+  const espera = Math.max(300, CacheRegras.esperaParaAvisar(ultimoAviso, Date.now()));
+  avisoDadosNovos = setTimeout(() => {
+    avisoDadosNovos = null;
+    ultimoAviso = Date.now();
+    window.dispatchEvent(new CustomEvent("ss:dados-novos"));
+  }, espera);
 }
 
-async function obter(chave, ttl, buscar, estavel) {
+function buscarUmaVez(chave, ttl, buscar, estavel, salvo) {
+  if (!emAndamento.has(chave)) {
+    emAndamento.set(chave, buscarEGuardar(chave, ttl, buscar, estavel, salvo).finally(() => emAndamento.delete(chave)));
+  }
+  return emAndamento.get(chave);
+}
+
+/** opcoes.semVelho: nunca entrega dado vencido (o ao vivo dos e-sports, que corrige outras listas). */
+async function obter(chave, ttl, buscar, estavel, opcoes = {}) {
   const salvo = await Banco.ler("dados", chave);
-  const agora = Date.now() / 1000;
-  if (salvo && agora < salvo.vale_ate) return salvo.valor;
-  if (salvo && agora - salvo.salvo_em < VELHO_MAXIMO) {
-    if (!revalidando.has(chave)) {
+  const decisao = CacheRegras.decidir(salvo, Date.now() / 1000, opcoes);
+  if (decisao === "valido") return salvo.valor;
+  if (decisao === "velho") {
+    if (!emAndamento.has(chave)) {
       const antes = JSON.stringify(salvo.valor);
-      revalidando.set(
-        chave,
-        buscarEGuardar(chave, ttl, buscar, estavel, salvo)
-          .then((novo) => {
-            if (JSON.stringify(novo) !== antes) avisarDadosNovos();
-          })
-          .catch(() => {})
-          .finally(() => revalidando.delete(chave))
-      );
+      buscarUmaVez(chave, ttl, buscar, estavel, salvo)
+        .then((novo) => {
+          if (JSON.stringify(novo) !== antes) avisarDadosNovos();
+        })
+        .catch(() => {});
     }
     return salvo.valor;
   }
-  return buscarEGuardar(chave, ttl, buscar, estavel, salvo);
+  return buscarUmaVez(chave, ttl, buscar, estavel, salvo);
 }
 
 async function buscarEGuardar(chave, ttl, buscar, estavel, salvo) {
@@ -409,7 +419,9 @@ function ondeAssistir(esporte, { liga = null, data = null, inicio = null, times 
   const dados = TRANSMISSOES || {};
   const br = inicio ? partesBR(inicio instanceof Date ? inicio : lerData(inicio)) : null;
   if (!data && br) data = br.data;
-  for (const item of dados.jogos || []) {
+  // item escrito à mão vem antes do item do robô dos canais (fonte "guia de TV")
+  const itens = [...(dados.jogos || [])].sort((a, b) => (a.fonte === "guia de TV") - (b.fonte === "guia de TV"));
+  for (const item of itens) {
     if ((item.esporte || "nba") !== esporte) continue;
     if (item.liga && liga && item.liga !== liga) continue;
     if (item.data !== data) continue;
@@ -907,6 +919,7 @@ function tipoLance(texto, gol) {
 function lances(dados, esporteEspn) {
   if (esporteEspn === "soccer") {
     return (dados.keyEvents || [])
+      .filter((e) => !e.shootout) // cobrança da disputa de pênaltis não é gol do jogo
       .map((e) => {
         const tipo = tipoLance((e.type || {}).text || (e.type || {}).type, e.scoringPlay);
         if (!tipo) return null;
@@ -2256,9 +2269,9 @@ async function pandascore(caminho, params = {}) {
   }
 }
 
-async function viaEsports(chave, ttl, buscar, estavel) {
+async function viaEsports(chave, ttl, buscar, estavel, opcoes) {
   try {
-    return await obter(chave, ttl, buscar, estavel);
+    return await obter(chave, ttl, buscar, estavel, opcoes);
   } catch (erro) {
     if (erro instanceof ErroRota) throw erro;
     throw new Error(erro instanceof ErroEsports ? erro.message : `Não foi possível obter os e-sports agora. Motivo: ${motivo(erro)}`);
@@ -2285,7 +2298,7 @@ async function esportsDoDia(de) {
 
 /** As partidas ao vivo dos três jogos: /matches/running fica só 30 s na memória do repasse (as listas, 2 min). */
 function esportsAoVivo() {
-  return viaEsports("esports_aovivo_v1", 25, async () => (await pandascore("matches/running", { "filter[videogame]": SLUGS_ESPORTS, per_page: 100 })).map((m) => Esports.partida(m)));
+  return viaEsports("esports_aovivo_v1", 25, async () => (await pandascore("matches/running", { "filter[videogame]": SLUGS_ESPORTS, per_page: 100 })).map((m) => Esports.partida(m)), undefined, { semVelho: true });
 }
 
 /** O elenco ativo de um time (não derruba a página se falhar). */
@@ -2329,7 +2342,7 @@ const ROTAS = [
     // ao vivo: a versão de /matches/running (30 s no repasse) em vez da de /matches/{id} (2 min)
     if (Esports.partida(bruta).estado === 2) {
       try {
-        const vivo = await obter(`esports_partida_vivo_v1:${m[2]}`, 25, () => pandascore("matches/running", { "filter[id]": m[2] }));
+        const vivo = await obter(`esports_partida_vivo_v1:${m[2]}`, 25, () => pandascore("matches/running", { "filter[id]": m[2] }), undefined, { semVelho: true });
         if (vivo.length) bruta = vivo[0];
       } catch (_) {
         /* fica a versão que já veio */

@@ -41,16 +41,28 @@ const Fotos = (() => {
     const doTime = candidatos.filter((p) => mesmoTime(p.strTeam, time));
     let escolhido = null;
     if (doTime.length === 1) escolhido = doTime[0];
-    // sem o time (o TheSportsDB às vezes guarda a seleção): só nome completo, e um só resultado
-    else if (!doTime.length && candidatos.length === 1 && alvo.split(" ").length >= 2) escolhido = candidatos[0];
+    // sem o time: só se o "time" do resultado for a seleção do próprio jogador (o TheSportsDB às vezes guarda
+    // a seleção no lugar do clube), com nome completo e um só resultado; outro clube pode ser um homônimo
+    else if (!doTime.length && candidatos.length === 1 && alvo.split(" ").length >= 2) {
+      const c = candidatos[0];
+      if (!c.strTeam || (c.strNationality && normalizar(c.strTeam) === normalizar(c.strNationality))) escolhido = c;
+    }
     return escolhido ? urlPequena(escolhido.strCutout || escolhido.strThumb) : null;
+  }
+
+  /** As chaves do cache a apagar: as vencidas e, além do limite, as que vencem primeiro. */
+  function chavesParaApagar(entradas, agora, maximo) {
+    const vencidas = entradas.filter((e) => !(e.ate > agora)).map((e) => e.chave);
+    const validas = entradas.filter((e) => e.ate > agora).sort((a, b) => a.ate - b.ate);
+    const excesso = validas.slice(0, Math.max(0, validas.length - maximo)).map((e) => e.chave);
+    return [...vencidas, ...excesso];
   }
 
   const espnNba = (id) => `https://a.espncdn.com/i/headshots/nba/players/full/${id}.png`;
   const urlBusca = (nome) => `${API}/searchplayers.php?p=${encodeURIComponent(String(nome || "").trim())}`;
   const chave = (nome, time) => `${normalizar(nome)}|${normalizar(time)}`;
 
-  return { normalizar, mesmoTime, urlPequena, escolher, espnNba, urlBusca, chave };
+  return { normalizar, mesmoTime, urlPequena, escolher, chavesParaApagar, espnNba, urlBusca, chave };
 })();
 
 if (typeof module !== "undefined") module.exports = Fotos;

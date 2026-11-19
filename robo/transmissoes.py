@@ -108,14 +108,18 @@ def normalizar(texto):
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", sem.lower())).strip()
 
 
+SIGLAS_EQUIVALENTES = {"wsh": "was", "gs": "gsw", "ny": "nyk", "sa": "sas", "no": "nop", "utah": "uta", "pho": "phx"}
+
+
 def mesmo_time(nome, candidatos):
-    """O nome do guia é o time: igual a um dos nomes da ESPN, ou uma palavra inteira dele (com 5 letras ou mais)."""
+    """O nome do guia é o time: igual a um dos nomes da ESPN (siglas equivalentes valem, NY = NYK),
+    ou uma palavra inteira dele (com 5 letras ou mais)."""
     g = normalizar(nome)
     for c in candidatos:
         n = normalizar(c)
         if not n or not g:
             continue
-        if g == n:
+        if g == n or SIGLAS_EQUIVALENTES.get(g, g) == SIGLAS_EQUIVALENTES.get(n, n):
             return True
         curto, longo = (g, n) if len(g) <= len(n) else (n, g)
         if len(curto) >= 5 and re.search(rf"\b{re.escape(curto)}\b", longo):
@@ -205,11 +209,13 @@ def atualizar(arquivo, hoje, pegar_texto=None, pegar_json=None, canais=None, dia
 
     programas = []  # (jogo do programa, nome do canal)
     lidas = 0
+    permitidas = 0
     for codigo, nome in canais.items():
         caminho = f"/programacao/canal/{codigo}"
         if not permitido(robots, caminho):
             rede.aviso(f"o robots.txt do guia não deixa ler {caminho}")
             continue
+        permitidas += 1
         html = pegar_texto(f"{BASE}{caminho}")
         if html is None:
             continue
@@ -247,12 +253,37 @@ def atualizar(arquivo, hoje, pegar_texto=None, pegar_json=None, canais=None, dia
             jogos.remove(item)
             mudancas.append(f"canais: saiu {item['esporte']} {item['data']} {' x '.join(item['times'])} (antigo)")
 
+    a_mao = [item for item in jogos if item.get("fonte") != FONTE]
+
+    def tem_item_a_mao(item):
+        return any(_mesmo_jogo(m, item["esporte"], item["data"], item.get("times") or []) for m in a_mao)
+
+    # item escrito à mão manda: o do robô para o mesmo jogo sai
+    for item in list(jogos):
+        if item.get("fonte") == FONTE and tem_item_a_mao(item):
+            jogos.remove(item)
+            mudancas.append(f"canais: saiu {item['esporte']} {item['data']} {' x '.join(item['times'])} (há item à mão)")
+
+    # com a grade inteira lida, o que o robô tinha marcado nestes dias e o guia não traz mais sai
+    if lidas == permitidas:
+        for item in list(jogos):
+            if item.get("fonte") != FONTE or not (hoje.isoformat() <= item.get("data", "") < limite):
+                continue
+            if not any(_mesmo_jogo(item, e, d, t) for (e, d, t) in achados):
+                jogos.remove(item)
+                mudancas.append(f"canais: saiu {item['esporte']} {item['data']} {' x '.join(item['times'])} (não está mais no guia)")
+
     ordem = list(canais.values())
+    posicao = lambda c: ordem.index(c) if c in ordem else 99  # noqa: E731
     for (esporte, data_jogo, times), lista in achados.items():
-        lista = canais_do_jogo(esporte, sorted(set(lista), key=lambda c: ordem.index(c) if c in ordem else 99))
-        if any(item.get("fonte") != FONTE and _mesmo_jogo(item, esporte, data_jogo, times) for item in jogos):
+        lista = canais_do_jogo(esporte, sorted(set(lista), key=posicao))
+        if any(_mesmo_jogo(m, esporte, data_jogo, times) for m in a_mao):
             continue  # já tem item escrito à mão: ele manda
         meu = next((item for item in jogos if item.get("fonte") == FONTE and _mesmo_jogo(item, esporte, data_jogo, times)), None)
+        if meu is not None and lidas < permitidas:
+            # alguma página falhou: só acrescenta canais, nunca tira
+            base = [c for c in meu["canais"] if c not in ("Disney+ Premium", "NBA League Pass")]
+            lista = canais_do_jogo(esporte, sorted(set(base) | {c for c in lista if c not in ("Disney+ Premium", "NBA League Pass")}, key=posicao))
         if meu is None:
             jogos.append({"esporte": esporte, "data": data_jogo, "times": list(times), "canais": lista, "conferido_em": hoje.isoformat(), "fonte": FONTE})
             mudancas.append(f"canais: {esporte} {data_jogo} {' x '.join(times)} -> {', '.join(lista)}")

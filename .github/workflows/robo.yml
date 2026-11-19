@@ -39,11 +39,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if ! git diff --quiet -- campeoes.json boxe_eventos.json; then
+          if ! git diff --quiet -- campeoes.json boxe_eventos.json transmissoes.json; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             # a pasta www do APK é ignorada pelo git de propósito (o workflow do APK copia docs/apk/)
-            git add campeoes.json boxe_eventos.json docs
+            git add campeoes.json boxe_eventos.json transmissoes.json docs
             git commit -m "Robô: dados atualizados ($(date -u +%Y-%m-%d))"
             git push
             # pede ao Pages para publicar de novo (um push feito pelo robô pode não disparar a publicação)

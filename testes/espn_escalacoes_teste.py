@@ -60,3 +60,13 @@ class TesteEscalacoes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestePenaltisDaDisputa(unittest.TestCase):
+    def test_disputa_de_penaltis_nao_vira_gol(self):
+        dados = {"keyEvents": [
+            {"type": {"type": "goal", "text": "Goal"}, "scoringPlay": True, "clock": {"displayValue": "30'"}, "team": {"id": "1"}, "participants": [{"athlete": {"displayName": "Autor"}}]},
+            {"type": {"type": "penalty---scored", "text": "Penalty - Scored"}, "scoringPlay": True, "shootout": True, "clock": {"displayValue": "120'"}, "team": {"id": "2"}, "participants": [{"athlete": {"displayName": "Cobrador"}}]},
+        ]}
+        lances = espn_dados._lances(dados, "soccer")
+        self.assertEqual([l["jogadores"] for l in lances], [["Autor"]])

@@ -27,6 +27,7 @@ const ARQUIVOS = [
   "./busca_regras.js",
   "./regras_esportes.js",
   "./time_dados.js",
+  "./cache_regras.js",
   "./direto.js",
   "./registrar.js",
   "./manifest.webmanifest",
@@ -57,8 +58,8 @@ self.addEventListener("fetch", (e) => {
 
   if (url.origin !== self.location.origin) return; // ESPN e Wikipédia: o direto.js cuida
 
-  // arquivos de dados (transmissões, boxe, campeões): entrega o guardado na hora e busca a versão nova
-  // em segundo plano (vale na próxima abertura); sem nada guardado, espera a rede
+  // arquivos de dados (transmissões, boxe, campeões): a versão nova pela rede, mas sem segurar a abertura:
+  // se a rede não responder em 1,5 s, entrega o guardado (e a nova fica guardada para a próxima vez)
   if (url.pathname.includes("/dados/")) {
     const daRede = fetch(e.request).then((r) => {
       if (r.ok) {
@@ -67,7 +68,10 @@ self.addEventListener("fetch", (e) => {
       }
       return r;
     });
-    e.respondWith(caches.match(e.request).then((guardado) => guardado || daRede));
+    const prazo = new Promise((ok) => setTimeout(ok, 1500)).then(() => caches.match(e.request));
+    e.respondWith(
+      Promise.race([daRede.catch(() => caches.match(e.request)), prazo]).then((r) => r || daRede)
+    );
     e.waitUntil(daRede.catch(() => {}));
     return;
   }

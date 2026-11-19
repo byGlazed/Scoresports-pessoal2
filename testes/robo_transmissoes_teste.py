@@ -175,3 +175,61 @@ class TesteRobots(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TesteRevisao(unittest.TestCase):
+    """Correções da revisão final da parte I."""
+
+    def setUp(self):
+        base = TesteAtualizar()
+        base.setUp()
+        self.pegar_texto, self.pegar_json = base.pegar_texto, base.pegar_json
+        self.canais = {"ES2": "ESPN 2", "SPO": "SporTV", "GRD": "Globo"}
+
+    def rodar(self, arquivo, pegar_texto=None):
+        return T.atualizar(arquivo, HOJE, pegar_texto=pegar_texto or self.pegar_texto, pegar_json=self.pegar_json, canais=self.canais, dias=1)
+
+    def test_grade_que_mudou_sai_quando_todas_as_paginas_vieram(self):
+        sumiu = {"esporte": "nba", "data": "2026-11-19", "times": ["LAL", "BOS"], "canais": ["ESPN 2"], "conferido_em": "2026-11-18", "fonte": T.FONTE}
+        arquivo = {"jogos": [dict(sumiu)]}
+        self.rodar(arquivo)
+        self.assertNotIn(sumiu, arquivo["jogos"])
+
+    def test_pagina_que_falhou_so_acrescenta(self):
+        sumiu = {"esporte": "nba", "data": "2026-11-19", "times": ["LAL", "BOS"], "canais": ["ESPN 2"], "conferido_em": "2026-11-18", "fonte": T.FONTE}
+        sp = {"esporte": "futebol", "data": "2026-11-19", "times": ["São Paulo", "Fluminense"], "canais": ["Globo", "Premiere"], "conferido_em": "2026-11-18", "fonte": T.FONTE}
+        arquivo = {"jogos": [dict(sumiu), dict(sp)]}
+        sem_globo = lambda url: None if url.endswith("/GRD") else self.pegar_texto(url)
+        self.rodar(arquivo, sem_globo)
+        self.assertIn(sumiu, arquivo["jogos"])
+        sp_depois = next(j for j in arquivo["jogos"] if "São Paulo" in j["times"])
+        self.assertEqual(sp_depois["canais"], ["Globo", "Premiere"])
+
+    def test_item_a_mao_tira_o_do_robo(self):
+        do_robo = {"esporte": "futebol", "data": "2026-11-19", "times": ["São Paulo", "Fluminense"], "canais": ["Globo"], "conferido_em": "2026-11-18", "fonte": T.FONTE}
+        a_mao = {"esporte": "futebol", "data": "2026-11-19", "times": ["Fluminense", "São Paulo"], "canais": ["Globo", "Premiere"], "conferido_em": "2026-11-19", "fonte": "grade da Globo"}
+        arquivo = {"jogos": [dict(do_robo), dict(a_mao)]}
+        self.rodar(arquivo)
+        self.assertEqual(arquivo["jogos"].count(a_mao), 1)
+        self.assertFalse(any(j.get("fonte") == T.FONTE and "São Paulo" in j["times"] for j in arquivo["jogos"]))
+
+    def test_siglas_equivalentes(self):
+        self.assertTrue(T.mesmo_time("NYK", ["NY", "New York Knicks"]))
+        self.assertTrue(T.mesmo_time("GS", ["GSW"]))
+        self.assertFalse(T.mesmo_time("NY", ["NO", "New Orleans Pelicans"]))
+
+
+class TesteOndeAssistirNoPC(unittest.TestCase):
+    def test_item_a_mao_tem_preferencia(self):
+        import transmissoes
+        dados = {"padroes": {}, "jogos": [
+            {"esporte": "nba", "data": "2026-11-21", "times": ["NY", "POR"], "canais": ["ESPN 2"], "fonte": T.FONTE},
+            {"esporte": "nba", "data": "2026-11-21", "times": ["NYK", "POR"], "canais": ["Prime Video"], "fonte": "grade do Prime"},
+        ]}
+        original = transmissoes._carregar
+        transmissoes._carregar = lambda: dados
+        try:
+            r = transmissoes.onde_assistir("nba", data="2026-11-21", times=[["NY", "New York Knicks"], ["POR", "Portland Trail Blazers"]])
+        finally:
+            transmissoes._carregar = original
+        self.assertEqual(r["canais"], ["Prime Video"])

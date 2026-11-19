@@ -23,16 +23,51 @@ const FotoJogador = (() => {
     }
   }
 
-  function guardar(chave, url) {
+  const MAXIMO = 800; // fotos guardadas no aparelho (cada uma é só um endereço)
+  let limpo = false;
+
+  /** Apaga as vencidas e, além do limite, as mais antigas (para não tomar o espaço dos favoritos). */
+  function limpar(maximo = MAXIMO) {
     try {
-      localStorage.setItem(`ss:foto:${chave}`, JSON.stringify({ u: url, ate: Date.now() + PRAZO_MS }));
+      const entradas = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith("ss:foto:")) continue;
+        let ate = 0;
+        try {
+          ate = JSON.parse(localStorage.getItem(k) || "{}").ate || 0;
+        } catch (_) {
+          /* entrada quebrada: sai */
+        }
+        entradas.push({ chave: k, ate });
+      }
+      Fotos.chavesParaApagar(entradas, Date.now(), maximo).forEach((k) => localStorage.removeItem(k));
     } catch (_) {
-      /* sem espaço ou sem localStorage: só não guarda */
+      /* sem localStorage */
+    }
+  }
+
+  function guardar(chave, url) {
+    const valor = JSON.stringify({ u: url, ate: Date.now() + PRAZO_MS });
+    try {
+      localStorage.setItem(`ss:foto:${chave}`, valor);
+    } catch (_) {
+      // sem espaço: libera metade das fotos e tenta uma vez mais
+      limpar(Math.floor(MAXIMO / 2));
+      try {
+        localStorage.setItem(`ss:foto:${chave}`, valor);
+      } catch (__) {
+        /* só não guarda */
+      }
     }
   }
 
   /** A foto do jogador do time (ou null). Sem internet, não guarda o "não achei". */
   function buscar(nome, time) {
+    if (!limpo) {
+      limpo = true;
+      limpar();
+    }
     const chave = Fotos.chave(nome, time);
     if (memoria.has(chave)) return memoria.get(chave);
     const guardada = lerGuardada(chave);

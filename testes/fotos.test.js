@@ -41,3 +41,22 @@ test("miniatura quando não há recorte, e endereços", () => {
   assert.equal(Fotos.urlBusca("Dean Henderson"), "https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=Dean%20Henderson");
   assert.equal(Fotos.chave("Jérémy Jacquet", "Liverpool"), "jeremy jacquet|liverpool");
 });
+
+test("nome completo com outro clube não vale (homônimo); só a seleção do próprio jogador", () => {
+  const outroClube = [{ strPlayer: "Dean Henderson", strTeam: "Manchester United", strNationality: "England", strSport: "Soccer", strCutout: "https://r2.thesportsdb.com/a.png" }];
+  assert.equal(Fotos.escolher(outroClube, "Dean Henderson", "Crystal Palace"), null);
+  // o Jacquet aparece com a seleção da França (time = nacionalidade): vale
+  assert.ok(Fotos.escolher(BUSCAS["Jérémy Jacquet"], "Jérémy Jacquet", "Liverpool"));
+});
+
+test("limpeza do cache das fotos: vencidas e as mais antigas além do limite", () => {
+  const agora = 1000;
+  const entradas = [
+    { chave: "a", ate: 500 }, // vencida
+    { chave: "b", ate: 2000 },
+    { chave: "c", ate: 3000 },
+    { chave: "d", ate: 4000 },
+  ];
+  assert.deepEqual(Fotos.chavesParaApagar(entradas, agora, 10), ["a"]);
+  assert.deepEqual(Fotos.chavesParaApagar(entradas, agora, 2).sort(), ["a", "b"]);
+});

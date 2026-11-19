@@ -780,6 +780,8 @@ def _lances(dados, esporte_espn):
     lances = []
     if esporte_espn == "soccer":
         for e in dados.get("keyEvents") or []:
+            if e.get("shootout"):
+                continue  # cobrança da disputa de pênaltis não é gol do jogo
             tipo = _tipo_lance((e.get("type") or {}).get("text") or (e.get("type") or {}).get("type"), e.get("scoringPlay"))
             if not tipo:
                 continue

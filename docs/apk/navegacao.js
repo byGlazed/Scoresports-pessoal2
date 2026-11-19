@@ -729,10 +729,12 @@ window.mostrarAvisoApk = function (link) {
 window.addEventListener("ss:dados-novos", () => {
   const p = Navegacao.topo();
   if (!p || document.hidden) return;
+  if (p.pronta === null) return; // o primeiro desenho ainda não terminou: ele já traz o dado novo
+  const def = PAGINAS[p.tipo];
   try {
+    // na aba Jogos, o aoMostrar devolveria o dia guardado ao sair: aqui só redesenha a lista
     if (p.tipo === "jogos") desenharChipJogos(true);
-    else if (p.tipo === "favoritos") inicioDesenhar(true);
-    else if (p.tipo === "jogo" && PAGINAS.jogo.aoMostrar) PAGINAS.jogo.aoMostrar(p.corpo, p.params, p);
+    else if (def && def.aoMostrar) def.aoMostrar(p.corpo, p.params, p);
   } catch (_) {
     /* a próxima atualização tenta de novo */
   }

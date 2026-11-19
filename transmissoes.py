@@ -152,7 +152,8 @@ def onde_assistir(esporte, liga=None, data=None, inicio=None, times=(), evento=N
     if data is None and inicio_br is not None:
         data = inicio_br.strftime("%Y-%m-%d")
 
-    for item in dados.get("jogos", []):
+    # item escrito à mão vem antes do item do robô dos canais (fonte "guia de TV")
+    for item in sorted(dados.get("jogos", []), key=lambda i: i.get("fonte") == "guia de TV"):
         if (item.get("esporte") or "nba") != esporte:
             continue
         if item.get("liga") and liga and item["liga"] != liga:
