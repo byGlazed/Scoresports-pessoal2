@@ -61,7 +61,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 ### Nota do Scoresports e escalação no campinho
 - **Campinho (futebol, no app e no PC):** a aba Escalações desenha os titulares no campo, pela formação ("4-2-3-1") e pelo lugar de cada um que a ESPN informa. O campo é visto de cima com o time atacando para baixo, então o lado esquerdo do time fica à direita da tela, como no Sofascore. Cada jogador tem foto (ou o número), a nota colorida, os ícones de gol, assistência, cartão e substituição; embaixo vêm os reservas, com o minuto em que entraram. Formação desconhecida mostra a lista de sempre.
 - **Nota do Scoresports:** de 3,0 a 10,0, calculada pelo próprio app a partir das estatísticas do jogo. **Não é a nota do Sofascore**, que não sai em fonte aberta; o ⓘ ao lado da média explica isso. Cores: abaixo de 6,0 vermelho, até 6,4 laranja, até 6,9 amarelo, até 7,9 verde, até 8,9 verde-azulado, 9,0 ou mais azul.
-  - *Futebol:* parte de 6,5 e soma ou tira por gols, assistências, chutes no gol, faltas, cartões, gol contra, defesas e gols sofridos (goleiro), jogo sem sofrer gol e resultado. Quem jogou menos de 10 minutos fica sem nota. O cabeçalho mostra a média do time.
+  - *Futebol:* parte de 6,6 e soma ou tira por gols, assistências, chutes no gol, faltas, cartões, gol contra, defesas e gols sofridos (goleiro) e jogo sem sofrer gol; o resultado quase não pesa. Calibrada num jogo real (Crystal Palace 1 x 3 Liverpool): as médias dos times ficam a até 0,35 das do Sofascore e o goleiro com 5 defesas passa de 7,3. Quem jogou menos de 10 minutos fica sem nota. O cabeçalho mostra a média do time.
   - *NBA:* sai do Game Score de John Hollinger, calibrado nas notas de um jogo real (Jazz 132 x 107 Clippers, 17/11/2026): fica a até 0,3 delas. Menos de 5 minutos: sem nota.
 - **Box score da NBA (no app):** o seletor [time] [Os dois] [time] junta os jogadores dos dois times numa tabela só, ordenada por pontos, com a coluna **Nota**.
 
@@ -72,9 +72,20 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **De onde vem:** da [PandaScore](https://pandascore.co), plano grátis, por meio do repasse da Cloudflare (a chave fica só lá, veja abaixo). O plano grátis **não traz o nome do mapa, o placar de rounds nem o KDA** dos jogadores; a página avisa isso. O KDA do CS2 pode entrar depois pelo [GRID Open Access](https://grid.gg/open-access/), se a inscrição for aprovada.
 - **Ao vivo:** a lista e a partida se atualizam a cada 30 s, para caber no limite grátis da PandaScore (cerca de 1.000 pedidos por hora).
 
+### Fotos, visual e velocidade
+- **Fotos dos jogadores:** no futebol, a foto da ESPN quando existe e, senão, a foto recortada do [TheSportsDB](https://www.thesportsdb.com) (API gratuita), com zoom no rosto. A foto só entra se o time bater (ou se o nome completo for único), para não mostrar um homônimo; sem foto, fica o número da camisa. As buscas vão uma de cada vez e ficam guardadas no aparelho por 30 dias. Aparecem no campinho, nos reservas e na página do jogador. Na NBA, a foto da ESPN em cada linha do box score.
+- **Como no Sofascore:**
+  - *Lista do dia:* contador em cada campeonato ("6", ou "2/6" em vermelho com jogo ao vivo) e grupo que recolhe (a escolha fica guardada).
+  - *Partida:* autores dos gols embaixo de cada time; na linha do tempo, o placar em pílula nos gols e as substituições com ↑ e ↓; nos reservas, "60' · Saiu: Q. Timber".
+  - *Time:* aba **Visão geral** (abre primeiro) com o próximo jogo, a forma recente (5 placas V/E/D com o placar) e a mini-classificação.
+  - *Campeonato:* barra de progresso da temporada.
+  - *Jogador:* foto redonda e "Informações gerais" em blocos.
+- **Velocidade:** o que já está guardado no aparelho aparece na hora (até 6 h de idade), e o dado novo chega em segundo plano e redesenha a tela sozinho. Medido no navegador: a lista do dia com dado guardado em cerca de 0,15 s, e voltar da partida para a lista em 0,02 s.
+
 ### Onde assistir no Brasil
 Cada jogo mostra os canais. A informação vem do `transmissoes.json`, em duas camadas:
 1. **Grade confirmada:** jogos anotados um a um, a partir das grades que as emissoras divulgam (aparece com o selo "Grade confirmada").
+   O **robô dos canais** (`robo/transmissoes.py`) preenche a grade sozinho duas vezes por dia (7h e 15h de Brasília): lê a programação dos canais esportivos no guia de TV [meuguia.tv](https://meuguia.tv) (ESPN 1 a 5, SporTV 1 a 3, Premiere, BandSports, Combate, Globo, Band, Record, SBT e TV Cultura), pega só os programas "Ao Vivo" e cruza cada um com os jogos do dia da ESPN pelos dois times e pela hora. Na dúvida, não marca. Canal da ESPN ganha também o Disney+ Premium, e a NBA, o League Pass. Item escrito à mão nunca é alterado.
 2. **Padrão da competição:** quando o jogo não está na grade, vale o padrão (por exemplo, todo jogo da NBA está no League Pass e todo evento do UFC está no Paramount+). As regras do padrão podem depender do dia da semana e do horário (na NFL, quinta e domingo à noite no SporTV, segunda na ESPN).
 
 ## App Android (APK)
@@ -194,7 +205,7 @@ Scoresports-pessoal2/
 ├── box_score.py        # script de terminal: box score de um jogo
 ├── classificacao.py    # script de terminal: classificação das conferências
 ├── temporada.py       # temporada da NBA pela data
-├── robo/              # robô diário: campeões (ESPN) e lutas de boxe (Wikipédia)
+├── robo/              # robô diário: campeões (ESPN), lutas de boxe (Wikipédia) e canais de TV (guia meuguia.tv)
 ├── requirements.txt
 └── static/
     ├── index.html
@@ -213,6 +224,9 @@ Scoresports-pessoal2/
     ├── campinho.js     # a escalação no campinho, com as notas
     ├── esports_regras.js # regras dos e-sports: partida da PandaScore, filtro do dia, grupos, bolinhas
     ├── esports.js      # telas dos e-sports: lista do dia, partida e time (só no app)
+    ├── fotos_regras.js # regras das fotos dos jogadores (ESPN e TheSportsDB, sem homônimo)
+    ├── fotos.js        # busca das fotos uma por vez, guardadas por 30 dias
+    ├── visual_regras.js # regras das telas inspiradas no Sofascore (autores dos gols, forma, mini-classificação, temporada)
     └── fontes/         # fonte Inter (licença SIL OFL)
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
@@ -339,12 +353,13 @@ A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-2
 | E-sports (partidas, mapas, elencos) | da PandaScore, pelo repasse da Cloudflare |
 | Telas e dados no APK | o app baixa do GitHub Pages ao abrir e usa na próxima abertura |
 | Campeões (`campeoes.json`) | o robô diário lê na ESPN quem ganhou cada temporada encerrada |
+| Canais de TV (`transmissoes.json` > `jogos`) | o robô lê a grade dos canais esportivos no guia de TV, às 7h e às 15h |
 | Lutas grandes de boxe (`boxe_eventos.json`) | o robô diário lê as fichas das lutas na Wikipédia (categorias "AAAA boxing matches"): acrescenta as lutas marcadas e completa os resultados |
 | Temporada da NBA no PC | calculada pela data (`temporada.py`) |
 
 O robô (`robo/`, `.github/workflows/robo.yml`) roda todo dia às 7h de Brasília. Para rodar na hora: aba **Actions > Robô diário > Run workflow**. Ele só acrescenta ou completa: nunca apaga nem troca o que foi escrito à mão, e se a ESPN ou a Wikipédia estiverem fora do ar, não muda nada. As lutas novas entram sem horário e sem canal: complete à mão se quiser, e o robô não mexe no que você escreveu.
 
-Ainda é à mão: os canais de TV (`transmissoes.json`; não existe fonte aberta com a grade do Brasil) e as lutas de boxe que não têm artigo na Wikipédia.
+Ainda é à mão: o que passa só em streaming (Prime Video, CazéTV, Max), que não está em guia de TV, e as lutas de boxe que não têm artigo na Wikipédia.
 
 Para testar o robô sem gravar nada: `python -m robo --seco`.
 
@@ -367,7 +382,7 @@ Para testar o robô sem gravar nada: `python -m robo --seco`.
 - [ ] Opção de ver playoffs no calendário da NBA
 - [ ] Mais esportes da ESPN (NHL, MLB, tênis)
 
-A grade de transmissões automática saiu da lista: a ESPN não informa os canais do Brasil e não existe uma fonte aberta com a programação das emissoras.
+A grade de transmissões automática saiu da lista: o robô dos canais lê o guia de TV (a ESPN não informa os canais do Brasil).
 
 ## Aviso
 
