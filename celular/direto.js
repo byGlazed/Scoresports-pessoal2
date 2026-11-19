@@ -863,6 +863,7 @@ function escalacoes(dados) {
         foto: (at.headshot || {}).href || null,
         entrou_aos: troca.entrou_aos ?? null,
         saiu_aos: troca.saiu_aos ?? null,
+        no_lugar_de: troca.no_lugar_de ?? null,
         gols: numeroStat(st, "totalGoals", "G"),
         assistencias: numeroStat(st, "goalAssists", "A"),
         amarelos: numeroStat(st, "yellowCards", "YC"),
@@ -1078,7 +1079,8 @@ async function buscarClassificacao(esporte, liga) {
   const repetidos = new Set(grupos.map((g) => g.nome).filter((n, i, todos) => todos.indexOf(n) !== i));
   for (const g of grupos) if (repetidos.has(g.nome) && g.pai) g.nome = `${g.pai} · ${g.nome}`;
   Indice.registrar(grupos.flatMap((g) => g.linhas.map((l) => ({ tipo: l.tipo, esporte, liga, id: l.id, nome: l.nome, descricao: cfg.nome, imagem: l.tipo === "time" ? l.logo : null }))));
-  return { grupos };
+  const temp = dados.season || {};
+  return { grupos, temporada: temp.startDate && temp.endDate ? { inicio: temp.startDate, fim: temp.endDate, nome: temp.displayName || null } : null };
 }
 
 /* ---------- Elenco e atleta ---------- */

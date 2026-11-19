@@ -539,7 +539,45 @@ function barraFiltro(jogos, aoMudar) {
 }
 
 /** Cabeçalho de um grupo de jogos (competição), com logo, atalho e estrela. */
-function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub }) {
+/** Grupos recolhidos na lista do dia (a escolha fica guardada no aparelho, pelo título). */
+function gruposRecolhidos() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem("ss:recolhidos") || "[]"));
+  } catch (_) {
+    return new Set();
+  }
+}
+
+function botaoRecolher(titulo) {
+  const seta = s("svg", { viewBox: "0 0 24 24", width: "18", height: "18", "aria-hidden": "true" }, s("path", { d: "M6 15l6-6 6 6", fill: "none", stroke: "currentColor", "stroke-width": "2.4", "stroke-linecap": "round", "stroke-linejoin": "round" }));
+  const botao = h("button", { class: "recolher-grupo", type: "button", "aria-label": `Recolher ${titulo}`, "aria-expanded": "true" }, seta);
+  const aplicar = (recolhido) => {
+    const secaoGrupo = botao.closest("section");
+    if (secaoGrupo) secaoGrupo.classList.toggle("recolhido", recolhido);
+    botao.setAttribute("aria-expanded", String(!recolhido));
+    botao.setAttribute("aria-label", `${recolhido ? "Mostrar" : "Recolher"} ${titulo}`);
+  };
+  botao.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const conjunto = gruposRecolhidos();
+    if (conjunto.has(titulo)) conjunto.delete(titulo);
+    else conjunto.add(titulo);
+    try {
+      localStorage.setItem("ss:recolhidos", JSON.stringify([...conjunto]));
+    } catch (_) {
+      /* sem localStorage: vale só nesta tela */
+    }
+    aplicar(conjunto.has(titulo));
+  });
+  queueMicrotask(() => aplicar(gruposRecolhidos().has(titulo)));
+  return botao;
+}
+
+function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub, jogos }) {
+  const vivos = jogos ? jogos.filter((j) => j.estado === 2).length : 0;
+  const contador = jogos && jogos.length
+    ? h("span", { class: `contador-grupo${vivos ? " ao-vivo" : ""}`, title: vivos ? `${vivos} ao vivo de ${jogos.length}` : `${jogos.length} jogos` }, vivos ? `${vivos}/${jogos.length}` : String(jogos.length))
+    : null;
   return h(
     "div",
     { class: "grupo-liga-titulo" },
@@ -554,7 +592,9 @@ function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub }) {
       : h("span", null, titulo),
     sub ? h("span", { class: "nota", style: { margin: 0 } }, sub) : null,
     h("span", { style: { flex: 1 } }),
-    favorito ? botaoFavorito(favorito) : null
+    contador,
+    favorito ? botaoFavorito(favorito) : null,
+    jogos && jogos.length ? botaoRecolher(titulo) : null
   );
 }
 
@@ -646,6 +686,7 @@ function placarGrande({ esquerda, direita, estado, status, info, centro }) {
       t.logo !== undefined ? imgLogo(t.logo) : null,
       t.aoClicar ? h("button", { class: "botao-link nome", type: "button", onclick: t.aoClicar }, t.nome) : h("div", { class: "nome" }, t.nome),
       t.sub ? h("div", { class: "sub" }, t.sub) : null,
+      t.gols && t.gols.length ? h("ul", { class: "placar-gols" }, t.gols.map((g) => h("li", null, g))) : null,
       t.favorito ? botaoFavorito(t.favorito) : null
     );
   const temPlacar = estado >= 2 && esquerda.placar !== null && esquerda.placar !== undefined;

@@ -38,6 +38,7 @@ class TesteEscalacoes(unittest.TestCase):
     def test_substituicao(self):
         self.assertEqual(self.jogador("Quinten Timber")["saiu_aos"], 60)
         self.assertEqual(self.jogador("Darío Osorio")["entrou_aos"], 60)
+        self.assertEqual(self.jogador("Darío Osorio")["no_lugar_de"], self.jogador("Quinten Timber")["id"])
         self.assertIsNone(self.jogador("Dean Henderson")["saiu_aos"])
 
     def test_placar_do_time(self):

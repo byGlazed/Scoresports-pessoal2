@@ -68,7 +68,7 @@ function grupoEsports(g, partidas) {
   return h(
     "section",
     { class: "cartao grupo-liga" },
-    cabecaGrupo({ titulo: g.titulo, logo: g.partidas[0].torneio.logo || null }),
+    cabecaGrupo({ titulo: g.titulo, logo: g.partidas[0].torneio.logo || null, jogos: partidas }),
     partidas.map((p) => linhaPartidaEsports(p, () => abrirPartidaEsports(p)))
   );
 }

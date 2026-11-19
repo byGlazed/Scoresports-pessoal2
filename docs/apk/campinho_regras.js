@@ -61,8 +61,8 @@ const Campinho = (() => {
       if (!tipo.includes("substitution")) continue;
       const minuto = minutoDoTexto((e.clock || {}).displayValue);
       const [entra, sai] = (e.participants || []).map((p) => String(((p || {}).athlete || {}).id || ""));
-      if (entra) saida[entra] = { ...saida[entra], entrou_aos: minuto };
-      if (sai) saida[sai] = { ...saida[sai], saiu_aos: minuto };
+      if (entra) saida[entra] = { ...saida[entra], entrou_aos: minuto, ...(sai ? { no_lugar_de: sai } : {}) };
+      if (sai) saida[sai] = { ...saida[sai], saiu_aos: minuto, ...(entra ? { saiu_para: entra } : {}) };
     }
     return saida;
   }

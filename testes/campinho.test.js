@@ -87,6 +87,9 @@ test("substituições da amostra", () => {
   // Darío Osorio (315668) entra no lugar de Quinten Timber (282230) aos 60'
   assert.equal(subs["282230"].saiu_aos, 60);
   assert.equal(subs["315668"].entrou_aos, 60);
+  // quem entrou no lugar de quem (para o "Saiu: Q. Timber" dos reservas)
+  assert.equal(subs["315668"].no_lugar_de, "282230");
+  assert.equal(subs["282230"].saiu_para, "315668");
   // Joe Gomez entra aos 90'+1'
   assert.equal(subs["102053"].entrou_aos, 91);
   assert.deepEqual(Campinho.substituicoes(null), {});

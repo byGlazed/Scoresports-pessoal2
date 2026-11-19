@@ -30,7 +30,7 @@ function empilharAtleta(esporte, liga, id, nome, contexto = null) {
 function abrirTime(esporte, liga, timeId, nome) {
   if (!timeId) return;
   // a aba escolhida fica guardada na página: ao voltar de um atleta, ela reabre na mesma aba
-  Navegacao.abrir({ tipo: "time", params: { esporte, liga, id: String(timeId) }, nome, lembrar: { aba: "jogos" } });
+  Navegacao.abrir({ tipo: "time", params: { esporte, liga, id: String(timeId) }, nome, lembrar: { aba: "geral" } });
 }
 
 /** Da página do time para a página do jogo. */
@@ -88,6 +88,7 @@ async function desenharElencoSimples(corpo, ativo, esporte, liga, timeId) {
 }
 
 const ABAS_TIME = [
+  { id: "geral", nome: "Visão geral" },
   { id: "jogos", nome: "Jogos" },
   { id: "elenco", nome: "Elenco" },
   { id: "detalhes", nome: "Detalhes" },
@@ -127,7 +128,7 @@ function cabecalhoTime(t, fav) {
   );
 }
 
-async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, lembrar = { aba: "jogos" }) {
+async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, lembrar = { aba: "geral" }) {
   if (!window.MODO_CELULAR) return desenharElencoSimples(corpo, ativo, esporte, liga, timeId);
   const base = `/e/${esporte}/${liga}/times/${timeId}`;
   const id = String(timeId);
@@ -146,6 +147,34 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
     });
 
   const carregar = {
+    geral: async () => {
+      const [r, c] = await Promise.all([api(`${base}/jogos`), api(`/e/${esporte}/${liga}/classificacao`).catch(() => null)]);
+      const blocos = [];
+      const proximo = Visual.proximoJogo(r.proximos, hojeBR());
+      if (proximo) blocos.push(secao("Próximo jogo", linhaJogoDoTime(esporte, liga, id, proximo)));
+      const forma = Visual.formaRecente(r.ultimos, id);
+      if (forma.length)
+        blocos.push(
+          secao(
+            "Forma recente",
+            h(
+              "div",
+              { class: "forma-recente" },
+              forma.map((f) =>
+                h(
+                  "button",
+                  { class: `forma-item forma-${f.resultado}`, type: "button", title: `${NOME_RESULTADO[f.resultado]} contra ${f.adversario.nome}`, onclick: () => abrirJogoDoTime(esporte, liga, f.jogo) },
+                  h("span", { class: "forma-placar" }, f.placar),
+                  imgLogo(f.adversario.logo)
+                )
+              )
+            )
+          )
+        );
+      const grupo = c && (c.grupos || []).find((g) => g.linhas.some((l) => String(l.id) === id));
+      if (grupo) blocos.push(...cartoesClassificacao(esporteObj(esporte), liga, { grupos: [{ ...grupo, linhas: Visual.miniClassificacao(grupo.linhas, id) }] }, id));
+      return blocos.length ? blocos : [vazio("Sem jogos nem classificação deste time por enquanto.")];
+    },
     jogos: async () => {
       const r = await api(`${base}/jogos`);
       const bloco = (titulo, jogos) =>
@@ -203,7 +232,7 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
     }
   };
   corpo.replaceChildren(cabecalho, barra, area);
-  escolher(ABAS_TIME.some((a) => a.id === lembrar.aba) ? lembrar.aba : "jogos");
+  escolher(ABAS_TIME.some((a) => a.id === lembrar.aba) ? lembrar.aba : "geral");
 }
 
 /** Sem foto da ESPN, no futebol a do TheSportsDB (pelo nome e pelo time); senão o espaço vazio de sempre. */
@@ -460,7 +489,7 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id, contexto = null) 
     ),
   ];
   if (contexto && contexto.arremessos) blocos.push(secao("Arremessos no jogo", ...blocoMapa(contexto.arremessos)));
-  if (fatos.length) blocos.push(h("dl", { class: "fatos" }, fatos.map(([r, v]) => h("div", { class: "fato" }, h("dt", null, r), h("dd", null, v)))));
+  if (fatos.length) blocos.push(secao("Informações gerais", h("dl", { class: "fatos blocos" }, fatos.map(([r, v]) => h("div", { class: "fato" }, h("dt", null, r), h("dd", null, v))))));
   if (p.resumo.length) {
     blocos.push(
       secao(
@@ -888,7 +917,7 @@ function grupoDeJogos(esp, liga, jogos, { aoTocarLiga, aoTocarJogo, sub } = {}) 
   return h(
     "section",
     { class: "cartao grupo-liga" },
-    cabecaGrupo({ titulo: liga.nome, logo: (jogos[0] && jogos[0].liga_logo) || null, sub, aoClicar: aoTocarLiga, favorito: favLiga(esp, liga.id) }),
+    cabecaGrupo({ titulo: liga.nome, logo: (jogos[0] && jogos[0].liga_logo) || null, sub, aoClicar: aoTocarLiga, favorito: favLiga(esp, liga.id), jogos }),
     jogos.map((j) => linhaPartida(esp, j, () => aoTocarJogo(j)))
   );
 }
@@ -968,9 +997,12 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   // o topo da página mostra a liga e a rodada
   if (!silencioso) definirTitulo(null, j.liga_nome || (esp.ligas.find((l) => l.id === liga) || esp).nome, j.nota || (j.semana ? `Semana ${j.semana}` : null));
   const favTime = (t) => (t.id ? { tipo: "time", esporte: esp.id, liga, id: String(t.id), nome: t.nome, logo: t.logo } : null);
+  // no futebol, os autores dos gols embaixo de cada time (como no Sofascore)
+  const autores = futebol && j.estado >= 2 ? Visual.autoresDosGols(r.lances, ladoDe) : null;
+  const golsDe = (t) => (autores ? autores[ladoDe(t.id)] : null);
   const placar = placarGrande({
-    esquerda: { nome: esq.nome, logo: esq.logo, placar: placarComPenaltis(esq), sub: esq.campanha, aoClicar: () => abrirTime(esp.id, liga, esq.id, esq.nome), favorito: favTime(esq) },
-    direita: { nome: dir.nome, logo: dir.logo, placar: placarComPenaltis(dir), sub: dir.campanha, aoClicar: () => abrirTime(esp.id, liga, dir.id, dir.nome), favorito: favTime(dir) },
+    esquerda: { nome: esq.nome, logo: esq.logo, placar: placarComPenaltis(esq), sub: esq.campanha, gols: golsDe(esq), aoClicar: () => abrirTime(esp.id, liga, esq.id, esq.nome), favorito: favTime(esq) },
+    direita: { nome: dir.nome, logo: dir.logo, placar: placarComPenaltis(dir), sub: dir.campanha, gols: golsDe(dir), aoClicar: () => abrirTime(esp.id, liga, dir.id, dir.nome), favorito: favTime(dir) },
     estado: j.estado,
     status: j.estado === 1 ? j.status || hora(j.inicio) || "A definir" : j.status,
     info: [j.liga_nome, diaHora(j.inicio)].filter(Boolean).join(", "),
@@ -1024,10 +1056,11 @@ function iconeLance(tipo, futebol) {
 }
 
 function listaLances(lances, ladoDe, futebol, foraPrimeiro) {
+  const corrido = futebol ? Visual.placarCorrido(lances, ladoDe) : [];
   return h(
     "ol",
     { class: "lances" },
-    lances.map((l) => {
+    lances.map((l, i) => {
       let lado = ladoDe(l.time_id);
       if (foraPrimeiro) lado = lado === "casa" ? "fora" : "casa";
       const principal = futebol ? l.jogadores[0] || l.texto : l.texto;
@@ -1045,7 +1078,15 @@ function listaLances(lances, ladoDe, futebol, foraPrimeiro) {
         { class: `lance${lado === "fora" ? " fora" : ""}` },
         h("span", { class: "lance-tempo" }, l.tempo || ""),
         h("span", { class: "lance-icone" }, iconeLance(l.tipo, futebol)),
-        h("span", { class: "lance-texto" }, futebol && l.tipo === "substituicao" ? "Substituição" : principal, detalheTexto ? h("span", { class: "sub" }, detalheTexto) : null)
+        futebol && l.tipo === "substituicao" && l.jogadores.length > 1
+          ? h("span", { class: "lance-texto" }, h("span", { class: "entra" }, l.jogadores[0]), h("span", { class: "sub sai" }, l.jogadores[1]))
+          : h(
+              "span",
+              { class: "lance-texto" },
+              futebol && l.tipo === "substituicao" ? "Substituição" : principal,
+              corrido[i] ? h("span", { class: "placar-pilula" }, corrido[i]) : null,
+              detalheTexto ? h("span", { class: "sub" }, detalheTexto) : null
+            )
       );
     })
   );
@@ -1239,8 +1280,21 @@ async function classificacaoEspn(esp, liga) {
     return;
   }
   const cartoes = cartoesClassificacao(esp, liga, c);
+  const progresso = c.temporada ? Visual.progressoTemporada(c.temporada.inicio, c.temporada.fim) : null;
+  if (progresso) cartoes.unshift(barraTemporada(progresso));
   const chaveCampeoes = esp.id === "futebol" ? `futebol:${liga}` : esp.id;
   lista().replaceChildren(h("div", { class: "grade-classificacao" }, h("div", null, ...cartoes), cartaoCampeoes(chaveCampeoes)));
+}
+
+/** A barra de progresso da temporada, com as datas de início e de fim (como no Sofascore). */
+function barraTemporada(p) {
+  const data = (iso) => new Date(iso).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric", timeZone: FUSO });
+  return h(
+    "section",
+    { class: "cartao barra-temporada", "aria-label": `Temporada: ${p.pct}% concluída` },
+    h("div", { class: "barra-temporada-trilho" }, h("i", { style: { width: `${p.pct}%` } })),
+    h("div", { class: "barra-temporada-datas" }, h("span", null, data(p.inicio)), h("span", null, data(p.fim)))
+  );
 }
 
 /** Os cartões da classificação (um por grupo). destaqueTimeId marca a linha do time na página do time. */

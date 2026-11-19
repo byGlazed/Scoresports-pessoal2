@@ -78,7 +78,7 @@ function jogadorNoCampo(esp, liga, p, time) {
   );
 }
 
-function linhaReserva(esp, liga, j, time) {
+function linhaReserva(esp, liga, j, time, nomes) {
   const entrou = j.entrou_aos !== null && j.entrou_aos !== undefined;
   return h(
     "li",
@@ -88,7 +88,11 @@ function linhaReserva(esp, liga, j, time) {
       "span",
       { class: "reserva-nome" },
       h("button", { class: "botao-link", type: "button", onclick: () => abrirAtleta(esp.id, liga, j.id, j.nome) }, j.nome),
-      entrou ? h("span", { class: "sub" }, ` entrou aos ${j.entrou_aos}'`) : j.posicao ? h("span", { class: "sub" }, ` ${j.posicao}`) : null
+      entrou
+        ? h("span", { class: "sub reserva-troca" }, `${j.entrou_aos}'`, j.no_lugar_de && nomes.get(String(j.no_lugar_de)) ? ` · Saiu: ${nomes.get(String(j.no_lugar_de))}` : "")
+        : j.posicao
+          ? h("span", { class: "sub" }, ` ${j.posicao}`)
+          : null
     ),
     h("span", { class: "icones" }, iconesJogador(j)),
     h("span", { class: "reserva-nota" }, seloNota(j.nota))
@@ -121,7 +125,7 @@ function cartaoCampinho(esp, liga, e, jogo) {
       h("span", { class: "campo-meio", "aria-hidden": "true" }),
       posicoes.map((p) => jogadorNoCampo(esp, liga, p, e.time.nome))
     ),
-    reservasEmOrdem.length ? [h("h3", { class: "campinho-reservas-titulo" }, "Reservas"), h("ul", { class: "campinho-reservas" }, reservasEmOrdem.map((j) => linhaReserva(esp, liga, j, e.time.nome)))] : null
+    reservasEmOrdem.length ? [h("h3", { class: "campinho-reservas-titulo" }, "Reservas"), h("ul", { class: "campinho-reservas" }, reservasEmOrdem.map((j) => linhaReserva(esp, liga, j, e.time.nome, new Map([...titulares, ...reservas].map((t) => [String(t.id), nomeCurtoJogador(t.nome)])))))] : null
   );
 }
 

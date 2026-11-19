@@ -297,7 +297,7 @@ registrarPagina("time", {
   titulo: (params, p) => p.nome || "Time",
   desenhar: (corpo, params, ativo, p) => {
     if (params.esporte === "esports") return desenharTimeEsports(corpo, ativo, params.liga, params.id, p.nome);
-    p.lembrar = p.lembrar || { aba: "jogos" };
+    p.lembrar = p.lembrar || { aba: "geral" };
     return desenharTime(corpo, ativo, params.esporte, params.liga, params.id, p.nome, p.lembrar);
   },
 });
@@ -568,7 +568,7 @@ async function gruposDoEsporte(esp, data) {
           h(
             "section",
             { class: "cartao grupo-liga" },
-            cabecaGrupo({ titulo: "NBA", aoClicar: () => irPara("nba", "classificacao"), favorito: { tipo: "liga", esporte: "nba", liga: "nba", id: "nba", nome: "NBA" } }),
+            cabecaGrupo({ titulo: "NBA", aoClicar: () => irPara("nba", "classificacao"), favorito: { tipo: "liga", esporte: "nba", liga: "nba", id: "nba", nome: "NBA" }, jogos: visiveis }),
             visiveis.map((j) => nbaLinhaJogo(j))
           ),
       },

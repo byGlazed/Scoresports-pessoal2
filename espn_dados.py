@@ -679,10 +679,16 @@ def _substituicoes(lances):
             continue
         minuto = _minuto_do_texto((e.get("clock") or {}).get("displayValue"))
         ids = [str((p.get("athlete") or {}).get("id") or "") for p in e.get("participants") or []]
-        if len(ids) > 0 and ids[0]:
-            saida.setdefault(ids[0], {})["entrou_aos"] = minuto
-        if len(ids) > 1 and ids[1]:
-            saida.setdefault(ids[1], {})["saiu_aos"] = minuto
+        entra = ids[0] if len(ids) > 0 else ""
+        sai = ids[1] if len(ids) > 1 else ""
+        if entra:
+            saida.setdefault(entra, {})["entrou_aos"] = minuto
+            if sai:
+                saida[entra]["no_lugar_de"] = sai
+        if sai:
+            saida.setdefault(sai, {})["saiu_aos"] = minuto
+            if entra:
+                saida[sai]["saiu_para"] = entra
     return saida
 
 
@@ -706,6 +712,7 @@ def _jogador_escalacao(p, subs=None):
         "foto": (atleta.get("headshot") or {}).get("href"),
         "entrou_aos": troca.get("entrou_aos"),
         "saiu_aos": troca.get("saiu_aos"),
+        "no_lugar_de": troca.get("no_lugar_de"),
         "gols": _numero_stat(stats, "totalGoals", "G"),
         "assistencias": _numero_stat(stats, "goalAssists", "A"),
         "amarelos": _numero_stat(stats, "yellowCards", "YC"),
