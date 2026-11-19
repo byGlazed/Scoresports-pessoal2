@@ -34,12 +34,13 @@ function comNotas(e, jogo) {
   return { titulares: e.titulares.map(preparar), reservas: e.reservas.map(preparar) };
 }
 
-/** Foto do jogador: a da ESPN quando vem; senão tenta a foto padrão da ESPN e, sem ela, o número da camisa. */
-function fotoJogador(j) {
-  const numero = () => h("span", { class: "campo-numero", "aria-hidden": "true" }, j.camisa || "");
-  const src = j.foto || (j.id ? `https://a.espncdn.com/i/headshots/soccer/players/full/${j.id}.png` : null);
-  if (!src) return numero();
-  return h("img", { class: "campo-foto", src, alt: "", loading: "lazy", onerror: (ev) => ev.target.replaceWith(numero()) });
+/** Foto do jogador: a da ESPN quando vem no roster; senão a do TheSportsDB (chega depois); sem nenhuma, o número da camisa. */
+function fotoJogador(j, time, classe = "campo-foto", classeNumero = "campo-numero") {
+  const numero = () => h("span", { class: classeNumero, "aria-hidden": "true" }, j.camisa || "");
+  if (j.foto) return h("img", { class: classe, src: j.foto, alt: "", loading: "lazy", onerror: (ev) => ev.target.replaceWith(numero()) });
+  const caixa = numero();
+  FotoJogador.aplicar(caixa, j.nome, time, classe);
+  return caixa;
 }
 
 function iconesJogador(j) {
@@ -53,7 +54,7 @@ function iconesJogador(j) {
   return icones;
 }
 
-function jogadorNoCampo(esp, liga, p) {
+function jogadorNoCampo(esp, liga, p, time) {
   const j = p.jogador;
   return h(
     "button",
@@ -67,7 +68,7 @@ function jogadorNoCampo(esp, liga, p) {
     h(
       "span",
       { class: "campo-foto-caixa" },
-      fotoJogador(j),
+      fotoJogador(j, time),
       j.saiu_aos !== null && j.saiu_aos !== undefined ? h("span", { class: "campo-saiu", title: `Saiu aos ${j.saiu_aos}'` }, "⇄") : null,
       h("span", { class: "campo-icones" }, iconesJogador(j))
     ),
@@ -77,12 +78,12 @@ function jogadorNoCampo(esp, liga, p) {
   );
 }
 
-function linhaReserva(esp, liga, j) {
+function linhaReserva(esp, liga, j, time) {
   const entrou = j.entrou_aos !== null && j.entrou_aos !== undefined;
   return h(
     "li",
     { class: `reserva${entrou ? " entrou" : ""}` },
-    h("span", { class: "camisa" }, j.camisa || ""),
+    fotoJogador(j, time, "reserva-foto", "reserva-foto numero"),
     h(
       "span",
       { class: "reserva-nome" },
@@ -118,9 +119,9 @@ function cartaoCampinho(esp, liga, e, jogo) {
       h("span", { class: "campo-area", "aria-hidden": "true" }),
       h("span", { class: "campo-pequena-area", "aria-hidden": "true" }),
       h("span", { class: "campo-meio", "aria-hidden": "true" }),
-      posicoes.map((p) => jogadorNoCampo(esp, liga, p))
+      posicoes.map((p) => jogadorNoCampo(esp, liga, p, e.time.nome))
     ),
-    reservasEmOrdem.length ? [h("h3", { class: "campinho-reservas-titulo" }, "Reservas"), h("ul", { class: "campinho-reservas" }, reservasEmOrdem.map((j) => linhaReserva(esp, liga, j)))] : null
+    reservasEmOrdem.length ? [h("h3", { class: "campinho-reservas-titulo" }, "Reservas"), h("ul", { class: "campinho-reservas" }, reservasEmOrdem.map((j) => linhaReserva(esp, liga, j, e.time.nome)))] : null
   );
 }
 

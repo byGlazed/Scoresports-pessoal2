@@ -206,6 +206,13 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
   escolher(ABAS_TIME.some((a) => a.id === lembrar.aba) ? lembrar.aba : "jogos");
 }
 
+/** Sem foto da ESPN, no futebol a do TheSportsDB (pelo nome e pelo time); senão o espaço vazio de sempre. */
+function fotoDoPerfil(esporte, p) {
+  const vazio = imgLogo(null, "perfil-foto");
+  if (esporte === "futebol" && typeof FotoJogador !== "undefined") FotoJogador.aplicar(vazio, p.nome, p.time, "perfil-foto");
+  return vazio;
+}
+
 /* ---------- NBA: box score ordenável e mapa de arremessos (dados da ESPN) ---------- */
 
 const COLUNAS_BOX_NBA = [
@@ -308,7 +315,12 @@ function boxScoreNBA(esp, liga, r, estado, redesenhar) {
         h(
           "td",
           { class: "esq coluna-jogador" },
-          ambos ? imgLogo(j.time_logo, "logo logo-box") : null,
+          h(
+            "span",
+            { class: "foto-box-caixa" },
+            h("img", { class: "foto-box", src: Fotos.espnNba(j.id), alt: "", loading: "lazy", onerror: (e) => (e.target.style.visibility = "hidden") }),
+            ambos ? imgLogo(j.time_logo, "logo logo-box") : null
+          ),
           h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta("nba", liga, j.id, j.nome, { arremessos: arremessosDe(j.id) }) }, j.nome_curto || j.nome),
           j.posicao ? h("span", { class: "sub" }, ` ${j.posicao}`) : null
         ),
@@ -437,7 +449,7 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id, contexto = null) 
     h(
       "div",
       { class: "perfil" },
-      p.foto ? h("img", { class: "perfil-foto", src: p.foto, alt: "" }) : imgLogo(null, "perfil-foto"),
+      p.foto ? h("img", { class: "perfil-foto", src: p.foto, alt: "" }) : fotoDoPerfil(esporte, p),
       h(
         "div",
         null,

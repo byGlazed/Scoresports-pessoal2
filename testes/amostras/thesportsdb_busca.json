@@ -1,0 +1,57 @@
+{
+ "Dean Henderson": [
+  {
+   "idPlayer": "34160940",
+   "strPlayer": "Dean Henderson",
+   "strTeam": "Crystal Palace",
+   "strSport": "Soccer",
+   "strNationality": "England",
+   "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/5g2so61788796455.png",
+   "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/0bcnqd1772140599.jpg"
+  }
+ ],
+ "Jérémy Jacquet": [
+  {
+   "idPlayer": "34231160",
+   "strPlayer": "Jérémy Jacquet",
+   "strTeam": "France",
+   "strSport": "Soccer",
+   "strNationality": "France",
+   "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/1swvnz1788550928.png",
+   "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/28b359e4278c4c9a70a2dcddb733292b.jpg"
+  }
+ ],
+ "Pedro": [
+  {
+   "idPlayer": "34146369",
+   "strPlayer": "Pedro",
+   "strTeam": "Lazio",
+   "strSport": "Soccer",
+   "strNationality": "Spain",
+   "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/1249qj1698231526.png",
+   "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/l9xmht1510590221.jpg"
+  }
+ ],
+ "Daichi Kamada": [
+  {
+   "idPlayer": "34169137",
+   "strPlayer": "Daichi Kamada",
+   "strTeam": "Crystal Palace",
+   "strSport": "Soccer",
+   "strNationality": "Japan",
+   "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/fzunq81788796788.png",
+   "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/ol23bf1772140877.jpg"
+  }
+ ],
+ "Gustavo Gómez": [
+  {
+   "idPlayer": "34162306",
+   "strPlayer": "Gustavo Gómez",
+   "strTeam": "Palmeiras",
+   "strSport": "Soccer",
+   "strNationality": "Paraguay",
+   "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/ytrnlp1750412203.png",
+   "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/x37vm21725068007.jpg"
+  }
+ ]
+}
