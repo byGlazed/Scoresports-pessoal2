@@ -160,10 +160,41 @@ try {
 const TRINTA_DIAS = 30 * 86400;
 
 /** Igual ao cache.obter do Python: guarda tudo, só pergunta de novo quando vence. */
+// Dado vencido mas recente (até 6 h) é entregue na hora, e o novo é buscado em segundo plano
+// (stale-while-revalidate): a tela aparece sem "Carregando…" e se redesenha quando o novo chega.
+const VELHO_MAXIMO = 6 * 3600;
+const revalidando = new Map();
+let avisoDadosNovos = null;
+
+function avisarDadosNovos() {
+  clearTimeout(avisoDadosNovos);
+  avisoDadosNovos = setTimeout(() => window.dispatchEvent(new CustomEvent("ss:dados-novos")), 300);
+}
+
 async function obter(chave, ttl, buscar, estavel) {
   const salvo = await Banco.ler("dados", chave);
   const agora = Date.now() / 1000;
   if (salvo && agora < salvo.vale_ate) return salvo.valor;
+  if (salvo && agora - salvo.salvo_em < VELHO_MAXIMO) {
+    if (!revalidando.has(chave)) {
+      const antes = JSON.stringify(salvo.valor);
+      revalidando.set(
+        chave,
+        buscarEGuardar(chave, ttl, buscar, estavel, salvo)
+          .then((novo) => {
+            if (JSON.stringify(novo) !== antes) avisarDadosNovos();
+          })
+          .catch(() => {})
+          .finally(() => revalidando.delete(chave))
+      );
+    }
+    return salvo.valor;
+  }
+  return buscarEGuardar(chave, ttl, buscar, estavel, salvo);
+}
+
+async function buscarEGuardar(chave, ttl, buscar, estavel, salvo) {
+  const agora = Date.now() / 1000;
   let valor;
   try {
     valor = await buscar();

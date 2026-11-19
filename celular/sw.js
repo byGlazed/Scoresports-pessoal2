@@ -56,17 +56,18 @@ self.addEventListener("fetch", (e) => {
 
   if (url.origin !== self.location.origin) return; // ESPN e Wikipédia: o direto.js cuida
 
-  // arquivos de dados (transmissões, boxe, campeões): tenta a rede primeiro para pegar a versão nova
+  // arquivos de dados (transmissões, boxe, campeões): entrega o guardado na hora e busca a versão nova
+  // em segundo plano (vale na próxima abertura); sem nada guardado, espera a rede
   if (url.pathname.includes("/dados/")) {
-    e.respondWith(
-      fetch(e.request)
-        .then((r) => {
-          const copia = r.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, copia));
-          return r;
-        })
-        .catch(() => caches.match(e.request))
-    );
+    const daRede = fetch(e.request).then((r) => {
+      if (r.ok) {
+        const copia = r.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copia));
+      }
+      return r;
+    });
+    e.respondWith(caches.match(e.request).then((guardado) => guardado || daRede));
+    e.waitUntil(daRede.catch(() => {}));
     return;
   }
 

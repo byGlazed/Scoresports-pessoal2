@@ -722,3 +722,18 @@ window.mostrarAvisoApk = function (link) {
   );
   document.querySelector(".app").append(faixa);
 };
+
+/* ---------- Dado guardado na hora, dado novo depois ---------- */
+// No celular, o direto.js entrega o que está guardado e busca o novo em segundo plano; quando o novo
+// é diferente, ele avisa e a página aberta se redesenha em silêncio (sem "Carregando…").
+window.addEventListener("ss:dados-novos", () => {
+  const p = Navegacao.topo();
+  if (!p || document.hidden) return;
+  try {
+    if (p.tipo === "jogos") desenharChipJogos(true);
+    else if (p.tipo === "favoritos") inicioDesenhar(true);
+    else if (p.tipo === "jogo" && PAGINAS.jogo.aoMostrar) PAGINAS.jogo.aoMostrar(p.corpo, p.params, p);
+  } catch (_) {
+    /* a próxima atualização tenta de novo */
+  }
+});
