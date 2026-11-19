@@ -75,27 +75,29 @@ const Notas = (() => {
     return "linha";
   }
 
-  const RESULTADO = { vitoria: 0.3, empate: 0, derrota: -0.3 };
-  const GOL = { goleiro: 1.5, defensor: 1.3, linha: 1.0 };
+  // calibrado em Crystal Palace 1 x 3 Liverpool (Sofascore: médias 7,02 e 6,70; Henderson 8,1 com 5 defesas):
+  // o resultado quase não pesa, e as defesas do goleiro pesam bastante
+  const RESULTADO = { vitoria: 0.05, empate: 0, derrota: -0.05 };
+  const GOL = { goleiro: 1.4, defensor: 1.2, linha: 0.9 };
 
   /** Nota de um jogador de futebol. ctx = { resultado: "vitoria"|"empate"|"derrota", sofridos_do_time }. */
   function notaFutebol(j, ctx = {}) {
     if (!j || j.minutos === null || j.minutos === undefined || num(j.minutos) < 10) return null;
     const quem = papel(j.posicao);
-    let n = 6.5;
+    let n = 6.6;
     n += RESULTADO[ctx.resultado] || 0;
     n += GOL[quem] * num(j.gols);
-    n += 0.6 * num(j.assistencias);
-    n += 0.1 * num(j.chutes_no_gol);
-    n += 0.05 * num(j.faltas_sofridas);
+    n += 0.5 * num(j.assistencias);
+    n += 0.15 * num(j.chutes_no_gol);
+    n += 0.1 * num(j.faltas_sofridas);
     n -= 0.08 * num(j.faltas_cometidas);
     n -= 0.3 * num(j.amarelos);
     n -= 1.5 * num(j.vermelhos);
     n -= 1.0 * num(j.gols_contra);
     const semSofrer = ctx.sofridos_do_time !== null && ctx.sofridos_do_time !== undefined && num(ctx.sofridos_do_time) === 0 && num(j.minutos) >= 60;
     if (quem === "goleiro") {
-      n += 0.2 * num(j.defesas);
-      n -= 0.3 * num(j.gols_sofridos);
+      n += 0.35 * num(j.defesas);
+      n -= 0.1 * num(j.gols_sofridos);
       if (semSofrer) n += 0.5;
     } else if (quem === "defensor") {
       n -= 0.05 * num(ctx.sofridos_do_time);

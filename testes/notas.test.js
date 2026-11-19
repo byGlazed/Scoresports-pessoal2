@@ -78,7 +78,8 @@ test("futebol: âncoras", () => {
   entre(Notas.notaFutebol({ posicao: "F", minutos: 90, gols: 1, chutes_no_gol: 2 }, { resultado: "vitoria", sofridos_do_time: 0 }), 7.4, 8.2, "atacante com 1 gol numa vitória");
   assert.ok(Notas.notaFutebol({ posicao: "F", minutos: 90, gols: 3, chutes_no_gol: 4 }, { resultado: "vitoria", sofridos_do_time: 1 }) >= 9.0, "três gols");
   assert.ok(Notas.notaFutebol({ posicao: "CM", minutos: 60, vermelhos: 1 }, empate) <= 5.5, "expulso");
-  entre(Notas.notaFutebol({ posicao: "G", minutos: 90, defesas: 5, gols_sofridos: 3 }, { resultado: "derrota", sofridos_do_time: 3 }), 5.8, 6.8, "goleiro com 5 defesas e 3 gols sofridos");
+  // âncora real: o Henderson tem 8,1 no Sofascore em Crystal Palace 1 x 3 Liverpool (5 defesas)
+  assert.ok(Notas.notaFutebol({ posicao: "G", minutos: 90, defesas: 5, gols_sofridos: 3 }, { resultado: "derrota", sofridos_do_time: 3 }) >= 7.3, "goleiro com 5 defesas e 3 gols sofridos");
 });
 
 test("futebol: sem números não dá NaN", () => {
@@ -104,4 +105,37 @@ test("média do time", () => {
   assert.equal(Notas.media([7.8, 6.7, null, 6.5]), 7.0);
   assert.equal(Notas.media([]), null);
   assert.equal(Notas.media([null]), null);
+});
+
+test("futebol: perto do Sofascore no jogo real (Crystal Palace 1 x 3 Liverpool)", () => {
+  const Campinho = require("../static/campinho_regras.js");
+  const resumo = JSON.parse(fs.readFileSync(path.join(__dirname, "amostras", "espn_futebol_resumo.json"), "utf8"));
+  const subs = Campinho.substituicoes(resumo.keyEvents);
+  const stat = (st, abrev) => Number((st.find((x) => x.abbreviation === abrev) || {}).value) || 0;
+  const placar = Object.fromEntries(resumo.header.competitions[0].competitors.map((c) => [String(c.team.id), Number(c.score)]));
+  const medias = {};
+  for (const r of resumo.rosters) {
+    const pro = placar[String(r.team.id)];
+    const contra = Object.entries(placar).find(([k]) => k !== String(r.team.id))[1];
+    const ctx = { resultado: pro > contra ? "vitoria" : pro < contra ? "derrota" : "empate", sofridos_do_time: contra };
+    const notas = r.roster.map((p) => {
+      const st = p.stats || [];
+      const troca = subs[String(p.athlete.id)] || {};
+      const j = {
+        posicao: (p.position || {}).abbreviation,
+        titular: Boolean(p.starter),
+        entrou_aos: troca.entrou_aos ?? null,
+        saiu_aos: troca.saiu_aos ?? null,
+        gols: stat(st, "G"), assistencias: stat(st, "A"), chutes_no_gol: stat(st, "SOG"), faltas_cometidas: stat(st, "FC"),
+        faltas_sofridas: stat(st, "FA"), amarelos: stat(st, "YC"), vermelhos: stat(st, "RC"), gols_contra: stat(st, "OG"),
+        defesas: stat(st, "SV"), gols_sofridos: stat(st, "GA"),
+      };
+      const nota = Notas.notaFutebol({ ...j, minutos: Campinho.minutosJogados(j, 90) }, ctx);
+      if (p.athlete.displayName === "Dean Henderson") assert.ok(nota >= 7.3, `Henderson: ${nota}`);
+      return nota;
+    });
+    medias[r.team.displayName] = Notas.media(notas);
+  }
+  assert.ok(Math.abs(medias["Crystal Palace"] - 7.02) <= 0.35, `Palace: ${medias["Crystal Palace"]} (Sofascore 7,02)`);
+  assert.ok(Math.abs(medias["Liverpool"] - 6.7) <= 0.35, `Liverpool: ${medias["Liverpool"]} (Sofascore 6,70)`);
 });
