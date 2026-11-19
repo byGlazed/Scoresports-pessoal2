@@ -788,7 +788,13 @@ async function buscarDatas(esporte, liga) {
   const liga0 = (dados.leagues || [{}])[0] || {};
   // na MLB o calendário lista os dias SEM jogo
   const dias = liga0.calendarIsWhitelist === false ? diasDoCalendario(liga0) : [...datas].sort();
-  return { tipo: semanas.length ? "semanas" : "dias", datas: dias, semanas, atual };
+  // o cabeçalho da página da liga (escudo, temporada e datas) vem do mesmo pedido; a barra vai
+  // do primeiro ao último dia com jogo (como no Sofascore), não de 1/1 a 31/12
+  const info = Liga.infoDaLiga(liga0);
+  const primeiro = semanas.length ? semanas[0].de : dias[0];
+  const ultimo = semanas.length ? semanas[semanas.length - 1].ate : dias[dias.length - 1];
+  if (info && primeiro && ultimo && primeiro < ultimo) Object.assign(info, { inicio: `${primeiro}T12:00:00Z`, fim: `${ultimo}T12:00:00Z` });
+  return { tipo: semanas.length ? "semanas" : "dias", datas: dias, semanas, atual, liga: info };
 }
 
 function estatisticasTimes(dados, jogo) {
@@ -1265,6 +1271,7 @@ function perfilAtleta(a) {
     posicao: texto(a.position),
     time: texto(a.team),
     time_id: a.team && typeof a.team === "object" ? a.team.id || null : null,
+    time_logo: a.team && typeof a.team === "object" ? logoDe(a.team) : null,
     camisa: a.jersey || null,
     idade: a.age ?? null,
     nascimento: a.displayDOB || (a.dateOfBirth || "").slice(0, 10) || null,
@@ -1489,7 +1496,8 @@ async function buscarLideres(esporte, liga, limite = 10) {
   const [ano, tipo, nomeTemporada] = await temporadaAtual(cfg.esporte, liga);
   const americano = ["nfl", "nba", "mlb", "nhl"].includes(esporte); // sempre a temporada regular
   const anos = americano ? [ano, ano - 1] : [ano, ano - 1, ano - 2];
-  const tipos = americano ? [2] : [...new Set([tipo || 1, null])];
+  // no futebol o "tipo" do scoreboard é um código interno (13907): os líderes ficam no tipo 1
+  const tipos = americano ? [2] : [...new Set([1, tipo, null].filter((t) => t !== undefined))];
   let cats = [];
   let anoAchado = null;
   for (const a of anos) {
@@ -2384,17 +2392,17 @@ const ROTAS = [
     dConfig(m[1], m[2]);
     let r;
     try {
-      r = await obter(`espn_datas_v1:${m[1]}:${m[2]}`, 21600, () => buscarDatas(m[1], m[2]));
+      r = await obter(`espn_datas_v3:${m[1]}:${m[2]}`, 21600, () => buscarDatas(m[1], m[2]));
     } catch (_) {
       r = { tipo: "dias", datas: [], semanas: [], atual: null };
     }
     return { ...r, hoje: hojeEmBR() };
   }],
-  [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v1:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3)],
+  [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v2:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3)],
   // a temporada "atual" nunca é guardada por muito tempo: quando o mata-mata novo começar, ela tem de trocar
   [/^\/e\/nba\/nba\/copa$/, (m, q) => viaEspn(`espn_copa_nba_v1:${q.temporada || "atual"}`, 120, () => buscarCopaNba(q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
   [/^\/e\/([^/]+)\/([^/]+)\/chave$/, (m, q) => viaEspn(`espn_chave_v1:${m[1]}:${m[2]}:${q.temporada || "atual"}`, 120, () => buscarChave(m[1], m[2], q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
-  [/^\/e\/([^/]+)\/([^/]+)\/classificacao$/, (m) => viaEspn(`espn_classificacao_v1:${m[1]}:${m[2]}`, 1800, () => buscarClassificacao(m[1], m[2]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/classificacao$/, (m) => viaEspn(`espn_classificacao_v2:${m[1]}:${m[2]}`, 1800, () => buscarClassificacao(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)$/, (m) => viaEspn(`espn_time_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarTime(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/jogos$/, (m) => viaEspn(`espn_time_jogos_v1:${m[1]}:${m[2]}:${m[3]}`, 900, () => buscarJogosTime(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/estatisticas$/, (m) => viaEspn(`espn_time_stats_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarEstatisticasTime(m[1], m[2], m[3]))],
@@ -2405,10 +2413,10 @@ const ROTAS = [
     if (cfg.esporte === "soccer") return viaEspn(`futebol_carreira_v1:${m[2]}:${m[3]}`, 12 * 3600, () => buscarCarreiraFutebol(m[2], m[3]));
     return { tipo: "nenhum" };
   }],
-  [/^\/e\/([^/]+)\/([^/]+)\/atletas\/([^/]+)$/, (m) => viaEspn(`espn_atleta_v1:${m[1]}:${m[2]}:${m[3]}`, 86400, () => buscarAtleta(m[1], m[2], m[3]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/atletas\/([^/]+)$/, (m) => viaEspn(`espn_atleta_v2:${m[1]}:${m[2]}:${m[3]}`, 86400, () => buscarAtleta(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/eventos$/, (m) => viaEspn(`espn_eventos_v1:${m[1]}:${m[2]}:atual`, 3600, () => buscarEventos(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/eventos\/([^/]+)$/, (m, q) => viaEspn(`espn_evento_v1:${m[1]}:${m[2]}:${m[3]}`, 30, () => buscarEvento(m[1], m[2], m[3], q.data))],
-  [/^\/e\/([^/]+)\/([^/]+)\/lideres$/, (m) => viaEspn(`espn_lideres_v1:${m[1]}:${m[2]}`, 3 * 3600, () => buscarLideres(m[1], m[2]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/lideres$/, (m) => viaEspn(`espn_lideres_v2:${m[1]}:${m[2]}`, 3 * 3600, () => buscarLideres(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/ranking$/, () => viaEspn("ufc_ranking_v1", 6 * 3600, buscarRankingUfc)],
   [/^\/boxe\/eventos$/, () => boxeEventos()],
   [/^\/boxe\/lutador$/, async (m, q) => {

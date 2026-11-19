@@ -69,3 +69,32 @@ test("progresso da temporada", () => {
   assert.equal(Visual.progressoTemporada("2026-01-28", "2026-12-02", new Date("2027-01-01")).pct, 100);
   assert.equal(Visual.progressoTemporada(null, "2026-12-02", new Date()), null);
 });
+
+test("mini-classificação guarda a posição da tabela inteira quando a ESPN não manda o rank", () => {
+  const linhas = Array.from({ length: 20 }, (_, i) => ({ id: String(i + 1) }));
+  const mini = Visual.miniClassificacao(linhas, "10");
+  assert.deepEqual(mini.map((l) => l.rank), [8, 9, 10, 11, 12]);
+  // o rank que a ESPN manda (empate na posição, por exemplo) fica como está
+  const comRank = linhas.map((l, i) => ({ ...l, rank: i === 9 ? 9 : i + 1 }));
+  assert.equal(Visual.miniClassificacao(comRank, "10")[2].rank, 9);
+  // não muda a lista original
+  assert.equal(linhas[9].rank, undefined);
+});
+
+test("imagem pequena pelo redimensionador da ESPN", () => {
+  assert.equal(
+    Visual.imagemPequena("https://a.espncdn.com/i/teamlogos/soccer/500/2029.png", 64),
+    "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/2029.png&w=64&h=64"
+  );
+  assert.equal(
+    Visual.imagemPequena("https://a.espncdn.com/i/headshots/nba/players/full/1966.png", 120, 88),
+    "https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/1966.png&w=120&h=88"
+  );
+  // a1, a2... da ESPN também
+  assert.equal(Visual.imagemPequena("https://a1.espncdn.com/i/teamlogos/nba/500/bos.png", 40), "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/bos.png&w=40&h=40");
+  // já redimensionada, de outro site, ou vazia: fica como está
+  const ja = "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/2029.png&w=64&h=64";
+  assert.equal(Visual.imagemPequena(ja, 32), ja);
+  assert.equal(Visual.imagemPequena("https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg", 64), "https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg");
+  assert.equal(Visual.imagemPequena(null, 64), null);
+});

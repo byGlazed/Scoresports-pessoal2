@@ -9,7 +9,7 @@ const NOME_ESPORTE = { nba: "NBA", futebol: "Futebol", nfl: "NFL", mlb: "MLB", n
 
 const esporteObj = (id) => S.esportes.find((e) => e.id === id);
 
-/** Abre a página de uma competição numa aba (jogos, classificação, líderes...). */
+/** Abre a página de uma competição (sem aba: a primeira, como no Sofascore). */
 function abrirLiga(esporte, liga, aba) {
   irPara(esporte, aba, liga);
 }
@@ -350,76 +350,6 @@ async function inicioDesenhar(silencioso) {
 
 const PESQUISA = { texto: "" };
 
-const ABAS_POR_ESPORTE = {
-  nba: [
-    ["classificacao", "Classificação"],
-    ["jogos", "Jogos"],
-    ["lideres", "Líderes"],
-  ],
-  futebol: [
-    ["classificacao", "Classificação"],
-    ["jogos", "Jogos"],
-    ["lideres", "Artilharia e cartões"],
-  ],
-  nfl: [
-    ["classificacao", "Classificação"],
-    ["jogos", "Jogos"],
-    ["lideres", "Líderes"],
-  ],
-  mlb: [
-    ["classificacao", "Classificação"],
-    ["jogos", "Jogos"],
-    ["lideres", "Líderes"],
-  ],
-  nhl: [
-    ["classificacao", "Classificação"],
-    ["jogos", "Jogos"],
-    ["lideres", "Líderes"],
-  ],
-  f1: [
-    ["calendario", "Calendário"],
-    ["classificacao", "Classificação"],
-  ],
-  ufc: [
-    ["calendario", "Eventos"],
-    ["ranking", "Ranking"],
-  ],
-  boxe: [["eventos", "Eventos"]],
-};
-
-function cartaoLiga(l) {
-  const chave = l.esporte === "futebol" ? `futebol:${l.liga}` : l.esporte;
-  const fav = { tipo: "liga", esporte: l.esporte, liga: l.liga, id: l.liga, nome: l.nome };
-  return h(
-    "section",
-    { class: "cartao" },
-    h("div", { class: "cartao-cabeca" }, h("h3", null, l.nome, " ", h("span", { class: "selo" }, NOME_ESPORTE[l.esporte] || l.esporte)), botaoFavorito(fav, { comTexto: true })),
-    h(
-      "div",
-      { class: "cartao-corpo" },
-      h(
-        "div",
-        { class: "controles" },
-        (ABAS_POR_ESPORTE[l.esporte] || []).map(([aba, nome]) =>
-          h(
-            "button",
-            {
-              class: "botao",
-              type: "button",
-              onclick: () => {
-                PESQUISA_lembrar({ tipo: "liga", esporte: l.esporte, liga: l.liga, id: l.liga, nome: l.nome, descricao: null, imagem: null });
-                abrirLiga(l.esporte, l.liga, aba);
-              },
-            },
-            nome
-          )
-        )
-      ),
-      listaCampeoes(chave)
-    )
-  );
-}
-
 function linhaResultado({ nome, descricao, esporte, imagem, aoClicar, favorito }) {
   return h(
     "div",
@@ -510,12 +440,19 @@ function pesquisaEsquecer(item) {
 /** Abre um resultado (atleta, time ou competição) e o põe no topo dos recentes. */
 function pesquisaAbrir(item) {
   PESQUISA_lembrar(item);
-  if (item.tipo === "liga") return abrirLiga(item.esporte, item.liga, ((ABAS_POR_ESPORTE[item.esporte] || [])[0] || [])[0]);
+  if (item.tipo === "liga") return abrirLiga(item.esporte, item.liga);
   if (item.tipo === "time") return abrirTime(item.esporte, item.liga, item.id, item.nome);
   if (item.esporte === "boxe") return abrirBoxeador(item.nome);
   if (item.esporte === "nba" && esporteObj("nba") && esporteObj("nba").tipo === "nba")
     return abrirJogadorNBA(Number(item.id), item.nome, { aba: item.ativo === false ? "carreira" : "temporada" });
   return abrirAtleta(item.esporte, item.liga, item.id, item.nome);
+}
+
+function itemDeLiga(l) {
+  const esp = esporteObj(l.esporte);
+  const liga = esp && (esp.ligas || []).find((x) => x.id === l.liga);
+  const descricao = l.esporte === "futebol" && liga ? grupoDaLiga(liga) : null;
+  return { tipo: "liga", esporte: l.esporte, liga: l.liga, id: l.liga, nome: l.nome, descricao, imagem: null };
 }
 
 function itemDeBusca(tipo, x) {
@@ -548,7 +485,7 @@ function pesquisaRecentes(resultados) {
       h(
         "p",
         { class: "nota" },
-        "Procure em todos os esportes: jogadores da NBA (inclusive aposentados), jogadores e times de futebol, NFL, MLB e NHL, lutadores do UFC, boxeadores, pilotos e competições. Nas competições aparecem os últimos campeões."
+        "Procure em todos os esportes: jogadores da NBA (inclusive aposentados), jogadores e times de futebol, NFL, MLB e NHL, lutadores do UFC, boxeadores, pilotos e competições. As competições abrem a página delas."
       )
     );
     return;
@@ -610,7 +547,8 @@ function pesquisaMostrar(r, resultados) {
   const ver = (qual) => f === "todos" || f === qual;
   const partes = [];
   if (ver("competicoes") && r.ligas.length) {
-    partes.push(h("p", { class: "titulo-dia" }, "Competições"), h("div", { class: "grade-cartoes" }, r.ligas.map(cartaoLiga)));
+    // como no Sofascore: a competição é uma linha, e o toque abre a página dela
+    partes.push(h("p", { class: "titulo-dia" }, "Competições"), h("div", { class: "cartao" }, r.ligas.map((l) => linhaDeItem(itemDeLiga(l)))));
   }
   if (ver("atletas") && r.jogadores.length) {
     partes.push(

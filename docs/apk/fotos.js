@@ -13,6 +13,8 @@ const FotoJogador = (() => {
   const memoria = new Map(); // chave -> Promise<url|null>
   let fila = Promise.resolve();
   let ultimo = 0;
+  let pausa = 0; // depois de um 429, a fila espera (1 min, dobrando até 8 min)
+  let pausaAte = 0;
 
   function lerGuardada(chave) {
     try {
@@ -77,11 +79,19 @@ const FotoJogador = (() => {
       return p;
     }
     const p = (fila = fila.then(async () => {
-      const espera = INTERVALO_MS - (Date.now() - ultimo);
+      const espera = Math.max(INTERVALO_MS - (Date.now() - ultimo), pausaAte - Date.now());
       if (espera > 0) await new Promise((ok) => setTimeout(ok, espera));
       ultimo = Date.now();
       try {
         const r = await fetch(Fotos.urlBusca(nome));
+        if (r.status === 429) {
+          // limite do plano gratuito: a fila para um pouco, e a foto pode vir numa próxima vez
+          pausa = Fotos.proximaPausa(pausa);
+          pausaAte = Date.now() + pausa;
+          memoria.delete(chave);
+          return null;
+        }
+        pausa = 0;
         if (!r.ok) return null;
         const url = Fotos.escolher((await r.json()).player, nome, time);
         guardar(chave, url);

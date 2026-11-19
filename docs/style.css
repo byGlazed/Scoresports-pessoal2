@@ -20,6 +20,7 @@
   --marca-suave: rgba(61, 92, 240, 0.1);
   --ao-vivo: #e8364c;
   --vitoria: #1f9d5c;
+  --texto-sobre-resultado: #fff; /* texto nas placas de vitória, empate e derrota */
   --derrota: #d23c52;
   --empate: #b5891a;
   /* nota do Scoresports: as mesmas cores nos dois temas */
@@ -53,6 +54,7 @@
     --marca-suave: rgba(111, 139, 255, 0.14);
     --ao-vivo: #ff5a6e;
     --vitoria: #3ccf86;
+    --texto-sobre-resultado: #0b1220; /* as cores do tema escuro são claras: texto escuro por cima */
     --derrota: #ff6a7d;
     --empate: #e0b43d;
     --campo-fundo: #1d2a25;
@@ -742,7 +744,7 @@ select.campo-data { cursor: pointer; }
   border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
+  color: var(--texto-sobre-resultado);
 }
 .forma .V { background: var(--vitoria); }
 .forma .D { background: var(--derrota); }
@@ -1327,7 +1329,7 @@ select.campo-data { cursor: pointer; }
   border-radius: 4px;
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
+  color: var(--texto-sobre-resultado);
   flex: none;
 }
 .selo-resultado.v { background: var(--vitoria); }
@@ -1589,7 +1591,7 @@ button.confronto-chave:hover { border-color: var(--texto-3); }
   border-radius: var(--raio-pequeno);
   background: var(--superficie-2);
 }
-.forma-placar { display: block; width: 100%; padding: 1px 4px; border-radius: 4px; font-size: 12.5px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
+.forma-placar { display: block; width: 100%; padding: 1px 4px; border-radius: 4px; font-size: 12.5px; font-weight: 800; color: var(--texto-sobre-resultado); font-variant-numeric: tabular-nums; }
 .forma-V .forma-placar { background: var(--vitoria); }
 .forma-E .forma-placar { background: var(--texto-3); }
 .forma-D .forma-placar { background: var(--derrota); }
@@ -1606,3 +1608,52 @@ button.confronto-chave:hover { border-color: var(--texto-3); }
 .fatos.blocos .fato { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 64px; padding: 8px 6px; border-radius: var(--raio-pequeno); background: var(--superficie-2); text-align: center; }
 .fatos.blocos dt { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--texto-3); }
 .fatos.blocos dd { margin: 0; font-size: 14.5px; font-weight: 700; overflow-wrap: anywhere; }
+
+/* ---------- Página da liga (como a página de torneio do Sofascore) ---------- */
+.cabeca-liga { padding: 14px 16px 10px; background: var(--superficie); border-bottom: 1px solid var(--linha); }
+.cabeca-liga-linha { display: flex; align-items: center; gap: 14px; }
+.cabeca-liga-escudo { width: 56px; height: 56px; flex: none; object-fit: contain; border-radius: 12px; }
+span.cabeca-liga-escudo { background: var(--superficie-2); }
+.cabeca-liga-texto { min-width: 0; }
+.cabeca-liga h2 { margin: 0; font-size: 19px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.cabeca-liga-sub { margin: 3px 0 0; font-size: 13.5px; font-weight: 600; color: var(--texto-2); }
+.cabeca-liga-barra { margin-top: 12px; }
+.cabeca-liga-barra .barra-temporada-trilho { height: 4px; }
+.area-liga .abas-detalhe, .cabeca-liga + .abas-detalhe { border-top: 0; border-bottom: 1px solid var(--linha); background: var(--superficie); }
+.cabeca-liga + .abas-detalhe .aba-detalhe { min-height: 44px; }
+
+.detalhes-liga { display: grid; gap: 12px; }
+.cabeca-com-acao { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; }
+.cabeca-com-acao .botao-link { min-height: 44px; padding: 0 4px; font-weight: 700; color: var(--marca); }
+.divisoes-liga { display: grid; gap: 8px; }
+.divisao-liga {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  min-height: 52px; padding: 8px 12px; border: 1px solid var(--linha); border-radius: var(--raio-pequeno);
+  background: var(--superficie-2); color: var(--texto); text-align: left; font: inherit; cursor: pointer;
+}
+.divisao-liga .nota { margin: 0; font-size: 12px; }
+.detalhes-liga .fatos.blocos { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+
+/* partida: a data em pílula no topo */
+.pilula-data { display: flex; justify-content: center; padding: 12px 16px 0; }
+.pilula-data span { padding: 4px 12px; border-radius: 999px; background: var(--superficie-2); font-size: 12.5px; font-weight: 700; color: var(--texto-2); }
+
+/* escalação: o técnico embaixo do campinho */
+.campinho-tecnico { display: flex; align-items: baseline; gap: 8px; margin: 10px 2px 0; font-size: 14px; }
+.campinho-tecnico .nota { margin: 0; }
+
+/* elenco: a foto ao lado do nome */
+.elenco-atleta { display: inline-flex; align-items: center; gap: 8px; }
+.elenco-foto { width: 32px; height: 32px; flex: none; border-radius: 50%; object-fit: cover; background: var(--superficie-2); }
+.elenco-foto.numero { display: inline-grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--texto-2); }
+
+/* jogador: o cartão do clube */
+.cartao-clube {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; margin: 8px 0 4px; padding: 8px 14px;
+  border: 1px solid var(--linha); border-radius: var(--raio-pequeno); background: var(--superficie); color: var(--texto);
+  font: inherit; text-align: left; cursor: pointer;
+}
+.cartao-clube .logo { width: 32px; height: 32px; }
+.cartao-clube-texto { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.cartao-clube-texto .nota { margin: 0; font-size: 12px; }
+.cartao-clube svg { color: var(--texto-3); }

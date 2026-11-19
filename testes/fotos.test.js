@@ -37,7 +37,7 @@ test("outro esporte, outro nome ou nada", () => {
 test("miniatura quando não há recorte, e endereços", () => {
   const so = [{ strPlayer: "Dean Henderson", strTeam: "Crystal Palace", strSport: "Soccer", strCutout: null, strThumb: "https://r2.thesportsdb.com/images/media/player/thumb/a.jpg" }];
   assert.equal(Fotos.escolher(so, "Dean Henderson", "Crystal Palace"), "https://r2.thesportsdb.com/images/media/player/thumb/a.jpg/small");
-  assert.equal(Fotos.espnNba("3934672"), "https://a.espncdn.com/i/headshots/nba/players/full/3934672.png");
+  assert.equal(Fotos.espnNba("3934672"), "https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/3934672.png&w=120&h=88");
   assert.equal(Fotos.urlBusca("Dean Henderson"), "https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=Dean%20Henderson");
   assert.equal(Fotos.chave("Jérémy Jacquet", "Liverpool"), "jeremy jacquet|liverpool");
 });
@@ -59,4 +59,11 @@ test("limpeza do cache das fotos: vencidas e as mais antigas além do limite", (
   ];
   assert.deepEqual(Fotos.chavesParaApagar(entradas, agora, 10), ["a"]);
   assert.deepEqual(Fotos.chavesParaApagar(entradas, agora, 2).sort(), ["a", "b"]);
+});
+
+test("pausa das buscas quando o TheSportsDB limita (429): 1 min, dobrando até 8 min", () => {
+  assert.equal(Fotos.proximaPausa(0), 60000);
+  assert.equal(Fotos.proximaPausa(60000), 120000);
+  assert.equal(Fotos.proximaPausa(240000), 480000);
+  assert.equal(Fotos.proximaPausa(480000), 480000);
 });

@@ -1,7 +1,7 @@
 /* Service worker: guarda o app no celular para ele abrir rápido e até sem internet.
    Os dados das partidas ficam no banco do navegador (IndexedDB), cuidado pelo direto.js. */
 
-const VERSAO = "20261119-145746"; // o gerar_celular.py troca por data e hora a cada geração
+const VERSAO = "20261119-193611"; // o gerar_celular.py troca por data e hora a cada geração
 const CACHE = `scoresports-${VERSAO}`;
 const ARQUIVOS = [
   "./",
@@ -14,6 +14,8 @@ const ARQUIVOS = [
   "./esports_regras.js",
   "./fotos_regras.js",
   "./visual_regras.js",
+  "./liga_regras.js",
+  "./liga.js",
   "./rotas.js",
   "./app.js",
   "./esportes.js",
@@ -40,7 +42,9 @@ const ARQUIVOS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
+  // cache: "reload" pula o cache HTTP do navegador (o GitHub Pages manda guardar por 10 min):
+  // sem isso, a versão nova podia ser montada com arquivos da versão anterior
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {

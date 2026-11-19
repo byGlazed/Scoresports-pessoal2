@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Scoresports</title>
   <meta name="color-scheme" content="light dark">
+  <!-- abre a conexão com a ESPN enquanto o app carrega: o primeiro pedido sai mais rápido -->
+  <link rel="preconnect" href="https://site.api.espn.com" crossorigin>
+  <link rel="preconnect" href="https://a.espncdn.com">
+  <link rel="dns-prefetch" href="https://sports.core.api.espn.com">
   <link rel="stylesheet" href="/static/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23e8364c'/></svg>">
 </head>
@@ -45,12 +49,14 @@
   <script src="/static/esports_regras.js"></script>
   <script src="/static/fotos_regras.js"></script>
   <script src="/static/visual_regras.js"></script>
+  <script src="/static/liga_regras.js"></script>
   <script src="/static/rotas.js"></script>
   <script src="/static/app.js"></script>
   <script src="/static/esportes.js"></script>
   <script src="/static/fotos.js"></script>
   <script src="/static/campinho.js"></script>
   <script src="/static/esports.js"></script>
+  <script src="/static/liga.js"></script>
   <script src="/static/busca_regras.js"></script>
   <script src="/static/inicio.js"></script>
   <script src="/static/chave_regras.js"></script>

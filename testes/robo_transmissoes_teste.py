@@ -107,6 +107,8 @@ class TesteCruzamento(unittest.TestCase):
 class TesteAtualizar(unittest.TestCase):
     def setUp(self):
         self.paginas = {c: guia(c) for c in ("ES2", "SPO", "GRD")}
+        # a lista do dia do futebolnatv: vazia aqui (os testes dela ficam em TesteFutebolNaTV)
+        self.paginas.update({"jogos-hoje": "<html></html>", "jogos-amanha": "<html></html>"})
 
         def pegar_texto(url):
             if url.endswith("/robots.txt"):
@@ -173,10 +175,6 @@ class TesteRobots(unittest.TestCase):
         self.assertTrue(T.permitido(None, "/programacao/canal/ES2"))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TesteRevisao(unittest.TestCase):
     """Correções da revisão final da parte I."""
 
@@ -233,3 +231,90 @@ class TesteOndeAssistirNoPC(unittest.TestCase):
         finally:
             transmissoes._carregar = original
         self.assertEqual(r["canais"], ["Prime Video"])
+
+
+class TesteFutebolNaTV(unittest.TestCase):
+    """Parte J: os streamings e os canais que o guia de TV não tem, pela lista do dia do futebolnatv."""
+
+    def setUp(self):
+        base = TesteAtualizar()
+        base.setUp()
+        base.paginas["jogos-hoje"] = (AMOSTRAS / "futebolnatv_hoje.html").read_text(encoding="utf-8")
+        self.base = base
+        self.canais = {"ES2": "ESPN 2", "SPO": "SporTV", "GRD": "Globo"}
+
+    def rodar(self, arquivo):
+        return T.atualizar(arquivo, HOJE, pegar_texto=self.base.pegar_texto, pegar_json=self.base.pegar_json, canais=self.canais, dias=1)
+
+    def test_le_a_lista_do_dia(self):
+        jogos = T.ler_futebolnatv((AMOSTRAS / "futebolnatv_hoje.html").read_text(encoding="utf-8"))
+        self.assertEqual(len(jogos), 3)  # o jogo sem canal fica de fora
+        sp = jogos[1]
+        self.assertEqual(sp["times"], ["São Paulo", "Fluminense"])
+        self.assertEqual((sp["data"], sp["hora"]), ("2026-11-19", "21:30"))  # data-ts em UTC -> Brasília
+        self.assertEqual(sp["canais"], ["Globo", "Premiere 2", "ge tv"])
+        self.assertEqual(jogos[0]["canais"], ["SporTV", "Premiere"])
+        self.assertEqual(jogos[2]["canais"], ["ESPN", "Disney+ Premium"])
+
+    def test_nomes_dos_canais(self):
+        casos = {
+            "GLOBO": "Globo", "SPORTV": "SporTV", "SPORTV 2": "SporTV 2", "SPORTV 3": "SporTV 3", "SPORTV 1": "SporTV",
+            "PREMIERE FC": "Premiere", "PREMIERE 4": "Premiere 4", "GE TV": "ge tv", "CAZÉTV": "CazéTV", "CAZE TV": "CazéTV",
+            "PRIME VIDEO": "Prime Video", "AMAZON PRIME VIDEO": "Prime Video", "HBO MAX": "HBO Max", "MAX": "HBO Max",
+            "DISNEY+": "Disney+ Premium", "XSPORTS": "Xsports", "SPORTYNET": "SportyNet", "PARAMOUNT+": "Paramount+",
+            "APPLE TV": "Apple TV", "ESPN 4": "ESPN 4", "CANAL GOAT": "GOAT", "PPV ONEFOOTBALL": "OneFootball", "BAND": "Band", "TNT": "TNT", "YOUTUBE NBA BRASIL": "YouTube NBA Brasil",
+        }
+        for bruto, nome in casos.items():
+            self.assertEqual(T.nome_do_canal(bruto), nome, bruto)
+
+    def test_junta_o_guia_e_a_lista_do_dia(self):
+        arquivo = {"jogos": []}
+        self.rodar(arquivo)
+        sp = [j for j in arquivo["jogos"] if "São Paulo" in j["times"]]
+        self.assertEqual(len(sp), 1)
+        self.assertEqual(sp[0]["canais"], ["Globo", "Premiere 2", "ge tv"])
+        vasco = [j for j in arquivo["jogos"] if "Vasco da Gama" in j["times"]]
+        self.assertEqual(vasco[0]["canais"], ["SporTV", "Premiere"])
+
+    def test_premiere_numerado_tira_o_premiere_generico(self):
+        self.assertEqual(T.canais_do_jogo("futebol", ["Premiere", "Premiere 2"]), ["Premiere 2"])
+        self.assertEqual(T.canais_do_jogo("futebol", ["ESPN", "Disney+ Premium"]), ["ESPN", "Disney+ Premium"])
+
+    def test_lista_do_dia_fora_do_ar_so_acrescenta(self):
+        antigo = {"esporte": "futebol", "data": "2026-11-19", "times": ["São Paulo", "Fluminense"], "canais": ["Globo", "Premiere 2", "ge tv"], "conferido_em": "2026-11-19", "fonte": T.FONTE}
+        arquivo = {"jogos": [dict(antigo)]}
+        self.base.paginas["jogos-hoje"] = None
+        self.rodar(arquivo)
+        self.assertEqual(arquivo["jogos"][0]["canais"], ["Globo", "Premiere 2", "ge tv"])
+
+
+class TesteMadrugada(unittest.TestCase):
+    def test_hoje_e_a_data_de_brasilia(self):
+        from datetime import datetime, timezone
+        self.assertEqual(T.hoje_em_brasilia(datetime(2026, 11, 20, 2, 0, tzinfo=timezone.utc)), date(2026, 11, 19))
+        self.assertEqual(T.hoje_em_brasilia(datetime(2026, 11, 20, 4, 0, tzinfo=timezone.utc)), date(2026, 11, 20))
+
+    def test_jogo_depois_da_meia_noite_procura_tambem_o_dia_anterior_da_espn(self):
+        self.assertEqual(T.datas_da_espn({"data": "2026-11-20", "hora": "00:30"}), ["2026-11-20", "2026-11-19"])
+        self.assertEqual(T.datas_da_espn({"data": "2026-11-20", "hora": "21:30"}), ["2026-11-20"])
+
+    def test_futebol_junta_os_nomes_em_portugues_e_os_jogos_so_em_ingles(self):
+        def ev(id_, quando, a, b):
+            return {"id": id_, "date": quando, "competitions": [{"competitors": [{"team": a}, {"team": b}]}]}
+
+        pt = {"events": [ev("1", "2026-11-21T18:00Z", {"abbreviation": "LAZ", "displayName": "Lázio"}, {"abbreviation": "LEC", "displayName": "Lecce"})]}
+        en = {"events": [
+            ev("1", "2026-11-21T18:00Z", {"abbreviation": "LAZ", "displayName": "Lazio"}, {"abbreviation": "LEC", "displayName": "Lecce"}),
+            ev("2", "2026-11-21T15:00Z", {"abbreviation": "BAY", "displayName": "Bayern Munich"}, {"abbreviation": "STU", "displayName": "VfB Stuttgart"}),
+        ]}
+        eventos = T.juntar_eventos(T.eventos_espn(pt), T.eventos_espn(en))
+        self.assertEqual(len(eventos), 2)
+        lazio = eventos[0]["times"][0]
+        self.assertEqual(lazio["chave"], "Lázio")  # o nome em português, como o app recebe
+        self.assertIn("Lazio", lazio["nomes"])
+        bayern = eventos[1]["times"][0]
+        self.assertEqual(bayern["chave"], "BAY")  # só em inglês: a sigla, que é a mesma nas duas línguas
+
+
+if __name__ == "__main__":
+    unittest.main()

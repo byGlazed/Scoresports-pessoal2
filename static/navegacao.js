@@ -362,7 +362,8 @@ registrarPagina("evento", {
   },
 });
 
-/** Competição: as abas do esporte (jogos, classificação, líderes...) para uma liga. */
+/** Competição (como a página de torneio do Sofascore): o cabeçalho da liga e as abas do esporte
+    (classificação, detalhes, jogos, estatísticas...). */
 registrarPagina("liga", {
   titulo: (params) => {
     const esp = esporteObj(params.esporte);
@@ -424,7 +425,9 @@ registrarPagina("liga", {
       p.dia = guardarDia(esp);
       Navegacao.acompanhar(p, desenharAba());
     }
-    corpo.replaceChildren(abas.length > 1 ? barra : h("span"), area);
+    // o "Ver tudo" da aba Detalhes troca de aba por aqui
+    p.trocarAba = (nova) => abas.some((a) => a.id === nova) && trocar(nova);
+    corpo.replaceChildren(cabecaLiga(esp, params.liga), abas.length > 1 ? barra : h("span"), area);
     return desenharAba();
   },
 });
@@ -568,7 +571,7 @@ async function gruposDoEsporte(esp, data) {
           h(
             "section",
             { class: "cartao grupo-liga" },
-            cabecaGrupo({ titulo: "NBA", aoClicar: () => irPara("nba", "classificacao"), favorito: { tipo: "liga", esporte: "nba", liga: "nba", id: "nba", nome: "NBA" }, jogos: visiveis }),
+            cabecaGrupo({ titulo: "NBA", chave: "nba:nba", aoClicar: () => irPara("nba", "classificacao"), favorito: { tipo: "liga", esporte: "nba", liga: "nba", id: "nba", nome: "NBA" }, jogos: visiveis }),
             visiveis.map((j) => nbaLinhaJogo(j))
           ),
       },
@@ -691,8 +694,22 @@ async function jogosTodos(silencioso) {
   if (tk !== S.tkLista) return;
 
   const todos = [...porEsporte.values()].filter(Array.isArray).flat().flatMap((g) => g.jogos);
+  if (!silencioso) adiantarDias(esportes, data);
   if (todos.some((j) => j.estado === 2)) agendar("lista", () => jogosTodos(true), 20000);
   else if (data === hoje && todos.some((j) => j.estado === 1)) agendar("lista", () => jogosTodos(true), 60000);
+}
+
+/** Com o aparelho ocioso, busca os jogos do dia anterior e do seguinte: trocar de dia sai na hora
+    (o dado fica guardado). Não faz isso com economia de dados ligada nem em rede 2G. */
+function adiantarDias(esportes, data) {
+  const c = navigator.connection;
+  if (c && (c.saveData || /(^|-)2g$/.test(c.effectiveType || ""))) return;
+  const ocioso = window.requestIdleCallback ? (f) => window.requestIdleCallback(f, { timeout: 4000 }) : (f) => setTimeout(f, 1500);
+  ocioso(() => {
+    for (const d of [somarDias(data, 1), somarDias(data, -1)]) {
+      for (const esp of esportes) gruposDoEsporte(esp, d).catch(() => {});
+    }
+  });
 }
 
 /* ---------- Atalhos usados pelas telas ---------- */

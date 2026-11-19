@@ -67,7 +67,7 @@ function cartaoConfronto(c, { aoTocar, estilo }) {
     h(
       "span",
       { class: `chave-lado${l.passou ? " passou" : algumPassou ? " saiu" : ""}` },
-      l.logo ? h("img", { src: l.logo, alt: "", loading: "lazy", width: 20, height: 20 }) : h("span"),
+      l.logo ? h("img", { src: Visual.imagemPequena(l.logo, 40), alt: "", loading: "lazy", width: 20, height: 20 }) : h("span"),
       h("span", { class: "nome" }, l.aDefinir ? "A definir" : l.curto || l.nome),
       h("span", { class: "placar" }, comecou ? String(l.placar) : "")
     )
@@ -144,7 +144,7 @@ function listaDeFase(nome, confrontos, aoTocar) {
           h(
             "span",
             { class: `chave-lado${l.passou ? " passou" : algumPassou ? " saiu" : ""}` },
-            l.logo ? h("img", { src: l.logo, alt: "", loading: "lazy", width: 20, height: 20 }) : h("span"),
+            l.logo ? h("img", { src: Visual.imagemPequena(l.logo, 40), alt: "", loading: "lazy", width: 20, height: 20 }) : h("span"),
             h("span", { class: "nome" }, l.aDefinir ? "A definir" : l.nome),
             h("span", { class: "placar" }, comecou ? String(l.placar) : "")
           )

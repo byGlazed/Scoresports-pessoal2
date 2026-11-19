@@ -38,14 +38,18 @@ function abrirJogoDoTime(esporte, liga, jogo) {
   Navegacao.abrir({ tipo: "jogo", params: { esporte, liga, id: String(jogo.id) }, jogo });
 }
 
-function tabelaElenco(esporte, liga, atletas) {
+function tabelaElenco(esporte, liga, atletas, nomeTime) {
+  // a foto do atleta (no futebol, a do TheSportsDB quando a ESPN não tem; nos outros, só a da ESPN)
+  const foto = (a) =>
+    // sem foto ainda, um círculo vazio: o número já está na coluna "#"
+    a.foto || esporte === "futebol" ? fotoJogador({ ...a, camisa: "" }, nomeTime, "elenco-foto", "elenco-foto numero") : null;
   return tabela(
     [
       { nome: "#", valor: (a) => a.camisa || "" },
       {
         nome: "Atleta",
         esq: true,
-        valor: (a) => h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta(esporte, liga, a.id, a.nome) }, a.nome),
+        valor: (a) => h("span", { class: "elenco-atleta" }, foto(a), h("button", { class: "botao-link", type: "button", onclick: () => empilharAtleta(esporte, liga, a.id, a.nome) }, a.nome)),
       },
       { nome: "Posição", valor: (a) => a.posicao || "" },
       { nome: "Idade", valor: (a) => a.idade ?? "" },
@@ -59,7 +63,7 @@ function secoesElenco(esporte, liga, e) {
   const grupos = (e.grupos || []).filter((g) => g.atletas.length);
   if (!grupos.length && !e.tecnico) return [vazio("A ESPN não tem o elenco deste time.")];
   return [
-    ...grupos.map((g) => secao(g.nome, tabelaElenco(esporte, liga, g.atletas))),
+    ...grupos.map((g) => secao(g.nome, tabelaElenco(esporte, liga, g.atletas, (e.time || {}).nome))),
     e.tecnico ? secao("Técnico", h("p", { class: "tecnico" }, e.tecnico)) : null,
   ].filter(Boolean);
 }
@@ -478,7 +482,7 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id, contexto = null) 
     h(
       "div",
       { class: "perfil" },
-      p.foto ? h("img", { class: "perfil-foto", src: p.foto, alt: "" }) : fotoDoPerfil(esporte, p),
+      p.foto ? h("img", { class: "perfil-foto", src: Visual.imagemPequena(p.foto, 200, 146), alt: "" }) : fotoDoPerfil(esporte, p),
       h(
         "div",
         null,
@@ -488,6 +492,18 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id, contexto = null) 
       )
     ),
   ];
+  // o cartão do clube (como no Sofascore): o escudo e o nome, e o toque abre a página do time
+  if (p.time && p.time_id) {
+    blocos.push(
+      h(
+        "button",
+        { class: "cartao-clube", type: "button", onclick: () => abrirTime(esporte, liga, String(p.time_id), p.time) },
+        imgLogo(p.time_logo || null),
+        h("span", { class: "cartao-clube-texto" }, h("span", { class: "nota" }, "Time"), h("strong", null, p.time)),
+        s("svg", { viewBox: "0 0 24 24", width: "16", height: "16", "aria-hidden": "true" }, s("path", { d: "M9 5l7 7-7 7", fill: "none", stroke: "currentColor", "stroke-width": "2.4", "stroke-linecap": "round", "stroke-linejoin": "round" }))
+      )
+    );
+  }
   if (contexto && contexto.arremessos) blocos.push(secao("Arremessos no jogo", ...blocoMapa(contexto.arremessos)));
   if (fatos.length) blocos.push(secao("Informações gerais", h("dl", { class: "fatos blocos" }, fatos.map(([r, v]) => h("div", { class: "fato" }, h("dt", null, r), h("dd", null, v))))));
   if (p.resumo.length) {
@@ -720,15 +736,14 @@ function favLiga(esp, ligaId) {
 
 const ModuloPartidas = {
   abas: (esp, liga) => {
-    const abas = [
-      { id: "classificacao", nome: "Classificação" },
-      { id: "jogos", nome: "Jogos" },
-    ];
-    // a chave (mata-mata ou playoffs) só no app: o site do PC usa o servidor Python, que não tem a rota
+    // a ordem do Sofascore: Classificação, Detalhes, Jogos, Estatísticas
+    const abas = [{ id: "classificacao", nome: "Classificação" }];
+    // Detalhes e a chave (mata-mata ou playoffs) só no app: o site do PC usa o servidor Python, que não tem as rotas
+    if (window.MODO_CELULAR) abas.push({ id: "detalhes", nome: "Detalhes" });
+    abas.push({ id: "jogos", nome: "Jogos" }, { id: "lideres", nome: "Estatísticas" });
     const ligaDaAba = liga || (esp.ligas.length === 1 ? esp.ligas[0].id : null);
     if (window.MODO_CELULAR && ligaDaAba && Chave.temChave(esp.id, ligaDaAba)) abas.push({ id: "chave", nome: Chave.nomeDaAba(esp.id, ligaDaAba) });
     if (window.MODO_CELULAR && esp.id === "nba") abas.push({ id: "copa", nome: "Copa NBA" });
-    abas.push({ id: "lideres", nome: esp.id === "futebol" ? "Artilharia e cartões" : "Líderes" });
     return abas;
   },
 
@@ -738,6 +753,7 @@ const ModuloPartidas = {
     const ligaEscolhida = st.liga === "todas" ? esp.ligas[0].id : st.liga;
     if (aba === "classificacao") return classificacaoEspn(esp, ligaEscolhida);
     if (aba === "lideres") return lideresEspn(esp, ligaEscolhida);
+    if (aba === "detalhes") return ligaDetalhes(esp, ligaEscolhida);
     if (aba === "chave") return chaveLista(esp, ligaEscolhida);
     if (aba === "copa") return copaNbaLista(esp);
     return partidasLista(esp);
@@ -917,7 +933,7 @@ function grupoDeJogos(esp, liga, jogos, { aoTocarLiga, aoTocarJogo, sub } = {}) 
   return h(
     "section",
     { class: "cartao grupo-liga" },
-    cabecaGrupo({ titulo: liga.nome, logo: (jogos[0] && jogos[0].liga_logo) || null, sub, aoClicar: aoTocarLiga, favorito: favLiga(esp, liga.id), jogos }),
+    cabecaGrupo({ titulo: liga.nome, chave: `${esp.id}:${liga.id}`, logo: (jogos[0] && jogos[0].liga_logo) || null, sub, aoClicar: aoTocarLiga, favorito: favLiga(esp, liga.id), jogos }),
     jogos.map((j) => linhaPartida(esp, j, () => aoTocarJogo(j)))
   );
 }
@@ -1005,9 +1021,11 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
     direita: { nome: dir.nome, logo: dir.logo, placar: placarComPenaltis(dir), sub: dir.campanha, gols: golsDe(dir), aoClicar: () => abrirTime(esp.id, liga, dir.id, dir.nome), favorito: favTime(dir) },
     estado: j.estado,
     status: j.estado === 1 ? j.status || hora(j.inicio) || "A definir" : j.status,
-    info: [j.liga_nome, diaHora(j.inicio)].filter(Boolean).join(", "),
+    info: j.liga_nome || null,
   });
-  detalhe().replaceChildren(h("section", { class: "cartao" }, placar, barra, area));
+  // a data em pílula no topo (como no Sofascore)
+  const pilula = diaHora(j.inicio) ? h("div", { class: "pilula-data" }, h("span", null, diaHora(j.inicio))) : null;
+  detalhe().replaceChildren(h("section", { class: "cartao" }, pilula, placar, barra, area));
 
   if (j.estado === 2) agendar("detalhe", () => partidaDetalhe(esp, liga, jogoLista, true), 20000);
 }
@@ -1281,7 +1299,8 @@ async function classificacaoEspn(esp, liga) {
   }
   const cartoes = cartoesClassificacao(esp, liga, c);
   const progresso = c.temporada ? Visual.progressoTemporada(c.temporada.inicio, c.temporada.fim) : null;
-  if (progresso) cartoes.unshift(barraTemporada(progresso));
+  // no app a barra da temporada fica no cabeçalho da liga; no PC (sem a rota /datas nova), aqui
+  if (progresso && !window.MODO_CELULAR) cartoes.unshift(barraTemporada(progresso));
   const chaveCampeoes = esp.id === "futebol" ? `futebol:${liga}` : esp.id;
   lista().replaceChildren(h("div", { class: "grade-classificacao" }, h("div", null, ...cartoes), cartaoCampeoes(chaveCampeoes)));
 }
@@ -1358,12 +1377,11 @@ async function lideresEspn(esp, liga) {
     return;
   }
   if (tk !== S.tkLista) return;
-  const nomeLiga = (esp.ligas.find((x) => x.id === liga) || {}).nome || liga;
+  // o nome da liga já está no cabeçalho da página
   const partes = [
     h(
       "div",
       { class: "cabeca-pagina" },
-      h("h2", null, nomeLiga),
       l.temporada ? h("span", { class: "selo" }, `Temporada ${l.temporada}`) : null,
       l.temporada_anterior ? h("span", { class: "nota", style: { margin: 0 } }, "A temporada atual ainda não tem números; mostrando a última.") : null
     ),

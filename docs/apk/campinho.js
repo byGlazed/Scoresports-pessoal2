@@ -37,7 +37,7 @@ function comNotas(e, jogo) {
 /** Foto do jogador: a da ESPN quando vem no roster; senão a do TheSportsDB (chega depois); sem nenhuma, o número da camisa. */
 function fotoJogador(j, time, classe = "campo-foto", classeNumero = "campo-numero") {
   const numero = () => h("span", { class: classeNumero, "aria-hidden": "true" }, j.camisa || "");
-  if (j.foto) return h("img", { class: classe, src: j.foto, alt: "", loading: "lazy", onerror: (ev) => ev.target.replaceWith(numero()) });
+  if (j.foto) return h("img", { class: classe, src: Visual.imagemPequena(j.foto, 96, 70), alt: "", loading: "lazy", onerror: (ev) => ev.target.replaceWith(numero()) });
   const caixa = numero();
   FotoJogador.aplicar(caixa, j.nome, time, classe);
   return caixa;
@@ -99,6 +99,20 @@ function linhaReserva(esp, liga, j, time, nomes) {
   );
 }
 
+/** O técnico embaixo do campinho, quando a página do time traz (ESPN ou Wikidata). Aparece depois, sem segurar o campinho. */
+function linhaTecnico(esp, liga, time) {
+  const linha = h("p", { class: "campinho-tecnico", hidden: true });
+  if (!time || !time.id) return linha;
+  api(`/e/${esp.id}/${liga}/times/${time.id}`)
+    .then((t) => {
+      if (!t || !t.tecnico) return;
+      linha.replaceChildren(h("span", { class: "nota" }, "Técnico"), h("strong", null, t.tecnico));
+      linha.hidden = false;
+    })
+    .catch(() => {});
+  return linha;
+}
+
 /** Um cartão por time: cabeçalho (média e formação), o campinho e os reservas. */
 function cartaoCampinho(esp, liga, e, jogo) {
   const { titulares, reservas } = comNotas(e, jogo);
@@ -125,6 +139,7 @@ function cartaoCampinho(esp, liga, e, jogo) {
       h("span", { class: "campo-meio", "aria-hidden": "true" }),
       posicoes.map((p) => jogadorNoCampo(esp, liga, p, e.time.nome))
     ),
+    linhaTecnico(esp, liga, e.time),
     reservasEmOrdem.length ? [h("h3", { class: "campinho-reservas-titulo" }, "Reservas"), h("ul", { class: "campinho-reservas" }, reservasEmOrdem.map((j) => linhaReserva(esp, liga, j, e.time.nome, new Map([...titulares, ...reservas].map((t) => [String(t.id), nomeCurtoJogador(t.nome)])))))] : null
   );
 }

@@ -398,7 +398,8 @@ function imgLogo(src, classe = "logo") {
   if (!src) return h("span", { class: "logo-vazio", "aria-hidden": "true" });
   return h("img", {
     class: classe,
-    src,
+    // o escudo da ESPN no tamanho em que aparece (o original tem 500 px e ~110 KB)
+    src: Visual.imagemPequena(src, /perfil-foto/.test(classe) ? 160 : 64),
     alt: "",
     loading: "lazy",
     onerror: (e) => e.target.replaceWith(h("span", { class: "logo-vazio", "aria-hidden": "true" })),
@@ -548,7 +549,8 @@ function gruposRecolhidos() {
   }
 }
 
-function botaoRecolher(titulo) {
+/** chave: o que identifica o grupo entre esportes ("futebol:bra.1"); o título só aparece no rótulo. */
+function botaoRecolher(titulo, chave = titulo) {
   const seta = s("svg", { viewBox: "0 0 24 24", width: "18", height: "18", "aria-hidden": "true" }, s("path", { d: "M6 15l6-6 6 6", fill: "none", stroke: "currentColor", "stroke-width": "2.4", "stroke-linecap": "round", "stroke-linejoin": "round" }));
   const botao = h("button", { class: "recolher-grupo", type: "button", "aria-label": `Recolher ${titulo}`, "aria-expanded": "true" }, seta);
   const aplicar = (recolhido) => {
@@ -560,20 +562,20 @@ function botaoRecolher(titulo) {
   botao.addEventListener("click", (e) => {
     e.stopPropagation();
     const conjunto = gruposRecolhidos();
-    if (conjunto.has(titulo)) conjunto.delete(titulo);
-    else conjunto.add(titulo);
+    if (conjunto.has(chave)) conjunto.delete(chave);
+    else conjunto.add(chave);
     try {
       localStorage.setItem("ss:recolhidos", JSON.stringify([...conjunto]));
     } catch (_) {
       /* sem localStorage: vale só nesta tela */
     }
-    aplicar(conjunto.has(titulo));
+    aplicar(conjunto.has(chave));
   });
-  queueMicrotask(() => aplicar(gruposRecolhidos().has(titulo)));
+  queueMicrotask(() => aplicar(gruposRecolhidos().has(chave)));
   return botao;
 }
 
-function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub, jogos }) {
+function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub, jogos, chave }) {
   const vivos = jogos ? jogos.filter((j) => j.estado === 2).length : 0;
   const contador = jogos && jogos.length
     ? h("span", { class: `contador-grupo${vivos ? " ao-vivo" : ""}`, title: vivos ? `${vivos} ao vivo de ${jogos.length}` : `${jogos.length} jogos` }, vivos ? `${vivos}/${jogos.length}` : String(jogos.length))
@@ -594,7 +596,7 @@ function cabecaGrupo({ titulo, logo, aoClicar, favorito, sub, jogos }) {
     h("span", { style: { flex: 1 } }),
     contador,
     favorito ? botaoFavorito(favorito) : null,
-    jogos && jogos.length ? botaoRecolher(titulo) : null
+    jogos && jogos.length ? botaoRecolher(titulo, chave || titulo) : null
   );
 }
 

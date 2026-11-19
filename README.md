@@ -9,7 +9,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 ### Interface
 - No estilo do Sofascore e do Flashscore: uma **barra embaixo** com **Jogos**, **Favoritos** e **Pesquisa**, e cada coisa que você abre (partida, time, competição, atleta, boxeador, evento) vira uma **página com voltar**.
 - **Jogos:** a tela inicial mostra só os jogos do dia. Os **chips** no topo escolhem o esporte (Todos, Futebol, NBA, NFL, MLB, NHL, F1, UFC, Boxe). Em "Todos", os jogos de todos os esportes aparecem juntos, agrupados por competição, com os que estão **ao vivo primeiro**. Se um esporte não carregar, só ele mostra o aviso, com um botão para tentar de novo.
-- **Competição:** tocar no nome dela abre a página da liga, com as abas **Classificação**, Jogos e Líderes (no futebol, Artilharia e cartões). Na F1 são Calendário e Classificação; no UFC, Eventos e Ranking.
+- **Competição (como a página de torneio do Sofascore):** tocar no nome dela, ou nela na Pesquisa, abre a página da liga. No topo ficam o escudo, o nome, "país · temporada" e a barra da temporada (do primeiro ao último dia com jogo). Embaixo vêm as abas **Classificação**, **Detalhes**, Jogos e **Estatísticas** (artilharia, assistências, cartões ou os líderes do esporte). **Detalhes** (no app) junta os jogos ao vivo, os próximos e os últimos resultados, os 3 primeiros da principal estatística com "Ver tudo", os números da temporada no futebol (gols, média de gols, jogos, empates e times), os títulos com o maior campeão da lista e a divisão de cima ou de baixo (Série A ↔ Série B). Na F1 as abas são Calendário e Classificação; no UFC, Eventos e Ranking.
 - **Chaveamento (no app):** nas copas e competições com mata-mata (Copa do Brasil, Libertadores, Champions, FA Cup, Copa do Mundo…) a página da liga ganha a aba **Mata-mata**, e na NBA, NFL, MLB, NHL e MLS a aba **Playoffs**: a chave em colunas, arrastando para os lados, com as linhas ligando quem passa, o agregado da ida e volta, os pênaltis, as vitórias na série e quem está ao vivo. Tocar num confronto abre o jogo (ou os jogos de ida e volta e da série). As fases preliminares e o Play-In da NBA ficam numa lista acima da chave. Se o mata-mata desta temporada ainda não começou, aparece o da anterior, com um botão para trocar.
 - **Voltar:** cada aba guarda as suas páginas. Trocar de aba e voltar mantém onde você estava; tocar na aba de novo volta ao começo dela. No Android, o botão voltar volta uma página por vez e só sai do app no começo da aba Jogos. Cada página tem um endereço próprio (por exemplo `#/liga/futebol/bra.1/classificacao`), então recarregar mantém a página aberta.
 - **Faixa de dias** com ontem, hoje e amanhã, setas e calendário. Na NBA e numa competição escolhida, os dias sem jogo ficam apagados.
@@ -20,7 +20,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 
 ### Favoritos e Pesquisa
 - **Favoritos:** a estrela ☆ ao lado de times, jogadores e competições guarda o favorito no navegador. A aba **Favoritos** junta, no dia escolhido, os jogos de todos os favoritos (de qualquer esporte), com placar ao vivo e onde assistir. Os chips mostram só os esportes em que você tem favorito, e embaixo fica a lista **Seus favoritos**, com atalho para cada um e o × para tirar.
-- **Pesquisa:** procura jogadores (inclusive aposentados da NBA), times, seleções, lutadores do UFC, boxeadores (pela Wikipédia), pilotos e competições, com o nome certo primeiro. Filtros Todos, Times, Atletas e Competições; com o campo vazio aparecem as **buscas recentes** (com × para apagar). Cada competição mostra atalhos para jogos, classificação e estatísticas, e os **últimos campeões**.
+- **Pesquisa:** procura jogadores (inclusive aposentados da NBA), times, seleções, lutadores do UFC, boxeadores (pela Wikipédia), pilotos e competições, com o nome certo primeiro. Filtros Todos, Times, Atletas e Competições; com o campo vazio aparecem as **buscas recentes** (com × para apagar). Cada competição é uma linha, como os times e os jogadores, e o toque abre a página dela.
 
 ### NBA
 - **Jogos por dia:** navegação por setas ou calendário, da primeira rodada ao fim da temporada.
@@ -73,19 +73,23 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **Ao vivo:** a lista e a partida se atualizam a cada 30 s, para caber no limite grátis da PandaScore (cerca de 1.000 pedidos por hora).
 
 ### Fotos, visual e velocidade
-- **Fotos dos jogadores:** no futebol, a foto da ESPN quando existe e, senão, a foto recortada do [TheSportsDB](https://www.thesportsdb.com) (API gratuita), com zoom no rosto. A foto só entra se o time bater (ou se o nome completo for único), para não mostrar um homônimo; sem foto, fica o número da camisa. As buscas vão uma de cada vez e ficam guardadas no aparelho por 30 dias. Aparecem no campinho, nos reservas e na página do jogador. Na NBA, a foto da ESPN em cada linha do box score.
+- **Fotos dos jogadores:** no futebol, a foto da ESPN quando existe e, senão, a foto recortada do [TheSportsDB](https://www.thesportsdb.com) (API gratuita), com zoom no rosto. A foto só entra se o time bater (ou se o nome completo for único), para não mostrar um homônimo; sem foto, fica o número da camisa. As buscas vão uma de cada vez e ficam guardadas no aparelho por 30 dias. Aparecem no campinho, nos reservas, no elenco e na página do jogador. Na NBA, a foto da ESPN em cada linha do box score. Se o TheSportsDB pedir para esperar (limite do plano grátis), as buscas param 1 minuto, dobrando até 8.
 - **Como no Sofascore:**
   - *Lista do dia:* contador em cada campeonato ("6", ou "2/6" em vermelho com jogo ao vivo) e grupo que recolhe (a escolha fica guardada).
-  - *Partida:* autores dos gols embaixo de cada time; na linha do tempo, o placar em pílula nos gols e as substituições com ↑ e ↓; nos reservas, "60' · Saiu: Q. Timber".
+  - *Partida:* a data em pílula no topo; autores dos gols embaixo de cada time; na linha do tempo, o placar em pílula nos gols e as substituições com ↑ e ↓; nos reservas, "60' · Saiu: Q. Timber"; o técnico embaixo do campinho.
   - *Time:* aba **Visão geral** (abre primeiro) com o próximo jogo, a forma recente (5 placas V/E/D com o placar) e a mini-classificação.
-  - *Campeonato:* barra de progresso da temporada.
-  - *Jogador:* foto redonda e "Informações gerais" em blocos.
-- **Velocidade:** o que já está guardado no aparelho aparece na hora (até 6 h de idade), e o dado novo chega em segundo plano e redesenha a tela sozinho. Medido no navegador: a lista do dia com dado guardado em cerca de 0,15 s, e voltar da partida para a lista em 0,02 s.
+  - *Campeonato:* a página da liga com cabeçalho, barra da temporada e a aba Detalhes.
+  - *Jogador:* foto redonda, o cartão do clube (toque para abrir o time) e "Informações gerais" em blocos.
+- **Velocidade:** o que já está guardado no aparelho aparece na hora (até 6 h de idade), e o dado novo chega em segundo plano e redesenha a tela sozinho. Medido no navegador: a lista do dia com dado guardado em cerca de 0,15 s, e voltar da partida para a lista em 0,02 s. Os escudos e as fotos da ESPN vêm no tamanho em que aparecem (um escudo cai de ~110 KB para ~5 KB), a conexão com a ESPN abre enquanto o app carrega, e o dia anterior e o seguinte são buscados quando o celular fica ocioso (não com economia de dados ligada).
 
 ### Onde assistir no Brasil
 Cada jogo mostra os canais. A informação vem do `transmissoes.json`, em duas camadas:
 1. **Grade confirmada:** jogos anotados um a um, a partir das grades que as emissoras divulgam (aparece com o selo "Grade confirmada").
-   O **robô dos canais** (`robo/transmissoes.py`) preenche a grade sozinho duas vezes por dia (7h e 15h de Brasília): lê a programação dos canais esportivos no guia de TV [meuguia.tv](https://meuguia.tv) (ESPN 1 a 5, SporTV 1 a 3, Premiere, BandSports, Combate, Globo, Band, Record, SBT e TV Cultura), pega só os programas "Ao Vivo" e cruza cada um com os jogos do dia da ESPN pelos dois times e pela hora. Na dúvida, não marca. Canal da ESPN ganha também o Disney+ Premium, e a NBA, o League Pass. Item escrito à mão nunca é alterado.
+   O **robô dos canais** (`robo/transmissoes.py`) preenche a grade sozinho duas vezes por dia (7h e 15h de Brasília), com duas fontes:
+   - o guia de TV [meuguia.tv](https://meuguia.tv) (ESPN 1 a 5, SporTV 1 a 3, Premiere, BandSports, Combate, Globo, Band, Record, SBT e TV Cultura), só os programas "Ao Vivo";
+   - a lista do dia do [futebolnatv.com.br](https://www.futebolnatv.com.br) (hoje e amanhã), que traz também os streamings e os canais que o guia não tem: ge tv, CazéTV, Prime Video, HBO Max, Disney+, Premiere 2 a 7, Xsports, SportyNet, Paramount+, Apple TV… O robô lê só a hora, os dois times e os canais (os termos do site pedem para não copiar o conteúdo; o dono aprovou o uso pessoal).
+
+   Cada jogo é cruzado com os jogos da ESPN pelos dois times e pela hora (no futebol, a ESPN em português e em inglês, que traz todas as ligas; depois da meia-noite, também o dia anterior da ESPN). Na dúvida, não marca. Os canais das duas fontes se juntam; canal da ESPN ganha também o Disney+ Premium, e a NBA, o League Pass. Item escrito à mão nunca é alterado.
 2. **Padrão da competição:** quando o jogo não está na grade, vale o padrão (por exemplo, todo jogo da NBA está no League Pass e todo evento do UFC está no Paramount+). As regras do padrão podem depender do dia da semana e do horário (na NFL, quinta e domingo à noite no SporTV, segunda na ESPN).
 
 ## App Android (APK)
@@ -205,7 +209,7 @@ Scoresports-pessoal2/
 ├── box_score.py        # script de terminal: box score de um jogo
 ├── classificacao.py    # script de terminal: classificação das conferências
 ├── temporada.py       # temporada da NBA pela data
-├── robo/              # robô diário: campeões (ESPN), lutas de boxe (Wikipédia) e canais de TV (guia meuguia.tv)
+├── robo/              # robô diário: campeões (ESPN), lutas de boxe (Wikipédia) e canais (guia meuguia.tv e futebolnatv)
 ├── requirements.txt
 └── static/
     ├── index.html
@@ -227,6 +231,8 @@ Scoresports-pessoal2/
     ├── fotos_regras.js # regras das fotos dos jogadores (ESPN e TheSportsDB, sem homônimo)
     ├── fotos.js        # busca das fotos uma por vez, guardadas por 30 dias
     ├── visual_regras.js # regras das telas inspiradas no Sofascore (autores dos gols, forma, mini-classificação, temporada)
+    ├── liga_regras.js   # regras da página da liga (temporada, destaques, números da temporada, maior campeão, divisões)
+    ├── liga.js          # página da liga: cabeçalho e aba Detalhes
     └── fontes/         # fonte Inter (licença SIL OFL)
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
@@ -353,13 +359,13 @@ A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-2
 | E-sports (partidas, mapas, elencos) | da PandaScore, pelo repasse da Cloudflare |
 | Telas e dados no APK | o app baixa do GitHub Pages ao abrir e usa na próxima abertura |
 | Campeões (`campeoes.json`) | o robô diário lê na ESPN quem ganhou cada temporada encerrada |
-| Canais de TV (`transmissoes.json` > `jogos`) | o robô lê a grade dos canais esportivos no guia de TV, às 7h e às 15h |
+| Canais de TV e streaming (`transmissoes.json` > `jogos`) | o robô lê o guia de TV e a lista do dia do futebolnatv, às 7h e às 15h |
 | Lutas grandes de boxe (`boxe_eventos.json`) | o robô diário lê as fichas das lutas na Wikipédia (categorias "AAAA boxing matches"): acrescenta as lutas marcadas e completa os resultados |
 | Temporada da NBA no PC | calculada pela data (`temporada.py`) |
 
-O robô (`robo/`, `.github/workflows/robo.yml`) roda todo dia às 7h de Brasília. Para rodar na hora: aba **Actions > Robô diário > Run workflow**. Ele só acrescenta ou completa: nunca apaga nem troca o que foi escrito à mão, e se a ESPN ou a Wikipédia estiverem fora do ar, não muda nada. As lutas novas entram sem horário e sem canal: complete à mão se quiser, e o robô não mexe no que você escreveu.
+O robô (`robo/`, `.github/workflows/robo.yml`) roda todo dia às 7h de Brasília. Para rodar na hora: aba **Actions > Robô diário > Run workflow**. Ele não apaga nem troca o que foi escrito à mão (só os próprios itens antigos ou que saíram da grade), e se a ESPN ou a Wikipédia estiverem fora do ar, não muda nada. As lutas novas entram sem horário e sem canal: complete à mão se quiser, e o robô não mexe no que você escreveu.
 
-Ainda é à mão: o que passa só em streaming (Prime Video, CazéTV, Max), que não está em guia de TV, e as lutas de boxe que não têm artigo na Wikipédia.
+Ainda é à mão: o streaming fora do futebol (Prime Video e YouTube da NBA Brasil na NBA, por exemplo), que não tem fonte aberta, e as lutas de boxe que não têm artigo na Wikipédia.
 
 Para testar o robô sem gravar nada: `python -m robo --seco`.
 
@@ -382,7 +388,9 @@ Para testar o robô sem gravar nada: `python -m robo --seco`.
 - [ ] Opção de ver playoffs no calendário da NBA
 - [ ] Mais esportes da ESPN (NHL, MLB, tênis)
 
-A grade de transmissões automática saiu da lista: o robô dos canais lê o guia de TV (a ESPN não informa os canais do Brasil).
+A grade de transmissões automática saiu da lista: o robô dos canais lê o guia de TV e a lista do dia do futebolnatv (a ESPN não informa os canais do Brasil).
+
+Sobre o CS: a HLTV não tem API oficial, e o site fica atrás do Cloudflare (as bibliotecas que existem raspam as páginas e levam bloqueio de IP), então fica de fora, como o Sofascore. O KDA do CS2 depende do GRID Open Access (parte F2).
 
 ## Aviso
 

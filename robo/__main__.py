@@ -6,14 +6,13 @@ Sai sempre com 0 quando a fonte falha (fica tudo como estava); só um erro de pr
 
 import json
 import sys
-from datetime import date
-
 from robo import boxe, campeoes, transmissoes
 
 
 def rodar(modulo, rotulo, seco):
     arquivo = json.loads(modulo.ARQUIVO.read_text(encoding="utf-8"))
-    mudancas = modulo.atualizar(arquivo, date.today())
+    # a data de hoje em Brasília: o Actions roda no UTC, e às 22h de Brasília lá já é amanhã
+    mudancas = modulo.atualizar(arquivo, transmissoes.hoje_em_brasilia())
     for m in mudancas:
         print(m)
     if not mudancas:

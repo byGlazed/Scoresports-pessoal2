@@ -73,13 +73,22 @@ const Visual = (() => {
       .sort((a, b) => quando(a).localeCompare(quando(b)))[0] || null;
   }
 
-  /** O time e `vizinhos` de cada lado (5 linhas, encostando no topo ou no fim da tabela). */
+  /** O time e `vizinhos` de cada lado (5 linhas, encostando no topo ou no fim da tabela).
+      Cada linha leva a posição na tabela inteira (rank), para o pedaço não recomeçar do 1. */
   function miniClassificacao(linhas, timeId, vizinhos = 2) {
     const i = (linhas || []).findIndex((l) => String(l.id) === String(timeId));
     if (i < 0) return [];
     const tamanho = vizinhos * 2 + 1;
     const ini = Math.max(0, Math.min(i - vizinhos, linhas.length - tamanho));
-    return linhas.slice(ini, ini + tamanho);
+    return linhas.slice(ini, ini + tamanho).map((l, k) => ({ ...l, rank: l.rank ?? ini + k + 1 }));
+  }
+
+  /** A imagem da ESPN no tamanho em que aparece (o redimensionador dela): um escudo de 500 px tem ~110 KB,
+      o de 64 px tem ~5 KB. Imagem de outro site, ou já redimensionada, fica como está. */
+  function imagemPequena(url, largura, altura = largura) {
+    const m = /^https?:\/\/a\d?\.espncdn\.com(\/i\/[^?#]+\.png)$/i.exec(String(url || ""));
+    if (!m) return url || null;
+    return `https://a.espncdn.com/combiner/i?img=${m[1]}&w=${largura}&h=${altura}`;
   }
 
   /** Quanto da temporada já passou (0 a 100), com as datas de início e fim. */
@@ -91,7 +100,7 @@ const Visual = (() => {
     return { pct, inicio, fim };
   }
 
-  return { autoresDosGols, placarCorrido, formaRecente, proximoJogo, miniClassificacao, progressoTemporada };
+  return { autoresDosGols, placarCorrido, formaRecente, proximoJogo, miniClassificacao, imagemPequena, progressoTemporada };
 })();
 
 if (typeof module !== "undefined") module.exports = Visual;

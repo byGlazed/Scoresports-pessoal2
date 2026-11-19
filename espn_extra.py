@@ -201,6 +201,9 @@ def buscar_lideres(esporte, liga, limite=10):
     ano, tipo, nome_temporada = _temporada_atual(sport, liga)
     if esporte == "nfl":
         anos, tipos = [ano, ano - 1], [2]  # 2 = temporada regular
+    elif esporte == "futebol":
+        # no futebol o "tipo" do scoreboard é um código interno (13907): os líderes ficam no tipo 1
+        anos, tipos = [ano, ano - 1, ano - 2], [1, tipo, None]
     else:
         anos, tipos = [ano, ano - 1, ano - 2], [tipo or 1, None]
 

@@ -14,6 +14,8 @@ const ARQUIVOS = [
   "./esports_regras.js",
   "./fotos_regras.js",
   "./visual_regras.js",
+  "./liga_regras.js",
+  "./liga.js",
   "./rotas.js",
   "./app.js",
   "./esportes.js",
@@ -40,7 +42,9 @@ const ARQUIVOS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
+  // cache: "reload" pula o cache HTTP do navegador (o GitHub Pages manda guardar por 10 min):
+  // sem isso, a versão nova podia ser montada com arquivos da versão anterior
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ARQUIVOS.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {

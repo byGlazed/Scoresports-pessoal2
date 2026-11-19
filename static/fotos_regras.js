@@ -58,11 +58,15 @@ const Fotos = (() => {
     return [...vencidas, ...excesso];
   }
 
-  const espnNba = (id) => `https://a.espncdn.com/i/headshots/nba/players/full/${id}.png`;
+  // a foto da ESPN no tamanho da tela (o original tem 1040 x 760)
+  const espnNba = (id) => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=120&h=88`;
+
+  /** Quanto esperar depois de um 429 do TheSportsDB: 1 min na primeira vez, dobrando até 8 min. */
+  const proximaPausa = (atual) => Math.min(480000, atual ? atual * 2 : 60000);
   const urlBusca = (nome) => `${API}/searchplayers.php?p=${encodeURIComponent(String(nome || "").trim())}`;
   const chave = (nome, time) => `${normalizar(nome)}|${normalizar(time)}`;
 
-  return { normalizar, mesmoTime, urlPequena, escolher, chavesParaApagar, espnNba, urlBusca, chave };
+  return { normalizar, mesmoTime, urlPequena, escolher, chavesParaApagar, espnNba, proximaPausa, urlBusca, chave };
 })();
 
 if (typeof module !== "undefined") module.exports = Fotos;
