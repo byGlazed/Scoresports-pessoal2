@@ -1,4 +1,4 @@
-"""python -m robo: roda os robôs dos campeões e do boxe e grava só o arquivo que mudou.
+"""python -m robo: roda os robôs dos campeões, do boxe e dos canais e grava só o arquivo que mudou.
 
 Sai sempre com 0 quando a fonte falha (fica tudo como estava); só um erro de programação para a execução.
     python -m robo --seco   # mostra o que mudaria, sem gravar
@@ -8,7 +8,7 @@ import json
 import sys
 from datetime import date
 
-from robo import boxe, campeoes
+from robo import boxe, campeoes, transmissoes
 
 
 def rodar(modulo, rotulo, seco):
@@ -25,7 +25,7 @@ def rodar(modulo, rotulo, seco):
 
 def main():
     seco = "--seco" in sys.argv
-    total = rodar(campeoes, "campeões", seco) + rodar(boxe, "boxe", seco)
+    total = rodar(campeoes, "campeões", seco) + rodar(boxe, "boxe", seco) + rodar(transmissoes, "canais", seco)
     print(f"{total} mudança(s)" + (" (sem gravar)" if seco else ""))
 
 

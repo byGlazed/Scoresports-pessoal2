@@ -18,8 +18,8 @@ def aviso(texto):
     print(f"aviso: {texto}", file=sys.stderr)
 
 
-def pegar_json(url):
-    """O JSON da resposta, ou None (com aviso no log) se não der depois de algumas tentativas."""
+def _pegar(url, aceitar, ler):
+    """A resposta lida por `ler`, ou None (com aviso no log) se não der depois de algumas tentativas."""
     global _ultimo
     for tentativa in range(1, TENTATIVAS + 1):
         espera = INTERVALO - (time.monotonic() - _ultimo)
@@ -27,9 +27,9 @@ def pegar_json(url):
             time.sleep(espera)
         _ultimo = time.monotonic()
         try:
-            pedido = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+            pedido = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": aceitar})
             with urllib.request.urlopen(pedido, timeout=60) as resposta:
-                return json.load(resposta)
+                return ler(resposta)
         except urllib.error.HTTPError as erro:
             if (erro.code == 429 or erro.code >= 500) and tentativa < TENTATIVAS:
                 aviso(f"{erro.code} em {url}; tentando de novo em {ESPERA_429}s")
@@ -37,7 +37,17 @@ def pegar_json(url):
                 continue
             aviso(f"{erro.code} em {url}")
             return None
-        except Exception as erro:  # sem rede, tempo esgotado, JSON quebrado
+        except Exception as erro:  # sem rede, tempo esgotado, resposta quebrada
             aviso(f"{erro} em {url}")
             return None
     return None
+
+
+def pegar_json(url):
+    """O JSON da resposta, ou None."""
+    return _pegar(url, "application/json", json.load)
+
+
+def pegar_texto(url):
+    """O texto (HTML) da resposta, ou None."""
+    return _pegar(url, "text/html,text/plain", lambda r: r.read().decode(r.headers.get_content_charset() or "utf-8", "replace"))

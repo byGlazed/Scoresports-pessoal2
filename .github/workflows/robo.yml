@@ -6,6 +6,7 @@ name: Robô diário
 on:
   schedule:
     - cron: "0 10 * * *" # 7h em Brasília
+    - cron: "0 18 * * *" # 15h em Brasília (a grade da noite às vezes sai no mesmo dia)
   workflow_dispatch:
 
 permissions:
