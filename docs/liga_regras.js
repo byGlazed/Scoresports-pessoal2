@@ -106,7 +106,43 @@ const Liga = (() => {
     return r;
   }
 
-  return { temporadaRotulo, infoDaLiga, resumoTemporada, maisTitulos, destaques, datasDosDestaques, divisoes };
+  const NOMES_LIDERES = { goalsLeaders: "Artilharia", assistsLeaders: "Assistências" };
+
+  /** Os líderes do /statistics da ESPN (um pedido só, com nome e time de cada um, e que vale para as copas):
+      artilharia e assistências do torneio inteiro. */
+  function lideresDoSite(dados, limite = 10) {
+    const categorias = ((dados && dados.stats) || [])
+      .map((c) => ({
+        chave: c.name,
+        nome: NOMES_LIDERES[c.name] || c.displayName || c.name,
+        lideres: (c.leaders || []).slice(0, limite).map((l, i) => {
+          const a = l.athlete || {};
+          const t = a.team || {};
+          const logos = t.logos || [];
+          const logo = logos.find((x) => !(x.rel || []).includes("dark")) || logos[0] || null;
+          const jogos = /(\d+)/.exec(l.shortDisplayValue || l.displayValue || "");
+          return {
+            posicao: i + 1,
+            id: a.id || null,
+            nome: a.displayName || a.shortName || "?",
+            time: t.abbreviation || t.displayName || null,
+            time_logo: logo ? logo.href : null,
+            valor: Number.isFinite(l.value) ? String(Math.round(l.value)) : l.displayValue || "",
+            jogos: jogos ? Number(jogos[1]) : null,
+          };
+        }),
+      }))
+      .filter((c) => c.lideres.length);
+    return { categorias, temporada: ((dados && dados.season) || {}).displayName || null };
+  }
+
+  /** As categorias rápidas primeiro; das completas, só as que faltam (os cartões). */
+  function juntarLideres(rapidas, completas) {
+    const nomes = new Set((rapidas || []).map((c) => c.nome));
+    return [...(rapidas || []), ...(completas || []).filter((c) => !nomes.has(c.nome))];
+  }
+
+  return { temporadaRotulo, infoDaLiga, resumoTemporada, maisTitulos, destaques, datasDosDestaques, divisoes, lideresDoSite, juntarLideres };
 })();
 
 if (typeof module !== "undefined") module.exports = Liga;

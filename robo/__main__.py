@@ -6,7 +6,7 @@ Sai sempre com 0 quando a fonte falha (fica tudo como estava); só um erro de pr
 
 import json
 import sys
-from robo import boxe, campeoes, transmissoes
+from robo import boxe, campeoes, fotos, transmissoes
 
 
 def rodar(modulo, rotulo, seco):
@@ -24,7 +24,7 @@ def rodar(modulo, rotulo, seco):
 
 def main():
     seco = "--seco" in sys.argv
-    total = rodar(campeoes, "campeões", seco) + rodar(boxe, "boxe", seco) + rodar(transmissoes, "canais", seco)
+    total = rodar(campeoes, "campeões", seco) + rodar(boxe, "boxe", seco) + rodar(transmissoes, "canais", seco) + rodar(fotos, "fotos", seco)
     print(f"{total} mudança(s)" + (" (sem gravar)" if seco else ""))
 
 

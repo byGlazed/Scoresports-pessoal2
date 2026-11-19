@@ -113,8 +113,13 @@ class TesteAtualizar(unittest.TestCase):
         def pegar_texto(url):
             if url.endswith("/robots.txt"):
                 return "<!DOCTYPE html><html>página inicial</html>"
-            codigo = url.rsplit("/", 1)[-1]
-            return self.paginas.get(codigo)
+            codigo = url.rstrip("/").rsplit("/", 1)[-1]
+            if codigo in self.paginas:
+                return self.paginas[codigo]
+            # páginas das ligas do futebolnatv e lista do mês da NBA: vazias, a não ser que o teste mude
+            if "/liga/" in url or "gameoverdrive" in url:
+                return "<html></html>"
+            return None
 
         def pegar_json(url):
             if "dates=20261119" not in url:
@@ -314,6 +319,59 @@ class TesteMadrugada(unittest.TestCase):
         self.assertIn("Lazio", lazio["nomes"])
         bayern = eventos[1]["times"][0]
         self.assertEqual(bayern["chave"], "BAY")  # só em inglês: a sigla, que é a mesma nas duas línguas
+
+
+
+class TesteMaisFontes(unittest.TestCase):
+    """As páginas das ligas do futebolnatv (a rodada inteira) e a lista do mês da NBA (Prime Video)."""
+
+    def setUp(self):
+        base = TesteAtualizar()
+        base.setUp()
+        self.base = base
+        self.canais = {"ES2": "ESPN 2", "SPO": "SporTV", "GRD": "Globo"}
+
+    def rodar(self, arquivo):
+        return T.atualizar(arquivo, HOJE, pegar_texto=self.base.pegar_texto, pegar_json=self.base.pegar_json, canais=self.canais, dias=2)
+
+    def test_le_a_lista_do_mes_da_nba(self):
+        jogos = T.ler_gameoverdrive((AMOSTRAS / "gameoverdrive_nba_mes.html").read_text(encoding="utf-8"))
+        # só os jogos com algo além do League Pass (que o padrão da NBA já mostra)
+        self.assertEqual([(j["data"], j["hora"], j["times"]) for j in jogos], [
+            ("2026-11-19", "22:00", ["Clippers", "Spurs"]),
+            ("2026-11-20", "21:30", ["Raptors", "Pistons"]),
+            ("2026-11-20", "23:30", ["Suns", "Jazz"]),
+        ])
+        self.assertEqual(jogos[0]["canais"], ["NBA League Pass", "Prime Video"])
+        self.assertEqual(jogos[2]["canais"], ["NBA League Pass", "ESPN 2", "Disney+ Premium"])
+
+    def test_paginas_da_nba_do_mes(self):
+        self.assertEqual(T.paginas_nba(date(2026, 11, 19), 7), ["/nba-novembro-2026-onde-assistir-jogos-horarios/"])
+        self.assertEqual(T.paginas_nba(date(2026, 11, 28), 7), ["/nba-novembro-2026-onde-assistir-jogos-horarios/", "/nba-dezembro-2026-onde-assistir-jogos-horarios/"])
+        self.assertEqual(T.paginas_nba(date(2026, 12, 29), 7)[1], "/nba-janeiro-2027-onde-assistir-jogos-horarios/")
+
+    def test_clippers_x_spurs_no_prime_video(self):
+        self.base.paginas["nba-novembro-2026-onde-assistir-jogos-horarios"] = (AMOSTRAS / "gameoverdrive_nba_mes.html").read_text(encoding="utf-8")
+        arquivo = {"jogos": []}
+        self.rodar(arquivo)
+        lac = [j for j in arquivo["jogos"] if j["esporte"] == "nba" and "LAC" in j["times"]]
+        self.assertEqual(len(lac), 1)
+        self.assertEqual(lac[0]["canais"], ["Prime Video", "NBA League Pass"])
+
+    def test_pagina_da_liga_descoberta_na_lista_do_dia(self):
+        self.base.paginas["jogos-hoje"] = '<a href="/liga/campeonato-espanhol-u62s3h464c">LaLiga</a><a href="/liga/brasileiro-sub-20-x">Sub-20</a>'
+        self.base.paginas["campeonato-espanhol-u62s3h464c"] = (AMOSTRAS / "futebolnatv_hoje.html").read_text(encoding="utf-8")
+        pedidas = []
+        original = self.base.pegar_texto
+
+        def anotar(url):
+            pedidas.append(url)
+            return original(url)
+
+        T.atualizar({"jogos": []}, HOJE, pegar_texto=anotar, pegar_json=self.base.pegar_json, canais=self.canais, dias=2)
+        self.assertTrue(any(u.endswith("/liga/campeonato-espanhol-u62s3h464c") for u in pedidas))
+        self.assertFalse(any("sub-20" in u for u in pedidas))  # base e feminino ficam de fora
+        self.assertTrue(any(u.endswith("/liga/brasileirao-serie-a-ne9wa6elab") for u in pedidas))  # as fixas sempre
 
 
 if __name__ == "__main__":

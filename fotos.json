@@ -1,0 +1,5 @@
+{
+  "_como_usar": "Índice de fotos dos jogadores dos times brasileiros (Série A e B), montado pelo robô (robo/fotos.py) com o TheSportsDB. 'fotos' leva 'nome|time' (sem acento, minúsculas) à foto, ou null quando não tem; 'conferidas' guarda quando cada um foi procurado. Não precisa editar à mão.",
+  "fotos": {},
+  "conferidas": {}
+}

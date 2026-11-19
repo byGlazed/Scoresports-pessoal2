@@ -1,20 +1,26 @@
 "use strict";
 
 /* =========================================================================
-   Fotos dos jogadores de futebol pelo TheSportsDB (quando a ESPN não tem): uma busca por vez
-   (o plano gratuito aceita cerca de 30 por minuto), na ordem em que a tela pede (titulares primeiro),
-   guardadas no aparelho por 30 dias. A tela desenha o número da camisa e troca pela foto quando ela chega.
-   A escolha da foto (time certo, nada de homônimo) fica em fotos_regras.js.
+   Fotos dos jogadores de futebol pelo TheSportsDB (quando a ESPN não tem).
+   - Primeiro o índice que o robô monta (dados/fotos.json: os times brasileiros, com a foto ou a
+     marca de "não tem"): sai na hora, sem pedido nenhum.
+   - Fora do índice, a busca no TheSportsDB: até 4 ao mesmo tempo e até 25 por minuto (o plano
+     gratuito aceita cerca de 30), na ordem em que a tela pede (titulares primeiro). Um 429 pausa a
+     fila (1 min, dobrando até 8).
+   - Tudo fica guardado no aparelho por 30 dias. A tela desenha o número e troca pela foto quando ela chega.
+   A escolha da foto (time certo, nada de homônimo) e as contas de espera ficam em fotos_regras.js.
    ========================================================================= */
 
 const FotoJogador = (() => {
   const PRAZO_MS = 30 * 86400 * 1000;
-  const INTERVALO_MS = 2100;
+  const SIMULTANEAS = 4;
   const memoria = new Map(); // chave -> Promise<url|null>
-  let fila = Promise.resolve();
-  let ultimo = 0;
-  let pausa = 0; // depois de um 429, a fila espera (1 min, dobrando até 8 min)
+  const fila = []; // { nome, time, chave, ok }
+  const feitas = []; // horários das buscas do último minuto
+  let ativas = 0;
+  let pausa = 0; // depois de um 429 (1 min, dobrando até 8 min)
   let pausaAte = 0;
+  let relogio = null;
 
   function lerGuardada(chave) {
     try {
@@ -64,7 +70,64 @@ const FotoJogador = (() => {
     }
   }
 
-  /** A foto do jogador do time (ou null). Sem internet, não guarda o "não achei". */
+  // o índice do robô (dados/fotos.json): pedido uma vez; sem ele (PC, sem rede), tudo vai à busca
+  let indice = null;
+  function lerIndice() {
+    if (!indice) {
+      indice = fetch("dados/fotos.json")
+        .then((r) => (r.ok ? r.json() : {}))
+        .then((d) => (d && d.fotos) || {})
+        .catch(() => ({}));
+    }
+    return indice;
+  }
+
+  async function buscarNoSite(item) {
+    feitas.push(Date.now());
+    try {
+      const r = await fetch(Fotos.urlBusca(item.nome));
+      if (r.status === 429) {
+        // limite do plano gratuito: a fila para um pouco, e a foto pode vir numa próxima vez
+        pausa = Fotos.proximaPausa(pausa);
+        pausaAte = Date.now() + pausa;
+        memoria.delete(item.chave);
+        return null;
+      }
+      pausa = 0;
+      if (!r.ok) return null;
+      const url = Fotos.escolher((await r.json()).player, item.nome, item.time);
+      guardar(item.chave, url);
+      return url;
+    } catch (_) {
+      memoria.delete(item.chave); // sem internet: tenta de novo numa próxima vez
+      return null;
+    }
+  }
+
+  /** Começa as buscas que podem sair agora; as outras esperam a vez. */
+  function andar() {
+    clearTimeout(relogio);
+    relogio = null;
+    while (fila.length && ativas < SIMULTANEAS) {
+      const agora = Date.now();
+      while (feitas.length && agora - feitas[0] > 60000) feitas.shift();
+      const espera = Math.max(Fotos.esperaParaBuscar(feitas, agora), pausaAte - agora);
+      if (espera > 0) {
+        relogio = setTimeout(andar, espera);
+        return;
+      }
+      const item = fila.shift();
+      ativas += 1;
+      buscarNoSite(item)
+        .then(item.ok)
+        .finally(() => {
+          ativas -= 1;
+          andar();
+        });
+    }
+  }
+
+  /** A foto do jogador do time (ou null). */
   function buscar(nome, time) {
     if (!limpo) {
       limpo = true;
@@ -78,28 +141,16 @@ const FotoJogador = (() => {
       memoria.set(chave, p);
       return p;
     }
-    const p = (fila = fila.then(async () => {
-      const espera = Math.max(INTERVALO_MS - (Date.now() - ultimo), pausaAte - Date.now());
-      if (espera > 0) await new Promise((ok) => setTimeout(ok, espera));
-      ultimo = Date.now();
-      try {
-        const r = await fetch(Fotos.urlBusca(nome));
-        if (r.status === 429) {
-          // limite do plano gratuito: a fila para um pouco, e a foto pode vir numa próxima vez
-          pausa = Fotos.proximaPausa(pausa);
-          pausaAte = Date.now() + pausa;
-          memoria.delete(chave);
-          return null;
-        }
-        pausa = 0;
-        if (!r.ok) return null;
-        const url = Fotos.escolher((await r.json()).player, nome, time);
-        guardar(chave, url);
-        return url;
-      } catch (_) {
-        return null;
+    const p = lerIndice().then((fotos) => {
+      if (Object.prototype.hasOwnProperty.call(fotos, chave)) {
+        guardar(chave, fotos[chave]);
+        return fotos[chave]; // o robô já procurou: a foto, ou null quando não tem
       }
-    }));
+      return new Promise((ok) => {
+        fila.push({ nome, time, chave, ok });
+        andar();
+      });
+    });
     memoria.set(chave, p);
     return p;
   }

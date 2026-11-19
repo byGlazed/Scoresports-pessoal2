@@ -103,7 +103,8 @@ function linhaReserva(esp, liga, j, time, nomes) {
 function linhaTecnico(esp, liga, time) {
   const linha = h("p", { class: "campinho-tecnico", hidden: true });
   if (!time || !time.id) return linha;
-  api(`/e/${esp.id}/${liga}/times/${time.id}`)
+  const rota = esp.id === "futebol" ? `/e/futebol/${liga}/times/${time.id}/tecnico?nome=${encodeURIComponent(time.nome || "")}` : `/e/${esp.id}/${liga}/times/${time.id}`;
+  api(rota)
     .then((t) => {
       if (!t || !t.tecnico) return;
       linha.replaceChildren(h("span", { class: "nota" }, "Técnico"), h("strong", null, t.tecnico));

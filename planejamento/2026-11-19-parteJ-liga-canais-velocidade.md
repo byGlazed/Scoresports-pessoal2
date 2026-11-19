@@ -71,3 +71,17 @@ aparecia só com "Globo", e o futebolnatv mostra Globo, Premiere 2 e ge tv.
 
 Não tem API oficial. As bibliotecas que existem raspam o site, que fica atrás do Cloudflare e bane IPs.
 É o mesmo caso do Sofascore, então fica de fora. O KDA do CS continua dependendo do GRID (parte F2).
+
+## Rodada 2 (19/11, à noite): o que o dono achou ao usar
+
+- **Prime Video na NBA:** a ESPN só informa os canais dos EUA. A fonte é a lista do mês do gameoverdrive.com.br
+  (tabelas por dia, robots.txt liberado), que confirma, por exemplo, Clippers x Spurs no Prime Video.
+- **CazéTV na LaLiga:** a lista do dia só cobria hoje e amanhã, e o resto caía no padrão (ESPN). O robô lê também
+  a página de cada liga do futebolnatv (a rodada inteira), e o padrão da LaLiga passa a ser a CazéTV.
+- **Artilharia vazia:** o celular estava na versão antiga (o APK só troca a versão quando o Android fecha o app).
+  A página agora confere a versão ao voltar para o app e recarrega. Nas copas (Libertadores, Copa da Liga,
+  Copa do Rei) o Core API só tem números por fase: a artilharia e as assistências vêm do /statistics da ESPN,
+  num pedido só (antes, de 3 a 5 s), e os cartões chegam depois.
+- **Fotos demorando:** uma busca a cada 2,1 s (46 jogadores, cerca de 90 s). Agora as buscas saem em rajada
+  (até 4 ao mesmo tempo, 25 por minuto) e o robô monta um índice das fotos da Série A e da Série B (fotos.json).
+- **Página do time:** não espera mais a Wikidata (o técnico vem à parte).

@@ -49,6 +49,17 @@ CANAIS = {
 
 FUTEBOLNATV = "https://www.futebolnatv.com.br"
 PAGINAS_FUTEBOLNATV = ("/jogos-hoje", "/jogos-amanha")
+# as páginas das ligas trazem a rodada inteira com os canais (a lista do dia só tem hoje e amanhã);
+# as ligas que aparecem na lista do dia entram também (a Série A italiana, quando tem jogo, por exemplo)
+LIGAS_FUTEBOLNATV = (
+    "/liga/brasileirao-serie-a-ne9wa6elab", "/liga/brasileirao-serie-b-yphg5kufc2", "/liga/copa-do-brasil-ek15w9aq8d",
+    "/liga/copa-libertadores-1npfagfslh", "/liga/champions-league-9gagii11da", "/liga/uefa-europa-league-9q40bjxdyw",
+    "/liga/campeonato-ingles-diegw7eeiu", "/liga/campeonato-espanhol-u62s3h464c", "/liga/campeonato-alemao-x5kmzzp7ug",
+    "/liga/campeonato-frances-5na39ifvp5", "/liga/mls-mb2vqejb8s",
+)
+# a lista do mês da NBA no Brasil (League Pass, ESPN 2/Disney+ e Prime Video), uma página por mês
+GAMEOVERDRIVE = "https://gameoverdrive.com.br"
+MESES = ("janeiro", "fevereiro", "marco", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro")
 
 # a ordem dos canais no app: TV aberta, TV fechada, depois os streamings
 ORDEM_CANAIS = [
@@ -231,6 +242,47 @@ def nome_do_canal(bruto):
     return " ".join(p.upper() if normalizar(p) in SIGLAS_NO_NOME else ("YouTube" if normalizar(p) == "youtube" else p.capitalize()) for p in palavras)
 
 
+def ligas_nas_paginas(htmls):
+    """Os links de liga nas listas do dia, sem as de base nem as femininas (o app não tem)."""
+    caminhos = []
+    for html in htmls:
+        for caminho in re.findall(r'href="(/liga/[a-z0-9-]+)"', html or ""):
+            if not re.search(r"sub-\d|feminin|-f-", caminho):
+                caminhos.append(caminho)
+    return list(dict.fromkeys(caminhos))
+
+
+def paginas_nba(hoje, dias):
+    """As páginas do mês da NBA que cobrem de hoje até `dias` dias depois (o mês atual primeiro)."""
+    caminhos = []
+    for n in range(dias):
+        d = hoje + timedelta(days=n)
+        caminho = f"/nba-{MESES[d.month - 1]}-{d.year}-onde-assistir-jogos-horarios/"
+        if caminho not in caminhos:
+            caminhos.append(caminho)
+    return caminhos
+
+
+_DIA_GAMEOVERDRIVE = re.compile(r'<h2[^>]*\bid="(\d{2})-(\d{2})-(\d{4})"[^>]*>.*?</h2>\s*<figure[^>]*>\s*<table[^>]*>(.*?)</table>', re.S)
+_LINHA_GAMEOVERDRIVE = re.compile(r"<tr>\s*<td>([^<]*)</td>\s*<td>([^<]*)</td>\s*<td>([^<]*)</td>\s*</tr>")
+
+
+def ler_gameoverdrive(html):
+    """Os jogos da NBA da lista do mês, com hora de Brasília e os canais; só os que têm algo além do
+    League Pass (que o padrão da NBA já mostra para todos)."""
+    jogos = []
+    for m in _DIA_GAMEOVERDRIVE.finditer(html or ""):
+        data = f"{m.group(3)}-{m.group(2)}-{m.group(1)}"
+        for hora, partida, onde in _LINHA_GAMEOVERDRIVE.findall(m.group(4)):
+            h = re.fullmatch(r"\s*(\d{1,2})h(\d{2})?\s*", unescape(hora))
+            times = [t.strip() for t in unescape(partida).split(" x ")]
+            canais = [nome_do_canal(c) for c in unescape(onde).split(",") if c.strip()]
+            if not h or len(times) != 2 or not all(times) or not any(c != "NBA League Pass" for c in canais):
+                continue
+            jogos.append({"esporte": "nba", "times": times, "data": data, "hora": f"{int(h.group(1)):02d}:{h.group(2) or '00'}", "canais": canais})
+    return jogos
+
+
 _PARTIDA_FUTEBOLNATV = re.compile(r'<article\b[^>]*\bdata-ts="(\d+)"[^>]*>(.*?)</article>', re.S)
 
 
@@ -344,21 +396,38 @@ def atualizar(arquivo, hoje, pegar_texto=None, pegar_json=None, canais=None, dia
                 if jogo:
                     programas.append((jogo, nome))
 
-    # a lista do dia do futebolnatv (hoje e amanhã): os streamings e os canais que o guia não tem
-    if futebolnatv:
-        robots_fntv = pegar_texto(f"{FUTEBOLNATV}/robots.txt")
-        for caminho in PAGINAS_FUTEBOLNATV:
-            if not permitido(robots_fntv, caminho):
-                rede.aviso(f"o robots.txt do futebolnatv não deixa ler {caminho}")
+    def ler_paginas(base, robots, caminhos, ler, contar=True):
+        """Lê as páginas de um site e junta os jogos delas; devolve o HTML de cada uma (para achar links)."""
+        nonlocal permitidas, lidas
+        htmls = []
+        for caminho in caminhos:
+            if not permitido(robots, caminho):
+                rede.aviso(f"o robots.txt de {base} não deixa ler {caminho}")
                 continue
-            permitidas += 1
-            html = pegar_texto(f"{FUTEBOLNATV}{caminho}")
+            if contar:
+                permitidas += 1
+            html = pegar_texto(f"{base}{caminho}")
             if html is None:
                 continue
-            lidas += 1
-            for jogo in ler_futebolnatv(html):
+            if contar:
+                lidas += 1
+            htmls.append(html)
+            for jogo in ler(html):
                 if hoje.isoformat() <= jogo["data"] < limite:
                     programas.extend((jogo, canal) for canal in jogo["canais"])
+        return htmls
+
+    if futebolnatv:
+        # a lista do dia (hoje e amanhã) e a página de cada liga (a rodada inteira, com os streamings)
+        robots_fntv = pegar_texto(f"{FUTEBOLNATV}/robots.txt")
+        do_dia = ler_paginas(FUTEBOLNATV, robots_fntv, PAGINAS_FUTEBOLNATV, ler_futebolnatv)
+        ligas = list(dict.fromkeys([*LIGAS_FUTEBOLNATV, *ligas_nas_paginas(do_dia)]))
+        ler_paginas(FUTEBOLNATV, robots_fntv, ligas, ler_futebolnatv)
+        # a lista do mês da NBA (Prime Video, ESPN 2/Disney+); a do mês seguinte pode ainda não ter saído
+        robots_god = pegar_texto(f"{GAMEOVERDRIVE}/robots.txt")
+        meses = paginas_nba(hoje, dias)
+        ler_paginas(GAMEOVERDRIVE, robots_god, meses[:1], ler_gameoverdrive)
+        ler_paginas(GAMEOVERDRIVE, robots_god, meses[1:], ler_gameoverdrive, contar=False)
     if not lidas:
         return []  # as fontes fora do ar: fica tudo como estava
 

@@ -98,3 +98,28 @@ test("divisão de cima e de baixo", () => {
   assert.deepEqual(Liga.divisoes("futebol", "eng.1"), {});
   assert.deepEqual(Liga.divisoes("nba", "nba"), {});
 });
+
+test("líderes do futebol pelo /statistics da ESPN: artilharia e assistências do torneio inteiro", () => {
+  const dados = JSON.parse(fs.readFileSync(path.join(__dirname, "amostras", "espn_estatisticas_libertadores_2026.json"), "utf8"));
+  const r = Liga.lideresDoSite(dados, 10);
+  assert.deepEqual(r.categorias.map((c) => c.nome), ["Artilharia", "Assistências"]);
+  const art = r.categorias[0].lideres;
+  assert.equal(art.length, 3);
+  assert.deepEqual(
+    { posicao: art[0].posicao, id: art[0].id, nome: art[0].nome, time: art[0].time, valor: art[0].valor, jogos: art[0].jogos },
+    { posicao: 1, id: "257754", nome: "Alex Arce", time: "RIV", valor: "8", jogos: 5 }
+  );
+  assert.equal(art[0].time_logo, "https://a.espncdn.com/i/teamlogos/soccer/500/9744.png"); // o escudo claro, não o -dark
+  assert.equal(r.temporada, "2026 CONMEBOL Libertadores");
+  // sem números (torneio que não começou): nada
+  assert.deepEqual(Liga.lideresDoSite({ stats: [] }).categorias, []);
+  assert.deepEqual(Liga.lideresDoSite(null).categorias, []);
+});
+
+test("juntar líderes: as categorias rápidas primeiro, as que faltam (cartões) depois, sem repetir", () => {
+  const rapidas = [{ nome: "Artilharia", lideres: [1] }, { nome: "Assistências", lideres: [1] }];
+  const completas = [{ nome: "Artilharia", lideres: [2] }, { nome: "Cartões amarelos", lideres: [3] }, { nome: "Cartões vermelhos", lideres: [4] }];
+  assert.deepEqual(Liga.juntarLideres(rapidas, completas).map((c) => c.nome), ["Artilharia", "Assistências", "Cartões amarelos", "Cartões vermelhos"]);
+  assert.equal(Liga.juntarLideres(rapidas, completas)[0].lideres[0], 1); // a rápida fica
+  assert.deepEqual(Liga.juntarLideres([], completas).map((c) => c.nome), ["Artilharia", "Cartões amarelos", "Cartões vermelhos"]);
+});

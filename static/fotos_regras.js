@@ -61,12 +61,20 @@ const Fotos = (() => {
   // a foto da ESPN no tamanho da tela (o original tem 1040 x 760)
   const espnNba = (id) => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=120&h=88`;
 
+  /** Quantos ms esperar antes da próxima busca: até `maximo` buscas numa janela de 1 min saem na hora
+      (o plano gratuito aceita cerca de 30 por minuto); passou disso, espera a mais antiga sair da janela. */
+  function esperaParaBuscar(feitas, agora, maximo = 25, janela = 60000) {
+    const naJanela = (feitas || []).filter((t) => agora - t < janela).sort((a, b) => a - b);
+    if (naJanela.length < maximo) return 0;
+    return naJanela[naJanela.length - maximo] + janela - agora;
+  }
+
   /** Quanto esperar depois de um 429 do TheSportsDB: 1 min na primeira vez, dobrando até 8 min. */
   const proximaPausa = (atual) => Math.min(480000, atual ? atual * 2 : 60000);
   const urlBusca = (nome) => `${API}/searchplayers.php?p=${encodeURIComponent(String(nome || "").trim())}`;
   const chave = (nome, time) => `${normalizar(nome)}|${normalizar(time)}`;
 
-  return { normalizar, mesmoTime, urlPequena, escolher, chavesParaApagar, espnNba, proximaPausa, urlBusca, chave };
+  return { normalizar, mesmoTime, urlPequena, escolher, chavesParaApagar, espnNba, proximaPausa, esperaParaBuscar, urlBusca, chave };
 })();
 
 if (typeof module !== "undefined") module.exports = Fotos;

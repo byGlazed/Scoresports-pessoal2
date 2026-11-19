@@ -1,0 +1,259 @@
+{
+ "season": {
+  "year": 2026,
+  "displayName": "2026 CONMEBOL Libertadores",
+  "type": 13921,
+  "name": "Final"
+ },
+ "league": {
+  "name": "CONMEBOL Libertadores"
+ },
+ "stats": [
+  {
+   "name": "goalsLeaders",
+   "displayName": "Pontuações",
+   "leaders": [
+    {
+     "displayValue": "Partidas: 5, Gols: 8",
+     "shortDisplayValue": "J: 5, G: 8: A: 0",
+     "value": 8.0,
+     "athlete": {
+      "id": "257754",
+      "displayName": "Alex Arce",
+      "shortName": "A. Arce",
+      "team": {
+       "id": "9744",
+       "abbreviation": "RIV",
+       "displayName": "Independiente Rivadavia",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/9744.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "default"
+         ],
+         "lastUpdated": "2019-05-08T16:07Z"
+        },
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/9744.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "dark"
+         ],
+         "lastUpdated": "2019-05-08T16:07Z"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "displayValue": "Partidas: 7, Gols: 6",
+     "shortDisplayValue": "J: 7, G: 6: A: 0",
+     "value": 6.0,
+     "athlete": {
+      "id": "80359",
+      "displayName": "Carlos González",
+      "shortName": "C. González",
+      "team": {
+       "id": "17086",
+       "abbreviation": "IDV",
+       "displayName": "Independiente del Valle",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/17086.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "default"
+         ],
+         "lastUpdated": "2026-10-12T17:04Z"
+        },
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/17086.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "dark"
+         ],
+         "lastUpdated": "2026-10-12T17:05Z"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "displayValue": "Partidas: 10, Gols: 5",
+     "shortDisplayValue": "J: 10, G: 5: A: 2",
+     "value": 5.0,
+     "athlete": {
+      "id": "201683",
+      "displayName": "Bruno Henrique",
+      "shortName": "Bruno Henrique",
+      "team": {
+       "id": "819",
+       "abbreviation": "FLA",
+       "displayName": "Flamengo",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "default"
+         ],
+         "lastUpdated": "2020-02-20T17:24Z"
+        },
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/819.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "dark"
+         ],
+         "lastUpdated": "2020-02-20T17:24Z"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "assistsLeaders",
+   "displayName": "Assistências",
+   "leaders": [
+    {
+     "displayValue": "Jogos: 8, Assistencias: 5",
+     "shortDisplayValue": "J: 8, G: 0: A: 5",
+     "value": 5.0,
+     "athlete": {
+      "id": "270562",
+      "displayName": "Rodrigo Garro",
+      "shortName": "R. Garro",
+      "team": {
+       "id": "874",
+       "abbreviation": "COR",
+       "displayName": "Corinthians",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/874.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "default"
+         ],
+         "lastUpdated": "2023-03-24T19:32Z"
+        },
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/874.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "dark"
+         ],
+         "lastUpdated": "2023-03-24T19:33Z"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "displayValue": "Jogos: 10, Assistencias: 4",
+     "shortDisplayValue": "J: 10, G: 3: A: 4",
+     "value": 4.0,
+     "athlete": {
+      "id": "311743",
+      "displayName": "José Manuel López",
+      "shortName": "J. López",
+      "team": {
+       "id": "2029",
+       "abbreviation": "PAL",
+       "displayName": "Palmeiras",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/2029.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "default"
+         ],
+         "lastUpdated": "2019-05-08T16:07Z"
+        },
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/2029.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "dark"
+         ],
+         "lastUpdated": "2019-05-08T16:07Z"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "displayValue": "Jogos: 6, Assistencias: 4",
+     "shortDisplayValue": "J: 6, G: 0: A: 4",
+     "value": 4.0,
+     "athlete": {
+      "id": "185434",
+      "displayName": "Matías Fernández",
+      "shortName": "M. Fernández",
+      "team": {
+       "id": "9744",
+       "abbreviation": "RIV",
+       "displayName": "Independiente Rivadavia",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/9744.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "default"
+         ],
+         "lastUpdated": "2019-05-08T16:07Z"
+        },
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/9744.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "dark"
+         ],
+         "lastUpdated": "2019-05-08T16:07Z"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

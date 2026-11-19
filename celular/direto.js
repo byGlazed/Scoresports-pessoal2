@@ -1191,7 +1191,9 @@ async function buscarTime(esporte, liga, timeId) {
   // técnico: o do elenco da ESPN nos esportes em que ele é confiável; no futebol, só o Wikidata
   // (o elenco da ESPN no futebol traz técnicos de anos atrás)
   let tecnico = (elenco && elenco.tecnico) || null;
-  if (!tecnico && futebol) tecnico = await tecnicoFutebol(time.displayName, timeId, liga);
+  // a Wikidata leva de 1 a 2 s na primeira vez: a página do time não espera mais que 0,6 s. A busca
+  // continua e fica guardada; a aba Detalhes e o campinho pedem o técnico pela rota /tecnico
+  if (!tecnico && futebol) tecnico = await Promise.race([tecnicoFutebol(time.displayName, timeId, liga), new Promise((ok) => setTimeout(() => ok(null), 600))]);
   return {
     id: String(time.id || timeId),
     nome: time.displayName || null,
@@ -1457,6 +1459,7 @@ const CATEGORIAS_LIDERES_PT = {
   rebounds: "Rebotes", reboundspergame: "Rebotes por jogo", assistspergame: "Assistências por jogo", steals: "Roubos de bola",
   stealspergame: "Roubos por jogo", blocks: "Tocos", blockspergame: "Tocos por jogo", fieldgoalpercentage: "Aproveitamento (FG%)",
   threepointfieldgoalsmade: "Bolas de três", threepointfieldgoalpercentage: "Bolas de três (%)",
+  foulssuffered: "Faltas sofridas", foulscommitted: "Faltas cometidas", accuratepasses: "Passes certos",
 };
 const ORDEM_LIDERES = ["Artilharia", "Assistências", "Cartões amarelos", "Cartões vermelhos", "Pontos por jogo", "Rebotes por jogo", "Assistências por jogo",
   "Jardas de passe", "Touchdowns de passe", "Rating de quarterback", "Jardas de corrida", "Touchdowns de corrida", "Jardas recebidas", "Recepções",
@@ -1489,6 +1492,21 @@ async function temporadaAtual(sport, liga) {
   } catch (_) {
     return [new Date().getFullYear(), null, null];
   }
+}
+
+/** Futebol: artilharia e assistências pelo /statistics da ESPN. Um pedido só, com nome e time de cada um
+    (o Core API pede um por atleta e leva de 3 a 5 s), e vale para as copas, que o Core API guarda por fase.
+    Sem números ali, cai no caminho completo. Os cartões vêm depois, pela rota com ?completo=1. */
+async function buscarLideresFutebolRapido(liga, limite = 10) {
+  let r = { categorias: [] };
+  try {
+    r = Liga.lideresDoSite(await espnGet(`${D_BASE}/soccer/${liga}/statistics`), limite);
+  } catch (_) {
+    /* sem a rota: o caminho completo */
+  }
+  if (!r.categorias.length) return buscarLideres("futebol", liga, limite);
+  Indice.registrar(r.categorias.flatMap((c) => c.lideres.map((j) => ({ esporte: "futebol", liga, id: j.id, nome: j.nome, descricao: j.time }))));
+  return { categorias: r.categorias, faltando: [], temporada: r.temporada, temporada_anterior: false, parcial: true };
 }
 
 async function buscarLideres(esporte, liga, limite = 10) {
@@ -2404,6 +2422,7 @@ const ROTAS = [
   [/^\/e\/([^/]+)\/([^/]+)\/chave$/, (m, q) => viaEspn(`espn_chave_v1:${m[1]}:${m[2]}:${q.temporada || "atual"}`, 120, () => buscarChave(m[1], m[2], q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
   [/^\/e\/([^/]+)\/([^/]+)\/classificacao$/, (m) => viaEspn(`espn_classificacao_v2:${m[1]}:${m[2]}`, 1800, () => buscarClassificacao(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)$/, (m) => viaEspn(`espn_time_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarTime(m[1], m[2], m[3]))],
+  [/^\/e\/futebol\/([^/]+)\/times\/([^/]+)\/tecnico$/, async (m, q) => ({ tecnico: await tecnicoFutebol(q.nome || "", m[2], m[1]) })],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/jogos$/, (m) => viaEspn(`espn_time_jogos_v1:${m[1]}:${m[2]}:${m[3]}`, 900, () => buscarJogosTime(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/estatisticas$/, (m) => viaEspn(`espn_time_stats_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarEstatisticasTime(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/elenco$/, (m) => viaEspn(`espn_elenco_v2:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarElenco(m[1], m[2], m[3]))],
@@ -2416,7 +2435,11 @@ const ROTAS = [
   [/^\/e\/([^/]+)\/([^/]+)\/atletas\/([^/]+)$/, (m) => viaEspn(`espn_atleta_v2:${m[1]}:${m[2]}:${m[3]}`, 86400, () => buscarAtleta(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/eventos$/, (m) => viaEspn(`espn_eventos_v1:${m[1]}:${m[2]}:atual`, 3600, () => buscarEventos(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/eventos\/([^/]+)$/, (m, q) => viaEspn(`espn_evento_v1:${m[1]}:${m[2]}:${m[3]}`, 30, () => buscarEvento(m[1], m[2], m[3], q.data))],
-  [/^\/e\/([^/]+)\/([^/]+)\/lideres$/, (m) => viaEspn(`espn_lideres_v2:${m[1]}:${m[2]}`, 3 * 3600, () => buscarLideres(m[1], m[2]))],
+  // futebol: primeiro a artilharia rápida (/statistics); ?completo=1 traz também os cartões (Core API)
+  [/^\/e\/([^/]+)\/([^/]+)\/lideres$/, (m, q) =>
+    m[1] === "futebol" && !q.completo
+      ? viaEspn(`espn_lideres_rapido_v1:${m[2]}`, 3 * 3600, () => buscarLideresFutebolRapido(m[2]))
+      : viaEspn(`espn_lideres_v2:${m[1]}:${m[2]}`, 3 * 3600, () => buscarLideres(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/ranking$/, () => viaEspn("ufc_ranking_v1", 6 * 3600, buscarRankingUfc)],
   [/^\/boxe\/eventos$/, () => boxeEventos()],
   [/^\/boxe\/lutador$/, async (m, q) => {

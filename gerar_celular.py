@@ -14,6 +14,7 @@ Depois é só fazer commit e push: o GitHub monta o APK novo sozinho (veja o REA
 """
 
 import hashlib
+import json
 import shutil
 import time
 from pathlib import Path
@@ -22,7 +23,7 @@ RAIZ = Path(__file__).parent
 DOCS = RAIZ / "docs"
 APK_WWW = RAIZ / "android" / "app" / "src" / "main" / "assets" / "www"
 TELAS = ("nba_quadra.js", "notas_regras.js", "campinho_regras.js", "esports_regras.js", "fotos_regras.js", "visual_regras.js", "liga_regras.js", "rotas.js", "app.js", "esportes.js", "fotos.js", "campinho.js", "esports.js", "liga.js", "busca_regras.js", "inicio.js", "chave_regras.js", "navegacao.js", "chave.js", "style.css")
-DADOS = ("transmissoes.json", "boxe_eventos.json", "campeoes.json")
+DADOS = ("transmissoes.json", "boxe_eventos.json", "campeoes.json", "fotos.json")
 APK_MINIMO = RAIZ / "celular" / "apk_minimo.txt"  # menor versionCode de APK que as telas atuais aceitam
 
 CABECA_CELULAR = """  <link rel="manifest" href="./manifest.webmanifest">
@@ -76,6 +77,9 @@ def main():
             shutil.copy(arquivo, DOCS / arquivo.name)
     for nome in DADOS:
         shutil.copy(RAIZ / nome, DOCS / "dados" / nome)
+    # o índice de fotos vai sem as datas de conferência (só o robô usa), e compacto
+    fotos = json.loads((RAIZ / "fotos.json").read_text(encoding="utf-8"))
+    (DOCS / "dados" / "fotos.json").write_text(json.dumps({"fotos": fotos.get("fotos", {})}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     html = (RAIZ / "static" / "index.html").read_text(encoding="utf-8")
     html = html.replace('href="/static/', 'href="./').replace('src="/static/', 'src="./').replace('href="/"', 'href="./"')

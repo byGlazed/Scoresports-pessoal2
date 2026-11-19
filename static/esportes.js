@@ -187,7 +187,11 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
     },
     elenco: async () => secoesElenco(esporte, liga, await api(`${base}/elenco`)),
     detalhes: async () => {
-      const t = await pedidoCabecalho;
+      const t = { ...(await pedidoCabecalho) };
+      // no futebol o técnico pode não ter vindo com o time (a Wikidata demora): pede à parte
+      if (!t.tecnico && esporte === "futebol" && window.MODO_CELULAR) {
+        t.tecnico = await api(`${base}/tecnico?nome=${encodeURIComponent(t.nome || "")}`).then((r) => r.tecnico).catch(() => null);
+      }
       const fatos = [
         ["Estádio", t.estadio],
         ["Cidade", t.cidade],
@@ -1377,6 +1381,20 @@ async function lideresEspn(esp, liga) {
     return;
   }
   if (tk !== S.tkLista) return;
+  desenharLideres(esp, liga, l);
+  // futebol: a artilharia rápida aparece primeiro; os cartões (Core API, mais lento) entram depois
+  if (l.parcial) {
+    api(`/e/${esp.id}/${liga}/lideres?completo=1`)
+      .then((c) => {
+        if (tk !== S.tkLista || !c.categorias.length) return;
+        const categorias = Liga.juntarLideres(l.categorias, c.categorias);
+        desenharLideres(esp, liga, { ...l, categorias, faltando: (c.faltando || []).filter((n) => !categorias.some((x) => x.nome === n)) });
+      })
+      .catch(() => {});
+  }
+}
+
+function desenharLideres(esp, liga, l) {
   // o nome da liga já está no cabeçalho da página
   const partes = [
     h(

@@ -67,3 +67,14 @@ test("pausa das buscas quando o TheSportsDB limita (429): 1 min, dobrando até 8
   assert.equal(Fotos.proximaPausa(240000), 480000);
   assert.equal(Fotos.proximaPausa(480000), 480000);
 });
+
+test("buscas de foto em rajada: até 25 por minuto saem na hora, a 26ª espera a janela abrir", () => {
+  assert.equal(Fotos.esperaParaBuscar([], 1000), 0);
+  const vinteQuatro = Array.from({ length: 24 }, (_, i) => i * 100);
+  assert.equal(Fotos.esperaParaBuscar(vinteQuatro, 5000), 0);
+  const vinteCinco = Array.from({ length: 25 }, (_, i) => i * 100);
+  assert.equal(Fotos.esperaParaBuscar(vinteCinco, 5000), 55000); // a mais antiga (0) sai da janela aos 60 s
+  // as que já saíram da janela não contam
+  const velhas = Array.from({ length: 25 }, (_, i) => i * 100 - 120000);
+  assert.equal(Fotos.esperaParaBuscar(velhas, 5000), 0);
+});
