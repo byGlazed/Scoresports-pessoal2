@@ -17,10 +17,21 @@ const Fotos = (() => {
       .replace(/[^a-z0-9]+/g, " ")
       .trim();
 
+  // a ESPN usa a sigla do estado; o TheSportsDB, o nome do clube (igual no robô, robo/fotos.py)
+  const APELIDOS = {
+    "atletico mg": "atletico mineiro",
+    "america mg": "america mineiro",
+    "atletico go": "atletico goianiense",
+    "athletico pr": "athletico paranaense",
+    "operario pr": "operario ferroviario",
+    remo: "clube do remo",
+  };
+  const comApelido = (n) => APELIDOS[n] || n;
+
   /** Os dois nomes são o mesmo time: iguais, ou um é uma palavra inteira do outro (5 letras ou mais). */
   function mesmoTime(a, b) {
-    const x = normalizar(a);
-    const y = normalizar(b);
+    const x = comApelido(normalizar(a));
+    const y = comApelido(normalizar(b));
     if (!x || !y) return false;
     if (x === y) return true;
     const [curto, longo] = x.length <= y.length ? [x, y] : [y, x];
@@ -36,8 +47,8 @@ const Fotos = (() => {
   /** A foto do jogador entre os resultados da busca, ou null. */
   function escolher(resultados, nome, time) {
     const alvo = normalizar(nome);
-    const candidatos = (resultados || []).filter((p) => p && p.strSport === "Soccer" && normalizar(p.strPlayer) === alvo && (p.strCutout || p.strThumb));
-    if (!candidatos.length) return null;
+    const comFoto = (resultados || []).filter((p) => p && p.strSport === "Soccer" && (p.strCutout || p.strThumb));
+    const candidatos = comFoto.filter((p) => normalizar(p.strPlayer) === alvo);
     const doTime = candidatos.filter((p) => mesmoTime(p.strTeam, time));
     let escolhido = null;
     if (doTime.length === 1) escolhido = doTime[0];
@@ -46,6 +57,13 @@ const Fotos = (() => {
     else if (!doTime.length && candidatos.length === 1 && alvo.split(" ").length >= 2) {
       const c = candidatos[0];
       if (!c.strTeam || (c.strNationality && normalizar(c.strTeam) === normalizar(c.strNationality))) escolhido = c;
+    }
+    // a ESPN usa o nome curto ("Warleson"); o TheSportsDB, o completo ("Warleson Oliveira"): vale se o time
+    // bate e todas as palavras do nome curto estão no completo, e só um jogador do time servir
+    else if (!doTime.length && alvo) {
+      const palavras = alvo.split(" ");
+      const contidos = comFoto.filter((p) => mesmoTime(p.strTeam, time) && palavras.every((w) => normalizar(p.strPlayer).split(" ").includes(w)));
+      if (contidos.length === 1) escolhido = contidos[0];
     }
     return escolhido ? urlPequena(escolhido.strCutout || escolhido.strThumb) : null;
   }

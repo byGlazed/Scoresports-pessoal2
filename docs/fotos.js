@@ -13,6 +13,8 @@
 
 const FotoJogador = (() => {
   const PRAZO_MS = 30 * 86400 * 1000;
+  // "ss:foto2:" desde a regra do nome curto (Warleson = Warleson Oliveira): os "não tem" da regra antiga saem
+  const PREFIXO = "ss:foto2:";
   const SIMULTANEAS = 4;
   const memoria = new Map(); // chave -> Promise<url|null>
   const fila = []; // { nome, time, chave, ok }
@@ -24,7 +26,7 @@ const FotoJogador = (() => {
 
   function lerGuardada(chave) {
     try {
-      const v = JSON.parse(localStorage.getItem(`ss:foto:${chave}`) || "null");
+      const v = JSON.parse(localStorage.getItem(`${PREFIXO}${chave}`) || "null");
       return v && v.ate > Date.now() ? v : null;
     } catch (_) {
       return null;
@@ -40,7 +42,12 @@ const FotoJogador = (() => {
       const entradas = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (!k || !k.startsWith("ss:foto:")) continue;
+        if (k && k.startsWith("ss:foto:")) {
+          localStorage.removeItem(k); // da regra antiga
+          i--;
+          continue;
+        }
+        if (!k || !k.startsWith(PREFIXO)) continue;
         let ate = 0;
         try {
           ate = JSON.parse(localStorage.getItem(k) || "{}").ate || 0;
@@ -58,12 +65,12 @@ const FotoJogador = (() => {
   function guardar(chave, url) {
     const valor = JSON.stringify({ u: url, ate: Date.now() + PRAZO_MS });
     try {
-      localStorage.setItem(`ss:foto:${chave}`, valor);
+      localStorage.setItem(`${PREFIXO}${chave}`, valor);
     } catch (_) {
       // sem espaço: libera metade das fotos e tenta uma vez mais
       limpar(Math.floor(MAXIMO / 2));
       try {
-        localStorage.setItem(`ss:foto:${chave}`, valor);
+        localStorage.setItem(`${PREFIXO}${chave}`, valor);
       } catch (__) {
         /* só não guarda */
       }

@@ -78,3 +78,21 @@ test("buscas de foto em rajada: até 25 por minuto saem na hora, a 26ª espera a
   const velhas = Array.from({ length: 25 }, (_, i) => i * 100 - 120000);
   assert.equal(Fotos.esperaParaBuscar(velhas, 5000), 0);
 });
+
+test("nome curto da ESPN vale quando o time bate (Warleson -> Warleson Oliveira, do Botafogo)", () => {
+  assert.match(Fotos.escolher(BUSCAS["Warleson"], "Warleson", "Botafogo") || "", /\/small$/);
+  // outro time, mesmo com o nome curto contido: não (o Rhyan do Sydney FC não é o do Botafogo)
+  assert.equal(Fotos.escolher(BUSCAS["Rhyan"], "Rhyan", "Botafogo"), null);
+  assert.equal(Fotos.escolher(BUSCAS["Pedro"], "Pedro", "Flamengo"), null);
+});
+
+test("times com a sigla do estado: Atlético-MG é o Atlético Mineiro", () => {
+  assert.ok(Fotos.mesmoTime("Atlético-MG", "Atlético Mineiro"));
+  assert.ok(Fotos.mesmoTime("América-MG", "América Mineiro"));
+  assert.ok(Fotos.mesmoTime("Atlético-GO", "Atlético Goianiense"));
+  assert.ok(Fotos.mesmoTime("Remo", "Clube do Remo"));
+  assert.ok(Fotos.mesmoTime("Operário PR", "Operário Ferroviário"));
+  assert.equal(Fotos.mesmoTime("Atlético-MG", "Atlético Goianiense"), false);
+  assert.equal(Fotos.mesmoTime("Atlético-MG", "Atlético Madrid"), false);
+  assert.ok(Fotos.escolher(BUSCAS["Gustavo Scarpa"], "Gustavo Scarpa", "Atlético-MG"));
+});

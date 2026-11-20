@@ -96,3 +96,52 @@ class TesteIndice(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TesteRegrasNovas(unittest.TestCase):
+    """As mesmas regras de static/fotos_regras.js (testes/fotos.test.js)."""
+
+    def test_nome_curto_no_mesmo_time(self):
+        self.assertRegex(F.escolher(BUSCAS["Warleson"], "Warleson", "Botafogo") or "", r"/small$")
+        self.assertIsNone(F.escolher(BUSCAS["Rhyan"], "Rhyan", "Botafogo"))
+        self.assertIsNone(F.escolher(BUSCAS["Pedro"], "Pedro", "Flamengo"))
+
+    def test_sigla_do_estado(self):
+        self.assertTrue(F.mesmo_time("Atlético-MG", "Atlético Mineiro"))
+        self.assertTrue(F.mesmo_time("América-MG", "América Mineiro"))
+        self.assertTrue(F.mesmo_time("Atlético-GO", "Atlético Goianiense"))
+        self.assertTrue(F.mesmo_time("Remo", "Clube do Remo"))
+        self.assertTrue(F.mesmo_time("Operário PR", "Operário Ferroviário"))
+        self.assertFalse(F.mesmo_time("Atlético-MG", "Atlético Goianiense"))
+        self.assertFalse(F.mesmo_time("Atlético-MG", "Atlético Madrid"))
+        self.assertTrue(F.escolher(BUSCAS["Gustavo Scarpa"], "Gustavo Scarpa", "Atlético-MG"))
+
+
+class TesteTempo(unittest.TestCase):
+    """A rodada das fotos não pode segurar o robô inteiro (o Actions corta o job em 6 h e aí nada é publicado)."""
+
+    def setUp(self):
+        base = TesteIndice()
+        base.setUp()
+        self.base = base
+
+    def test_para_quando_o_tempo_acaba(self):
+        relogio = iter([0, 0, 2000, 2000, 2000])  # começa, 1ª busca, depois já passou do limite
+        arquivo = {}
+        F.atualizar(arquivo, HOJE, pegar_json=self.base.pegar_json, esperar=lambda s: None, ligas=("bra.1",), tempo_maximo=1200, relogio=lambda: next(relogio))
+        self.assertEqual(len(arquivo["fotos"]), 1)
+
+    def test_para_depois_de_5_buscas_seguidas_sem_resposta(self):
+        muitos = {"team": {"displayName": "Palmeiras"}, "athletes": [{"id": str(i), "displayName": f"Jogador {i}"} for i in range(20)]}
+        buscas = []
+
+        def pegar_json(url):
+            if "searchplayers" in url:
+                buscas.append(url)
+                return None  # o TheSportsDB não responde (429 seguidos)
+            if "/roster" in url:
+                return muitos
+            return self.base.pegar_json(url)
+
+        F.atualizar({}, HOJE, pegar_json=pegar_json, esperar=lambda s: None, ligas=("bra.1",))
+        self.assertEqual(len(buscas), 5)

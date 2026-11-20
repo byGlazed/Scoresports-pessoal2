@@ -28,6 +28,8 @@ MAXIMO = 240  # buscas por rodada (~8,5 min)
 INTERVALO = 2.1  # segundos entre buscas no TheSportsDB
 REVER_FOTO = 60  # dias
 REVER_SEM_FOTO = 20  # dias
+TEMPO_MAXIMO = 20 * 60  # segundos por rodada: o Actions corta o job inteiro em 6 h, e aí nada é publicado
+SEM_RESPOSTA_SEGUIDAS = 5  # o TheSportsDB parou de responder (429 em sequência): fica para a próxima
 
 
 def normalizar(texto):
@@ -40,9 +42,21 @@ def chave(nome, time_):
     return f"{normalizar(nome)}|{normalizar(time_)}"
 
 
+# a ESPN usa a sigla do estado; o TheSportsDB, o nome do clube (igual no app, static/fotos_regras.js)
+APELIDOS = {
+    "atletico mg": "atletico mineiro",
+    "america mg": "america mineiro",
+    "atletico go": "atletico goianiense",
+    "athletico pr": "athletico paranaense",
+    "operario pr": "operario ferroviario",
+    "remo": "clube do remo",
+}
+
+
 def mesmo_time(a, b):
     """Igual a Fotos.mesmoTime: iguais, ou um é uma palavra inteira do outro (5 letras ou mais)."""
     x, y = normalizar(a), normalizar(b)
+    x, y = APELIDOS.get(x, x), APELIDOS.get(y, y)
     if not x or not y:
         return False
     if x == y:
@@ -62,12 +76,8 @@ def url_pequena(url):
 def escolher(resultados, nome, time_):
     """Igual a Fotos.escolher: a foto do jogador entre os resultados da busca, ou None."""
     alvo = normalizar(nome)
-    candidatos = [
-        p for p in (resultados or [])
-        if p and p.get("strSport") == "Soccer" and normalizar(p.get("strPlayer")) == alvo and (p.get("strCutout") or p.get("strThumb"))
-    ]
-    if not candidatos:
-        return None
+    com_foto = [p for p in (resultados or []) if p and p.get("strSport") == "Soccer" and (p.get("strCutout") or p.get("strThumb"))]
+    candidatos = [p for p in com_foto if normalizar(p.get("strPlayer")) == alvo]
     do_time = [p for p in candidatos if mesmo_time(p.get("strTeam"), time_)]
     escolhido = None
     if len(do_time) == 1:
@@ -76,6 +86,13 @@ def escolher(resultados, nome, time_):
         c = candidatos[0]
         if not c.get("strTeam") or (c.get("strNationality") and normalizar(c["strTeam"]) == normalizar(c["strNationality"])):
             escolhido = c
+    elif not do_time and alvo:
+        # nome curto da ESPN ("Warleson") e completo no TheSportsDB ("Warleson Oliveira"): vale com o time
+        # certo, todas as palavras do curto no completo, e só um jogador do time servindo
+        palavras = alvo.split(" ")
+        contidos = [p for p in com_foto if mesmo_time(p.get("strTeam"), time_) and all(w in normalizar(p.get("strPlayer")).split(" ") for w in palavras)]
+        if len(contidos) == 1:
+            escolhido = contidos[0]
     return url_pequena(escolhido.get("strCutout") or escolhido.get("strThumb")) if escolhido else None
 
 
@@ -113,10 +130,12 @@ def a_buscar(pares, arquivo, hoje):
     return novas + [(n, t) for _, n, t in vencidas]
 
 
-def atualizar(arquivo, hoje, pegar_json=None, esperar=None, maximo=MAXIMO, ligas=LIGAS):
+def atualizar(arquivo, hoje, pegar_json=None, esperar=None, maximo=MAXIMO, ligas=LIGAS, tempo_maximo=TEMPO_MAXIMO, relogio=None):
     """Busca as fotos que faltam (até `maximo`) e grava em arquivo["fotos"]; devolve a lista do que mudou."""
     pegar_json = pegar_json or rede.pegar_json
     esperar = esperar if esperar is not None else time.sleep
+    relogio = relogio or time.monotonic
+    inicio = relogio()
     arquivo.setdefault("fotos", {})
     arquivo.setdefault("conferidas", {})
     pares = jogadores(pegar_json, ligas)
@@ -124,13 +143,18 @@ def atualizar(arquivo, hoje, pegar_json=None, esperar=None, maximo=MAXIMO, ligas
         return []  # ESPN fora do ar: fica tudo como estava
     achadas = 0
     feitas = 0
+    sem_resposta = 0
     for nome, time_ in a_buscar(pares, arquivo, hoje)[:maximo]:
+        if relogio() - inicio > tempo_maximo or sem_resposta >= SEM_RESPOSTA_SEGUIDAS:
+            break
         if feitas:
             esperar(INTERVALO)
         feitas += 1
         r = pegar_json(f"{API}/searchplayers.php?p={quote(nome.strip())}")
         if r is None:
+            sem_resposta += 1
             continue  # o TheSportsDB não respondeu: fica para a próxima rodada
+        sem_resposta = 0
         k = chave(nome, time_)
         url = escolher(r.get("player"), nome, time_)
         arquivo["fotos"][k] = url

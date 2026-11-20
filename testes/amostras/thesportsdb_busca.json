@@ -53,5 +53,38 @@
    "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/ytrnlp1750412203.png",
    "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/x37vm21725068007.jpg"
   }
+ ],
+ "Warleson": [
+  {
+   "idPlayer": "34175567",
+   "strPlayer": "Warleson Oliveira",
+   "strTeam": "Botafogo",
+   "strSport": "Soccer",
+   "strNationality": "Brazil",
+   "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/3j9n4p1767799628.png",
+   "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/bui0t71767802042.jpg"
+  }
+ ],
+ "Rhyan": [
+  {
+   "idPlayer": "34149233",
+   "strPlayer": "Rhyan Grant",
+   "strTeam": "Sydney FC",
+   "strSport": "Soccer",
+   "strNationality": "Australia",
+   "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/e2kai51716118388.png",
+   "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/c1dzan1547473947.jpg"
+  }
+ ],
+ "Gustavo Scarpa": [
+  {
+   "idPlayer": "34174240",
+   "strPlayer": "Gustavo Scarpa",
+   "strTeam": "Atlético Mineiro",
+   "strSport": "Soccer",
+   "strNationality": "Brazil",
+   "strCutout": "https://r2.thesportsdb.com/images/media/player/cutout/agdoz11763755482.png",
+   "strThumb": "https://r2.thesportsdb.com/images/media/player/thumb/sxtvp81678183417.jpg"
+  }
  ]
 }
