@@ -1035,18 +1035,31 @@ function lances(dados, esporteEspn) {
   });
 }
 
-function jogoHistorico(e) {
+/** Um jogo do histórico do time (o mando e o resultado saem do placar: em português a ESPN manda x/em e V/E/D). */
+function jogoHistorico(e, timeId) {
   const adv = e.opponent || {};
+  const { local, resultado } = resultadoDoJogo(e, timeId);
   return {
     id: e.id,
     data: dataBrDe(lerData(e.gameDate)),
     adversario: adv.displayName || adv.abbreviation,
     adversario_logo: logoDe(adv),
-    local: e.atVs === "vs" ? "casa" : "fora",
+    local,
     placar: e.score,
-    resultado: { W: "V", L: "D", D: "E", T: "E" }[String(e.gameResult || "").toUpperCase()] || null,
+    resultado,
     competicao: e.leagueName || e.leagueAbbreviation,
   };
+}
+
+/** A provável escalação de um time: os titulares do jogo `eventoId` (o último dele), de qualquer competição. */
+async function buscarEscalacaoAnterior(eventoId, timeId) {
+  const dados = await espnGet(`${D_BASE}/soccer/all/summary`, { event: eventoId });
+  const e = escalacoes(dados).find((x) => String(x.time.id) === String(timeId));
+  const provavel = provavelDoTime(e);
+  if (!provavel) return null;
+  const comp = (((dados.header || {}).competitions) || [{}])[0] || {};
+  const adversario = (comp.competitors || []).find((c) => String((c.team || {}).id) !== String(timeId));
+  return { ...provavel, base: { data: dataBrDe(lerData(comp.date)), adversario: adversario ? (adversario.team || {}).displayName : null } };
 }
 
 async function buscarResumo(esporte, liga, eventoId) {
@@ -1089,10 +1102,10 @@ async function buscarResumo(esporte, liga, eventoId) {
       cfg.esporte === "basketball" && ((dados.boxscore || {}).players || []).length
         ? { box: dados.boxscore.players.map(boxScoreDoTime), ...arremessosDoJogo(dados.plays) }
         : null,
-    forma: (dados.lastFiveGames || []).map((t) => ({ time: { id: (t.team || {}).id, nome: (t.team || {}).displayName, logo: logoDe(t.team) }, jogos: (t.events || []).map(jogoHistorico) })),
+    forma: (dados.lastFiveGames || []).map((t) => ({ time: { id: (t.team || {}).id, nome: (t.team || {}).displayName, logo: logoDe(t.team) }, jogos: (t.events || []).map((e) => jogoHistorico(e, (t.team || {}).id)) })),
     confronto: (() => {
       for (const t of dados.headToHeadGames || []) {
-        const jogos = (t.events || []).map(jogoHistorico);
+        const jogos = (t.events || []).map((e) => jogoHistorico(e, (t.team || {}).id));
         if (jogos.length) return { time: { id: (t.team || {}).id, nome: (t.team || {}).displayName }, jogos: jogos.slice(0, 10) };
       }
       return null;
@@ -1115,7 +1128,9 @@ async function buscarResumo(esporte, liga, eventoId) {
           .map((c) => {
             const topo = (c.leaders || [{}])[0] || {};
             const at = topo.athlete || {};
-            return at.id ? { nome: traduzEstatistica(c.displayName || c.name), id: at.id, atleta: at.displayName || at.shortName, valor: topo.displayValue } : null;
+            // "Partidas: 32, Gols: 10" vira 10 (e "32 jogos" embaixo); o nome da categoria pela tabela do app
+            const { valor, detalhe } = valorDoLider(topo.displayValue ?? topo.value);
+            return at.id ? { nome: nomeCategoria(c, esporte), id: at.id, atleta: at.displayName || at.shortName, valor, detalhe } : null;
           })
           .filter(Boolean),
       }))
@@ -2498,12 +2513,14 @@ const ROTAS = [
     }
     return { ...r, hoje: hojeEmBR() };
   }],
-  [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v2:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3)],
+  [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v3:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3)],
   // a temporada "atual" nunca é guardada por muito tempo: quando o mata-mata novo começar, ela tem de trocar
   [/^\/e\/nba\/nba\/copa$/, (m, q) => viaEspn(`espn_copa_nba_v1:${q.temporada || "atual"}`, 120, () => buscarCopaNba(q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
   [/^\/e\/([^/]+)\/([^/]+)\/chave$/, (m, q) => viaEspn(`espn_chave_v1:${m[1]}:${m[2]}:${q.temporada || "atual"}`, 120, () => buscarChave(m[1], m[2], q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
   [/^\/e\/([^/]+)\/([^/]+)\/classificacao$/, (m) => viaEspn(`espn_classificacao_v2:${m[1]}:${m[2]}`, 1800, () => buscarClassificacao(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)$/, (m) => viaEspn(`espn_time_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarTime(m[1], m[2], m[3]))],
+  // a provável escalação (titulares do último jogo do time): o jogo já acabou, então guarda 30 dias
+  [/^\/e\/futebol\/escalacao-anterior\/([^/]+)\/([^/]+)$/, (m) => viaEspn(`espn_escalacao_anterior_v1:${m[1]}:${m[2]}`, 30 * 86400, () => buscarEscalacaoAnterior(m[1], m[2]))],
   [/^\/e\/futebol\/([^/]+)\/times\/([^/]+)\/tecnico$/, async (m, q) => ({ tecnico: await tecnicoFutebol(q.nome || "", m[2], m[1]) })],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/jogos$/, (m) => viaEspn(`espn_time_jogos_v1:${m[1]}:${m[2]}:${m[3]}`, 900, () => buscarJogosTime(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/times\/([^/]+)\/estatisticas$/, (m) => viaEspn(`espn_time_stats_v1:${m[1]}:${m[2]}:${m[3]}`, 21600, () => buscarEstatisticasTime(m[1], m[2], m[3]))],

@@ -114,12 +114,13 @@ function linhaTecnico(esp, liga, time) {
   return linha;
 }
 
-/** Um cartão por time: cabeçalho (média e formação), o campinho e os reservas. */
-function cartaoCampinho(esp, liga, e, jogo) {
-  const { titulares, reservas } = comNotas(e, jogo);
+/** Um cartão por time: cabeçalho (média e formação), o campinho e os reservas.
+    provavel: a provável escalação (titulares do último jogo), sem notas nem reservas. */
+function cartaoCampinho(esp, liga, e, jogo, provavel = false) {
+  const { titulares, reservas } = provavel ? { titulares: e.titulares, reservas: [] } : comNotas(e, jogo);
   const posicoes = Campinho.posicoes(e.formacao, titulares);
   if (!posicoes) return null;
-  const media = Notas.media([...titulares, ...reservas].map((j) => j.nota));
+  const media = provavel ? null : Notas.media([...titulares, ...reservas].map((j) => j.nota));
   const reservasEmOrdem = [...reservas].sort((a, b) => (a.entrou_aos ?? 999) - (b.entrou_aos ?? 999));
   return h(
     "div",
@@ -132,6 +133,9 @@ function cartaoCampinho(esp, liga, e, jogo) {
       media !== null ? [seloNota(media, 2), botaoInfoNota()] : null,
       h("span", { class: "campinho-formacao" }, e.formacao)
     ),
+    provavel && e.base
+      ? h("p", { class: "nota campinho-base" }, `Titulares do último jogo${e.base.adversario ? `, contra o ${e.base.adversario}` : ""}${e.base.data ? ` (${dataCurta(e.base.data)})` : ""}.`)
+      : null,
     h(
       "div",
       { class: "campo", role: "group", "aria-label": `Titulares de ${e.time.nome}, ${e.formacao}` },
@@ -143,6 +147,27 @@ function cartaoCampinho(esp, liga, e, jogo) {
     linhaTecnico(esp, liga, e.time),
     reservasEmOrdem.length ? [h("h3", { class: "campinho-reservas-titulo" }, "Reservas"), h("ul", { class: "campinho-reservas" }, reservasEmOrdem.map((j) => linhaReserva(esp, liga, j, e.time.nome, new Map([...titulares, ...reservas].map((t) => [String(t.id), nomeCurtoJogador(t.nome)])))))] : null
   );
+}
+
+/** As prováveis escalações (pré-jogo, antes de a ESPN divulgar): os titulares do último jogo de cada time,
+    pedidos à parte (o histórico do resumo traz o id desse jogo). Desenha um campinho por time quando chega. */
+function provaveisFutebol(esp, liga, jogo, forma) {
+  const caixa = h("div", { class: "provaveis" }, esqueleto("campinho"));
+  const ultimo = (t) => {
+    const f = (forma || []).find((x) => String(x.time.id) === String(t.id));
+    const jogos = ((f && f.jogos) || []).filter((x) => x.id).sort((a, b) => String(a.data).localeCompare(String(b.data)));
+    return jogos.length ? jogos[jogos.length - 1].id : null;
+  };
+  const lados = [jogo.casa, jogo.fora];
+  Promise.all(lados.map((t) => (ultimo(t) ? api(`/e/futebol/escalacao-anterior/${ultimo(t)}/${t.id}`).catch(() => null) : Promise.resolve(null)))).then((lista) => {
+    if (!caixa.isConnected && !caixa.parentNode) return;
+    const cartoes = lista.filter(Boolean).map((e) => cartaoCampinho(esp, liga, e, jogo, true)).filter(Boolean);
+    caixa.replaceChildren(
+      h("p", { class: "nota" }, "Prováveis escalações: os titulares do último jogo de cada time. A escalação oficial aparece aqui perto do jogo."),
+      ...(cartoes.length ? cartoes : [vazio("Ainda não dá para prever a escalação deste jogo.")])
+    );
+  });
+  return [caixa];
 }
 
 /** A aba Escalações: o campinho de cada time (mandante primeiro), ou a lista se não der para desenhar. */

@@ -198,7 +198,7 @@ async function ligaDetalhes(esp, liga) {
   const d = Liga.destaques(jogos, 3);
   const grupo = (titulo, lista) =>
     lista.length
-      ? h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo }), lista.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, liga, j))))
+      ? h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo }), lista.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, liga, j), liga)))
       : null;
   const partes = [grupo("Ao vivo", d.aoVivo), grupo("Próximos jogos", d.proximos), grupo("Últimos resultados", d.ultimos)].filter(Boolean);
   blocoJogos.replaceChildren(...(partes.length ? partes : [vazio("Sem jogos perto de hoje nesta competição.")]));
@@ -213,7 +213,7 @@ async function ligaDetalhesJogos(esp, liga, blocoJogos, periodos, tk) {
   const vistos = new Set();
   const d = Liga.destaques(respostas.flat().filter((j) => !vistos.has(j.id) && vistos.add(j.id)), 3);
   const grupo = (titulo, lista) =>
-    lista.length ? h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo }), lista.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, liga, j)))) : null;
+    lista.length ? h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo }), lista.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, liga, j), liga))) : null;
   const partes = [grupo("Ao vivo", d.aoVivo), grupo("Próximos jogos", d.proximos), grupo("Últimos resultados", d.ultimos)].filter(Boolean);
   if (partes.length) blocoJogos.replaceChildren(...partes);
   if (d.aoVivo.length) agendar("lista", () => ligaDetalhesJogos(esp, liga, blocoJogos, periodos, tk), 30000);

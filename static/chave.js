@@ -46,7 +46,7 @@ registrarPagina("confronto", {
         "section",
         { class: "cartao grupo-liga" },
         cabecaGrupo({ titulo: c.resumo ? `${p.titulo} · ${c.resumo}` : p.titulo }),
-        p.jogos.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, p.liga, j)))
+        p.jogos.map((j) => linhaPartida(esp, j, () => abrirPartida(esp, p.liga, j), p.liga))
       )
     );
   },

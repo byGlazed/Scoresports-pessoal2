@@ -62,6 +62,9 @@ function registrarPagina(tipo, def) {
   PAGINAS[tipo] = def;
 }
 
+// o esqueleto que cada página mostra enquanto o dado chega
+const ESQUELETO_DA_PAGINA = { jogo: "partida", evento: "partida", time: "perfil", atleta: "perfil", boxeador: "perfil" };
+
 const TITULO_ABA = { jogos: "Scoresports", favoritos: "Favoritos", pesquisa: "Pesquisa" };
 
 const Navegacao = {
@@ -227,7 +230,7 @@ const Navegacao = {
     area.replaceChildren(corpo);
     window.scrollTo({ top: 0 });
     const ativo = () => p.corpo === corpo && this.estaNaPilha(p);
-    corpo.replaceChildren(carregando());
+    corpo.replaceChildren(esqueleto(ESQUELETO_DA_PAGINA[p.tipo] || "lista"));
     this.acompanhar(
       p,
       Promise.resolve().then(() => def.desenhar(corpo, p.params, ativo, p)),
@@ -575,17 +578,41 @@ function linhaEventoDoDia(esp, ev, abrir) {
   );
 }
 
-/** Os grupos de um esporte no dia (uma competição por grupo). Rejeita se o esporte inteiro falhar. */
-async function gruposDoEsporte(esp, data) {
+/** Os grupos de um esporte no dia (uma competição por grupo). Rejeita se o esporte inteiro falhar.
+    aoParcial(grupos): no futebol, chamado a cada liga que chega (a lista não espera a mais lenta). */
+async function gruposDoEsporte(esp, data, aoParcial) {
   if (esp.tipo === "esports") return gruposEsports(data);
   if (esp.tipo === "kings") return gruposKings(data);
   const vivo = (itens) => itens.some((x) => x.estado === 2);
   if (esp.tipo === "partidas") {
-    const respostas = await Promise.allSettled(esp.ligas.map((l) => api(`/e/${esp.id}/${l.id}/jogos?de=${data}`)));
+    const respostas = new Array(esp.ligas.length);
+    await Promise.all(
+      esp.ligas.map((l, i) =>
+        api(`/e/${esp.id}/${l.id}/jogos?de=${data}`).then(
+          (value) => {
+            respostas[i] = { status: "fulfilled", value };
+            if (aoParcial && value.length) aoParcial(gruposDasLigas(esp, respostas, false));
+          },
+          (reason) => {
+            respostas[i] = { status: "rejected", reason };
+          }
+        )
+      )
+    );
     if (respostas.every((r) => r.status === "rejected")) throw respostas[0].reason;
+    return gruposDasLigas(esp, respostas, true);
+  }
+  return gruposDeEventos(esp, data, vivo);
+}
+
+/** Os grupos das ligas que já responderam (final: inclui a nota das que falharam). */
+function gruposDasLigas(esp, respostas, final) {
+  const vivo = (itens) => itens.some((x) => x.estado === 2);
+  {
     const grupos = [];
     const falhas = [];
     respostas.forEach((r, i) => {
+      if (!r) return; // ainda não chegou
       const liga = esp.ligas[i];
       if (r.status === "rejected") {
         falhas.push(liga.nome);
@@ -608,9 +635,13 @@ async function gruposDoEsporte(esp, data) {
           }),
       });
     });
-    if (falhas.length) grupos.push({ chave: `${esp.id}:falhas`, esporte: esp.id, ordem: 1e6, aoVivo: false, jogos: [], nota: `Não carregou agora: ${falhas.join(", ")}.` });
+    if (final && falhas.length) grupos.push({ chave: `${esp.id}:falhas`, esporte: esp.id, ordem: 1e6, aoVivo: false, jogos: [], nota: `Não carregou agora: ${falhas.join(", ")}.` });
     return grupos;
   }
+}
+
+/** NBA (do PC), F1, UFC e boxe: os eventos do dia. */
+async function gruposDeEventos(esp, data, vivo) {
   if (esp.tipo === "nba") {
     const jogos = await api(`/jogos?data=${data}`);
     if (!jogos.length) return [];
@@ -721,7 +752,7 @@ async function jogosTodos(silencioso) {
       algum = true;
       partes.push(g.desenhar(visiveis));
     }
-    if (pendentes.size) partes.push(carregando(algum ? "Carregando mais jogos…" : "Carregando…"));
+    if (pendentes.size) partes.push(algum ? esqueleto("grupo", "Carregando mais jogos…") : esqueleto("lista"));
     else if (!algum) partes.push(vazio(jogos.length ? "Nenhum jogo com esse filtro." : "Nenhum jogo nesta data."));
     lista().replaceChildren(...partes);
   }
@@ -732,7 +763,16 @@ async function jogosTodos(silencioso) {
       porEsporte.delete(esp.id);
       desenhar();
     }
-    return gruposDoEsporte(esp, data)
+    // no futebol cada liga aparece quando chega (só na primeira pintura: a atualização silenciosa desenha no fim)
+    let pintura = null;
+    const aoParcial = silencioso
+      ? null
+      : (parciais) => {
+          if (porEsporte.has(esp.id) && !Array.isArray(porEsporte.get(esp.id))) return;
+          porEsporte.set(esp.id, parciais);
+          if (!pintura) pintura = requestAnimationFrame(() => ((pintura = null), desenhar()));
+        };
+    return gruposDoEsporte(esp, data, aoParcial)
       .then((grupos) => porEsporte.set(esp.id, grupos))
       .catch((erro) => porEsporte.set(esp.id, { erro }))
       .finally(() => {

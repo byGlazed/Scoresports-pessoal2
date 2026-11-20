@@ -106,7 +106,11 @@ const FotoJogador = (() => {
       guardar(item.chave, url);
       return url;
     } catch (_) {
-      memoria.delete(item.chave); // sem internet: tenta de novo numa próxima vez
+      // o 429 do TheSportsDB vem sem a permissão de CORS: o navegador acusa erro de rede e o status nunca
+      // aparece. Erro de rede, então, também pausa a fila (sem internet, esperar também é o certo)
+      pausa = Fotos.proximaPausa(pausa);
+      pausaAte = Date.now() + pausa;
+      memoria.delete(item.chave);
       return null;
     }
   }

@@ -222,7 +222,7 @@ function blocoElencos(p, elencos) {
 
 async function esportsPartida(jogo, id, silencioso, jogoLista) {
   const tk = silencioso ? S.tkDetalhe : novoTokenDetalhe();
-  if (!silencioso) detalhe().replaceChildren(carregando());
+  if (!silencioso) detalhe().replaceChildren(esqueleto("partida"));
   let r;
   try {
     r = await api(`/esports/jogos/${jogo}/${id}`);

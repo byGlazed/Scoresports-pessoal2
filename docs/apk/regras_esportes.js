@@ -163,6 +163,46 @@ function estatisticasJogoBeisebol(grupos) {
   return saida;
 }
 
+/** O mando e o resultado de um jogo do histórico (lastFiveGames da ESPN) para o time: pelo placar, que não
+    depende da língua; sem placar, pela letra (em português V/E/D, em inglês W/L/T; o D português é derrota). */
+function resultadoDoJogo(e, timeId) {
+  const id = String(timeId || "");
+  let local = ["vs", "x"].includes(String(e.atVs || "").trim().toLowerCase()) ? "casa" : "fora";
+  if (id && String(e.homeTeamId || "") === id) local = "casa";
+  else if (id && String(e.awayTeamId || "") === id) local = "fora";
+  const casa = Number.parseInt(e.homeTeamScore, 10);
+  const fora = Number.parseInt(e.awayTeamScore, 10);
+  if (Number.isFinite(casa) && Number.isFinite(fora) && (String(e.homeTeamId || "") === id || String(e.awayTeamId || "") === id)) {
+    const meu = local === "casa" ? casa : fora;
+    const dele = local === "casa" ? fora : casa;
+    return { local, resultado: meu > dele ? "V" : meu < dele ? "D" : "E" };
+  }
+  const letra = String(e.gameResult || "").trim().toUpperCase();
+  const resultado = { W: "V", V: "V", L: "D", D: "D", T: "E", E: "E" }[letra] || null;
+  return { local, resultado };
+}
+
+/** "Partidas: 32, Gols: 10" -> { valor: "10", detalhe: "32 jogos" }; um número só fica como está. */
+function valorDoLider(texto) {
+  const t = String(texto ?? "").trim();
+  const m = /^(?:partidas|jogos|matches|games|apps?)\s*:\s*(\d+)\s*,\s*[^:]+:\s*([\d.,]+)/i.exec(t);
+  return m ? { valor: m[2], detalhe: `${m[1]} jogos` } : { valor: t, detalhe: null };
+}
+
+/** A provável escalação a partir da escalação do último jogo: só os titulares, sem os números daquele jogo. */
+function provavelDoTime(e) {
+  if (!e || !(e.titulares || []).length) return null;
+  return {
+    lado: e.lado,
+    time: e.time,
+    formacao: e.formacao,
+    gols_pro: null,
+    gols_contra_time: null,
+    titulares: e.titulares.map((j) => ({ id: j.id, nome: j.nome, camisa: j.camisa, posicao: j.posicao, lugar: j.lugar, foto: j.foto })),
+    reservas: [],
+  };
+}
+
 /** Os dias (AAAA-MM-DD, os da ESPN) que vale pedir: só os que o calendário da liga tem jogo. Sem calendário,
     ou com algum dia fora dele (outra temporada), pede todos, como antes: na dúvida, pede. */
 function diasParaPedir(dias, calendario) {
@@ -175,5 +215,5 @@ function diasParaPedir(dias, calendario) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol, diasParaPedir };
+  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol, diasParaPedir, resultadoDoJogo, valorDoLider, provavelDoTime };
 }

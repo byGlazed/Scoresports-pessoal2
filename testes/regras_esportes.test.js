@@ -137,3 +137,38 @@ test("dias a pedir à ESPN: só os que o calendário da liga tem jogo", () => {
   assert.deepEqual(R.diasParaPedir(["2027-01-30", "2027-01-31"], cal), ["2027-01-30", "2027-01-31"]);
   assert.deepEqual(R.diasParaPedir(["2026-11-01", "2026-11-02"], cal), ["2026-11-01", "2026-11-02"]);
 });
+
+test("resultado nos últimos jogos pelo placar e pelo mando (a ESPN em português manda V/E/D e x/em)", () => {
+  const casa = { homeTeamId: "2029", awayTeamId: "6086", homeTeamScore: "1", awayTeamScore: "0", atVs: "x", gameResult: "V" };
+  assert.deepEqual(R.resultadoDoJogo(casa, "2029"), { local: "casa", resultado: "V" });
+  const fora = { homeTeamId: "6086", awayTeamId: "2029", homeTeamScore: "2", awayTeamScore: "1", atVs: "em", gameResult: "D" };
+  assert.deepEqual(R.resultadoDoJogo(fora, "2029"), { local: "fora", resultado: "D" });
+  const empate = { homeTeamId: "1", awayTeamId: "2029", homeTeamScore: "0", awayTeamScore: "0", atVs: "em", gameResult: "E" };
+  assert.deepEqual(R.resultadoDoJogo(empate, "2029"), { local: "fora", resultado: "E" });
+  // sem placar: a letra (em português, D é derrota; em inglês, W/L/T)
+  assert.equal(R.resultadoDoJogo({ atVs: "vs", gameResult: "W" }, "9").resultado, "V");
+  assert.equal(R.resultadoDoJogo({ atVs: "x", gameResult: "D" }, "9").resultado, "D");
+  assert.equal(R.resultadoDoJogo({ atVs: "@", gameResult: "T" }, "9").resultado, "E");
+  assert.equal(R.resultadoDoJogo({ atVs: "x" }, "9").resultado, null);
+});
+
+test("valor curto dos destaques da temporada", () => {
+  assert.deepEqual(R.valorDoLider("Partidas: 32, Gols: 10"), { valor: "10", detalhe: "32 jogos" });
+  assert.deepEqual(R.valorDoLider("Jogos: 33, Assistencias: 10"), { valor: "10", detalhe: "33 jogos" });
+  assert.deepEqual(R.valorDoLider("Matches: 12, Goals: 7"), { valor: "7", detalhe: "12 jogos" });
+  assert.deepEqual(R.valorDoLider("1697"), { valor: "1697", detalhe: null });
+  assert.deepEqual(R.valorDoLider(null), { valor: "", detalhe: null });
+});
+
+test("provável escalação: o time titular do último jogo, sem os gols e cartões dele", () => {
+  const e = { lado: "fora", time: { id: "874", nome: "Corinthians" }, formacao: "4-2-3-1", gols_pro: 4, gols_contra_time: 0,
+    titulares: [{ id: "1", nome: "Hugo Souza", camisa: "1", posicao: "G", lugar: 1, foto: null, gols: 0, amarelos: 1, entrou_aos: null, saiu_aos: 60 }],
+    reservas: [{ id: "2", nome: "Reserva" }] };
+  const p = R.provavelDoTime(e);
+  assert.deepEqual(p.titulares, [{ id: "1", nome: "Hugo Souza", camisa: "1", posicao: "G", lugar: 1, foto: null }]);
+  assert.equal(p.formacao, "4-2-3-1");
+  assert.deepEqual(p.reservas, []);
+  assert.equal(p.gols_pro, null);
+  assert.equal(R.provavelDoTime(null), null);
+  assert.equal(R.provavelDoTime({ ...e, titulares: [] }), null);
+});

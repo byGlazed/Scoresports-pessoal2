@@ -364,8 +364,33 @@ function cartaoCampeoes(chave) {
 
 /* ---------- Pedaços de interface ---------- */
 
+/** O esqueleto (skeleton) no lugar do "Carregando…": blocos no formato do que vai chegar (lista de jogos, placar
+    da partida, perfil, linhas, campinho). Só aparece depois de 150 ms (CSS): com o dado guardado, nada pisca.
+    O texto fica para o leitor de tela. */
+function esqueleto(tipo = "lista", texto = "Carregando…") {
+  const barra = (classe) => h("i", { class: `esq ${classe}` });
+  const linhaJogo = () => h("div", { class: "esq-jogo" }, barra("esq-hora"), h("div", { class: "esq-times" }, barra("esq-linha"), barra("esq-linha esq-curta")), barra("esq-placar"));
+  const cartaoJogos = (n) => h("div", { class: "esq-cartao" }, h("div", { class: "esq-cabeca" }, barra("esq-escudo-p"), barra("esq-titulo")), ...Array.from({ length: n }, linhaJogo));
+  const linhas = (n) => h("div", { class: "esq-cartao esq-linhas" }, ...Array.from({ length: n }, (_, i) => barra(i % 3 === 2 ? "esq-linha esq-curta" : "esq-linha")));
+  let miolo;
+  if (tipo === "partida") {
+    miolo = [
+      h("div", { class: "esq-cartao esq-placar-grande" }, h("div", { class: "esq-lado" }, barra("esq-escudo"), barra("esq-linha esq-curta")), barra("esq-numero"), h("div", { class: "esq-lado" }, barra("esq-escudo"), barra("esq-linha esq-curta"))),
+      h("div", { class: "esq-abas" }, barra("esq-aba"), barra("esq-aba"), barra("esq-aba")),
+      linhas(5),
+    ];
+  } else if (tipo === "perfil") {
+    miolo = [h("div", { class: "esq-cartao esq-perfil" }, barra("esq-escudo esq-grande"), h("div", { class: "esq-times" }, barra("esq-linha"), barra("esq-linha esq-curta"))), h("div", { class: "esq-abas" }, barra("esq-aba"), barra("esq-aba"), barra("esq-aba")), linhas(6)];
+  } else if (tipo === "linhas") miolo = linhas(3);
+  else if (tipo === "grupo") miolo = cartaoJogos(2);
+  else if (tipo === "campinho") miolo = h("div", { class: "esq esq-campo" });
+  else miolo = [cartaoJogos(3), cartaoJogos(2)];
+  return h("div", { class: `esqueleto esqueleto-${tipo}`, role: "status" }, h("span", { class: "visualmente-oculto" }, texto), miolo);
+}
+
+/** Compatível com as telas antigas: o esqueleto de uma lista; com um texto próprio ("Procurando…"), o de linhas. */
 function carregando(texto = "Carregando…") {
-  return h("div", { class: "carregando" }, texto);
+  return esqueleto(texto === "Carregando…" ? "lista" : "linhas", texto);
 }
 
 function vazio(texto) {
@@ -645,8 +670,9 @@ function canalNaLista(t, mostrarPadrao = true) {
 }
 
 /** Uma linha de jogo na lista. `times` vem na ordem em que deve aparecer. */
-function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoClicar, atual }) {
+function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoClicar, atual, aoPreparar }) {
   const aoVivo = estado === 2;
+  let preparado = false;
   return h(
     "button",
     {
@@ -655,6 +681,15 @@ function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoCl
       dataset: { id: String(id) },
       "aria-current": atual ? "true" : null,
       onclick: aoClicar,
+      // o pedido da página do jogo sai quando o dedo encosta, não quando ele solta (~100 ms antes)
+      onpointerdown: aoPreparar
+        ? () => {
+            if (!preparado) {
+              preparado = true;
+              aoPreparar();
+            }
+          }
+        : null,
     },
     h(
       "div",
@@ -926,7 +961,7 @@ function nbaMostrarJogo(jogo, silencioso = false) {
 
 async function nbaPreJogo(jogo) {
   const tk = novoTokenDetalhe();
-  detalhe().replaceChildren(carregando("Montando o pré-jogo…"));
+  detalhe().replaceChildren(esqueleto("partida", "Montando o pré-jogo…"));
   let pre;
   try {
     pre = await api(`/jogos/${jogo.id}/pre-jogo`);
@@ -1098,7 +1133,7 @@ function traduzirStatusLesao(status) {
 
 async function nbaBoxScore(jogo, silencioso) {
   const tk = silencioso ? S.tkDetalhe : novoTokenDetalhe();
-  if (!silencioso) detalhe().replaceChildren(carregando());
+  if (!silencioso) detalhe().replaceChildren(esqueleto("partida"));
   let box;
   try {
     box = await api(`/jogos/${jogo.id}/boxscore`);

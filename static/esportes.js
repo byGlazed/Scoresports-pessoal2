@@ -671,8 +671,9 @@ function placarComPenaltis(t) {
   return t.penaltis !== null && t.penaltis !== undefined ? `${t.placar} (${t.penaltis})` : t.placar;
 }
 
-function linhaPartida(esp, j, aoClicar) {
+function linhaPartida(esp, j, aoClicar, liga) {
   const st = estadoDe(esp.id);
+  const ligaDoJogo = liga || j.liga;
   const terminou = j.estado === 3;
   const algumVenceu = j.casa.vencedor || j.fora.vencedor;
   return botaoJogo({
@@ -683,6 +684,7 @@ function linhaPartida(esp, j, aoClicar) {
     transmissao: j.transmissao,
     mostrarPadrao: true,
     aoClicar,
+    aoPreparar: ligaDoJogo && esp.tipo === "partidas" ? () => api(`/e/${esp.id}/${ligaDoJogo}/jogos/${j.id}`).catch(() => {}) : null,
     times: ordemTimes(esp.id, j).map((t) => ({
       nome: t.nome_curto || t.nome,
       logo: t.logo,
@@ -938,7 +940,7 @@ function grupoDeJogos(esp, liga, jogos, { aoTocarLiga, aoTocarJogo, sub } = {}) 
     "section",
     { class: "cartao grupo-liga" },
     cabecaGrupo({ titulo: liga.nome, chave: `${esp.id}:${liga.id}`, logo: (jogos[0] && jogos[0].liga_logo) || null, sub, aoClicar: aoTocarLiga, favorito: favLiga(esp, liga.id), jogos }),
-    jogos.map((j) => linhaPartida(esp, j, () => aoTocarJogo(j)))
+    jogos.map((j) => linhaPartida(esp, j, () => aoTocarJogo(j), liga.id))
   );
 }
 
@@ -951,7 +953,7 @@ function abrirPartida(esp, liga, jogo) {
 
 async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   const tk = silencioso ? S.tkDetalhe : novoTokenDetalhe();
-  if (!silencioso) detalhe().replaceChildren(carregando());
+  if (!silencioso) detalhe().replaceChildren(esqueleto("partida"));
   let r;
   try {
     r = await api(`/e/${esp.id}/${liga}/jogos/${jogoLista.id}`);
@@ -969,6 +971,8 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   const abas = [{ id: "resumo", nome: "Resumo" }];
   if (r.estatisticas.length) abas.push({ id: "estatisticas", nome: "Estatísticas" });
   if (r.escalacoes.some((e) => e.titulares.length || e.reservas.length)) abas.push({ id: "escalacoes", nome: "Escalações" });
+  // pré-jogo sem a escalação oficial: as prováveis (os titulares do último jogo de cada time)
+  else if (futebol && j.estado === 1 && r.forma.length) abas.push({ id: "provaveis", nome: "Escalações" });
   const nba = esp.id === "nba" && r.nba && r.nba.box.length;
   if (nba || r.jogadores.some((t) => t.grupos.length)) abas.push({ id: "jogadores", nome: "Jogadores" });
   if (nba && (r.nba.lista.length || r.nba.semPosicao.total)) abas.push({ id: "arremessos", nome: "Arremessos" });
@@ -993,6 +997,7 @@ async function partidaDetalhe(esp, liga, jogoLista, silencioso) {
   function conteudoAba(id) {
     if (id === "estatisticas") return [secao(null, comparacaoEstatisticas(r.estatisticas, j, futebol))];
     if (id === "escalacoes") return campinhoFutebol(esp, liga, r.escalacoes, j);
+    if (id === "provaveis") return provaveisFutebol(esp, liga, j, r.forma);
     // estados guardados por jogo: resistem à atualização automática do jogo ao vivo
     const guardado = (sufixo, inicial) => (S.abaDetalhe[`${chaveAba}:${sufixo}`] = S.abaDetalhe[`${chaveAba}:${sufixo}`] || inicial);
     if (id === "jogadores" && nba) return boxScoreNBA(esp, liga, r, guardado("ordem", { coluna: null, direcao: "desc" }), () => area.replaceChildren(...conteudoAba("jogadores")));
@@ -1241,13 +1246,19 @@ function preJogoEspn(esp, liga, r) {
               h("strong", null, t.time.nome),
               h(
                 "ul",
-                { class: "lista-simples", style: { marginTop: "8px" } },
+                { class: "destaques-jogo" },
                 t.categorias.map((c) =>
                   h(
                     "li",
                     null,
-                    h("span", null, h("span", { class: "sub" }, `${c.nome}: `), h("button", { class: "botao-link", type: "button", onclick: () => abrirAtleta(esp.id, liga, c.id, c.atleta) }, c.atleta)),
-                    h("strong", { class: "numero" }, c.valor)
+                    h(
+                      "span",
+                      { class: "destaque-texto" },
+                      h("span", { class: "destaque-categoria" }, c.nome),
+                      h("button", { class: "botao-link destaque-nome", type: "button", onclick: () => abrirAtleta(esp.id, liga, c.id, c.atleta) }, c.atleta),
+                      c.detalhe ? h("span", { class: "destaque-detalhe" }, c.detalhe) : null
+                    ),
+                    h("strong", { class: "destaque-valor" }, c.valor)
                   )
                 )
               )
@@ -1584,7 +1595,7 @@ function abrirEvento(esp, liga, ev) {
 
 async function eventoDetalhe(esp, liga, ev, silencioso) {
   const tk = silencioso ? S.tkDetalhe : novoTokenDetalhe();
-  if (!silencioso) detalhe().replaceChildren(carregando());
+  if (!silencioso) detalhe().replaceChildren(esqueleto("partida"));
   let e;
   try {
     e = await api(`/e/${esp.id}/${liga}/eventos/${ev.id}?data=${ev.data}`);
