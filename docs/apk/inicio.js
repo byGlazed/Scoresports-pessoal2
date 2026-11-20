@@ -5,7 +5,7 @@
    Usa a base de app.js e as telas de esportes.js.
    ========================================================================= */
 
-const NOME_ESPORTE = { nba: "NBA", futebol: "Futebol", nfl: "NFL", mlb: "MLB", nhl: "NHL", f1: "Fórmula 1", ufc: "UFC", boxe: "Boxe", esports: "E-sports" };
+const NOME_ESPORTE = { nba: "NBA", futebol: "Futebol", nfl: "NFL", mlb: "MLB", nhl: "NHL", f1: "Fórmula 1", ufc: "UFC", boxe: "Boxe", esports: "E-sports", kings: "Kings League" };
 
 const esporteObj = (id) => S.esportes.find((e) => e.id === id);
 

@@ -23,10 +23,18 @@ function cabecaLiga(esp, ligaId) {
     h("div", { class: "cabeca-liga-linha" }, escudo, h("div", { class: "cabeca-liga-texto" }, h("h2", null, liga.nome), sub)),
     barra
   );
-  if (esp.tipo !== "partidas") return caixa;
-  api(`/e/${esp.id}/${ligaId}/datas`)
-    .then((r) => {
-      const info = r && r.liga;
+  let pedido = null;
+  if (esp.tipo === "partidas") pedido = api(`/e/${esp.id}/${ligaId}/datas`).then((r) => r && r.liga);
+  // Kings League: o escudo e a temporada vêm do kings.json
+  else if (esp.tipo === "kings") {
+    pedido = api("/kings").then((cs) => {
+      const c = cs.find((x) => x.id === ligaId);
+      return c ? { logo: c.logo, temporada: c.temporada, inicio: c.inicio, fim: c.fim } : null;
+    });
+  }
+  if (!pedido) return caixa;
+  pedido
+    .then((info) => {
       if (!info) return;
       if (info.logo) escudo.replaceWith(h("img", { class: "cabeca-liga-escudo", src: Visual.imagemPequena(info.logo, 128), alt: "", onerror: (e) => e.target.remove() }));
       if (info.temporada) sub.textContent = lugar ? `${lugar} · ${info.temporada}` : `Temporada ${info.temporada}`;

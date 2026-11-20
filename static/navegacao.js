@@ -331,12 +331,14 @@ registrarPagina("jogo", {
     if (!esp) return corpo.replaceChildren(vazio("Jogo não encontrado."));
     if (esp.tipo === "nba") return p.jogo ? nbaMostrarJogo(p.jogo) : nbaJogoPeloId(params.id, p);
     if (esp.tipo === "esports") return esportsPartida(params.liga, params.id, false, p.jogo);
+    if (esp.tipo === "kings") return kingsPartida(params.liga, params.id, false, p.jogo);
     return partidaDetalhe(esp, params.liga, p.jogo || { id: params.id }, false);
   },
   aoMostrar: (corpo, params, p) => {
     const esp = esporteObj(params.esporte);
     if (esp.tipo === "nba") return p.jogo ? nbaMostrarJogo(p.jogo, true) : null;
     if (esp.tipo === "esports") return esportsPartida(params.liga, params.id, true, p.jogo);
+    if (esp.tipo === "kings") return kingsPartida(params.liga, params.id, true, p.jogo);
     return partidaDetalhe(esp, params.liga, p.jogo || { id: params.id }, true);
   },
 });
@@ -436,7 +438,7 @@ registrarPagina("liga", {
 
 const JOGOS = { chip: lembrar("jogos:chip") || "todos", data: null };
 
-const ARTIGO_ESPORTE = { futebol: "o futebol", nba: "a NBA", nfl: "a NFL", mlb: "a MLB", nhl: "a NHL", f1: "a Fórmula 1", ufc: "o UFC", boxe: "o boxe", esports: "os e-sports" };
+const ARTIGO_ESPORTE = { futebol: "o futebol", nba: "a NBA", nfl: "a NFL", mlb: "a MLB", nhl: "a NHL", f1: "a Fórmula 1", ufc: "o UFC", boxe: "o boxe", esports: "os e-sports", kings: "a Kings League" };
 
 function chipsDisponiveis() {
   return Rotas.CHIPS_ESPORTE.filter(([id]) => id === "todos" || esporteObj(id));
@@ -448,7 +450,7 @@ function dataDoChip(chip) {
   const esp = esporteObj(chip);
   if (!esp) return null;
   if (esp.tipo === "nba") return NBA.data;
-  if (esp.tipo === "partidas" || esp.tipo === "esports") return estadoDe(esp.id).data;
+  if (esp.tipo === "partidas" || esp.tipo === "esports" || esp.tipo === "kings") return estadoDe(esp.id).data;
   return null;
 }
 
@@ -506,6 +508,10 @@ function desenharChipJogos(silencioso) {
     if (!silencioso) estadoDe(esp.id).data = JOGOS.data || estadoDe(esp.id).data;
     return esportsLista(silencioso);
   }
+  if (esp.tipo === "kings") {
+    if (!silencioso) estadoDe(esp.id).data = JOGOS.data || estadoDe(esp.id).data;
+    return kingsLista(silencioso);
+  }
   if (silencioso) return null;
   if (esp.tipo === "boxe") return boxeLista(esp);
   return eventosLista(esp, esp.ligas[0].id);
@@ -525,6 +531,7 @@ function linhaEventoDoDia(esp, ev, abrir) {
 /** Os grupos de um esporte no dia (uma competição por grupo). Rejeita se o esporte inteiro falhar. */
 async function gruposDoEsporte(esp, data) {
   if (esp.tipo === "esports") return gruposEsports(data);
+  if (esp.tipo === "kings") return gruposKings(data);
   const vivo = (itens) => itens.some((x) => x.estado === 2);
   if (esp.tipo === "partidas") {
     const respostas = await Promise.allSettled(esp.ligas.map((l) => api(`/e/${esp.id}/${l.id}/jogos?de=${data}`)));

@@ -1,0 +1,2879 @@
+{
+  "_como_usar": "Kings League (Brasil e os Mundiais), montado pelo robô (robo/kings.py) a partir das páginas do kingsleague.pro. Não precisa editar à mão.",
+  "competicoes": {
+    "brazil": {
+      "nome": "Kings League Brasil",
+      "temporada": "Kings Cup Brazil 2026/27",
+      "inicio": "2026-10-14T00:00:00.000Z",
+      "fim": "2026-12-29T00:00:00.000Z",
+      "encerrada": false,
+      "logo": "https://kingsleague-cdn.kama.football/account/production/competitionSeason/a69d2394-d635-472f-b392-19437d936b43/879487230.png",
+      "times": {
+        "49": {
+          "nome": "G3X FC",
+          "sigla": "G3X",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/505293376.png"
+        },
+        "50": {
+          "nome": "Furia FC",
+          "sigla": "FUR",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/862945366.png"
+        },
+        "160": {
+          "nome": "Fluxo FC",
+          "sigla": "FLX",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/597287050.png"
+        },
+        "161": {
+          "nome": "Dendele FC",
+          "sigla": "DDL",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/620166076.png"
+        },
+        "162": {
+          "nome": "LOUD SC",
+          "sigla": "LSC",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/764766392.png"
+        },
+        "163": {
+          "nome": "Nyvelados FC",
+          "sigla": "NYV",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/711647252.png"
+        },
+        "164": {
+          "nome": "Podpah Funkbol Clube",
+          "sigla": "FNK",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/65a66c3d-8792-45fd-9b80-f481e3e2aaed/984965602.png"
+        },
+        "167": {
+          "nome": "Capim FC",
+          "sigla": "CAP",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/280117129.png"
+        },
+        "168": {
+          "nome": "DesimpaiN",
+          "sigla": "DEP",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/127893336.png"
+        },
+        "220": {
+          "nome": "Dibrados FC",
+          "sigla": "DIB",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/252882331.png"
+        },
+        "58": {
+          "nome": "TBD",
+          "sigla": "TBD",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/886816398.png"
+        },
+        "219": {
+          "nome": "TBD",
+          "sigla": "TBD",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/941908607.png"
+        },
+        "63": {
+          "nome": "Winner CRV-ELB",
+          "sigla": "GR1",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/286937267.png"
+        },
+        "64": {
+          "nome": "Winner CHA-PIO",
+          "sigla": "GR2",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/586089430.png"
+        },
+        "65": {
+          "nome": "Winner LA-RDB",
+          "sigla": "GR3",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/412377625.png"
+        },
+        "66": {
+          "nome": "Winner PRC-XBU",
+          "sigla": "GR4",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/402634446.png"
+        }
+      },
+      "jogos": [
+        {
+          "id": 2851,
+          "rodada": "Matchday 1",
+          "grupo": "Challenger",
+          "inicio": "2026-10-19T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "164",
+          "fora": "163",
+          "placar": [
+            10,
+            3
+          ],
+          "tempos": [
+            [
+              3,
+              0
+            ],
+            [
+              7,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=gUFs6nxE7p0"
+        },
+        {
+          "id": 2852,
+          "rodada": "Matchday 1",
+          "grupo": "B",
+          "inicio": "2026-10-19T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "168",
+          "fora": "167",
+          "placar": [
+            3,
+            3
+          ],
+          "tempos": [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "penaltis": [
+            2,
+            3
+          ],
+          "video": "https://www.youtube.com/watch?v=IGfSqbrkWHw"
+        },
+        {
+          "id": 2853,
+          "rodada": "Matchday 1",
+          "grupo": "A",
+          "inicio": "2026-10-19T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 46,
+          "casa": "160",
+          "fora": "50",
+          "placar": [
+            3,
+            3
+          ],
+          "tempos": [
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "penaltis": [
+            3,
+            2
+          ],
+          "video": "https://www.youtube.com/watch?v=i2bh5GvG6xI"
+        },
+        {
+          "id": 2854,
+          "rodada": "Matchday 1",
+          "grupo": "A",
+          "inicio": "2026-10-19T23:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "220",
+          "fora": "162",
+          "placar": [
+            6,
+            6
+          ],
+          "tempos": [
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              4
+            ]
+          ],
+          "penaltis": [
+            2,
+            1
+          ],
+          "video": "https://www.youtube.com/watch?v=3Y8ns-15l8Y"
+        },
+        {
+          "id": 2855,
+          "rodada": "Matchday 1",
+          "grupo": "B",
+          "inicio": "2026-10-20T00:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "161",
+          "fora": "49",
+          "placar": [
+            4,
+            3
+          ],
+          "tempos": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=iIkO0dA_sfM"
+        },
+        {
+          "id": 2856,
+          "rodada": "Matchday 2",
+          "grupo": "B",
+          "inicio": "2026-10-26T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "161",
+          "fora": "167",
+          "placar": [
+            2,
+            4
+          ],
+          "tempos": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=YOX-0c76tgc"
+        },
+        {
+          "id": 2857,
+          "rodada": "Matchday 2",
+          "grupo": "B",
+          "inicio": "2026-10-26T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "163",
+          "fora": "49",
+          "placar": [
+            2,
+            9
+          ],
+          "tempos": [
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=RiTkSU5WGKA"
+        },
+        {
+          "id": 2858,
+          "rodada": "Matchday 2",
+          "grupo": "A",
+          "inicio": "2026-10-26T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "220",
+          "fora": "164",
+          "placar": [
+            2,
+            4
+          ],
+          "tempos": [
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=7p9K3gANMHI"
+        },
+        {
+          "id": 2859,
+          "rodada": "Matchday 2",
+          "grupo": "A",
+          "inicio": "2026-10-26T23:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "162",
+          "fora": "160",
+          "placar": [
+            6,
+            4
+          ],
+          "tempos": [
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=w2RVUUncpFU"
+        },
+        {
+          "id": 2860,
+          "rodada": "Matchday 2",
+          "grupo": "Challenger",
+          "inicio": "2026-10-27T00:00:00.000Z",
+          "status": "ended",
+          "minuto": 37,
+          "casa": "50",
+          "fora": "168",
+          "placar": [
+            6,
+            4
+          ],
+          "tempos": [
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=nKaoU8RzWzU"
+        },
+        {
+          "id": 2861,
+          "rodada": "Matchday 3",
+          "grupo": "A",
+          "inicio": "2026-11-02T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "160",
+          "fora": "164",
+          "placar": [
+            4,
+            4
+          ],
+          "tempos": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "penaltis": [
+            2,
+            3
+          ],
+          "video": "https://youtu.be/tQFjzhs95sw"
+        },
+        {
+          "id": 2862,
+          "rodada": "Matchday 3",
+          "grupo": "A",
+          "inicio": "2026-11-02T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 48,
+          "casa": "162",
+          "fora": "50",
+          "placar": [
+            6,
+            5
+          ],
+          "tempos": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/TgMSXnclNcE"
+        },
+        {
+          "id": 2863,
+          "rodada": "Matchday 3",
+          "grupo": "B",
+          "inicio": "2026-11-02T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 37,
+          "casa": "168",
+          "fora": "161",
+          "placar": [
+            2,
+            8
+          ],
+          "tempos": [
+            [
+              0,
+              5
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/EfePxO_v6fI"
+        },
+        {
+          "id": 2864,
+          "rodada": "Matchday 3",
+          "grupo": "B",
+          "inicio": "2026-11-02T23:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "167",
+          "fora": "163",
+          "placar": [
+            7,
+            4
+          ],
+          "tempos": [
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/97GZMSzB6eY"
+        },
+        {
+          "id": 2865,
+          "rodada": "Matchday 3",
+          "grupo": "Challenger",
+          "inicio": "2026-11-03T00:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "49",
+          "fora": "220",
+          "placar": [
+            2,
+            4
+          ],
+          "tempos": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/XfO7cMJ7GFc"
+        },
+        {
+          "id": 2866,
+          "rodada": "Matchday 4",
+          "grupo": "B",
+          "inicio": "2026-11-09T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "163",
+          "fora": "161",
+          "placar": [
+            7,
+            8
+          ],
+          "tempos": [
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              6
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/mZ_vEvO8Kxg"
+        },
+        {
+          "id": 2867,
+          "rodada": "Matchday 4",
+          "grupo": "B",
+          "inicio": "2026-11-09T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "49",
+          "fora": "168",
+          "placar": [
+            5,
+            7
+          ],
+          "tempos": [
+            [
+              1,
+              2
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/pviJbBaRMx0"
+        },
+        {
+          "id": 2868,
+          "rodada": "Matchday 4",
+          "grupo": "Challenger",
+          "inicio": "2026-11-09T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "167",
+          "fora": "160",
+          "placar": [
+            4,
+            5
+          ],
+          "tempos": [
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/lk96fOCy1N4"
+        },
+        {
+          "id": 2869,
+          "rodada": "Matchday 4",
+          "grupo": "A",
+          "inicio": "2026-11-09T23:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "164",
+          "fora": "162",
+          "placar": [
+            4,
+            4
+          ],
+          "tempos": [
+            [
+              4,
+              3
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "penaltis": [
+            2,
+            3
+          ],
+          "video": "https://youtu.be/6TIzAe45bYw"
+        },
+        {
+          "id": 2870,
+          "rodada": "Matchday 4",
+          "grupo": "A",
+          "inicio": "2026-11-10T00:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "50",
+          "fora": "220",
+          "placar": [
+            7,
+            3
+          ],
+          "tempos": [
+            [
+              4,
+              2
+            ],
+            [
+              3,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/yv_RSKWg_o8"
+        },
+        {
+          "id": 2872,
+          "rodada": "Matchday 5",
+          "grupo": "B",
+          "inicio": "2026-11-16T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "168",
+          "fora": "163",
+          "placar": [
+            6,
+            4
+          ],
+          "tempos": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2871,
+          "rodada": "Matchday 5",
+          "grupo": "A",
+          "inicio": "2026-11-16T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "220",
+          "fora": "160",
+          "placar": [
+            6,
+            8
+          ],
+          "tempos": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2873,
+          "rodada": "Matchday 5",
+          "grupo": "A",
+          "inicio": "2026-11-16T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "50",
+          "fora": "164",
+          "placar": [
+            4,
+            5
+          ],
+          "tempos": [
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2874,
+          "rodada": "Matchday 5",
+          "grupo": "B",
+          "inicio": "2026-11-16T23:00:00.000Z",
+          "status": "ended",
+          "minuto": 44,
+          "casa": "49",
+          "fora": "167",
+          "placar": [
+            2,
+            5
+          ],
+          "tempos": [
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2875,
+          "rodada": "Matchday 5",
+          "grupo": "Challenger",
+          "inicio": "2026-11-17T00:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "161",
+          "fora": "162",
+          "placar": [
+            3,
+            4
+          ],
+          "tempos": [
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2890,
+          "rodada": "Quarter-Finals",
+          "grupo": "Playoffs",
+          "inicio": "2026-11-23T21:00:00.000Z",
+          "status": null,
+          "minuto": null,
+          "casa": "164",
+          "fora": "168",
+          "placar": null,
+          "tempos": [],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2891,
+          "rodada": "Quarter-Finals",
+          "grupo": "Playoffs",
+          "inicio": "2026-11-23T22:00:00.000Z",
+          "status": null,
+          "minuto": null,
+          "casa": "167",
+          "fora": "50",
+          "placar": null,
+          "tempos": [],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2889,
+          "rodada": "Quarter-Finals",
+          "grupo": "Playoffs",
+          "inicio": "2026-11-23T23:00:00.000Z",
+          "status": null,
+          "minuto": null,
+          "casa": "160",
+          "fora": "161",
+          "placar": null,
+          "tempos": [],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2892,
+          "rodada": "Semi-Finals",
+          "grupo": "Playoffs",
+          "inicio": "2026-11-30T14:01:00.000Z",
+          "status": null,
+          "minuto": null,
+          "casa": "162",
+          "fora": "219",
+          "placar": null,
+          "tempos": [],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2893,
+          "rodada": "Semi-Finals",
+          "grupo": "Playoffs",
+          "inicio": "2026-11-30T15:01:00.000Z",
+          "status": null,
+          "minuto": null,
+          "casa": "58",
+          "fora": "219",
+          "placar": null,
+          "tempos": [],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2894,
+          "rodada": "Final",
+          "grupo": "Playoffs",
+          "inicio": "2026-11-30T17:01:00.000Z",
+          "status": null,
+          "minuto": null,
+          "casa": "58",
+          "fora": "219",
+          "placar": null,
+          "tempos": [],
+          "penaltis": null,
+          "video": null
+        }
+      ]
+    },
+    "world-cup": {
+      "nome": "Mundial da Kings",
+      "temporada": "Kings World Cup",
+      "inicio": "2026-06-01T00:00:00.000Z",
+      "fim": "2026-08-02T00:00:00.000Z",
+      "encerrada": true,
+      "logo": "https://kingsleague-cdn.kama.football/account/production/competitionSeason/fea7f6af-eb00-4bf2-80ca-9fe926853eb1/126124170.png",
+      "times": {
+        "2": {
+          "nome": "Porcinos FC",
+          "sigla": "POR",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/809604166.png"
+        },
+        "6": {
+          "nome": "Los Troncos FC",
+          "sigla": "TFC",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/106381586.png"
+        },
+        "7": {
+          "nome": "Ultimate Móstoles",
+          "sigla": "ULT",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/960207479.png"
+        },
+        "11": {
+          "nome": "Aniquiladores FC",
+          "sigla": "ANI",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/387959470.png"
+        },
+        "37": {
+          "nome": "Atlético Parceros FC",
+          "sigla": "PRC",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/397931651.png"
+        },
+        "49": {
+          "nome": "G3X FC",
+          "sigla": "G3X",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/505293376.png"
+        },
+        "50": {
+          "nome": "Furia FC",
+          "sigla": "FUR",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/862945366.png"
+        },
+        "59": {
+          "nome": "Stallions",
+          "sigla": "STL",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/f712588a-cc11-4352-aa39-7dbe2a191a8a/130383838.png"
+        },
+        "90": {
+          "nome": "Alpak FC",
+          "sigla": "APK",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/581e5f02-968d-4e2f-aa5a-48b41ade6cd0/935063160.png"
+        },
+        "93": {
+          "nome": "Underdogs FC",
+          "sigla": "UND",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/678e547c-fc04-434f-bf18-648f74458e58/814402925.png"
+        },
+        "168": {
+          "nome": "DesimpaiN",
+          "sigla": "DEP",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/127893336.png"
+        },
+        "171": {
+          "nome": "Karasu",
+          "sigla": "KRS",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/811009255.png"
+        },
+        "179": {
+          "nome": "La Capital CF",
+          "sigla": "LCA",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/267138229.png"
+        },
+        "187": {
+          "nome": "No Rules FC",
+          "sigla": "NRF",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/221234473.png"
+        },
+        "194": {
+          "nome": "FWZ",
+          "sigla": "FWZ",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/258999281.png"
+        },
+        "195": {
+          "nome": "DR7",
+          "sigla": "DR7",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/656512302.png"
+        },
+        "58": {
+          "nome": "TBD",
+          "sigla": "TBD",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/886816398.png"
+        },
+        "219": {
+          "nome": "TBD",
+          "sigla": "TBD",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/941908607.png"
+        },
+        "63": {
+          "nome": "Winner CRV-ELB",
+          "sigla": "GR1",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/286937267.png"
+        },
+        "64": {
+          "nome": "Winner CHA-PIO",
+          "sigla": "GR2",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/586089430.png"
+        },
+        "65": {
+          "nome": "Winner LA-RDB",
+          "sigla": "GR3",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/412377625.png"
+        },
+        "66": {
+          "nome": "Winner PRC-XBU",
+          "sigla": "GR4",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/402634446.png"
+        }
+      },
+      "jogos": [
+        {
+          "id": 2699,
+          "rodada": "Round 1",
+          "grupo": "KWCC",
+          "inicio": "2026-07-26T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 38,
+          "casa": "90",
+          "fora": "187",
+          "placar": [
+            7,
+            5
+          ],
+          "tempos": [
+            [
+              4,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=LrX_6gfgy4M"
+        },
+        {
+          "id": 2701,
+          "rodada": "Round 1",
+          "grupo": "KWCC",
+          "inicio": "2026-07-26T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "6",
+          "fora": "195",
+          "placar": [
+            1,
+            6
+          ],
+          "tempos": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              4
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/LrX_6gfgy4M?si=O5uDuCAyS-OlShVG&t=377"
+        },
+        {
+          "id": 2704,
+          "rodada": "Round 1",
+          "grupo": "KWCC",
+          "inicio": "2026-07-26T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "7",
+          "fora": "11",
+          "placar": [
+            6,
+            3
+          ],
+          "tempos": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/LrX_6gfgy4M?si=vjY7ojPB0_YSUvSR&t=809"
+        },
+        {
+          "id": 2703,
+          "rodada": "Round 1",
+          "grupo": "KWCC",
+          "inicio": "2026-07-26T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 44,
+          "casa": "59",
+          "fora": "168",
+          "placar": [
+            6,
+            5
+          ],
+          "tempos": [
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/LrX_6gfgy4M?si=xKsraP7qCnXQDMdz&t=1347"
+        },
+        {
+          "id": 2702,
+          "rodada": "Round 1",
+          "grupo": "KWCC",
+          "inicio": "2026-07-27T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "179",
+          "fora": "93",
+          "placar": [
+            2,
+            8
+          ],
+          "tempos": [
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=ZmLrpGS1bU0"
+        },
+        {
+          "id": 2706,
+          "rodada": "Round 1",
+          "grupo": "KWCC",
+          "inicio": "2026-07-27T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "37",
+          "fora": "194",
+          "placar": [
+            6,
+            3
+          ],
+          "tempos": [
+            [
+              1,
+              0
+            ],
+            [
+              5,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/ZmLrpGS1bU0?si=PljO2m6op2jOkCSJ&t=473"
+        },
+        {
+          "id": 2700,
+          "rodada": "Round 1",
+          "grupo": "KWCC",
+          "inicio": "2026-07-27T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "171",
+          "fora": "49",
+          "placar": [
+            1,
+            5
+          ],
+          "tempos": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/ZmLrpGS1bU0?si=WCteJ_3nR4nvrXx9&t=1016"
+        },
+        {
+          "id": 2705,
+          "rodada": "Round 1",
+          "grupo": "KWCC",
+          "inicio": "2026-07-27T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "2",
+          "fora": "50",
+          "placar": [
+            3,
+            5
+          ],
+          "tempos": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://youtu.be/ZmLrpGS1bU0?si=OPSRluXOySKXUf3e&t=1294"
+        },
+        {
+          "id": 2707,
+          "rodada": "Round 2",
+          "grupo": "KWCC",
+          "inicio": "2026-07-28T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 38,
+          "casa": "90",
+          "fora": "49",
+          "placar": [
+            2,
+            5
+          ],
+          "tempos": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              4
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=66Bxl18pefQ"
+        },
+        {
+          "id": 2708,
+          "rodada": "Round 2",
+          "grupo": "KWCC",
+          "inicio": "2026-07-28T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 37,
+          "casa": "195",
+          "fora": "93",
+          "placar": [
+            4,
+            5
+          ],
+          "tempos": [
+            [
+              3,
+              3
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=sKRLA4ORRuw"
+        },
+        {
+          "id": 2713,
+          "rodada": "Round 2",
+          "grupo": "KWCC",
+          "inicio": "2026-07-28T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "168",
+          "fora": "11",
+          "placar": [
+            5,
+            0
+          ],
+          "tempos": [
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              0
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=A5gQ2Gqj7JA"
+        },
+        {
+          "id": 2709,
+          "rodada": "Round 2",
+          "grupo": "KWCC",
+          "inicio": "2026-07-28T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "59",
+          "fora": "7",
+          "placar": [
+            7,
+            9
+          ],
+          "tempos": [
+            [
+              1,
+              3
+            ],
+            [
+              6,
+              6
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=Pmrz6HWouys"
+        },
+        {
+          "id": 2711,
+          "rodada": "Round 2",
+          "grupo": "KWCC",
+          "inicio": "2026-07-29T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "187",
+          "fora": "171",
+          "placar": [
+            6,
+            5
+          ],
+          "tempos": [
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=XKiGWnhGZ9U"
+        },
+        {
+          "id": 2712,
+          "rodada": "Round 2",
+          "grupo": "KWCC",
+          "inicio": "2026-07-29T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "6",
+          "fora": "179",
+          "placar": [
+            7,
+            4
+          ],
+          "tempos": [
+            [
+              2,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=JuwEZdWEG9E"
+        },
+        {
+          "id": 2714,
+          "rodada": "Round 2",
+          "grupo": "KWCC",
+          "inicio": "2026-07-29T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "2",
+          "fora": "194",
+          "placar": [
+            4,
+            4
+          ],
+          "tempos": [
+            [
+              4,
+              0
+            ],
+            [
+              0,
+              4
+            ]
+          ],
+          "penaltis": [
+            1,
+            4
+          ],
+          "video": "https://www.youtube.com/watch?v=RkF4cPhyY-E"
+        },
+        {
+          "id": 2710,
+          "rodada": "Round 2",
+          "grupo": "KWCC",
+          "inicio": "2026-07-29T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "50",
+          "fora": "37",
+          "placar": [
+            11,
+            2
+          ],
+          "tempos": [
+            [
+              4,
+              0
+            ],
+            [
+              7,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=B85zGiVDs5E"
+        },
+        {
+          "id": 2715,
+          "rodada": "Last Chance",
+          "grupo": "KWCC",
+          "inicio": "2026-07-30T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 37,
+          "casa": "90",
+          "fora": "194",
+          "placar": [
+            5,
+            3
+          ],
+          "tempos": [
+            [
+              0,
+              1
+            ],
+            [
+              5,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=OJlBgKsnptk"
+        },
+        {
+          "id": 2718,
+          "rodada": "Last Chance",
+          "grupo": "KWCC",
+          "inicio": "2026-07-30T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "37",
+          "fora": "187",
+          "placar": [
+            6,
+            5
+          ],
+          "tempos": [
+            [
+              2,
+              1
+            ],
+            [
+              4,
+              4
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=0gIveoQja6g"
+        },
+        {
+          "id": 2716,
+          "rodada": "Last Chance",
+          "grupo": "KWCC",
+          "inicio": "2026-07-30T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 38,
+          "casa": "195",
+          "fora": "168",
+          "placar": [
+            1,
+            3
+          ],
+          "tempos": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=vMvdkI34waw"
+        },
+        {
+          "id": 2717,
+          "rodada": "Last Chance",
+          "grupo": "KWCC",
+          "inicio": "2026-07-30T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 38,
+          "casa": "59",
+          "fora": "6",
+          "placar": [
+            5,
+            8
+          ],
+          "tempos": [
+            [
+              2,
+              1
+            ],
+            [
+              3,
+              7
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=xOpMAXZ4t8c"
+        },
+        {
+          "id": 2721,
+          "rodada": "Quartas-de-final",
+          "grupo": "KWCC",
+          "inicio": "2026-07-31T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "7",
+          "fora": "37",
+          "placar": [
+            5,
+            5
+          ],
+          "tempos": [
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "penaltis": [
+            1,
+            0
+          ],
+          "video": "https://www.youtube.com/watch?v=H08vMrNTxBc"
+        },
+        {
+          "id": 2720,
+          "rodada": "Quartas-de-final",
+          "grupo": "KWCC",
+          "inicio": "2026-07-31T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "90",
+          "fora": "93",
+          "placar": [
+            5,
+            5
+          ],
+          "tempos": [
+            [
+              1,
+              2
+            ],
+            [
+              4,
+              3
+            ]
+          ],
+          "penaltis": [
+            3,
+            1
+          ],
+          "video": "https://www.youtube.com/watch?v=pEJneRgThSI"
+        },
+        {
+          "id": 2719,
+          "rodada": "Quartas-de-final",
+          "grupo": "KWCC",
+          "inicio": "2026-07-31T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "50",
+          "fora": "6",
+          "placar": [
+            5,
+            1
+          ],
+          "tempos": [
+            [
+              1,
+              0
+            ],
+            [
+              4,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=jfDsV-XjYPk"
+        },
+        {
+          "id": 2722,
+          "rodada": "Quartas-de-final",
+          "grupo": "KWCC",
+          "inicio": "2026-07-31T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 45,
+          "casa": "49",
+          "fora": "168",
+          "placar": [
+            6,
+            5
+          ],
+          "tempos": [
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=0ra_rqtqhZM"
+        },
+        {
+          "id": 2723,
+          "rodada": "Semifinais",
+          "grupo": "KWCC",
+          "inicio": "2026-08-01T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 38,
+          "casa": "50",
+          "fora": "90",
+          "placar": [
+            4,
+            6
+          ],
+          "tempos": [
+            [
+              0,
+              1
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2724,
+          "rodada": "Semifinais",
+          "grupo": "KWCC",
+          "inicio": "2026-08-01T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "7",
+          "fora": "49",
+          "placar": [
+            2,
+            8
+          ],
+          "tempos": [
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2725,
+          "rodada": "Final",
+          "grupo": "KWCC",
+          "inicio": "2026-08-01T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "90",
+          "fora": "49",
+          "placar": [
+            5,
+            9
+          ],
+          "tempos": [
+            [
+              1,
+              5
+            ],
+            [
+              4,
+              4
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        }
+      ]
+    },
+    "kwc-nations": {
+      "nome": "Mundial de Seleções da Kings",
+      "temporada": "Kings World Cup Nations",
+      "inicio": "2025-11-27T00:00:00.000Z",
+      "fim": "2026-01-17T00:00:00.000Z",
+      "encerrada": true,
+      "logo": "https://kingsleague-cdn.kama.football/account/production/competitionSeason/175d13d3-f808-4896-874a-2e4f17026ce4/759406106.png",
+      "times": {
+        "142": {
+          "nome": "Italy",
+          "sigla": "ITA",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/6c95be2b-8d81-429c-8168-3a4cf4b48a64/695065569.png"
+        },
+        "143": {
+          "nome": "Spain",
+          "sigla": "ESP",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/ef78d4cc-e13e-4b53-bdd3-d099afee9479/858883976.png"
+        },
+        "144": {
+          "nome": "Mexico",
+          "sigla": "MEX",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/b1396fd4-1de2-4058-ae0f-3719f56a4ba7/934283860.png"
+        },
+        "145": {
+          "nome": "Morocco",
+          "sigla": "MAR",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/4d422e0a-7b01-4b29-bbb1-693c0d41d6a7/199988789.png"
+        },
+        "146": {
+          "nome": "Saudi Arabia",
+          "sigla": "KSA",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/3561acca-7332-4501-b177-7e1d3f61ba1b/39943383.png"
+        },
+        "147": {
+          "nome": "Argentina",
+          "sigla": "ARG",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/c4ae909b-78d9-4c20-b251-cf11cd93ec00/877030143.png"
+        },
+        "148": {
+          "nome": "Colombia",
+          "sigla": "COL",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/c6b6299b-4210-4c49-a4e2-7175791ee8e2/506596108.png"
+        },
+        "149": {
+          "nome": "Japan",
+          "sigla": "JPN",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/c5c39756-048a-4849-b640-e7886727df34/314624382.png"
+        },
+        "150": {
+          "nome": "Peru",
+          "sigla": "PER",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/82524c2a-b762-4e90-9530-dfd34d7dcffc/262134820.png"
+        },
+        "153": {
+          "nome": "Germany",
+          "sigla": "GER",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/5474dd3a-16a4-4fa6-a823-8fcb0fbd60bc/551829939.png"
+        },
+        "155": {
+          "nome": "USA",
+          "sigla": "USA",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/53d94a12-afd3-4f38-9220-05e19ae6ca01/271793197.png"
+        },
+        "159": {
+          "nome": "Brazil",
+          "sigla": "BRA",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/1422f2cd-7387-40b1-888e-7f3dc361bb3d/699095939.png"
+        },
+        "202": {
+          "nome": "Chile",
+          "sigla": "CHI",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/90564750-ef8f-4fbb-bad7-b7b9cfc6caba/103586112.png"
+        },
+        "203": {
+          "nome": "Netherlands",
+          "sigla": "NED",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/46c7eb7c-2886-40c1-aa86-ee6a3bd333e2/308161089.png"
+        },
+        "204": {
+          "nome": "France",
+          "sigla": "FRA",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/b7dbe6ce-eb20-4a99-a78c-0ef9642b7bd8/22589996.png"
+        },
+        "205": {
+          "nome": "Poland",
+          "sigla": "POL",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/f11abbb6-e678-4fa0-aa17-5cffdf6d7162/280960833.png"
+        },
+        "207": {
+          "nome": "Qatar",
+          "sigla": "QAT",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/e3e78e2b-cb6e-4850-a66b-9e5510241c40/177368661.png"
+        },
+        "208": {
+          "nome": "India",
+          "sigla": "IND",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/9ac8075c-f473-419c-899d-5a68cf925e6d/359472613.png"
+        },
+        "209": {
+          "nome": "Indonesia",
+          "sigla": "IDN",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/ddaa82e9-7fa1-46eb-8ee1-984de6114242/480054101.png"
+        },
+        "218": {
+          "nome": "Algeria",
+          "sigla": "ALG",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/club/cba14533-425c-4993-898e-7e097b36addc/606131066.png"
+        },
+        "58": {
+          "nome": "TBD",
+          "sigla": "TBD",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/886816398.png"
+        },
+        "219": {
+          "nome": "TBD",
+          "sigla": "TBD",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/941908607.png"
+        },
+        "63": {
+          "nome": "Winner CRV-ELB",
+          "sigla": "GR1",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/286937267.png"
+        },
+        "64": {
+          "nome": "Winner CHA-PIO",
+          "sigla": "GR2",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/586089430.png"
+        },
+        "65": {
+          "nome": "Winner LA-RDB",
+          "sigla": "GR3",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/412377625.png"
+        },
+        "66": {
+          "nome": "Winner PRC-XBU",
+          "sigla": "GR4",
+          "logo": "https://kingsleague-cdn.kama.football/account/production/team/402634446.png"
+        }
+      },
+      "jogos": [
+        {
+          "id": 2218,
+          "rodada": "Rodada 1",
+          "grupo": "C",
+          "inicio": "2026-01-03T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "142",
+          "fora": "204",
+          "placar": [
+            8,
+            0
+          ],
+          "tempos": [
+            [
+              2,
+              0
+            ],
+            [
+              6,
+              0
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=fb31ixLST0Y"
+        },
+        {
+          "id": 2230,
+          "rodada": "Rodada 1",
+          "grupo": "E",
+          "inicio": "2026-01-03T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "144",
+          "fora": "146",
+          "placar": [
+            3,
+            4
+          ],
+          "tempos": [
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=ATtUA7Lx9II"
+        },
+        {
+          "id": 2205,
+          "rodada": "Rodada 1",
+          "grupo": "A",
+          "inicio": "2026-01-03T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "202",
+          "fora": "203",
+          "placar": [
+            3,
+            3
+          ],
+          "tempos": [
+            [
+              2,
+              1
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "penaltis": [
+            3,
+            1
+          ],
+          "video": "https://www.youtube.com/watch?v=an6BNTZdfek"
+        },
+        {
+          "id": 2212,
+          "rodada": "Rodada 1",
+          "grupo": "B",
+          "inicio": "2026-01-03T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "155",
+          "fora": "149",
+          "placar": [
+            5,
+            2
+          ],
+          "tempos": [
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=GbDVWUz-f18"
+        },
+        {
+          "id": 2224,
+          "rodada": "Rodada 1",
+          "grupo": "D",
+          "inicio": "2026-01-03T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "159",
+          "fora": "143",
+          "placar": [
+            3,
+            7
+          ],
+          "tempos": [
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=WM1yUpseLfw"
+        },
+        {
+          "id": 2231,
+          "rodada": "Rodada 1",
+          "grupo": "E",
+          "inicio": "2026-01-04T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "208",
+          "fora": "209",
+          "placar": [
+            3,
+            5
+          ],
+          "tempos": [
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=ZmeloIzVXYg"
+        },
+        {
+          "id": 2219,
+          "rodada": "Rodada 1",
+          "grupo": "C",
+          "inicio": "2026-01-04T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "205",
+          "fora": "218",
+          "placar": [
+            5,
+            8
+          ],
+          "tempos": [
+            [
+              0,
+              2
+            ],
+            [
+              5,
+              6
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=KvbFwL_VjD4"
+        },
+        {
+          "id": 2213,
+          "rodada": "Rodada 1",
+          "grupo": "B",
+          "inicio": "2026-01-04T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "153",
+          "fora": "147",
+          "placar": [
+            3,
+            3
+          ],
+          "tempos": [
+            [
+              0,
+              1
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "penaltis": [
+            0,
+            1
+          ],
+          "video": "https://www.youtube.com/watch?v=RrHN1544_4I"
+        },
+        {
+          "id": 2225,
+          "rodada": "Rodada 1",
+          "grupo": "D",
+          "inicio": "2026-01-04T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "207",
+          "fora": "150",
+          "placar": [
+            5,
+            4
+          ],
+          "tempos": [
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=AvKVbqouiEA"
+        },
+        {
+          "id": 2206,
+          "rodada": "Rodada 1",
+          "grupo": "A",
+          "inicio": "2026-01-04T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 37,
+          "casa": "145",
+          "fora": "148",
+          "placar": [
+            5,
+            3
+          ],
+          "tempos": [
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=29AlbbpKQvw"
+        },
+        {
+          "id": 2220,
+          "rodada": "Rodada 2",
+          "grupo": "C",
+          "inicio": "2026-01-05T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "205",
+          "fora": "142",
+          "placar": [
+            3,
+            7
+          ],
+          "tempos": [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              6
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=GXwxRLtDNYg"
+        },
+        {
+          "id": 2207,
+          "rodada": "Rodada 2",
+          "grupo": "A",
+          "inicio": "2026-01-05T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 44,
+          "casa": "148",
+          "fora": "203",
+          "placar": [
+            7,
+            2
+          ],
+          "tempos": [
+            [
+              3,
+              1
+            ],
+            [
+              4,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=i_zJKRxxbRc"
+        },
+        {
+          "id": 2221,
+          "rodada": "Rodada 2",
+          "grupo": "C",
+          "inicio": "2026-01-06T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "204",
+          "fora": "218",
+          "placar": [
+            5,
+            5
+          ],
+          "tempos": [
+            [
+              2,
+              1
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          "penaltis": [
+            3,
+            1
+          ],
+          "video": "https://www.youtube.com/watch?v=-ICTMT2RYPU"
+        },
+        {
+          "id": 2226,
+          "rodada": "Rodada 2",
+          "grupo": "D",
+          "inicio": "2026-01-06T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 44,
+          "casa": "143",
+          "fora": "150",
+          "placar": [
+            8,
+            5
+          ],
+          "tempos": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=Tl90IycP6Rg"
+        },
+        {
+          "id": 2208,
+          "rodada": "Rodada 2",
+          "grupo": "A",
+          "inicio": "2026-01-07T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "202",
+          "fora": "145",
+          "placar": [
+            6,
+            1
+          ],
+          "tempos": [
+            [
+              1,
+              0
+            ],
+            [
+              5,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=GHELlJvaprI"
+        },
+        {
+          "id": 2214,
+          "rodada": "Rodada 2",
+          "grupo": "B",
+          "inicio": "2026-01-07T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 45,
+          "casa": "147",
+          "fora": "149",
+          "placar": [
+            3,
+            1
+          ],
+          "tempos": [
+            [
+              0,
+              0
+            ],
+            [
+              3,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=8JvdL42vzzo"
+        },
+        {
+          "id": 2232,
+          "rodada": "Rodada 2",
+          "grupo": "E",
+          "inicio": "2026-01-08T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 43,
+          "casa": "208",
+          "fora": "144",
+          "placar": [
+            2,
+            18
+          ],
+          "tempos": [
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              13
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=2ozrW4v097s"
+        },
+        {
+          "id": 2227,
+          "rodada": "Rodada 2",
+          "grupo": "D",
+          "inicio": "2026-01-08T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 48,
+          "casa": "207",
+          "fora": "159",
+          "placar": [
+            6,
+            7
+          ],
+          "tempos": [
+            [
+              6,
+              4
+            ],
+            [
+              0,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=Y47M2otwuJ4"
+        },
+        {
+          "id": 2233,
+          "rodada": "Rodada 2",
+          "grupo": "E",
+          "inicio": "2026-01-09T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "146",
+          "fora": "209",
+          "placar": [
+            3,
+            3
+          ],
+          "tempos": [
+            [
+              0,
+              1
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "penaltis": [
+            0,
+            2
+          ],
+          "video": "https://www.youtube.com/watch?v=-j9kFNcr3lE"
+        },
+        {
+          "id": 2215,
+          "rodada": "Rodada 2",
+          "grupo": "B",
+          "inicio": "2026-01-09T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "155",
+          "fora": "153",
+          "placar": [
+            6,
+            10
+          ],
+          "tempos": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              7
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=SRSrv0CQ-nU"
+        },
+        {
+          "id": 2216,
+          "rodada": "Rodada 3",
+          "grupo": "B",
+          "inicio": "2026-01-10T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 44,
+          "casa": "153",
+          "fora": "149",
+          "placar": [
+            5,
+            4
+          ],
+          "tempos": [
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=WyZ6Dqe6wCo"
+        },
+        {
+          "id": 2234,
+          "rodada": "Rodada 3",
+          "grupo": "E",
+          "inicio": "2026-01-10T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "144",
+          "fora": "209",
+          "placar": [
+            14,
+            2
+          ],
+          "tempos": [
+            [
+              5,
+              0
+            ],
+            [
+              9,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=PuOOzizMO0w"
+        },
+        {
+          "id": 2223,
+          "rodada": "Rodada 3",
+          "grupo": "C",
+          "inicio": "2026-01-10T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "204",
+          "fora": "205",
+          "placar": [
+            9,
+            7
+          ],
+          "tempos": [
+            [
+              5,
+              4
+            ],
+            [
+              4,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=cdck5Y9E37I"
+        },
+        {
+          "id": 2217,
+          "rodada": "Rodada 3",
+          "grupo": "B",
+          "inicio": "2026-01-10T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 38,
+          "casa": "147",
+          "fora": "155",
+          "placar": [
+            5,
+            8
+          ],
+          "tempos": [
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=CPZ7Di0G_30"
+        },
+        {
+          "id": 2229,
+          "rodada": "Rodada 3",
+          "grupo": "D",
+          "inicio": "2026-01-10T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "143",
+          "fora": "207",
+          "placar": [
+            5,
+            2
+          ],
+          "tempos": [
+            [
+              2,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=b6vYKIyuJyk"
+        },
+        {
+          "id": 2235,
+          "rodada": "Rodada 3",
+          "grupo": "E",
+          "inicio": "2026-01-11T17:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "146",
+          "fora": "208",
+          "placar": [
+            12,
+            1
+          ],
+          "tempos": [
+            [
+              7,
+              1
+            ],
+            [
+              5,
+              0
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=CPSsFznlpnM"
+        },
+        {
+          "id": 2222,
+          "rodada": "Rodada 3",
+          "grupo": "C",
+          "inicio": "2026-01-11T18:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "142",
+          "fora": "218",
+          "placar": [
+            7,
+            4
+          ],
+          "tempos": [
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=2RkdsFpgt48"
+        },
+        {
+          "id": 2209,
+          "rodada": "Rodada 3",
+          "grupo": "A",
+          "inicio": "2026-01-11T19:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "145",
+          "fora": "203",
+          "placar": [
+            5,
+            6
+          ],
+          "tempos": [
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=IOyYlNaqCQA"
+        },
+        {
+          "id": 2210,
+          "rodada": "Rodada 3",
+          "grupo": "A",
+          "inicio": "2026-01-11T20:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "148",
+          "fora": "202",
+          "placar": [
+            5,
+            5
+          ],
+          "tempos": [
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "penaltis": [
+            1,
+            2
+          ],
+          "video": "https://www.youtube.com/watch?v=NpN8i-PDWoQ"
+        },
+        {
+          "id": 2228,
+          "rodada": "Rodada 3",
+          "grupo": "D",
+          "inicio": "2026-01-11T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "159",
+          "fora": "150",
+          "placar": [
+            6,
+            1
+          ],
+          "tempos": [
+            [
+              4,
+              1
+            ],
+            [
+              2,
+              0
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=i14gfACWTeA"
+        },
+        {
+          "id": 2238,
+          "rodada": "Last Chance",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-12T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "155",
+          "fora": "203",
+          "placar": [
+            7,
+            4
+          ],
+          "tempos": [
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=kcDwZhSVdJ0"
+        },
+        {
+          "id": 2237,
+          "rodada": "Last Chance",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-12T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 45,
+          "casa": "147",
+          "fora": "204",
+          "placar": [
+            5,
+            7
+          ],
+          "tempos": [
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=P444gezCyrk"
+        },
+        {
+          "id": 2236,
+          "rodada": "Last Chance",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-12T23:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "146",
+          "fora": "159",
+          "placar": [
+            1,
+            7
+          ],
+          "tempos": [
+            [
+              0,
+              4
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=0QKY6ZG81jA"
+        },
+        {
+          "id": 2241,
+          "rodada": "Quartas de final",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-13T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 45,
+          "casa": "144",
+          "fora": "204",
+          "placar": [
+            8,
+            4
+          ],
+          "tempos": [
+            [
+              2,
+              2
+            ],
+            [
+              6,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=rZbOW-fVw_0"
+        },
+        {
+          "id": 2242,
+          "rodada": "Quartas de final",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-13T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "142",
+          "fora": "159",
+          "placar": [
+            5,
+            15
+          ],
+          "tempos": [
+            [
+              1,
+              9
+            ],
+            [
+              4,
+              6
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=wsoK4NQzrEo"
+        },
+        {
+          "id": 2239,
+          "rodada": "Quartas de final",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-14T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 39,
+          "casa": "202",
+          "fora": "153",
+          "placar": [
+            8,
+            5
+          ],
+          "tempos": [
+            [
+              5,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=svq-5JsjmWQ"
+        },
+        {
+          "id": 2240,
+          "rodada": "Quartas de final",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-14T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 41,
+          "casa": "143",
+          "fora": "155",
+          "placar": [
+            9,
+            3
+          ],
+          "tempos": [
+            [
+              3,
+              1
+            ],
+            [
+              6,
+              2
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=U0W2CzrMuig"
+        },
+        {
+          "id": 2243,
+          "rodada": "Semifinais",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-15T21:00:00.000Z",
+          "status": "ended",
+          "minuto": 42,
+          "casa": "202",
+          "fora": "143",
+          "placar": [
+            5,
+            5
+          ],
+          "tempos": [
+            [
+              1,
+              1
+            ],
+            [
+              4,
+              4
+            ]
+          ],
+          "penaltis": [
+            2,
+            0
+          ],
+          "video": "https://www.youtube.com/watch?v=6cqv0YL88Kc"
+        },
+        {
+          "id": 2244,
+          "rodada": "Semifinais",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-15T22:00:00.000Z",
+          "status": "ended",
+          "minuto": 40,
+          "casa": "144",
+          "fora": "159",
+          "placar": [
+            3,
+            8
+          ],
+          "tempos": [
+            [
+              0,
+              3
+            ],
+            [
+              3,
+              5
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=rwmxdPai6W4"
+        },
+        {
+          "id": 2245,
+          "rodada": "Final",
+          "grupo": "Playoffs",
+          "inicio": "2026-01-17T23:00:00.000Z",
+          "status": "ended",
+          "minuto": 38,
+          "casa": "159",
+          "fora": "202",
+          "placar": [
+            6,
+            2
+          ],
+          "tempos": [
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ],
+          "penaltis": null,
+          "video": "https://www.youtube.com/watch?v=NACOBcAKh1A"
+        }
+      ]
+    }
+  }
+}

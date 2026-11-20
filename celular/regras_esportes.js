@@ -163,6 +163,17 @@ function estatisticasJogoBeisebol(grupos) {
   return saida;
 }
 
+/** Os dias (AAAA-MM-DD, os da ESPN) que vale pedir: só os que o calendário da liga tem jogo. Sem calendário,
+    ou com algum dia fora dele (outra temporada), pede todos, como antes: na dúvida, pede. */
+function diasParaPedir(dias, calendario) {
+  if (!calendario || !calendario.length) return dias;
+  const primeiro = calendario[0];
+  const ultimo = calendario[calendario.length - 1];
+  if (dias.some((d) => d < primeiro || d > ultimo)) return dias;
+  const tem = new Set(calendario);
+  return dias.filter((d) => tem.has(d));
+}
+
 if (typeof module !== "undefined") {
-  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol };
+  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol, diasParaPedir };
 }

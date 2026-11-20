@@ -164,7 +164,8 @@ test("eventoNoDia: um fim de semana de F1 aparece em todos os dias dele", () => 
 });
 
 test("CHIPS_ESPORTE e ORDEM_ESPORTES na ordem da spec", () => {
-  assert.deepEqual(R.CHIPS_ESPORTE.map((c) => c[0]), ["todos", "futebol", "nba", "nfl", "mlb", "nhl", "f1", "ufc", "boxe", "esports"]);
+  assert.deepEqual(R.CHIPS_ESPORTE.map((c) => c[0]), ["todos", "futebol", "nba", "nfl", "mlb", "nhl", "f1", "ufc", "boxe", "esports", "kings"]);
+  assert.equal(R.CHIPS_ESPORTE.find((c) => c[0] === "kings")[1], "Kings League");
   assert.equal(R.CHIPS_ESPORTE.find((c) => c[0] === "esports")[1], "E-sports");
-  assert.deepEqual(R.ORDEM_ESPORTES, ["futebol", "nba", "nfl", "mlb", "nhl", "f1", "ufc", "boxe", "esports"]);
+  assert.deepEqual(R.ORDEM_ESPORTES, ["futebol", "nba", "nfl", "mlb", "nhl", "f1", "ufc", "boxe", "esports", "kings"]);
 });

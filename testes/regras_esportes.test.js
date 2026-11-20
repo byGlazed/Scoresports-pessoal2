@@ -125,3 +125,15 @@ test("estatisticasJogoBeisebol: lista sem grupos aninhados devolve null", () => 
   assert.equal(R.estatisticasJogoBeisebol([{ name: "goals", displayValue: "3" }]), null);
   assert.equal(R.estatisticasJogoBeisebol(undefined), null);
 });
+
+test("dias a pedir à ESPN: só os que o calendário da liga tem jogo", () => {
+  const cal = ["2026-11-14", "2026-11-18", "2026-11-19", "2026-11-22", "2026-11-23"];
+  assert.deepEqual(R.diasParaPedir(["2026-11-18", "2026-11-19"], cal), ["2026-11-18", "2026-11-19"]);
+  assert.deepEqual(R.diasParaPedir(["2026-11-19", "2026-11-20"], cal), ["2026-11-19"]); // o dia 20 não tem jogo
+  assert.deepEqual(R.diasParaPedir(["2026-11-20", "2026-11-21"], cal), []); // nenhum: nem pede
+  // sem calendário, ou fora dele (outra temporada): pede tudo, como antes
+  assert.deepEqual(R.diasParaPedir(["2026-11-20", "2026-11-21"], null), ["2026-11-20", "2026-11-21"]);
+  assert.deepEqual(R.diasParaPedir(["2026-11-20", "2026-11-21"], []), ["2026-11-20", "2026-11-21"]);
+  assert.deepEqual(R.diasParaPedir(["2027-01-30", "2027-01-31"], cal), ["2027-01-30", "2027-01-31"]);
+  assert.deepEqual(R.diasParaPedir(["2026-11-01", "2026-11-02"], cal), ["2026-11-01", "2026-11-02"]);
+});

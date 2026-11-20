@@ -355,6 +355,25 @@ function somarDiasIso(ymd, n) {
 
 const yyyymmdd = (ymd) => ymd.replace(/-/g, "");
 
+/* ---------- Kings League (kings.json, montado pelo robô a partir do kingsleague.pro) ---------- */
+
+const KINGS_LIGAS = [
+  { id: "brazil", nome: "Kings League Brasil" },
+  { id: "world-cup", nome: "Mundial da Kings" },
+  { id: "kwc-nations", nome: "Mundial de Seleções da Kings" },
+];
+let KINGS_GUARDADO = null;
+
+/** As competições da Kings League (na ordem de KINGS_LIGAS), guardadas na memória por 1 minuto. */
+async function kingsCompeticoes() {
+  if (KINGS_GUARDADO && KINGS_GUARDADO.ate > Date.now()) return KINGS_GUARDADO.valor;
+  const d = await jsonLocal("dados/kings.json");
+  const comps = d.competicoes || {};
+  const valor = KINGS_LIGAS.filter((l) => comps[l.id]).map((l) => ({ ...comps[l.id], id: l.id, nome: l.nome }));
+  KINGS_GUARDADO = { valor, ate: Date.now() + 60000 };
+  return valor;
+}
+
 /* ---------- Onde assistir (transmissoes.json) ---------- */
 
 let TRANSMISSOES = null;
@@ -711,14 +730,32 @@ function partida(ev, esporte, liga, comp) {
   return jogo;
 }
 
-async function eventosPeriodo(url, d0, d1, info) {
+// o scoreboard de um dia, guardado na memória por pouco tempo: o "dia anterior" que a lista de um dia
+// pede é o mesmo dia que a lista anterior já pediu (trocar de dia não pede tudo de novo)
+const SCOREBOARDS = new Map();
+function scoreboardDoDia(url, chave) {
+  const k = `${url}|${chave}`;
+  const salvo = SCOREBOARDS.get(k);
+  if (salvo && salvo.ate > Date.now()) return salvo.p;
+  const passado = chave.length === 8 && chave < yyyymmdd(somarDiasIso(hojeEmBR(), -1));
+  const p = espnGet(url, { dates: chave, limit: 1000 });
+  SCOREBOARDS.set(k, { p, ate: Date.now() + (passado ? 30 * 60000 : 45000) });
+  p.catch(() => SCOREBOARDS.delete(k));
+  if (SCOREBOARDS.size > 300) SCOREBOARDS.delete(SCOREBOARDS.keys().next().value);
+  return p;
+}
+
+/** calendario: os dias com jogo da liga (AAAA-MM-DD), para pedir só esses (null = pede todos). */
+async function eventosPeriodo(url, d0, d1, info, calendario = null) {
   const dias = Math.round((new Date(`${d1}T12:00:00Z`) - new Date(`${d0}T12:00:00Z`)) / 86400000) + 1;
   let chaves;
-  if (dias <= 4) chaves = Array.from({ length: dias }, (_, i) => yyyymmdd(somarDiasIso(d0, i)));
-  else chaves = [...new Set(Array.from({ length: dias }, (_, i) => yyyymmdd(somarDiasIso(d0, i)).slice(0, 6)))].sort();
+  if (dias <= 4) {
+    const isos = Array.from({ length: dias }, (_, i) => somarDiasIso(d0, i));
+    chaves = diasParaPedir(isos, calendario).map(yyyymmdd);
+  } else chaves = [...new Set(Array.from({ length: dias }, (_, i) => yyyymmdd(somarDiasIso(d0, i)).slice(0, 6)))].sort();
   const vistos = new Set();
   const eventos = [];
-  const respostas = await Promise.all(chaves.map((chave) => espnGet(url, { dates: chave, limit: 1000 })));
+  const respostas = await Promise.all(chaves.map((chave) => scoreboardDoDia(url, chave)));
   for (const dados of respostas) {
     if (info && !info.logo) {
       const logos = ((dados.leagues || [{}])[0] || {}).logos || [];
@@ -735,11 +772,32 @@ async function eventosPeriodo(url, d0, d1, info) {
   return eventos;
 }
 
+/** Os dias com jogo da liga, do calendário já guardado (sem esperar a rede). Sem ele, busca em segundo
+    plano (a próxima troca de dia já usa) e devolve null: aí a lista pede todos os dias, como antes. */
+async function calendarioGuardado(esporte, liga) {
+  const chave = `espn_datas_v3:${esporte}:${liga}`;
+  try {
+    const salvo = await Banco.ler("dados", chave);
+    const v = salvo && salvo.valor;
+    if (v && v.tipo === "dias" && v.datas && v.datas.length && Date.now() / 1000 - salvo.salvo_em < 2 * 86400) {
+      if (Date.now() / 1000 >= salvo.vale_ate) obter(chave, 21600, () => buscarDatas(esporte, liga)).catch(() => {});
+      return v.datas;
+    }
+  } catch (_) {
+    /* sem banco: segue sem calendário */
+  }
+  // um pouco depois, para não disputar a rede com a lista que está abrindo
+  setTimeout(() => obter(chave, 21600, () => buscarDatas(esporte, liga)).catch(() => {}), 4000);
+  return null;
+}
+
 async function buscarPartidas(esporte, liga, de, ate) {
   const [cfg] = dConfig(esporte, liga);
   ate = ate || de;
   const info = {};
-  const eventos = await eventosPeriodo(`${D_BASE}/${cfg.esporte}/${liga}/scoreboard`, somarDiasIso(de, -1), ate, info);
+  // só os dias em que a liga joga (o calendário guardado): num dia comum, poucas das ~40 ligas jogam
+  const calendario = await calendarioGuardado(esporte, liga);
+  const eventos = await eventosPeriodo(`${D_BASE}/${cfg.esporte}/${liga}/scoreboard`, somarDiasIso(de, -1), ate, info, calendario);
   const jogos = [];
   for (const ev of eventos) {
     let j;
@@ -2343,7 +2401,9 @@ const ROTAS = [
     ...Object.entries(D_ESPORTES).map(([id, v]) => ({ id, nome: v.nome, tipo: v.tipo, ligas: v.ligas })),
     { id: "boxe", nome: "Boxe", tipo: "boxe", ligas: [{ id: "boxe", nome: "Boxe" }] },
     { id: "esports", nome: "E-sports", tipo: "esports", ligas: Esports.JOGOS.map((j) => ({ id: j.id, nome: j.nome })) },
+    { id: "kings", nome: "Kings League", tipo: "kings", ligas: KINGS_LIGAS },
   ]],
+  [/^\/kings$/, () => kingsCompeticoes()],
   [/^\/esports\/jogos$/, async (m, q) => {
     const de = q.de || hojeEmBR();
     const hoje = hojeEmBR();

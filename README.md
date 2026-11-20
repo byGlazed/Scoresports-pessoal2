@@ -82,6 +82,12 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
   - *Jogador:* foto redonda, o cartão do clube (toque para abrir o time) e "Informações gerais" em blocos.
 - **Velocidade:** o que já está guardado no aparelho aparece na hora (até 6 h de idade), e o dado novo chega em segundo plano e redesenha a tela sozinho. Medido no navegador: a lista do dia com dado guardado em cerca de 0,15 s, e voltar da partida para a lista em 0,02 s. Os escudos e as fotos da ESPN vêm no tamanho em que aparecem (um escudo cai de ~110 KB para ~5 KB), a conexão com a ESPN abre enquanto o app carrega, e o dia anterior e o seguinte são buscados quando o celular fica ocioso (não com economia de dados ligada).
 
+### Kings League (no app e na pasta `docs/`)
+- **Kings League Brasil**, o **Mundial da Kings** (Kings World Cup de clubes) e o **Mundial de Seleções**, no chip **Kings League** e na lista "Todos".
+- **Jogo:** o placar, o de cada tempo, os pênaltis (Shootouts), a rodada e o grupo, e o botão **Assistir no YouTube** quando a liga publica o vídeo.
+- **Página da liga:** os jogos por rodada (abre na rodada atual) e a **classificação** dos grupos, calculada pelo regulamento: cada vitória vale um ponto, inclusive nos pênaltis; os jogos do Challenger não contam; desempate pelo confronto direto, depois saldo e gols.
+- **De onde vem:** o robô (`robo/kings.py`) lê a página de cada competição no site oficial ([kingsleague.pro](https://kingsleague.pro)), que traz os dados embutidos, e grava `kings.json`. As páginas de cada jogo ficam de fora (o robots.txt do site não deixa). Ele roda junto com o robô diário e, nas noites de jogo (segunda, 17h às 21h40, e domingo à tarde, nas finais), a cada 20 minutos pelo workflow `kings.yml`. O placar aparece com esse atraso: não é ao vivo minuto a minuto.
+
 ### Onde assistir no Brasil
 Cada jogo mostra os canais. A informação vem do `transmissoes.json`, em duas camadas:
 1. **Grade confirmada:** jogos anotados um a um, a partir das grades que as emissoras divulgam (aparece com o selo "Grade confirmada").
@@ -207,6 +213,7 @@ Scoresports-pessoal2/
 ├── boxe_eventos.json   # agenda de boxe (editável)
 ├── campeoes.json      # últimos campeões de cada competição (editável)
 ├── fotos.json         # índice de fotos dos jogadores brasileiros (o robô monta)
+├── kings.json         # Kings League: temporadas, times e jogos (o robô monta)
 ├── placar_nba.py       # script de terminal: placar do dia
 ├── box_score.py        # script de terminal: box score de um jogo
 ├── classificacao.py    # script de terminal: classificação das conferências
@@ -235,6 +242,8 @@ Scoresports-pessoal2/
     ├── visual_regras.js # regras das telas inspiradas no Sofascore (autores dos gols, forma, mini-classificação, temporada)
     ├── liga_regras.js   # regras da página da liga (temporada, destaques, números da temporada, maior campeão, divisões)
     ├── liga.js          # página da liga: cabeçalho e aba Detalhes
+    ├── kings_regras.js  # regras da Kings League (estado do jogo, pênaltis, classificação pelo regulamento)
+    ├── kings.js         # Kings League: lista do dia, jogo e página da liga
     └── fontes/         # fonte Inter (licença SIL OFL)
 celular/
 ├── direto.js          # faz no celular o que o Python faz no PC
@@ -362,6 +371,7 @@ A temporada da NBA é definida pela constante `TEMPORADA` (por exemplo, `"2026-2
 | Telas e dados no APK | o app baixa do GitHub Pages ao abrir e usa na próxima abertura |
 | Campeões (`campeoes.json`) | o robô diário lê na ESPN quem ganhou cada temporada encerrada |
 | Canais de TV e streaming (`transmissoes.json` > `jogos`) | o robô lê o guia de TV, o futebolnatv (dia e ligas) e a lista do mês da NBA, às 7h e às 15h |
+| Kings League (`kings.json`) | o robô lê o kingsleague.pro duas vezes por dia e a cada 20 min nas noites de jogo |
 | Fotos dos jogadores brasileiros (`fotos.json`) | o robô procura no TheSportsDB a foto de cada jogador da Série A e da Série B (até 240 por rodada; revê a cada 60 dias) |
 | Lutas grandes de boxe (`boxe_eventos.json`) | o robô diário lê as fichas das lutas na Wikipédia (categorias "AAAA boxing matches"): acrescenta as lutas marcadas e completa os resultados |
 | Temporada da NBA no PC | calculada pela data (`temporada.py`) |
@@ -380,6 +390,7 @@ Para testar o robô sem gravar nada: `python -m robo --seco`.
 - A Globo transmite só 15 dos 24 GPs de F1 em TV aberta, e quais são varia. O padrão aponta SporTV e Globoplay, que passam todos.
 - A agenda de boxe fica no arquivo `boxe_eventos.json`. O robô acrescenta as lutas grandes que têm artigo na Wikipédia; as menores continuam à mão. O perfil dos lutadores depende de a Wikipédia ter uma página sobre eles.
 - Os favoritos ficam guardados no navegador: em outro navegador ou celular eles começam vazios.
+- Troca de dia: cada liga só é pedida à ESPN nos dias em que o calendário dela tem jogo (o calendário fica guardado 6 h), e cada dia já pedido fica na memória por um tempo curto. Num dia que nunca foi aberto, a lista pede cerca de metade do que pedia antes.
 - Versão nova: o app Android baixa as telas novas ao abrir e, quando você sai e volta para ele, recarrega na versão nova (na mesma página). Na versão do navegador, o mesmo acontece quando o service worker novo assume.
 - O técnico do time vem da Wikidata, e alguns clubes não são achados lá com segurança: aí ele não aparece.
 - No futebol, a artilharia e as assistências vêm num pedido só (e valem para as copas, como a Libertadores); os cartões e as outras categorias chegam logo depois, pelo Core API.

@@ -1,0 +1,52 @@
+# Kings League nas noites de jogo: o robô diário roda só duas vezes por dia, e um jogo da Kings dura
+# uns 40 minutos. Nas segundas à noite (Kings Cup Brazil, 17h às 21h de Brasília) e nos domingos à tarde
+# (finais), este workflow lê o site oficial a cada 20 minutos e publica o placar novo no Pages.
+# O GitHub pode atrasar os horários agendados em alguns minutos.
+name: Kings League (noites de jogo)
+
+on:
+  schedule:
+    - cron: "*/20 20-23 * * 1" # segunda, 17h às 20h40 de Brasília
+    - cron: "*/20 0 * * 2" # segunda, 21h às 21h40 de Brasília (já é terça no UTC)
+    - cron: "*/20 14-20 * * 0" # domingo, 11h às 17h40 de Brasília (finais)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: robo # a mesma fila do robô diário: os dois nunca publicam ao mesmo tempo
+  cancel-in-progress: false
+
+jobs:
+  kings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o projeto
+        uses: actions/checkout@v4
+
+      - name: Instalar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Ler a Kings League
+        run: python -m robo.kings
+
+      - name: Publicar se o placar mudou
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! git diff --quiet -- kings.json; then
+            python gerar_celular.py
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add kings.json docs
+            git commit -m "Robô: Kings League ($(date -u +%Y-%m-%d\ %H:%M))"
+            git pull --rebase -q || true
+            git push
+            gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "aviso: não consegui pedir a publicação do Pages"
+          else
+            echo "Nada novo."
+          fi

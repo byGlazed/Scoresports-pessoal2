@@ -20,7 +20,7 @@ const Rotas = (() => {
     evento: ["esporte", "liga", "id"],
   };
 
-  const ORDEM_ESPORTES = ["futebol", "nba", "nfl", "mlb", "nhl", "f1", "ufc", "boxe", "esports"];
+  const ORDEM_ESPORTES = ["futebol", "nba", "nfl", "mlb", "nhl", "f1", "ufc", "boxe", "esports", "kings"];
   const CHIPS_ESPORTE = [
     ["todos", "Todos"],
     ["futebol", "Futebol"],
@@ -32,6 +32,7 @@ const Rotas = (() => {
     ["ufc", "UFC"],
     ["boxe", "Boxe"],
     ["esports", "E-sports"],
+    ["kings", "Kings League"],
   ];
 
   const raiz = (aba) => ({ tipo: aba, params: {} });

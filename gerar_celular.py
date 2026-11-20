@@ -22,8 +22,8 @@ from pathlib import Path
 RAIZ = Path(__file__).parent
 DOCS = RAIZ / "docs"
 APK_WWW = RAIZ / "android" / "app" / "src" / "main" / "assets" / "www"
-TELAS = ("nba_quadra.js", "notas_regras.js", "campinho_regras.js", "esports_regras.js", "fotos_regras.js", "visual_regras.js", "liga_regras.js", "rotas.js", "app.js", "esportes.js", "fotos.js", "campinho.js", "esports.js", "liga.js", "busca_regras.js", "inicio.js", "chave_regras.js", "navegacao.js", "chave.js", "style.css")
-DADOS = ("transmissoes.json", "boxe_eventos.json", "campeoes.json", "fotos.json")
+TELAS = ("nba_quadra.js", "notas_regras.js", "campinho_regras.js", "esports_regras.js", "fotos_regras.js", "visual_regras.js", "liga_regras.js", "kings_regras.js", "rotas.js", "app.js", "esportes.js", "fotos.js", "campinho.js", "esports.js", "liga.js", "kings.js", "busca_regras.js", "inicio.js", "chave_regras.js", "navegacao.js", "chave.js", "style.css")
+DADOS = ("transmissoes.json", "boxe_eventos.json", "campeoes.json", "fotos.json", "kings.json")
 APK_MINIMO = RAIZ / "celular" / "apk_minimo.txt"  # menor versionCode de APK que as telas atuais aceitam
 
 CABECA_CELULAR = """  <link rel="manifest" href="./manifest.webmanifest">
