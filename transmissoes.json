@@ -739,19 +739,6 @@
     },
     {
       "esporte": "futebol",
-      "data": "2026-11-20",
-      "times": [
-        "Bayern Munich",
-        "Colônia"
-      ],
-      "canais": [
-        "SporTV"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
       "data": "2026-11-23",
       "times": [
         "Santos",
