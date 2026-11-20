@@ -98,7 +98,9 @@ async function kingsLista(silencioso) {
     marcarAtual(lista(), st.jogoAtual);
   };
   desenhar();
-  if (todos.some((j) => j.estado === 2)) agendar("lista", () => kingsLista(true), 60000);
+  // com jogo ao vivo o placar vem do repasse (30 s); perto da hora, confere a cada minuto
+  if (todos.some((j) => j.estado === 2)) agendar("lista", () => kingsLista(true), 30000);
+  else if (comps.some((c) => Kings.temJogoPerto(c, Date.now()))) agendar("lista", () => kingsLista(true), 60000);
 }
 
 /** A página do jogo: o placar, o de cada tempo, os pênaltis, a rodada e o vídeo no YouTube. */
@@ -149,7 +151,7 @@ async function kingsPartida(liga, id, silencioso, jogoLista) {
   );
   if (j.estado === 3 && j.penaltis) partes.push(h("p", { class: "nota" }, "Na Kings League o empate vai para os pênaltis (Shootouts), e os gols da disputa não entram no placar."));
   detalhe().replaceChildren(...partes);
-  if (j.estado === 2) agendar("detalhe", () => kingsPartida(liga, id, true, j), 60000);
+  if (j.estado === 2) agendar("detalhe", () => kingsPartida(liga, id, true, j), 30000);
 }
 
 /** A aba Jogos da liga: todos os jogos da temporada, por rodada; abre na rodada atual. */
@@ -232,15 +234,68 @@ async function kingsClassificacao(liga) {
   );
 }
 
+/** A aba Artilharia: os 3 primeiros em gols, assistências, defesas, MVP e dribles (o site da liga só mostra estes). */
+async function kingsArtilharia(liga) {
+  const tk = novoTokenLista();
+  lista().replaceChildren(carregando());
+  let comps;
+  try {
+    comps = await api("/kings");
+  } catch (erro) {
+    if (tk === S.tkLista) lista().replaceChildren(caixaErro(erro, () => kingsArtilharia(liga)));
+    return;
+  }
+  if (tk !== S.tkLista) return;
+  const comp = comps.find((c) => c.id === liga);
+  const categorias = (comp && comp.destaques) || [];
+  if (!categorias.length) {
+    lista().replaceChildren(vazio("A Kings League ainda não publicou as estatísticas desta temporada."));
+    return;
+  }
+  const time = (id) => (comp.times || {})[id] || {};
+  lista().replaceChildren(
+    h(
+      "div",
+      { class: "grade-cartoes" },
+      categorias.map((c) =>
+        cartao(
+          c.nome,
+          h(
+            "ol",
+            { class: "ranking" },
+            c.lideres.map((l, i) =>
+              h(
+                "li",
+                null,
+                h("span", { class: "lugar" }, i + 1),
+                h(
+                  "span",
+                  { class: "kings-jogador" },
+                  l.foto ? h("span", { class: "kings-foto recorte" }, h("img", { src: l.foto, alt: "", loading: "lazy" })) : h("span", { class: "kings-foto" }),
+                  h("span", null, h("strong", null, l.nome), h("div", { class: "sub" }, h("span", { class: "time-celula" }, imgLogo(time(l.time).logo || null), time(l.time).nome || ""), l.jogos ? ` · ${l.jogos} jogos` : ""))
+                ),
+                h("span", { class: "valor" }, l.total ?? "")
+              )
+            )
+          )
+        )
+      )
+    ),
+    h("p", { class: "nota" }, "O site da Kings League mostra os 3 primeiros de cada estatística. Os autores de cada gol aparecem só na página de cada jogo do site, que ele não deixa ler automaticamente.")
+  );
+}
+
 registrarModulo("kings", {
   abas: () => [
     { id: "jogos", nome: "Jogos" },
     { id: "classificacao", nome: "Classificação" },
+    { id: "artilharia", nome: "Artilharia" },
   ],
   desenhar(esp, aba) {
     const st = estadoDe("kings");
     const liga = st.liga && st.liga !== "todas" ? st.liga : esp.ligas[0].id;
     if (aba === "classificacao") return kingsClassificacao(liga);
+    if (aba === "artilharia") return kingsArtilharia(liga);
     return kingsJogosDaLiga(liga);
   },
 });

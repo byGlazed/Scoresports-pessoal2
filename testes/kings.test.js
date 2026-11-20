@@ -65,3 +65,19 @@ test("jogos do dia (horário de Brasília) e o próximo jogo", () => {
   const prox = Kings.proximoJogo(comp, "2026-11-20T12:00:00Z");
   assert.equal(prox.rodada, "Quartas de final");
 });
+
+test("ao vivo: só pergunta ao repasse com jogo perto da hora, e junta sem perder os destaques", () => {
+  const c = { jogos: [{ id: 1, inicio: "2026-11-23T21:00:00.000Z", status: null }, { id: 2, inicio: "2026-11-16T20:00:00.000Z", status: "ended" }] };
+  assert.equal(Kings.temJogoPerto(c, Date.parse("2026-11-23T20:55:00Z")), true); // começa em 5 min
+  assert.equal(Kings.temJogoPerto(c, Date.parse("2026-11-23T23:30:00Z")), true); // começou há 2 h 30 e não acabou
+  assert.equal(Kings.temJogoPerto(c, Date.parse("2026-11-23T19:00:00Z")), false); // falta muito
+  assert.equal(Kings.temJogoPerto(c, Date.parse("2026-11-24T03:00:00Z")), false); // passou demais
+  const robo = { nome: "Kings League Brasil", logo: "l.png", destaques: [{ nome: "Gols" }], times: { 1: { nome: "A" } }, jogos: c.jogos, temporada: "T" };
+  const vivo = { temporada: "T", encerrada: false, times: { 2: { nome: "B" } }, jogos: [{ id: 1, status: "live", placar: [2, 1] }] };
+  const junto = Kings.juntarAoVivo(robo, vivo);
+  assert.equal(junto.destaques[0].nome, "Gols");
+  assert.equal(junto.logo, "l.png");
+  assert.deepEqual(Object.keys(junto.times).sort(), ["1", "2"]);
+  assert.equal(junto.jogos[0].status, "live");
+  assert.equal(Kings.juntarAoVivo(robo, { jogos: [] }).jogos, robo.jogos); // repasse sem jogos: fica o do robô
+});

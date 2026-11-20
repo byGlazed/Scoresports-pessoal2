@@ -1,10 +1,12 @@
-// Repasse (proxy) gratuito na Cloudflare. Faz duas coisas:
+// Repasse (proxy) gratuito na Cloudflare. Faz três coisas:
 //
 // 1. ESPN e Wikipédia por ?url= (para o caso de a ESPN bloquear o navegador do celular).
 //    Ex.: https://SEU-WORKER.workers.dev/?url=https://site.api.espn.com/...
 // 2. E-sports pela PandaScore por /pandascore/<caminho>, com a chave guardada como SEGREDO do worker.
 //    Ex.: https://SEU-WORKER.workers.dev/pandascore/csgo/matches/running
 //    A chave nunca fica neste arquivo, no app nem no GitHub: só no segredo PANDASCORE_TOKEN.
+// 3. Kings League ao vivo por /kings/<competição> (brazil, world-cup ou kwc-nations): lê a página da
+//    competição no kingsleague.pro e devolve só os jogos e os times. Ex.: https://SEU-WORKER.workers.dev/kings/brazil
 //
 // Como configurar (uma vez só, sem cartão):
 // 1. Em https://dash.cloudflare.com, abra Workers & Pages e o seu worker (ou Create > Worker).
@@ -48,6 +50,90 @@ function respostaGuardada(item, ttl) {
   });
 }
 
+/* ---------- Kings League ao vivo: /kings/<competição> ---------- */
+// O robô do GitHub lê o site oficial a cada 20 min nas noites de jogo; o app, durante um jogo, pede aqui.
+// Só a página da competição (liberada no robots.txt do site), nunca a de cada jogo, e guardada 30 s.
+
+export const COMPETICOES_KINGS = /^(brazil|world-cup|kwc-nations)$/;
+const EMBRULHOS_NUXT = ["Reactive", "ShallowReactive", "Ref", "ShallowRef", "NuxtError"];
+
+/** O payload do Nuxt (uma lista em que cada valor aponta para outros pelo índice) como objeto. Igual ao robo/kings.py. */
+export function decodificarNuxt(html) {
+  const m = /<script[^>]*id="__NUXT_DATA__"[^>]*>([\s\S]*?)<\/script>/.exec(html || "");
+  if (!m) return null;
+  const lista = JSON.parse(m[1]);
+  const valor = (i, prof = 0) => {
+    if (prof > 60 || !Number.isInteger(i) || i < 0 || i >= lista.length) return null;
+    const v = lista[i];
+    if (Array.isArray(v)) {
+      if (typeof v[0] === "string") {
+        if (EMBRULHOS_NUXT.includes(v[0])) return v.length > 1 ? valor(v[1], prof + 1) : null;
+        if (v[0] === "EmptyRef" || v[0] === "EmptyShallowRef") return null;
+        if (v[0] === "Date") return v[1];
+        if (v[0] === "Set" || v[0] === "Map") return v.slice(1).map((x) => valor(x, prof + 1));
+      }
+      return v.map((x) => valor(x, prof + 1));
+    }
+    if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, valor(x, prof + 1)]));
+    return v;
+  };
+  return valor(0);
+}
+
+/** A temporada, os times e os jogos da página (o mesmo formato do kings.json do robô, sem os destaques). */
+export function competicaoKings(dados) {
+  const loja = ((dados && dados.pinia) || {}).competitionStore || {};
+  const temporada = loja.currentSeason || {};
+  const times = {};
+  for (const t of loja.currentSeasonTeams || []) {
+    if (t && t.id !== null && t.id !== undefined) times[String(t.id)] = { nome: t.name ?? null, sigla: t.shortName ?? null, logo: (t.logo && t.logo.url) || null };
+  }
+  const turnos = Object.values((dados && dados.data) || {}).find((v) => Array.isArray(v) && v[0] && typeof v[0] === "object" && "matches" in v[0]) || [];
+  const par = (p, a, b) => (p[a] !== null && p[a] !== undefined) || (p[b] !== null && p[b] !== undefined) ? [p[a] ?? null, p[b] ?? null] : null;
+  const jogos = [];
+  for (const turno of turnos) {
+    for (const m of turno.matches || []) {
+      const p = m.scores || {};
+      const lados = m.participants || {};
+      jogos.push({
+        id: m.id,
+        rodada: turno.turnName ?? null,
+        grupo: m.groupName ?? null,
+        inicio: m.date ?? null,
+        status: m.status ?? null,
+        minuto: m.currentMinute ?? null,
+        casa: String(lados.homeTeamId),
+        fora: String(lados.awayTeamId),
+        placar: par(p, "homeScore", "awayScore"),
+        tempos: [par(p, "homeScore1T", "awayScore1T"), par(p, "homeScore2T", "awayScore2T")].filter(Boolean),
+        penaltis: par(p, "homeScoreP", "awayScoreP"),
+        video: (m.metaInformation && m.metaInformation.youtube_url) || null,
+      });
+    }
+  }
+  return { temporada: temporada.name ?? null, encerrada: Boolean(temporada.finished), times, jogos };
+}
+
+async function kings(url) {
+  const slug = url.pathname.slice("/kings/".length);
+  if (!COMPETICOES_KINGS.test(slug)) return texto("Competição da Kings League não permitida.", 400);
+  const chave = `kings:${slug}`;
+  const guardado = MEMORIA.get(chave);
+  if (guardado && guardado.ate > Date.now()) return respostaGuardada(guardado, 30);
+  const resposta = await fetch(`https://kingsleague.pro/pt/${slug}`, { headers: { "User-Agent": "Mozilla/5.0 (compatible; scoresports-robo)", Accept: "text/html" } });
+  if (!resposta.ok) return texto(`A Kings League respondeu ${resposta.status}.`, 502);
+  let corpo;
+  try {
+    corpo = JSON.stringify(competicaoKings(decodificarNuxt(await resposta.text())));
+  } catch (_) {
+    return texto("A página da Kings League mudou de formato.", 502);
+  }
+  const item = { corpo, status: 200, tipo: "application/json; charset=utf-8" };
+  if (MEMORIA.size >= MAXIMO_NA_MEMORIA) MEMORIA.delete(MEMORIA.keys().next().value);
+  MEMORIA.set(chave, { ...item, ate: Date.now() + 30000 });
+  return respostaGuardada(item, 30);
+}
+
 async function pandascore(url, env) {
   const caminho = url.pathname.slice("/pandascore/".length);
   if (!CAMINHOS_PANDASCORE.test(caminho)) return texto("Caminho da PandaScore não permitido.", 400);
@@ -77,6 +163,7 @@ export default {
 
     const url = new URL(pedido.url);
     if (url.pathname.startsWith("/pandascore/")) return pandascore(url, env);
+    if (url.pathname.startsWith("/kings/")) return kings(url);
 
     const alvo = url.searchParams.get("url");
     if (!alvo || !PERMITIDOS.test(alvo)) return texto("Endereço não permitido.", 400);

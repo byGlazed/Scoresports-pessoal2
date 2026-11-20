@@ -840,6 +840,143 @@
           "penaltis": null,
           "video": null
         }
+      ],
+      "destaques": [
+        {
+          "codigo": "GOL",
+          "nome": "Gols",
+          "lideres": [
+            {
+              "nome": "Lucas 'L7'",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/8df12a8f-2da2-4dda-a27e-a7e9b5f579a2/323585831.png",
+              "time": "161",
+              "total": 11,
+              "jogos": 5
+            },
+            {
+              "nome": "Leleti Garcia",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/6787dbc2-03cf-4eac-ba78-140a451be856/112058223.png",
+              "time": "50",
+              "total": 9,
+              "jogos": 4
+            },
+            {
+              "nome": "Well Andrade",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/82a9a377-242b-404a-995c-f032c69e7d7b/792416858.png",
+              "time": "220",
+              "total": 6,
+              "jogos": 5
+            }
+          ]
+        },
+        {
+          "codigo": "ASS-V",
+          "nome": "Assistências",
+          "lideres": [
+            {
+              "nome": "Lipão Pinheiro",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/220bb879-7140-4d7b-a870-0e284a586d8a/56820528.png",
+              "time": "50",
+              "total": 5,
+              "jogos": 5
+            },
+            {
+              "nome": "Yan 'Coringa'",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/91afd4a8-a36c-4e04-a715-7efb690ef393/791842229.png",
+              "time": "164",
+              "total": 5,
+              "jogos": 5
+            },
+            {
+              "nome": "Cristhian 'Canhoto'",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/a86f7252-4915-4c81-84d6-c921e13435b1/783747908.png",
+              "time": "161",
+              "total": 4,
+              "jogos": 3
+            }
+          ]
+        },
+        {
+          "codigo": "PRT",
+          "nome": "Defesas",
+          "lideres": [
+            {
+              "nome": "Marcos 'Bolivia'",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/aba41a19-155a-4160-ad93-3b3c21a54c84/438979329.png",
+              "time": "167",
+              "total": 51,
+              "jogos": 5
+            },
+            {
+              "nome": "Clebinho Silva",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/cc327d38-3d28-4d98-876e-5564c64a93eb/876329434.png",
+              "time": "50",
+              "total": 48,
+              "jogos": 5
+            },
+            {
+              "nome": "Esaú Assunção",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/ca99c79b-a909-475e-bb92-2589c7f24595/754811713.png",
+              "time": "162",
+              "total": 46,
+              "jogos": 5
+            }
+          ]
+        },
+        {
+          "codigo": "MVP",
+          "nome": "MVP",
+          "lideres": [
+            {
+              "nome": "Lucas 'L7'",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/8df12a8f-2da2-4dda-a27e-a7e9b5f579a2/323585831.png",
+              "time": "161",
+              "total": 3,
+              "jogos": 5
+            },
+            {
+              "nome": "Aleix Martí",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/873ec32b-c5ff-4941-a668-89ccb16cf395/708337043.png",
+              "time": "49",
+              "total": 2,
+              "jogos": 5
+            },
+            {
+              "nome": "Lipão Pinheiro",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/220bb879-7140-4d7b-a870-0e284a586d8a/56820528.png",
+              "time": "50",
+              "total": 2,
+              "jogos": 5
+            }
+          ]
+        },
+        {
+          "codigo": "DRB",
+          "nome": "Dribles",
+          "lideres": [
+            {
+              "nome": "Caio Henrique",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/30cfd511-1d50-4071-847a-46dfa3698ff0/401072714.png",
+              "time": "167",
+              "total": 35,
+              "jogos": 5
+            },
+            {
+              "nome": "Lucas 'L7'",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/8df12a8f-2da2-4dda-a27e-a7e9b5f579a2/323585831.png",
+              "time": "161",
+              "total": 23,
+              "jogos": 5
+            },
+            {
+              "nome": "Ton 'Spider'",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/65705fc1-cc5c-4370-abee-8bfeae7145dc/188729806.png",
+              "time": "220",
+              "total": 20,
+              "jogos": 5
+            }
+          ]
+        }
       ]
     },
     "world-cup": {
@@ -1672,6 +1809,143 @@
           ],
           "penaltis": null,
           "video": null
+        }
+      ],
+      "destaques": [
+        {
+          "codigo": "GOL",
+          "nome": "Gols",
+          "lideres": [
+            {
+              "nome": "Kelvin Oliveira",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/a28beb82-490e-458d-b228-81c62220f91b/161561183.png",
+              "time": "49",
+              "total": 14,
+              "jogos": 5
+            },
+            {
+              "nome": "Aleix Martí",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/6696a9f4-d2f2-44c5-b6a7-44d19fb987ae/655078537.png",
+              "time": "7",
+              "total": 11,
+              "jogos": 4
+            },
+            {
+              "nome": "Lipão Pinheiro",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/5bb15b9c-e438-435f-ab5e-a2c4f1ceacce/755374587.png",
+              "time": "50",
+              "total": 11,
+              "jogos": 4
+            }
+          ]
+        },
+        {
+          "codigo": "ASS-V",
+          "nome": "Assistências",
+          "lideres": [
+            {
+              "nome": "Leleti Garcia",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/c26def52-4c3a-4778-aa82-228b2f1fcdc1/210222464.png",
+              "time": "50",
+              "total": 4,
+              "jogos": 4
+            },
+            {
+              "nome": "Matheus Rufino",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/f8aea16e-4b09-4bd4-8e7f-fa43f0491123/331181722.png",
+              "time": "49",
+              "total": 4,
+              "jogos": 5
+            },
+            {
+              "nome": "Matteo Perrotti",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/174d37e6-8fb6-411c-a0e7-ec8782da00c5/775470566.png",
+              "time": "93",
+              "total": 4,
+              "jogos": 3
+            }
+          ]
+        },
+        {
+          "codigo": "PRT",
+          "nome": "Defesas",
+          "lideres": [
+            {
+              "nome": "Vittorio Gilli",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/47563bf3-ff92-48b9-abcf-eab683d23137/211184579.png",
+              "time": "90",
+              "total": 54,
+              "jogos": 6
+            },
+            {
+              "nome": "Samuele Guddo",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/241f380a-894f-430b-a2a6-83c251a8d3d3/282989281.png",
+              "time": "59",
+              "total": 26,
+              "jogos": 3
+            },
+            {
+              "nome": "Mame Cheikh",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/0c950ec6-938e-4a00-b975-1334e52a96ad/179448312.png",
+              "time": "195",
+              "total": 26,
+              "jogos": 3
+            }
+          ]
+        },
+        {
+          "codigo": "MVP",
+          "nome": "MVP",
+          "lideres": [
+            {
+              "nome": "Aleix Martí",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/6696a9f4-d2f2-44c5-b6a7-44d19fb987ae/655078537.png",
+              "time": "7",
+              "total": 3,
+              "jogos": 4
+            },
+            {
+              "nome": "Lipão Pinheiro",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/5bb15b9c-e438-435f-ab5e-a2c4f1ceacce/755374587.png",
+              "time": "50",
+              "total": 3,
+              "jogos": 4
+            },
+            {
+              "nome": "Kelvin Oliveira",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/a28beb82-490e-458d-b228-81c62220f91b/161561183.png",
+              "time": "49",
+              "total": 2,
+              "jogos": 5
+            }
+          ]
+        },
+        {
+          "codigo": "DRB",
+          "nome": "Dribles",
+          "lideres": [
+            {
+              "nome": "David Loaiza",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/1f281f78-1fa5-4f28-a19b-60c5f9e1dc81/616722110.png",
+              "time": "37",
+              "total": 20,
+              "jogos": 4
+            },
+            {
+              "nome": "Alessandro Colombo",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/d39b0eb0-f422-4992-af31-20f275c6de38/654834796.png",
+              "time": "59",
+              "total": 18,
+              "jogos": 3
+            },
+            {
+              "nome": "Christian Ronchi",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/e1b83ff1-97dd-4d77-9d0b-aa2f0f3046f6/122549170.png",
+              "time": "90",
+              "total": 18,
+              "jogos": 6
+            }
+          ]
         }
       ]
     },
@@ -2872,6 +3146,116 @@
           ],
           "penaltis": null,
           "video": "https://www.youtube.com/watch?v=NACOBcAKh1A"
+        }
+      ],
+      "destaques": [
+        {
+          "codigo": "GOL",
+          "nome": "Gols",
+          "lideres": [
+            {
+              "nome": "Lipão Pinheiro",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/fc8ad73b-eb44-4f1b-afe2-0df3cd2b8825/230378318.png",
+              "time": "159",
+              "total": 14,
+              "jogos": 7
+            },
+            {
+              "nome": "Kelvin Oliveira",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/7dc735ed-f522-4111-9033-16caf84333d5/691402357.png",
+              "time": "159",
+              "total": 12,
+              "jogos": 7
+            },
+            {
+              "nome": "Gabriel Costa",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/81c77bdb-195b-43e7-b1bd-e02b2fcdce88/988389170.png",
+              "time": "155",
+              "total": 10,
+              "jogos": 5
+            }
+          ]
+        },
+        {
+          "codigo": "ASS-V",
+          "nome": "Assistências",
+          "lideres": [
+            {
+              "nome": "Mathías Vidangossy",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/989f1f16-95d0-46af-9182-a4a5f881e8cd/631652087.png",
+              "time": "202",
+              "total": 8,
+              "jogos": 6
+            },
+            {
+              "nome": "Angellot Caro",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/51e72ffd-78f9-4dc3-91ef-6866d200f5a2/839520814.png",
+              "time": "148",
+              "total": 5,
+              "jogos": 3
+            },
+            {
+              "nome": "Obed Martínez",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/0c84573a-2659-4d62-b944-0c8778384895/144303419.png",
+              "time": "144",
+              "total": 5,
+              "jogos": 5
+            }
+          ]
+        },
+        {
+          "codigo": "MVP",
+          "nome": "MVP",
+          "lideres": [
+            {
+              "nome": "Kelvin Oliveira",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/7dc735ed-f522-4111-9033-16caf84333d5/691402357.png",
+              "time": "159",
+              "total": 4,
+              "jogos": 7
+            },
+            {
+              "nome": "José Askenazi",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/c3e9072b-6393-46f5-9a1b-2965b22ec66b/21624124.png",
+              "time": "144",
+              "total": 3,
+              "jogos": 5
+            },
+            {
+              "nome": "Nadir Louah",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/24602141-be72-488b-8c92-136b445c1684/501091198.png",
+              "time": "145",
+              "total": 2,
+              "jogos": 3
+            }
+          ]
+        },
+        {
+          "codigo": "DRB",
+          "nome": "Dribles",
+          "lideres": [
+            {
+              "nome": "Amar Cekic",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/39b0a230-5b39-433d-9a25-f35f654d893d/252883673.png",
+              "time": "153",
+              "total": 19,
+              "jogos": 4
+            },
+            {
+              "nome": "Leleti Garcia",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/seasonTeamPlayer/f3bbee42-d298-40d1-98db-3c0b1244987c/989058255.png",
+              "time": "159",
+              "total": 15,
+              "jogos": 7
+            },
+            {
+              "nome": "Lipão Pinheiro",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/fc8ad73b-eb44-4f1b-afe2-0df3cd2b8825/230378318.png",
+              "time": "159",
+              "total": 13,
+              "jogos": 7
+            }
+          ]
         }
       ]
     }

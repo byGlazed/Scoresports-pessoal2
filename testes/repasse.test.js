@@ -108,3 +108,75 @@ test("tempos da memória", async () => {
   assert.equal(mod.ttlPandascore("valorant/matches/upcoming"), 120);
   assert.equal(mod.ttlPandascore("csgo/matches"), 120);
 });
+
+// a página da competição como o kingsleague.pro manda: o payload do Nuxt (lista com índices)
+function paginaKings() {
+  const payload = [
+    ["ShallowReactive", 1],
+    { data: 2, pinia: 9 },
+    { $fturnos: 3 },
+    [4],
+    { id: 5, turnName: 6, matches: 7 },
+    681,
+    "Matchday 1",
+    [8],
+    { id: 15, date: 16, status: 17, currentMinute: 18, groupName: 19, participants: 20, scores: 23, metaInformation: 27 },
+    { competitionStore: 10 },
+    { currentSeason: 11, currentSeasonTeams: 12 },
+    { name: 29, finished: 30 },
+    [13, 14],
+    { id: 31, name: 32, shortName: 33, logo: -1 },
+    { id: 34, name: 35, shortName: 36 },
+    2851,
+    "2026-11-23T21:00:00.000Z",
+    "live",
+    12,
+    "Playoffs",
+    { homeTeamId: 21, awayTeamId: 22 },
+    164,
+    168,
+    { homeScore: 24, awayScore: 25, homeScore1T: 24, awayScore1T: 26 },
+    3,
+    1,
+    0,
+    { youtube_url: 28 },
+    "https://www.youtube.com/watch?v=x",
+    "Kings Cup Brazil 2026/27",
+    false,
+    164,
+    "Podpah Funkbol Clube",
+    "FNK",
+    168,
+    "DesimpaiN",
+    "DEP",
+  ];
+  return `<html><script type="application/json" id="__NUXT_DATA__" data-ssr="true">${JSON.stringify(payload)}</script></html>`;
+}
+
+test("/kings/<competição> lê a página da liga e devolve só os jogos e os times (ao vivo)", async () => {
+  const { worker, pedidos } = await novoWorker(() => new Response(paginaKings(), { status: 200, headers: { "content-type": "text/html" } }));
+  const r = await worker.fetch(new Request("https://x.workers.dev/kings/brazil"), ENV);
+  assert.equal(r.status, 200);
+  assert.equal(pedidos[0].url, "https://kingsleague.pro/pt/brazil");
+  assert.equal(r.headers.get("Access-Control-Allow-Origin"), "*");
+  const d = await r.json();
+  assert.equal(d.temporada, "Kings Cup Brazil 2026/27");
+  assert.deepEqual(d.times["164"], { nome: "Podpah Funkbol Clube", sigla: "FNK", logo: null });
+  const j = d.jogos[0];
+  assert.deepEqual([j.id, j.status, j.minuto, j.casa, j.fora, j.rodada, j.grupo], [2851, "live", 12, "164", "168", "Matchday 1", "Playoffs"]);
+  assert.deepEqual(j.placar, [3, 1]);
+  assert.deepEqual(j.tempos, [[3, 0]]);
+  assert.equal(j.video, "https://www.youtube.com/watch?v=x");
+  // de novo logo depois: vem da memória, sem novo pedido ao site
+  await worker.fetch(new Request("https://x.workers.dev/kings/brazil"), ENV);
+  assert.equal(pedidos.length, 1);
+});
+
+test("/kings/ só aceita as competições da lista (nada de página de jogo)", async () => {
+  const { worker, pedidos } = await novoWorker();
+  for (const caminho of ["/kings/brazil/jogos/2851-fnk-vs-nyv", "/kings/../pt", "/kings/espana", "/kings/"]) {
+    const r = await worker.fetch(new Request(`https://x.workers.dev${caminho}`), ENV);
+    assert.equal(r.status, 400, caminho);
+  }
+  assert.equal(pedidos.length, 0);
+});

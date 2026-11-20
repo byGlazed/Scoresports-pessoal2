@@ -161,7 +161,21 @@ const Kings = (() => {
       .map(([nome, g]) => ({ nome: /^[A-Z]$/.test(nome) ? `Grupo ${nome}` : nome, linhas: ordenar([...g.linhas.values()], g.jogos) }));
   }
 
-  return { rodadaPt, dataBR, jogoDoApp, doDia, proximoJogo, classificacao };
+  /** Há jogo começando em até 15 min, ou que começou há menos de 3 h e não acabou? Aí vale perguntar ao repasse. */
+  function temJogoPerto(comp, agora) {
+    return (comp.jogos || []).some((j) => {
+      const t = Date.parse(j.inicio || "");
+      return j.status !== "ended" && !Number.isNaN(t) && t - agora <= 15 * 60000 && agora - t <= 3 * 3600000;
+    });
+  }
+
+  /** Os jogos e times do repasse (ao vivo) por cima do que o robô gravou, sem perder os destaques e o escudo. */
+  function juntarAoVivo(robo, vivo) {
+    if (!vivo || !(vivo.jogos || []).length) return robo;
+    return { ...robo, temporada: vivo.temporada || robo.temporada, times: { ...(robo.times || {}), ...(vivo.times || {}) }, jogos: vivo.jogos };
+  }
+
+  return { rodadaPt, dataBR, jogoDoApp, doDia, proximoJogo, classificacao, temJogoPerto, juntarAoVivo };
 })();
 
 if (typeof module !== "undefined") module.exports = Kings;

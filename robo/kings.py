@@ -24,6 +24,8 @@ COMPETICOES = {
     "world-cup": "Mundial da Kings",
     "kwc-nations": "Mundial de Seleções da Kings",
 }
+# as estatísticas da página /estatisticas (o site mostra os 3 primeiros de cada uma)
+ESTATISTICAS = {"GOL": "Gols", "ASS-V": "Assistências", "PRT": "Defesas", "MVP": "MVP", "DRB": "Dribles"}
 _PAYLOAD = re.compile(r'<script[^>]*id="__NUXT_DATA__"[^>]*>(.*?)</script>', re.S)
 _EMBRULHOS = ("Reactive", "ShallowReactive", "Ref", "ShallowRef", "NuxtError")
 
@@ -107,6 +109,27 @@ def extrair(dados):
     }
 
 
+def destaques(dados):
+    """Os 3 primeiros de cada estatística (gols, assistências, defesas, MVP, dribles) da página /estatisticas."""
+    por_codigo = {}
+    for v in ((dados or {}).get("data") or {}).values():
+        if not (isinstance(v, list) and v and isinstance(v[0], dict) and v[0].get("parameterCode") in ESTATISTICAS):
+            continue
+        codigo = v[0]["parameterCode"]
+        lideres = []
+        for e in sorted(v, key=lambda x: x.get("ranking") or 99):
+            jogador = e.get("player") or {}
+            lideres.append({
+                "nome": jogador.get("shortName") or jogador.get("displayName"),
+                "foto": (jogador.get("image") or {}).get("url"),
+                "time": str((e.get("team") or {}).get("id")),
+                "total": e.get("total"),
+                "jogos": e.get("matchesPlayed"),
+            })
+        por_codigo[codigo] = {"codigo": codigo, "nome": ESTATISTICAS[codigo], "lideres": lideres}
+    return [por_codigo[c] for c in ESTATISTICAS if c in por_codigo]
+
+
 def atualizar(arquivo, hoje=None, pegar_texto=None, competicoes=None):
     """Lê a página de cada competição e grava em arquivo["competicoes"]; devolve a lista do que mudou."""
     pegar_texto = pegar_texto or rede.pegar_texto
@@ -128,6 +151,14 @@ def atualizar(arquivo, hoje=None, pegar_texto=None, competicoes=None):
         if not dados or not dados["jogos"]:
             continue  # página fora do ar ou mudou de formato: fica como estava
         dados = {"nome": nome, **dados}
+        # os destaques (artilharia e companhia): sem a página, ficam os que já estavam
+        caminho_est = f"{caminho}/estatisticas"
+        html_est = pegar_texto(f"{BASE}{caminho_est}") if permitido(robots, caminho_est) else None
+        try:
+            lista = destaques(decodificar(html_est)) if html_est else []
+        except (ValueError, TypeError, KeyError):
+            lista = []
+        dados["destaques"] = lista or (guardadas.get(slug) or {}).get("destaques", [])
         if guardadas.get(slug) != dados:
             antes = {j["id"]: (j["status"], j["placar"]) for j in (guardadas.get(slug) or {}).get("jogos", [])}
             novos = sum(1 for j in dados["jogos"] if antes.get(j["id"]) != (j["status"], j["placar"]))

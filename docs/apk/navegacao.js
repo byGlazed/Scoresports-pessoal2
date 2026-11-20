@@ -11,6 +11,52 @@
 
 const PAGINAS = {};
 
+/* ---------- Tema: automático (o do aparelho), claro ou escuro ---------- */
+// No APK o Android diz "escuro" para a página mesmo com o celular no modo claro: o botão do topo escolhe.
+const Tema = {
+  ORDEM: ["auto", "claro", "escuro"],
+  NOMES: { auto: "automático", claro: "claro", escuro: "escuro" },
+  ICONES: {
+    auto: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>',
+    claro: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    escuro: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  },
+  atual() {
+    try {
+      const t = localStorage.getItem("ss:tema");
+      return this.ORDEM.includes(t) ? t : "auto";
+    } catch (_) {
+      return "auto";
+    }
+  },
+  aplicar(t, botao) {
+    if (t === "auto") document.documentElement.removeAttribute("data-tema");
+    else document.documentElement.setAttribute("data-tema", t);
+    if (botao) {
+      botao.innerHTML = this.ICONES[t];
+      botao.setAttribute("aria-label", `Tema: ${this.NOMES[t]}. Tocar para trocar`);
+      botao.title = `Tema ${this.NOMES[t]}`;
+    }
+    // a barra de status do celular acompanha o fundo
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", getComputedStyle(document.documentElement).getPropertyValue("--fundo").trim() || "#0f0f11");
+  },
+  iniciar(botao) {
+    if (!botao) return;
+    this.aplicar(this.atual(), botao);
+    botao.addEventListener("click", () => {
+      const prox = this.ORDEM[(this.ORDEM.indexOf(this.atual()) + 1) % this.ORDEM.length];
+      try {
+        if (prox === "auto") localStorage.removeItem("ss:tema");
+        else localStorage.setItem("ss:tema", prox);
+      } catch (_) {
+        /* sem armazenamento: vale só agora */
+      }
+      this.aplicar(prox, botao);
+    });
+  },
+};
+
 /** def: { titulo(params, pagina) -> string, acoes?(params, pagina) -> Node, desenhar(corpo, params, ativo, pagina), aoMostrar?(corpo, params, pagina) } */
 function registrarPagina(tipo, def) {
   PAGINAS[tipo] = def;
@@ -43,6 +89,7 @@ const Navegacao = {
     });
     $("#voltar-pagina").addEventListener("click", () => this.voltar());
     $("#busca-pagina").addEventListener("click", () => this.trocarAba("pesquisa"));
+    Tema.iniciar($("#tema-pagina"));
     this.mostrar();
   },
 

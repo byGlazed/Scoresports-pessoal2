@@ -118,3 +118,40 @@ class TesteKings(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+ESTATISTICAS = {"data": {
+    "$fgol": [
+        {"id": "KL_GOL_69_161_86914", "parameterCode": "GOL", "total": 11, "matchesPlayed": 5, "ranking": 1,
+         "team": {"id": 161}, "player": {"id": 86914, "shortName": "Lucas 'L7'", "displayName": "L SETE", "image": {"url": "https://cdn/l7.png"}}},
+        {"id": "KL_GOL_69_50_33932", "parameterCode": "GOL", "total": 9, "matchesPlayed": 5, "ranking": 2,
+         "team": {"id": 50}, "player": {"id": 33932, "shortName": "Leleti Garcia", "displayName": "LELETI", "image": None}},
+    ],
+    "$fass": [{"id": "KL_ASS-V_69_50_33918", "parameterCode": "ASS-V", "total": 5, "matchesPlayed": 5, "ranking": 1,
+               "team": {"id": 50}, "player": {"id": 33918, "shortName": "Fulano", "image": {"url": "https://cdn/f.png"}}}],
+    "$foutro": [{"playerId": 68215, "rankingData": []}],
+}}
+
+
+class TesteDestaques(unittest.TestCase):
+    def test_os_3_primeiros_de_cada_estatistica(self):
+        d = K.destaques(ESTATISTICAS)
+        self.assertEqual([c["nome"] for c in d], ["Gols", "Assistências"])
+        gols = d[0]["lideres"]
+        self.assertEqual(gols[0], {"nome": "Lucas 'L7'", "foto": "https://cdn/l7.png", "time": "161", "total": 11, "jogos": 5})
+        self.assertIsNone(gols[1]["foto"])
+        self.assertEqual(K.destaques({"data": {}}), [])
+
+    def test_atualizar_le_tambem_as_estatisticas(self):
+        def pegar_texto(url):
+            if url.endswith("/robots.txt"):
+                return "User-agent: *\nDisallow: */jogos/"
+            if url.endswith("/pt/brazil"):
+                return html_da_pagina()
+            if url.endswith("/pt/brazil/estatisticas"):
+                return html_da_pagina(ESTATISTICAS)
+            return None
+
+        arquivo = {}
+        K.atualizar(arquivo, pegar_texto=pegar_texto, competicoes={"brazil": "Kings League Brasil"})
+        self.assertEqual(arquivo["competicoes"]["brazil"]["destaques"][0]["lideres"][0]["total"], 11)

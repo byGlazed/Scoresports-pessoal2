@@ -27,7 +27,7 @@ DADOS = ("transmissoes.json", "boxe_eventos.json", "campeoes.json", "fotos.json"
 APK_MINIMO = RAIZ / "celular" / "apk_minimo.txt"  # menor versionCode de APK que as telas atuais aceitam
 
 CABECA_CELULAR = """  <link rel="manifest" href="./manifest.webmanifest">
-  <meta name="theme-color" content="#151a24">
+  <meta name="theme-color" content="#0f0f11">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

@@ -7,17 +7,21 @@
 }
 
 /* ---------- Tokens ---------- */
+/* Tema claro (branco com laranja) é o padrão; o escuro (preto com laranja) vale quando o aparelho está no modo
+   escuro ou quando a pessoa escolhe no botão do topo (data-tema="claro" ou "escuro" no <html>, guardado no
+   aparelho). No APK o Android diz "escuro" para a página mesmo com o celular no claro: por isso o botão. */
 :root {
-  --fundo: #eef1f6;
+  --fundo: #f3f3f4;
   --superficie: #ffffff;
-  --superficie-2: #f5f7fb;
-  --superficie-3: #e9edf4;
-  --linha: #dde2ec;
-  --texto: #1b2232;
-  --texto-2: #5d6880;
-  --texto-3: #8a94a8;
-  --marca: #3d5cf0;
-  --marca-suave: rgba(61, 92, 240, 0.1);
+  --superficie-2: #f7f7f8;
+  --superficie-3: #ececee;
+  --linha: #e2e2e6;
+  --texto: #18181b;
+  --texto-2: #5b5b66;
+  --texto-3: #85858f;
+  --marca: #c2410c; /* laranja: 5,2:1 sobre o branco */
+  --marca-suave: rgba(194, 65, 12, 0.1);
+  --texto-sobre-marca: #ffffff;
   --ao-vivo: #e8364c;
   --vitoria: #1f9d5c;
   --texto-sobre-resultado: #fff; /* texto nas placas de vitória, empate e derrota */
@@ -32,7 +36,7 @@
   --nota-azul: #3b4fe0;
   --campo-fundo: #e6f2ea;
   --campo-linha: #c5dccc;
-  --sombra: 0 1px 2px rgba(27, 34, 50, 0.06), 0 2px 8px rgba(27, 34, 50, 0.05);
+  --sombra: 0 1px 2px rgba(24, 24, 27, 0.06), 0 2px 8px rgba(24, 24, 27, 0.05);
   --raio: 10px;
   --raio-pequeno: 6px;
   --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -41,27 +45,51 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --fundo: #151a24;
-    --superficie: #1e2431;
-    --superficie-2: #252c3b;
-    --superficie-3: #2d3546;
-    --linha: #343d51;
-    --texto: #e9edf5;
-    --texto-2: #a2acc0;
-    --texto-3: #7a849a;
-    --marca: #6f8bff;
-    --marca-suave: rgba(111, 139, 255, 0.14);
+  :root:not([data-tema="claro"]) {
+    --fundo: #0f0f11;
+    --superficie: #18181b;
+    --superficie-2: #202024;
+    --superficie-3: #29292e;
+    --linha: #313137;
+    --texto: #f1f1f3;
+    --texto-2: #a8a8b3;
+    --texto-3: #7d7d88;
+    --marca: #ff8a3d; /* laranja: 7,4:1 sobre o fundo */
+    --marca-suave: rgba(255, 138, 61, 0.15);
+    --texto-sobre-marca: #1a0b00;
     --ao-vivo: #ff5a6e;
     --vitoria: #3ccf86;
     --texto-sobre-resultado: #0b1220; /* as cores do tema escuro são claras: texto escuro por cima */
     --derrota: #ff6a7d;
     --empate: #e0b43d;
-    --campo-fundo: #1d2a25;
+    --campo-fundo: #1b2721;
     --campo-linha: #33473e;
-    --sombra: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --sombra: 0 1px 2px rgba(0, 0, 0, 0.35);
     color-scheme: dark;
   }
+}
+
+:root[data-tema="escuro"] {
+  --fundo: #0f0f11;
+  --superficie: #18181b;
+  --superficie-2: #202024;
+  --superficie-3: #29292e;
+  --linha: #313137;
+  --texto: #f1f1f3;
+  --texto-2: #a8a8b3;
+  --texto-3: #7d7d88;
+  --marca: #ff8a3d;
+  --marca-suave: rgba(255, 138, 61, 0.15);
+  --texto-sobre-marca: #1a0b00;
+  --ao-vivo: #ff5a6e;
+  --vitoria: #3ccf86;
+  --texto-sobre-resultado: #0b1220;
+  --derrota: #ff6a7d;
+  --empate: #e0b43d;
+  --campo-fundo: #1b2721;
+  --campo-linha: #33473e;
+  --sombra: 0 1px 2px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -222,7 +250,7 @@ img { max-width: 100%; }
   font-weight: 600;
 }
 .chip-esporte:hover { color: var(--texto); border-color: var(--texto-3); }
-.chip-esporte[aria-pressed="true"] { background: var(--texto); border-color: var(--texto); color: var(--superficie); }
+.chip-esporte[aria-pressed="true"] { background: var(--marca); border-color: var(--marca); color: var(--texto-sobre-marca); }
 .nota-grupo { margin: -2px 2px 10px; }
 .seus-favoritos { margin-top: 18px; padding-bottom: 6px; }
 .seus-favoritos .lateral-secao { padding: 4px 8px; }
@@ -372,7 +400,7 @@ img { max-width: 100%; }
 .dia.sem-jogo .dia-num { color: var(--texto-3); font-weight: 500; }
 .dia.ativo { background: var(--marca); }
 .dia.ativo:hover { background: var(--marca); }
-.dia.ativo .dia-semana, .dia.ativo .dia-num { color: #fff; }
+.dia.ativo .dia-semana, .dia.ativo .dia-num { color: var(--texto-sobre-marca); }
 .calendario {
   position: relative;
   flex: none;
@@ -414,7 +442,7 @@ img { max-width: 100%; }
 }
 .filtro.com-ao-vivo { color: var(--ao-vivo); }
 .filtro.com-ao-vivo .contagem { background: color-mix(in srgb, var(--ao-vivo) 18%, transparent); }
-.filtro[aria-pressed="true"] { background: var(--texto); border-color: var(--texto); color: var(--superficie); }
+.filtro[aria-pressed="true"] { background: var(--marca); border-color: var(--marca); color: var(--texto-sobre-marca); }
 .filtro[aria-pressed="true"] .contagem { background: color-mix(in srgb, var(--superficie) 25%, transparent); color: inherit; }
 
 /* barra antiga, usada pela semana da NFL */
@@ -430,7 +458,7 @@ img { max-width: 100%; }
 }
 .botao:hover { border-color: var(--texto-3); }
 .botao:disabled { opacity: 0.4; cursor: default; }
-.botao-principal { background: var(--marca); border-color: var(--marca); color: #fff; }
+.botao-principal { background: var(--marca); border-color: var(--marca); color: var(--texto-sobre-marca); }
 
 .botao-icone {
   border: 1px solid var(--linha);
@@ -936,7 +964,7 @@ select.campo-data { cursor: pointer; }
   height: 14px;
   border-radius: 50%;
   background: var(--marca);
-  color: #fff;
+  color: var(--texto-sobre-marca);
   font-size: 9px;
   font-weight: 800;
   line-height: 14px;
@@ -1350,7 +1378,7 @@ select.campo-data { cursor: pointer; }
   font-size: 14px;
   font-weight: 600;
 }
-.chip-busca[aria-pressed="true"] { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
+.chip-busca[aria-pressed="true"] { background: var(--marca); color: var(--texto-sobre-marca); border-color: var(--marca); }
 .recente { display: flex; align-items: center; }
 .recente .resultado-busca { flex: 1; min-width: 0; }
 .tirar-recente { flex: none; font-size: 20px; color: var(--texto-3); background: none; border: 0; width: 40px; height: 40px; }
@@ -1657,3 +1685,7 @@ span.cabeca-liga-escudo { background: var(--superficie-2); }
 .cartao-clube-texto { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .cartao-clube-texto .nota { margin: 0; font-size: 12px; }
 .cartao-clube svg { color: var(--texto-3); }
+
+/* Kings League: a foto do jogador na artilharia */
+.kings-jogador { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.kings-foto { width: 36px; height: 36px; flex: none; border-radius: 50%; background: var(--superficie-3); }

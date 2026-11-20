@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Scoresports</title>
   <meta name="color-scheme" content="light dark">
+  <!-- o tema escolhido no botão do topo, antes de desenhar (sem piscar no tema errado) -->
+  <script>try{var t=localStorage.getItem("ss:tema");if(t==="claro"||t==="escuro")document.documentElement.setAttribute("data-tema",t)}catch(e){}</script>
   <!-- abre a conexão com a ESPN enquanto o app carrega: o primeiro pedido sai mais rápido -->
   <link rel="preconnect" href="https://site.api.espn.com" crossorigin>
   <link rel="preconnect" href="https://a.espncdn.com">
   <link rel="dns-prefetch" href="https://sports.core.api.espn.com">
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23e8364c'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23ea580c'/></svg>">
 </head>
 <body>
   <div class="app">
@@ -20,6 +22,7 @@
       </button>
       <h1 class="titulo-pagina" id="titulo-pagina">Scoresports</h1>
       <div class="acoes-pagina" id="acoes-pagina"></div>
+      <button class="botao-topo" id="tema-pagina" type="button" aria-label="Tema: automático"></button>
       <button class="botao-topo" id="busca-pagina" type="button" aria-label="Procurar time, jogador ou competição">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>

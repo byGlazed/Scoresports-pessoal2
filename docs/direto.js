@@ -364,13 +364,35 @@ const KINGS_LIGAS = [
 ];
 let KINGS_GUARDADO = null;
 
-/** As competições da Kings League (na ordem de KINGS_LIGAS), guardadas na memória por 1 minuto. */
+/** O que o repasse da Cloudflare lê agora na página da competição (ao vivo), ou null se ele não responder. */
+async function kingsAoVivo(slug) {
+  if (!REPASSE_ESPORTS) return null;
+  try {
+    const r = await fetch(`${REPASSE_ESPORTS}/kings/${slug}`, { cache: "no-store" });
+    return r.ok ? await r.json() : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+/** As competições da Kings League (na ordem de KINGS_LIGAS). O robô grava kings.json a cada 20 min nas noites
+    de jogo; com jogo perto da hora, o placar vem do repasse (30 s). Sem repasse, fica o do robô. */
 async function kingsCompeticoes() {
   if (KINGS_GUARDADO && KINGS_GUARDADO.ate > Date.now()) return KINGS_GUARDADO.valor;
   const d = await jsonLocal("dados/kings.json");
   const comps = d.competicoes || {};
-  const valor = KINGS_LIGAS.filter((l) => comps[l.id]).map((l) => ({ ...comps[l.id], id: l.id, nome: l.nome }));
-  KINGS_GUARDADO = { valor, ate: Date.now() + 60000 };
+  let aoVivo = false;
+  const valor = await Promise.all(
+    KINGS_LIGAS.filter((l) => comps[l.id]).map(async (l) => {
+      let comp = { ...comps[l.id], id: l.id, nome: l.nome };
+      if (Kings.temJogoPerto(comp, Date.now())) {
+        aoVivo = true;
+        comp = Kings.juntarAoVivo(comp, await kingsAoVivo(l.id));
+      }
+      return comp;
+    })
+  );
+  KINGS_GUARDADO = { valor, ate: Date.now() + (aoVivo ? 30000 : 60000) };
   return valor;
 }
 
