@@ -80,4 +80,19 @@ test("ao vivo: só pergunta ao repasse com jogo perto da hora, e junta sem perde
   assert.deepEqual(Object.keys(junto.times).sort(), ["1", "2"]);
   assert.equal(junto.jogos[0].status, "live");
   assert.equal(Kings.juntarAoVivo(robo, { jogos: [] }).jogos, robo.jogos); // repasse sem jogos: fica o do robô
+  const comGols = { ...robo, jogos: [{ id: 1, status: "ended", gols: [{ lado: 0, nome: "X", minuto: 3 }] }] };
+  assert.equal(Kings.juntarAoVivo(comGols, vivo).jogos[0].gols[0].nome, "X"); // o gol da súmula fica
+});
+
+test("autores dos gols embaixo de cada time, juntando os minutos do mesmo jogador", () => {
+  const j = { gols: [
+    { lado: 0, nome: "Gilli", minuto: 1, tipo: null }, { lado: 0, nome: "Gilli", minuto: 3, tipo: null },
+    { lado: 0, nome: "Frenezy", minuto: 9, tipo: "pp" }, { lado: 1, nome: "Günay", minuto: 20, tipo: "x2" },
+    { lado: 0, nome: "Marin", minuto: 34, tipo: "p" }, { lado: 1, nome: "Pérez", minuto: 12, tipo: "contra" },
+  ] };
+  assert.deepEqual(Kings.autoresDosGols(j), {
+    casa: ["Gilli 1', 3'", "Frenezy 9' (pên. do presidente)", "Marin 34' (pên.)"],
+    fora: ["Günay 20' (gol duplo)", "Pérez 12' (contra)"],
+  });
+  assert.deepEqual(Kings.autoresDosGols({}), { casa: [], fora: [] });
 });

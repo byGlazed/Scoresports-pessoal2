@@ -155,3 +155,56 @@ class TesteDestaques(unittest.TestCase):
         arquivo = {}
         K.atualizar(arquivo, pegar_texto=pegar_texto, competicoes={"brazil": "Kings League Brasil"})
         self.assertEqual(arquivo["competicoes"]["brazil"]["destaques"][0]["lideres"][0]["total"], 11)
+
+
+class TesteGolsDaWikipedia(unittest.TestCase):
+    """Os autores dos gols dos Mundiais pelas súmulas da Wikipédia em inglês (amostra real do artigo
+    "2026 Kings World Cup Clubs", CC BY-SA)."""
+
+    def setUp(self):
+        self.texto = (RAIZ / "testes" / "amostras" / "wikipedia_kwc_clubs_2026.txt").read_text(encoding="utf-8")
+
+    def test_le_as_sumulas(self):
+        s = K.sumulas(self.texto)
+        self.assertEqual([x["id"] for x in s], [2699, 2701, 2714])  # o número do jogo no link oficial
+        primeira = s[0]
+        self.assertEqual(primeira["times"], ["Alpak FC", "No Rules FC"])
+        gols_casa = primeira["gols"][0]
+        self.assertEqual([(g["nome"], g["minuto"]) for g in gols_casa][:3], [("Gilli", 1), ("Gilli", 3), ("Martín", 4)])
+        self.assertEqual(next(g for g in gols_casa if g["nome"] == "Frenezy")["tipo"], "pp")  # pênalti do presidente
+        self.assertEqual(next(g for g in gols_casa if g["nome"] == "Marin")["tipo"], "p")  # o link [[Vlad Marin|Marin]]
+        fora = primeira["gols"][1]
+        self.assertEqual([(g["nome"], g["minuto"], g["tipo"]) for g in fora], [("Günay", 20, "x2"), ("Costa", 22, None), ("Imsak", 25, "x2")])  # o cartão fica de fora
+        # três gols do mesmo jogador num template só
+        self.assertEqual([g["minuto"] for g in s[1]["gols"][1] if g["nome"] == "Diop"], [2, 22, 22])
+        # os pênaltis da disputa (Shootouts) não entram como gol
+        self.assertNotIn("Baton", [g["nome"] for g in s[2]["gols"][1]])
+
+    def test_junta_os_gols_nos_jogos_pelo_numero_e_pelo_lado(self):
+        comp = {"times": {"1": {"nome": "No Rules FC"}, "2": {"nome": "Alpak FC"}},
+                "jogos": [{"id": 2699, "casa": "2", "fora": "1"}, {"id": 1, "casa": "1", "fora": "2"}]}
+        K.juntar_gols(comp, K.sumulas(self.texto))
+        gols = comp["jogos"][0]["gols"]
+        self.assertEqual(gols[0], {"lado": 0, "nome": "Gilli", "minuto": 1, "tipo": None})
+        self.assertIn({"lado": 1, "nome": "Günay", "minuto": 20, "tipo": "x2"}, gols)
+        self.assertEqual([g["minuto"] for g in gols], sorted(g["minuto"] for g in gols))  # na ordem do jogo
+        self.assertNotIn("gols", comp["jogos"][1])  # sem súmula: nada
+
+
+class TesteOutroFormatoDeSumula(unittest.TestCase):
+    def test_football_box_com_espacos_e_pen(self):
+        texto = """{{football box
+| date = 3 January 2026
+| score = 3–3
+| report = https://kingsleague.pro/en/kwc-nations/matches/2205-chi-vs-ned
+| team1 = Chile {{flagdeco|CHI}}
+| goals1 = M. Herrera {{goal|2}} <br> [[Ignacio Herrera|N. Herrera]] {{goal|31|pen.}}
+| team2 = {{flagdeco|NED}} Netherlands
+| goals2 = Chatmo {{goal|24|{{abbr|pp|President's penalty}}}}
+|penalties1 = Araya {{pengoal}}
+}}"""
+        s = K.sumulas(texto)
+        self.assertEqual(s[0]["id"], 2205)
+        self.assertEqual(s[0]["times"], ["Chile", "Netherlands"])
+        self.assertEqual(s[0]["gols"][0], [{"nome": "M. Herrera", "minuto": 2, "tipo": None}, {"nome": "N. Herrera", "minuto": 31, "tipo": "p"}])
+        self.assertEqual(s[0]["gols"][1][0]["tipo"], "pp")

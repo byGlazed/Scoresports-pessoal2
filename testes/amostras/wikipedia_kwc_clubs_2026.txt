@@ -1,0 +1,44 @@
+{{#invoke:football box|main
+|date=26 July 2026
+|time=19:00 CEST
+|team1=Alpak FC {{flagicon|ITA}}
+|score=7–5
+|team2={{flagicon|GER}} No Rules FC
+|goals1=Gilli {{goal|1||3}}<br>Martín {{goal|4}}<br>Frenezy {{goal|9|{{abbr|pp|President's penalty}}}}<br>Ronchi {{goal|21}}<br>[[Vlad Marin|Marin]] {{goal|34|p}}<br>Benedetti {{goal|37}}
+|goals2=Günay {{goal|20|x2}}<br>Costa {{goal|22}}<br>Imsak {{goal|25|x2}}<br>Skrijelj {{yel|34}}
+|stadium=Fonzies Arena Cologno Monzese, Milan
+|attendance=
+|referee=
+|report=https://kingsleague.pro/es/world-cup/partidos/2699-apk-vs-nrf
+}}
+
+{{#invoke:football box|main
+|date=26 July 2026
+|time=20:00 CEST
+|team1=Los Troncos FC {{flagicon|ESP}}
+|score=1–6
+|team2={{flagicon|KSA}} DR7
+|goals1=Escoto {{yel|14}}<br>Gómez {{goal|37|p}}
+|goals2=Diop {{goal|2||22||22}}<br>Alaqeeli {{goal|16}}<br>Chaveirinho {{goal|26|p}}<br>Almaleh {{yel|37}}<br>Brinquinho {{goal|43}}
+|stadium=Fonzies Arena Cologno Monzese, Milan
+|attendance=
+|referee=
+|report=https://kingsleague.pro/es/world-cup/partidos/2701-tfc-vs-dr7
+}}
+
+{{#invoke:football box|main
+|date=29 July 2026
+|time=21:00 CEST
+|team1=Porcinos FC {{flagicon|ESP}}
+|score=4–4
+|team2={{flagicon|KUW}} FWZ
+|goals1=Pérez {{goal|1||1}}<br>Santos {{goal|13|p}}<br>Carbó {{goal|15}}
+|goals2=Léo Gol {{yel|19}}<br>Da Silva {{goal|23}}<br>Chichlete {{goal|27||28}}<br>Fwaz {{goal|31|{{abbr|pp|President's penalty}}}}
+|penaltyscore=1–4
+|penalties1=El Amrani {{penmiss}}<br>Álvaro {{penmiss}}<br>Soriano {{pengoal}}
+|penalties2={{pengoal}} Léo Gol<br>{{pengoal}} Rodrigues<br>{{pengoal}} Baton<br>{{pengoal}} Chiclete
+|stadium=Fonzies Arena Cologno Monzese, Milan
+|attendance=
+|referee=
+|report=https://kingsleague.pro/es/world-cup/partidos/2714-por-vs-fwz
+}}

@@ -75,6 +75,7 @@ const Kings = (() => {
       penaltis: pen,
       vencedor,
       video: j.video || null,
+      gols: j.gols || [],
     };
   }
 
@@ -172,10 +173,28 @@ const Kings = (() => {
   /** Os jogos e times do repasse (ao vivo) por cima do que o robô gravou, sem perder os destaques e o escudo. */
   function juntarAoVivo(robo, vivo) {
     if (!vivo || !(vivo.jogos || []).length) return robo;
-    return { ...robo, temporada: vivo.temporada || robo.temporada, times: { ...(robo.times || {}), ...(vivo.times || {}) }, jogos: vivo.jogos };
+    // os gols das súmulas (Wikipédia) só o robô traz: ficam no jogo de mesmo número
+    const golsDoRobo = new Map((robo.jogos || []).filter((j) => j.gols).map((j) => [j.id, j.gols]));
+    const jogos = vivo.jogos.map((j) => (j.gols || !golsDoRobo.has(j.id) ? j : { ...j, gols: golsDoRobo.get(j.id) }));
+    return { ...robo, temporada: vivo.temporada || robo.temporada, times: { ...(robo.times || {}), ...(vivo.times || {}) }, jogos };
   }
 
-  return { rodadaPt, dataBR, jogoDoApp, doDia, proximoJogo, classificacao, temJogoPerto, juntarAoVivo };
+  const TIPOS_GOL = { p: "pên.", pp: "pên. do presidente", x2: "gol duplo", contra: "contra" };
+
+  /** Os autores dos gols de cada lado, como no futebol: "Gilli 1', 3'" e "Günay 20' (gol duplo)". */
+  function autoresDosGols(j) {
+    const lados = [new Map(), new Map()];
+    for (const g of (j && j.gols) || []) {
+      const marca = `${g.minuto}'${g.tipo ? ` (${TIPOS_GOL[g.tipo] || g.tipo})` : ""}`;
+      const mapa = lados[g.lado === 1 ? 1 : 0];
+      if (!mapa.has(g.nome)) mapa.set(g.nome, []);
+      mapa.get(g.nome).push(marca);
+    }
+    const texto = (mapa) => [...mapa.entries()].map(([nome, minutos]) => `${nome} ${minutos.join(", ")}`);
+    return { casa: texto(lados[0]), fora: texto(lados[1]) };
+  }
+
+  return { rodadaPt, dataBR, jogoDoApp, doDia, proximoJogo, classificacao, temJogoPerto, juntarAoVivo, autoresDosGols };
 })();
 
 if (typeof module !== "undefined") module.exports = Kings;

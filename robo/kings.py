@@ -12,6 +12,7 @@ placar de cada tempo, pênaltis e o vídeo no YouTube).
 import json
 import re
 from pathlib import Path
+from urllib.parse import quote
 
 from robo import rede
 from robo.transmissoes import permitido
@@ -109,6 +110,115 @@ def extrair(dados):
     }
 
 
+# os autores dos gols dos Mundiais: as súmulas da Wikipédia em inglês (o site só os mostra na página de cada
+# jogo, que o robots.txt proíbe). A Kings League Brasil atual não tem artigo com súmulas.
+WIKIPEDIA = "https://en.wikipedia.org/w/api.php"
+ARTIGOS_WIKIPEDIA = {"world-cup": "{ano} Kings World Cup Clubs", "kwc-nations": "{ano} Kings World Cup Nations"}
+# os dois formatos de súmula: {{#invoke:football box|main ...}} e {{football box ...}}
+_CAIXA_WIKI = re.compile(r"\{\{(?:#invoke:football box\|main|football box)\s*\n(.*?)\n\}\}", re.S)
+NOTAS_GOL = {"pen.": "p", "pen": "p", "o.g.": "contra", "og": "contra"}
+
+
+def _sem_marcacao(texto):
+    """O nome sem os templates ({{flagicon|ITA}}) e com o texto dos links ([[Vlad Marin|Marin]] -> Marin)."""
+    t = re.sub(r"\{\{[^{}]*\}\}", "", texto or "")
+    t = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def _templates(texto, nome):
+    """O miolo de cada {{nome|...}}, com os templates de dentro ({{abbr|pp|...}}) inteiros."""
+    saida = []
+    marca = "{{" + nome + "|"
+    i = texto.find(marca)
+    while i >= 0:
+        pos, prof = i, 0
+        while pos < len(texto):
+            if texto.startswith("{{", pos):
+                prof, pos = prof + 1, pos + 2
+            elif texto.startswith("}}", pos):
+                prof, pos = prof - 1, pos + 2
+                if prof == 0:
+                    break
+            else:
+                pos += 1
+        saida.append(texto[i + len(marca):pos - 2])
+        i = texto.find(marca, pos)
+    return saida
+
+
+def _parametros(texto):
+    """Os parâmetros de um template, separados pelos | de fora."""
+    partes, atual, prof, i = [], "", 0, 0
+    while i < len(texto):
+        if texto.startswith("{{", i):
+            prof, atual, i = prof + 1, atual + "{{", i + 2
+        elif texto.startswith("}}", i):
+            prof, atual, i = prof - 1, atual + "}}", i + 2
+        elif texto[i] == "|" and prof == 0:
+            partes.append(atual)
+            atual, i = "", i + 1
+        else:
+            atual, i = atual + texto[i], i + 1
+    partes.append(atual)
+    return partes
+
+
+def _gols_do_lado(texto):
+    """[{nome, minuto, tipo}] de um "goals1=" da súmula; o tipo é a nota do minuto (p, pp, x2...)."""
+    gols = []
+    for item in re.split(r"<br\s*/?>", texto or ""):
+        nome = _sem_marcacao(item.split("{{", 1)[0])
+        for miolo in _templates(item, "goal"):
+            p = _parametros(miolo)
+            for k in range(0, len(p), 2):
+                minuto = p[k].strip()
+                if not minuto.isdigit():
+                    continue
+                nota = p[k + 1] if k + 1 < len(p) else ""
+                nota = re.sub(r"\{\{abbr\|([^|}]*)\|[^{}]*\}\}", r"\1", nota).strip().lower()
+                nota = NOTAS_GOL.get(nota, nota)
+                gols.append({"nome": nome, "minuto": int(minuto), "tipo": nota or None})
+    return gols
+
+
+def sumulas(wikitext):
+    """As súmulas de um artigo: o número do jogo no site (do link oficial), os dois times e os gols de cada lado."""
+    saida = []
+    for m in _CAIXA_WIKI.finditer(wikitext or ""):
+        campos = {k: v.strip() for k, v in re.findall(r"^\|\s*(\w+)\s*=(.*)$", m.group(1), re.M)}
+        link = re.search(r"/(\d+)-[a-z0-9]+-vs-[a-z0-9]+", campos.get("report", ""))
+        saida.append({
+            "id": int(link.group(1)) if link else None,
+            "times": [_sem_marcacao(campos.get("team1")), _sem_marcacao(campos.get("team2"))],
+            "gols": [_gols_do_lado(campos.get("goals1")), _gols_do_lado(campos.get("goals2"))],
+        })
+    return saida
+
+
+def _mesmo_nome(a, b):
+    n = lambda x: re.sub(r"[^a-z0-9]+", " ", (x or "").lower()).strip()  # noqa: E731
+    return n(a) == n(b)
+
+
+def juntar_gols(comp, lista):
+    """Põe em cada jogo da competição os gols da súmula com o mesmo número, do lado certo (casa 0, fora 1)."""
+    por_id = {s["id"]: s for s in lista if s["id"] is not None}
+    times = comp.get("times") or {}
+    for jogo in comp.get("jogos") or []:
+        s = por_id.get(jogo.get("id"))
+        if not s:
+            continue
+        casa = (times.get(str(jogo.get("casa"))) or {}).get("nome")
+        invertido = _mesmo_nome(s["times"][1], casa) and not _mesmo_nome(s["times"][0], casa)
+        gols = []
+        for lado_sumula, lista_gols in enumerate(s["gols"]):
+            lado = 1 - lado_sumula if invertido else lado_sumula
+            gols.extend({"lado": lado, **g} for g in lista_gols)
+        if gols:
+            jogo["gols"] = sorted(gols, key=lambda g: (g["minuto"], g["lado"]))
+
+
 def destaques(dados):
     """Os 3 primeiros de cada estatística (gols, assistências, defesas, MVP, dribles) da página /estatisticas."""
     por_codigo = {}
@@ -130,9 +240,10 @@ def destaques(dados):
     return [por_codigo[c] for c in ESTATISTICAS if c in por_codigo]
 
 
-def atualizar(arquivo, hoje=None, pegar_texto=None, competicoes=None):
+def atualizar(arquivo, hoje=None, pegar_texto=None, competicoes=None, pegar_json=None):
     """Lê a página de cada competição e grava em arquivo["competicoes"]; devolve a lista do que mudou."""
     pegar_texto = pegar_texto or rede.pegar_texto
+    pegar_json = pegar_json or rede.pegar_json
     competicoes = competicoes or COMPETICOES
     robots = pegar_texto(f"{BASE}/robots.txt")
     guardadas = arquivo.setdefault("competicoes", {})
@@ -159,6 +270,17 @@ def atualizar(arquivo, hoje=None, pegar_texto=None, competicoes=None):
         except (ValueError, TypeError, KeyError):
             lista = []
         dados["destaques"] = lista or (guardadas.get(slug) or {}).get("destaques", [])
+        # os autores dos gols dos Mundiais (Wikipédia); sem o artigo, os gols que já estavam ficam
+        if slug in ARTIGOS_WIKIPEDIA and dados.get("fim"):
+            titulo = ARTIGOS_WIKIPEDIA[slug].format(ano=dados["fim"][:4])
+            r = pegar_json(f"{WIKIPEDIA}?action=parse&page={quote(titulo)}&prop=wikitext&format=json&formatversion=2")
+            texto = ((r or {}).get("parse") or {}).get("wikitext")
+            if texto:
+                juntar_gols(dados, sumulas(texto))
+        antigos = {j["id"]: j.get("gols") for j in (guardadas.get(slug) or {}).get("jogos", [])}
+        for j in dados["jogos"]:
+            if "gols" not in j and antigos.get(j["id"]):
+                j["gols"] = antigos[j["id"]]
         if guardadas.get(slug) != dados:
             antes = {j["id"]: (j["status"], j["placar"]) for j in (guardadas.get(slug) or {}).get("jogos", [])}
             novos = sum(1 for j in dados["jogos"] if antes.get(j["id"]) != (j["status"], j["placar"]))

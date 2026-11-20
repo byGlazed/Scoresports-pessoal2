@@ -15,6 +15,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 - **Faixa de dias** com ontem, hoje e amanhã, setas e calendário. Na NBA e numa competição escolhida, os dias sem jogo ficam apagados.
 - **Filtros** Todos, Ao vivo, Encerrados e Próximos, com a contagem de cada um.
 - Busca sempre à mão: a lupa no topo e a aba Pesquisa (atalho no PC: tecla `/`).
+- **Tema:** o botão do topo alterna entre automático (o do aparelho), claro (branco com laranja) e escuro (preto com laranja), e a escolha fica guardada. No app Android o tema automático segue o do app, que o Android informa como escuro: para o claro, toque no botão.
 - Fonte **Inter** embutida no app (`static/fontes/`), igual com ou sem internet. No Android, o app acompanha o tamanho de letra do celular até +15%.
 - No PC, o app ocupa uma coluna central, como no celular.
 
@@ -84,9 +85,9 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 
 ### Kings League (no app e na pasta `docs/`)
 - **Kings League Brasil**, o **Mundial da Kings** (Kings World Cup de clubes) e o **Mundial de Seleções**, no chip **Kings League** e na lista "Todos".
-- **Jogo:** o placar, o de cada tempo, os pênaltis (Shootouts), a rodada e o grupo, e o botão **Assistir no YouTube** quando a liga publica o vídeo.
-- **Página da liga:** os jogos por rodada (abre na rodada atual) e a **classificação** dos grupos, calculada pelo regulamento: cada vitória vale um ponto, inclusive nos pênaltis; os jogos do Challenger não contam; desempate pelo confronto direto, depois saldo e gols.
-- **De onde vem:** o robô (`robo/kings.py`) lê a página de cada competição no site oficial ([kingsleague.pro](https://kingsleague.pro)), que traz os dados embutidos, e grava `kings.json`. As páginas de cada jogo ficam de fora (o robots.txt do site não deixa). Ele roda junto com o robô diário e, nas noites de jogo (segunda, 17h às 21h40, e domingo à tarde, nas finais), a cada 20 minutos pelo workflow `kings.yml`. O placar aparece com esse atraso: não é ao vivo minuto a minuto.
+- **Jogo:** o placar, o de cada tempo, os pênaltis (Shootouts), a rodada e o grupo, e o botão **Assistir no YouTube** quando a liga publica o vídeo. Nos Mundiais, os **autores dos gols** embaixo de cada time (pênalti, pênalti do presidente e gol duplo marcados), das súmulas da Wikipédia em inglês. Na Kings League Brasil eles só existem na página de cada jogo do site, que o robots.txt dele proíbe.
+- **Página da liga:** os jogos por rodada (abre na rodada atual), a **artilharia** (os 3 primeiros em gols, assistências, defesas, MVP e dribles, que é o que a página de estatísticas do site mostra) e a **classificação** dos grupos, calculada pelo regulamento: cada vitória vale um ponto, inclusive nos pênaltis; os jogos do Challenger não contam; desempate pelo confronto direto, depois saldo e gols.
+- **De onde vem:** o robô (`robo/kings.py`) lê a página de cada competição no site oficial ([kingsleague.pro](https://kingsleague.pro)), que traz os dados embutidos, e grava `kings.json`. As páginas de cada jogo ficam de fora (o robots.txt do site não deixa). Ele roda junto com o robô diário e, nas noites de jogo (segunda, 17h às 21h40, e domingo à tarde, nas finais), a cada 20 minutos pelo workflow `kings.yml`. Com jogo perto da hora, o app pega o placar **ao vivo** pelo repasse da Cloudflare (`/kings/<competição>`, guardado 30 s); sem o repasse atualizado, fica o do robô, com esse atraso.
 
 ### Onde assistir no Brasil
 Cada jogo mostra os canais. A informação vem do `transmissoes.json`, em duas camadas:

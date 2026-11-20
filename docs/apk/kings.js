@@ -125,9 +125,11 @@ async function kingsPartida(liga, id, silencioso, jogoLista) {
     return;
   }
   const info = [j.competicao_nome || (comp && comp.nome), j.rodada, j.grupo && /^[A-Z]$/.test(j.grupo) ? `Grupo ${j.grupo}` : null].filter(Boolean).join(" · ");
+  // os autores dos gols (nos Mundiais, das súmulas da Wikipédia): embaixo de cada time, como no futebol
+  const autores = Kings.autoresDosGols(j);
   const placar = placarGrande({
-    esquerda: { nome: j.casa.nome, logo: j.casa.logo, placar: j.casa.placar },
-    direita: { nome: j.fora.nome, logo: j.fora.logo, placar: j.fora.placar },
+    esquerda: { nome: j.casa.nome, logo: j.casa.logo, placar: j.casa.placar, gols: autores.casa },
+    direita: { nome: j.fora.nome, logo: j.fora.logo, placar: j.fora.placar, gols: autores.fora },
     estado: j.estado,
     status: j.estado === 1 ? hora(j.inicio) || "A definir" : j.status,
     info,
@@ -150,6 +152,10 @@ async function kingsPartida(liga, id, silencioso, jogoLista) {
     )
   );
   if (j.estado === 3 && j.penaltis) partes.push(h("p", { class: "nota" }, "Na Kings League o empate vai para os pênaltis (Shootouts), e os gols da disputa não entram no placar."));
+  if (j.estado === 3 && !j.gols.length && j.competicao === "brazil") {
+    partes.push(h("p", { class: "nota" }, "Os autores dos gols da Kings League Brasil só aparecem na página de cada jogo do site da liga, que ele não deixa ler automaticamente."));
+  }
+  if (j.gols.length) partes.push(h("p", { class: "nota" }, "Autores dos gols: súmulas da Wikipédia em inglês."));
   detalhe().replaceChildren(...partes);
   if (j.estado === 2) agendar("detalhe", () => kingsPartida(liga, id, true, j), 30000);
 }
@@ -281,7 +287,7 @@ async function kingsArtilharia(liga) {
         )
       )
     ),
-    h("p", { class: "nota" }, "O site da Kings League mostra os 3 primeiros de cada estatística. Os autores de cada gol aparecem só na página de cada jogo do site, que ele não deixa ler automaticamente.")
+    h("p", { class: "nota" }, "O site da Kings League mostra os 3 primeiros de cada estatística.")
   );
 }
 

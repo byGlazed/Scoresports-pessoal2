@@ -1123,7 +1123,69 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=LrX_6gfgy4M"
+          "video": "https://www.youtube.com/watch?v=LrX_6gfgy4M",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Gilli",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Gilli",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Martín",
+              "minuto": 4,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Frenezy",
+              "minuto": 9,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Günay",
+              "minuto": 20,
+              "tipo": "x2"
+            },
+            {
+              "lado": 0,
+              "nome": "Ronchi",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Costa",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Imsak",
+              "minuto": 25,
+              "tipo": "x2"
+            },
+            {
+              "lado": 0,
+              "nome": "Marin",
+              "minuto": 34,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Benedetti",
+              "minuto": 37,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2701,
@@ -1149,7 +1211,51 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://youtu.be/LrX_6gfgy4M?si=O5uDuCAyS-OlShVG&t=377"
+          "video": "https://youtu.be/LrX_6gfgy4M?si=O5uDuCAyS-OlShVG&t=377",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Diop",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Alaqeeli",
+              "minuto": 16,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Diop",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Diop",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chaveirinho",
+              "minuto": 26,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Gómez",
+              "minuto": 37,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Brinquinho",
+              "minuto": 43,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2704,
@@ -1175,7 +1281,63 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://youtu.be/LrX_6gfgy4M?si=vjY7ojPB0_YSUvSR&t=809"
+          "video": "https://youtu.be/LrX_6gfgy4M?si=vjY7ojPB0_YSUvSR&t=809",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Vidal",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Velandia",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Torres",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Gutiérrez",
+              "minuto": 14,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Martí",
+              "minuto": 17,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "DjMaRiiO",
+              "minuto": 26,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Martí",
+              "minuto": 27,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Quintero",
+              "minuto": 35,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Martí",
+              "minuto": 39,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2703,
@@ -1201,7 +1363,75 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://youtu.be/LrX_6gfgy4M?si=xKsraP7qCnXQDMdz&t=1347"
+          "video": "https://youtu.be/LrX_6gfgy4M?si=xKsraP7qCnXQDMdz&t=1347",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Guddo",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Guddo",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Gigante",
+              "minuto": 12,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Stojkovic",
+              "minuto": 16,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Gigante",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Blur",
+              "minuto": 29,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Santos",
+              "minuto": 35,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Di Dio",
+              "minuto": 36,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Bueno",
+              "minuto": 40,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Santos",
+              "minuto": 43,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Colombo",
+              "minuto": 44,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2702,
@@ -1227,7 +1457,69 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=ZmLrpGS1bU0"
+          "video": "https://www.youtube.com/watch?v=ZmLrpGS1bU0",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Chironi",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chironi",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Dambelleh",
+              "minuto": 8,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Fernandes",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Perrotti",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Rossi",
+              "minuto": 24,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Rektout",
+              "minuto": 27,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Caldera",
+              "minuto": 30,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 39,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2706,
@@ -1253,7 +1545,63 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://youtu.be/ZmLrpGS1bU0?si=PljO2m6op2jOkCSJ&t=473"
+          "video": "https://youtu.be/ZmLrpGS1bU0?si=PljO2m6op2jOkCSJ&t=473",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "M. Hernández",
+              "minuto": 10,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chiclete",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "M. Hernández",
+              "minuto": 30,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "M. Hernández",
+              "minuto": 32,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Al Fawzan",
+              "minuto": 32,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Caro",
+              "minuto": 35,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "C. Hernández",
+              "minuto": 36,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Léo Gol",
+              "minuto": 41,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Ramírez",
+              "minuto": 42,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2700,
@@ -1279,7 +1627,39 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://youtu.be/ZmLrpGS1bU0?si=WCteJ_3nR4nvrXx9&t=1016"
+          "video": "https://youtu.be/ZmLrpGS1bU0?si=WCteJ_3nR4nvrXx9&t=1016",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Lesec",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Brito",
+              "minuto": 25,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Andrade",
+              "minuto": 27,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 36,
+              "tipo": "x2"
+            },
+            {
+              "lado": 1,
+              "nome": "Vaz",
+              "minuto": 40,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2705,
@@ -1305,7 +1685,57 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://youtu.be/ZmLrpGS1bU0?si=OPSRluXOySKXUf3e&t=1294"
+          "video": "https://youtu.be/ZmLrpGS1bU0?si=OPSRluXOySKXUf3e&t=1294",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Pérez",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Lipão",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Silvestre",
+              "minuto": 4,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Lipão",
+              "minuto": 5,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Leandro",
+              "minuto": 11,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "El Amrani",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Pelaz",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Leleti",
+              "minuto": 40,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2707,
@@ -1331,7 +1761,51 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=66Bxl18pefQ"
+          "video": "https://www.youtube.com/watch?v=66Bxl18pefQ",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Spider",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Gelsi",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Spider",
+              "minuto": 26,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Frenezy",
+              "minuto": 33,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Massa",
+              "minuto": 33,
+              "tipo": "rp"
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 38,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2708,
@@ -1357,7 +1831,57 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=sKRLA4ORRuw"
+          "video": "https://www.youtube.com/watch?v=sKRLA4ORRuw",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Junior",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chironi",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Perroti",
+              "minuto": 10,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Junior",
+              "minuto": 19,
+              "tipo": "x2"
+            },
+            {
+              "lado": 1,
+              "nome": "D'errico",
+              "minuto": 36,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Arwan",
+              "minuto": 37,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Perroti",
+              "minuto": 37,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2713,
@@ -1383,7 +1907,39 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=A5gQ2Gqj7JA"
+          "video": "https://www.youtube.com/watch?v=A5gQ2Gqj7JA",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Souza",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Gigante",
+              "minuto": 6,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Alves",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Vicente",
+              "minuto": 36,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "José",
+              "minuto": 39,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2709,
@@ -1409,7 +1965,99 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=Pmrz6HWouys"
+          "video": "https://www.youtube.com/watch?v=Pmrz6HWouys",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Stojkovic",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "García",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Martí",
+              "minuto": 5,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Martí",
+              "minuto": 13,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Colombo",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Martí",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Colombo",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Martí",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Lo Faso",
+              "minuto": 30,
+              "tipo": "x2"
+            },
+            {
+              "lado": 0,
+              "nome": "Blur",
+              "minuto": 31,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Martí",
+              "minuto": 31,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "DjMaRiiO",
+              "minuto": 31,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Colombo",
+              "minuto": 32,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Torres",
+              "minuto": 33,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Martí",
+              "minuto": 39,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2711,
@@ -1435,7 +2083,69 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=XKiGWnhGZ9U"
+          "video": "https://www.youtube.com/watch?v=XKiGWnhGZ9U",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Costa",
+              "minuto": 18,
+              "tipo": "x2"
+            },
+            {
+              "lado": 0,
+              "nome": "Imsak",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Henry",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Gacem",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Boumhand",
+              "minuto": 27,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Diarra",
+              "minuto": 29,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Kone",
+              "minuto": 32,
+              "tipo": "rp"
+            },
+            {
+              "lado": 0,
+              "nome": "Vidal",
+              "minuto": 33,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Baptista",
+              "minuto": 38,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Costa",
+              "minuto": 41,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2712,
@@ -1461,7 +2171,69 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=JuwEZdWEG9E"
+          "video": "https://www.youtube.com/watch?v=JuwEZdWEG9E",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Planas",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Gómez",
+              "minuto": 17,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Hernández",
+              "minuto": 20,
+              "tipo": "x2"
+            },
+            {
+              "lado": 0,
+              "nome": "Sorroche",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Rektout",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Hernández",
+              "minuto": 26,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Oriol",
+              "minuto": 30,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Perxitaa",
+              "minuto": 31,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Dabo",
+              "minuto": 36,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Sorroche",
+              "minuto": 40,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2714,
@@ -1490,7 +2262,57 @@
             1,
             4
           ],
-          "video": "https://www.youtube.com/watch?v=RkF4cPhyY-E"
+          "video": "https://www.youtube.com/watch?v=RkF4cPhyY-E",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Pérez",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Pérez",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Santos",
+              "minuto": 13,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Carbó",
+              "minuto": 15,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Da Silva",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chichlete",
+              "minuto": 27,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chichlete",
+              "minuto": 28,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Fwaz",
+              "minuto": 31,
+              "tipo": "pp"
+            }
+          ]
         },
         {
           "id": 2710,
@@ -1516,7 +2338,87 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=B85zGiVDs5E"
+          "video": "https://www.youtube.com/watch?v=B85zGiVDs5E",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Silvestre",
+              "minuto": 5,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Guedes",
+              "minuto": 10,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "M. Hernández",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Dedo",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Honorato",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Dedo",
+              "minuto": 31,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Tambinha",
+              "minuto": 31,
+              "tipo": "rp"
+            },
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 32,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Leleti",
+              "minuto": 35,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Honorato",
+              "minuto": 36,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Dedo",
+              "minuto": 41,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2715,
@@ -1542,7 +2444,51 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=OJlBgKsnptk"
+          "video": "https://www.youtube.com/watch?v=OJlBgKsnptk",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Gaviria",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Baton",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Frenezy",
+              "minuto": 26,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Ronchi",
+              "minuto": 27,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Ronchi",
+              "minuto": 32,
+              "tipo": "x2"
+            },
+            {
+              "lado": 1,
+              "nome": "Léo Gol",
+              "minuto": 33,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Scienza",
+              "minuto": 37,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2718,
@@ -1568,7 +2514,75 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=0gIveoQja6g"
+          "video": "https://www.youtube.com/watch?v=0gIveoQja6g",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Duque",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Vidal",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "M. Hernández",
+              "minuto": 15,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Vidal",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Caro",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Pelicanger",
+              "minuto": 25,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Costa",
+              "minuto": 27,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Costa",
+              "minuto": 30,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Günay",
+              "minuto": 33,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Loaiza",
+              "minuto": 40,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Loaiza",
+              "minuto": 40,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2716,
@@ -1594,7 +2608,33 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=vMvdkI34waw"
+          "video": "https://www.youtube.com/watch?v=vMvdkI34waw",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Alaqeeli",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Souza",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Bolt",
+              "minuto": 38,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2717,
@@ -1620,7 +2660,87 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=xOpMAXZ4t8c"
+          "video": "https://www.youtube.com/watch?v=xOpMAXZ4t8c",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Colombo",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Marino",
+              "minuto": 4,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oriol",
+              "minuto": 15,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Lo Faso",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oriol",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Colombo",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Sorroche",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Colombo",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Planas",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Perxitaa",
+              "minuto": 29,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Oriol",
+              "minuto": 36,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Sorroche",
+              "minuto": 36,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Oriol",
+              "minuto": 37,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2721,
@@ -1649,7 +2769,69 @@
             1,
             0
           ],
-          "video": "https://www.youtube.com/watch?v=H08vMrNTxBc"
+          "video": "https://www.youtube.com/watch?v=H08vMrNTxBc",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Martí",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "M. Hernández",
+              "minuto": 4,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Liñares",
+              "minuto": 11,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "C. Hernández",
+              "minuto": 13,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "García",
+              "minuto": 17,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "C. Hernández",
+              "minuto": 21,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Loaiza",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Martí",
+              "minuto": 23,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "M. Hernández",
+              "minuto": 35,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "DjMaRiiO",
+              "minuto": 36,
+              "tipo": "pp"
+            }
+          ]
         },
         {
           "id": 2720,
@@ -1678,7 +2860,69 @@
             3,
             1
           ],
-          "video": "https://www.youtube.com/watch?v=pEJneRgThSI"
+          "video": "https://www.youtube.com/watch?v=pEJneRgThSI",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Gilli",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chironi",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Perrotti",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Veneroso",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Gilli",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Rossi",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Marin",
+              "minuto": 27,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Massa",
+              "minuto": 32,
+              "tipo": "rp"
+            },
+            {
+              "lado": 0,
+              "nome": "Frenezy",
+              "minuto": 35,
+              "tipo": "pp"
+            }
+          ]
         },
         {
           "id": 2719,
@@ -1704,7 +2948,45 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=jfDsV-XjYPk"
+          "video": "https://www.youtube.com/watch?v=jfDsV-XjYPk",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Leleti",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Perxitaa",
+              "minuto": 25,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Dedo",
+              "minuto": 40,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2722,
@@ -1730,7 +3012,75 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=0ra_rqtqhZM"
+          "video": "https://www.youtube.com/watch?v=0ra_rqtqhZM",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Oliveira",
+              "minuto": 3,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Vaz",
+              "minuto": 4,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Oliveira",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Andrade",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Gigante",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Vicente",
+              "minuto": 25,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Messias",
+              "minuto": 27,
+              "tipo": "rp"
+            },
+            {
+              "lado": 0,
+              "nome": "Gaules",
+              "minuto": 32,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Alves",
+              "minuto": 43,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Alves",
+              "minuto": 44,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Spider",
+              "minuto": 45,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2723,
@@ -1756,7 +3106,69 @@
             ]
           ],
           "penaltis": null,
-          "video": null
+          "video": null,
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Martín",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Martín",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Scienza",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Guedes",
+              "minuto": 28,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Frenezy",
+              "minuto": 31,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Lipão",
+              "minuto": 37,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Veneroso",
+              "minuto": 37,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Gelsi",
+              "minuto": 38,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2724,
@@ -1782,7 +3194,63 @@
             ]
           ],
           "penaltis": null,
-          "video": null
+          "video": null,
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Spider",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Torres",
+              "minuto": 4,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 19,
+              "tipo": "x2"
+            },
+            {
+              "lado": 1,
+              "nome": "Spider",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Espinosa",
+              "minuto": 25,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Gaules",
+              "minuto": 25,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 29,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 40,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2725,
@@ -1808,7 +3276,87 @@
             ]
           ],
           "penaltis": null,
-          "video": null
+          "video": null,
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Gilli",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 13,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 19,
+              "tipo": "x2"
+            },
+            {
+              "lado": 1,
+              "nome": "Vaz",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Andrade",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Ronchi",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Oliveira",
+              "minuto": 27,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Gelsi",
+              "minuto": 39,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Gelsi",
+              "minuto": 40,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Cutrignelli",
+              "minuto": 41,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Vaz",
+              "minuto": 42,
+              "tipo": null
+            }
+          ]
         }
       ],
       "destaques": [
@@ -2113,7 +3661,51 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=fb31ixLST0Y"
+          "video": "https://www.youtube.com/watch?v=fb31ixLST0Y",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Perrotti",
+              "minuto": 10,
+              "tipo": "x2"
+            },
+            {
+              "lado": 0,
+              "nome": "Perrotti",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Perrotti",
+              "minuto": 21,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Colombo",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Lo Faso",
+              "minuto": 24,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Tumblurr",
+              "minuto": 24,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Perrotti",
+              "minuto": 39,
+              "tipo": "p"
+            }
+          ]
         },
         {
           "id": 2230,
@@ -2139,7 +3731,45 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=ATtUA7Lx9II"
+          "video": "https://www.youtube.com/watch?v=ATtUA7Lx9II",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Askenazi",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Alaqeeli",
+              "minuto": 4,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Aroan",
+              "minuto": 13,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "O. Martínez",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Silva",
+              "minuto": 28,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Alaqeeli",
+              "minuto": 38,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2205,
@@ -2168,7 +3798,45 @@
             3,
             1
           ],
-          "video": "https://www.youtube.com/watch?v=an6BNTZdfek"
+          "video": "https://www.youtube.com/watch?v=an6BNTZdfek",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "M. Herrera",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Ikeshita",
+              "minuto": 8,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Luna",
+              "minuto": 13,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chatmo",
+              "minuto": 24,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "N. Herrera",
+              "minuto": 31,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Chih",
+              "minuto": 35,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2212,
@@ -2194,7 +3862,51 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=GbDVWUz-f18"
+          "video": "https://www.youtube.com/watch?v=GbDVWUz-f18",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Bancells",
+              "minuto": 5,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Castro",
+              "minuto": 17,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Bancells",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Bancells",
+              "minuto": 29,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Shingenobu",
+              "minuto": 29,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Kato",
+              "minuto": 29,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Costa",
+              "minuto": 41,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2224,
@@ -2220,7 +3932,57 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=WM1yUpseLfw"
+          "video": "https://www.youtube.com/watch?v=WM1yUpseLfw",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Oliveira",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Nolla",
+              "minuto": 12,
+              "tipo": "[[penalty kick (association football)"
+            },
+            {
+              "lado": 1,
+              "nome": "Santos",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Oliveira",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Santos",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Oliveira",
+              "minuto": 26,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "DjMaRiio",
+              "minuto": 33,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Liñares",
+              "minuto": 41,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2231,
@@ -2246,7 +4008,57 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=ZmeloIzVXYg"
+          "video": "https://www.youtube.com/watch?v=ZmeloIzVXYg",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Mohammed",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Khan",
+              "minuto": 4,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Fauzan",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Fauzan",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Fauzan",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Yamani",
+              "minuto": 28,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Darjee",
+              "minuto": 34,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Yamani",
+              "minuto": 41,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2219,
@@ -2272,7 +4084,81 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=KvbFwL_VjD4"
+          "video": "https://www.youtube.com/watch?v=KvbFwL_VjD4",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Jasczczak",
+              "minuto": 20,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Bencherif",
+              "minuto": 20,
+              "tipo": "x2"
+            },
+            {
+              "lado": 0,
+              "nome": "Jasczczak",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "El Mouttaqi",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Izak",
+              "minuto": 26,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "El Mouttaqi",
+              "minuto": 26,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Hachemisb",
+              "minuto": 26,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Bencherif",
+              "minuto": 29,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Bienias",
+              "minuto": 31,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "El Mouttaqi",
+              "minuto": 35,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Jasczczak",
+              "minuto": 40,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "El Mouttaqi",
+              "minuto": 42,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2213,
@@ -2301,7 +4187,45 @@
             0,
             1
           ],
-          "video": "https://www.youtube.com/watch?v=RrHN1544_4I"
+          "video": "https://www.youtube.com/watch?v=RrHN1544_4I",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Lescano",
+              "minuto": 17,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Senocak",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Dreesen",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Lescano",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Cekić",
+              "minuto": 33,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Navaja",
+              "minuto": 33,
+              "tipo": "pp"
+            }
+          ]
         },
         {
           "id": 2225,
@@ -2327,7 +4251,57 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=AvKVbqouiEA"
+          "video": "https://www.youtube.com/watch?v=AvKVbqouiEA",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Cheikh Diop",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Ramirez",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Pérez",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Monegal",
+              "minuto": 16,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Chakiri",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Chakiri",
+              "minuto": 31,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Descalzo",
+              "minuto": 32,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Pérez",
+              "minuto": 40,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2206,
@@ -2379,7 +4353,69 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=GXwxRLtDNYg"
+          "video": "https://www.youtube.com/watch?v=GXwxRLtDNYg",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Rossi",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Linca",
+              "minuto": 13,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Jaszczak",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Colombo",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Bienias",
+              "minuto": 27,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Colombo",
+              "minuto": 34,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Blur",
+              "minuto": 34,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Linca",
+              "minuto": 35,
+              "tipo": "contra"
+            },
+            {
+              "lado": 1,
+              "nome": "",
+              "minuto": 35,
+              "tipo": "rp"
+            },
+            {
+              "lado": 1,
+              "nome": "Perrotti",
+              "minuto": 40,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2207,
@@ -2405,7 +4441,63 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=i_zJKRxxbRc"
+          "video": "https://www.youtube.com/watch?v=i_zJKRxxbRc",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Van der Sar",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Loaiza",
+              "minuto": 5,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "González",
+              "minuto": 13,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Palacios",
+              "minuto": 16,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Mr. Stiven",
+              "minuto": 23,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Lobón",
+              "minuto": 23,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Palacios",
+              "minuto": 24,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Chih",
+              "minuto": 41,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Caro",
+              "minuto": 43,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2221,
@@ -2434,7 +4526,69 @@
             3,
             1
           ],
-          "video": "https://www.youtube.com/watch?v=-ICTMT2RYPU"
+          "video": "https://www.youtube.com/watch?v=-ICTMT2RYPU",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "Bencherif",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Rami",
+              "minuto": 10,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Scaramozzino",
+              "minuto": 16,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Lesec",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Bencherif",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "El Afghani",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Hachemisb",
+              "minuto": 26,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Scaramozzino",
+              "minuto": 27,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Scaramozzino",
+              "minuto": 32,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "Ahmed-Kadi",
+              "minuto": 34,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2226,
@@ -2460,7 +4614,81 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=Tl90IycP6Rg"
+          "video": "https://www.youtube.com/watch?v=Tl90IycP6Rg",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Coll",
+              "minuto": 11,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Nolla",
+              "minuto": 16,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "Pelaz",
+              "minuto": 19,
+              "tipo": "x2"
+            },
+            {
+              "lado": 1,
+              "nome": "Gálvez",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Santos",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Agnello",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Ramirez",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Descalzo",
+              "minuto": 23,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "Coll",
+              "minuto": 34,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Spursito",
+              "minuto": 34,
+              "tipo": "pp"
+            },
+            {
+              "lado": 1,
+              "nome": "Gálvez",
+              "minuto": 40,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Nolla",
+              "minuto": 43,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2208,
@@ -2486,7 +4714,51 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=GHELlJvaprI"
+          "video": "https://www.youtube.com/watch?v=GHELlJvaprI",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Araya",
+              "minuto": 5,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "N. Herrera",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "N. Herrera",
+              "minuto": 23,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "N. Herrera",
+              "minuto": 31,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Vidangossy",
+              "minuto": 31,
+              "tipo": "sg"
+            },
+            {
+              "lado": 1,
+              "nome": "*Louah",
+              "minuto": 40,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "N. Herrera",
+              "minuto": 41,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2214,
@@ -2512,7 +4784,33 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=8JvdL42vzzo"
+          "video": "https://www.youtube.com/watch?v=8JvdL42vzzo",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "Martínez",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "Miyashita",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "Navaja",
+              "minuto": 28,
+              "tipo": "pp"
+            },
+            {
+              "lado": 0,
+              "nome": "L. Sánchez",
+              "minuto": 44,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2232,
@@ -2538,7 +4836,27 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=2ozrW4v097s"
+          "video": "https://www.youtube.com/watch?v=2ozrW4v097s",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Bhagatawi",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Monterde",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Monterde",
+              "minuto": 3,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2227,
@@ -2564,7 +4882,39 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=Y47M2otwuJ4"
+          "video": "https://www.youtube.com/watch?v=Y47M2otwuJ4",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Oliveira",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Monegal",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Monegal",
+              "minuto": 13,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "*Oliveira",
+              "minuto": 20,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "*Oliveira",
+              "minuto": 43,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2233,
@@ -2593,7 +4943,21 @@
             0,
             2
           ],
-          "video": "https://www.youtube.com/watch?v=-j9kFNcr3lE"
+          "video": "https://www.youtube.com/watch?v=-j9kFNcr3lE",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Yamani",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Alaqeeli",
+              "minuto": 23,
+              "tipo": "sg"
+            }
+          ]
         },
         {
           "id": 2215,
@@ -2619,7 +4983,33 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=SRSrv0CQ-nU"
+          "video": "https://www.youtube.com/watch?v=SRSrv0CQ-nU",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Costa",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Costa",
+              "minuto": 5,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Imsak",
+              "minuto": 14,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Imsak",
+              "minuto": 25,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2216,
@@ -2645,7 +5035,21 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=WyZ6Dqe6wCo"
+          "video": "https://www.youtube.com/watch?v=WyZ6Dqe6wCo",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Senocak",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Tanabe",
+              "minuto": 19,
+              "tipo": "x2"
+            }
+          ]
         },
         {
           "id": 2234,
@@ -2671,7 +5075,45 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=PuOOzizMO0w"
+          "video": "https://www.youtube.com/watch?v=PuOOzizMO0w",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Askenazi",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Askenazi",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Permana",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Askenazi",
+              "minuto": 33,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Permana",
+              "minuto": 33,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Askenazi",
+              "minuto": 36,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2223,
@@ -2697,7 +5139,33 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=cdck5Y9E37I"
+          "video": "https://www.youtube.com/watch?v=cdck5Y9E37I",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Lessec",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Linca",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Lessec",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Lessec",
+              "minuto": 39,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2217,
@@ -2723,7 +5191,21 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=CPZ7Di0G_30"
+          "video": "https://www.youtube.com/watch?v=CPZ7Di0G_30",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Cortés",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*F. Romero",
+              "minuto": 4,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2229,
@@ -2749,7 +5231,27 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=b6vYKIyuJyk"
+          "video": "https://www.youtube.com/watch?v=b6vYKIyuJyk",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Cheikh Drop",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Nolla (",
+              "minuto": 20,
+              "tipo": "p"
+            },
+            {
+              "lado": 0,
+              "nome": "*Nolla (",
+              "minuto": 31,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2235,
@@ -2775,7 +5277,21 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=CPSsFznlpnM"
+          "video": "https://www.youtube.com/watch?v=CPSsFznlpnM",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Alkarnib",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Bhagawati",
+              "minuto": 15,
+              "tipo": "sg"
+            }
+          ]
         },
         {
           "id": 2222,
@@ -2801,7 +5317,33 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=2RkdsFpgt48"
+          "video": "https://www.youtube.com/watch?v=2RkdsFpgt48",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Bencherif",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Perrotti",
+              "minuto": 7,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Perrotti",
+              "minuto": 28,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Perrotti",
+              "minuto": 34,
+              "tipo": "p"
+            }
+          ]
         },
         {
           "id": 2209,
@@ -2827,7 +5369,21 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=IOyYlNaqCQA"
+          "video": "https://www.youtube.com/watch?v=IOyYlNaqCQA",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Ikeshita",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Louah",
+              "minuto": 3,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2210,
@@ -2856,7 +5412,39 @@
             1,
             2
           ],
-          "video": "https://www.youtube.com/watch?v=NpN8i-PDWoQ"
+          "video": "https://www.youtube.com/watch?v=NpN8i-PDWoQ",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*M. Herrera",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*M. Herrera",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*M. Herrera",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Palacios",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Palacios",
+              "minuto": 23,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2228,
@@ -2882,7 +5470,21 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=i14gfACWTeA"
+          "video": "https://www.youtube.com/watch?v=i14gfACWTeA",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Garcia",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Descalzo",
+              "minuto": 15,
+              "tipo": "pp"
+            }
+          ]
         },
         {
           "id": 2238,
@@ -2908,7 +5510,33 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=kcDwZhSVdJ0"
+          "video": "https://www.youtube.com/watch?v=kcDwZhSVdJ0",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Costa",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Ikeshita",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Costa",
+              "minuto": 22,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Costa",
+              "minuto": 41,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2237,
@@ -2934,7 +5562,27 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=P444gezCyrk"
+          "video": "https://www.youtube.com/watch?v=P444gezCyrk",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Lesec",
+              "minuto": 3,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*F. Romero",
+              "minuto": 6,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*F. Romero",
+              "minuto": 21,
+              "tipo": "p"
+            }
+          ]
         },
         {
           "id": 2236,
@@ -2960,7 +5608,21 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=0QKY6ZG81jA"
+          "video": "https://www.youtube.com/watch?v=0QKY6ZG81jA",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Hugo",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Almaghrabi",
+              "minuto": 23,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2241,
@@ -2986,7 +5648,27 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=rZbOW-fVw_0"
+          "video": "https://www.youtube.com/watch?v=rZbOW-fVw_0",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Mifsud",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Askenazi",
+              "minuto": 2,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Askenazi",
+              "minuto": 29,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2242,
@@ -3012,7 +5694,21 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=wsoK4NQzrEo"
+          "video": "https://www.youtube.com/watch?v=wsoK4NQzrEo",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Hugo",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Colombo",
+              "minuto": 2,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2239,
@@ -3038,7 +5734,27 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=svq-5JsjmWQ"
+          "video": "https://www.youtube.com/watch?v=svq-5JsjmWQ",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*M. Herrera",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Salihamidžić",
+              "minuto": 10,
+              "tipo": "p"
+            },
+            {
+              "lado": 1,
+              "nome": "*Salihamidžić",
+              "minuto": 21,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2240,
@@ -3064,7 +5780,21 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=U0W2CzrMuig"
+          "video": "https://www.youtube.com/watch?v=U0W2CzrMuig",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*Planas",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Costa",
+              "minuto": 1,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2243,
@@ -3093,7 +5823,21 @@
             2,
             0
           ],
-          "video": "https://www.youtube.com/watch?v=6cqv0YL88Kc"
+          "video": "https://www.youtube.com/watch?v=6cqv0YL88Kc",
+          "gols": [
+            {
+              "lado": 0,
+              "nome": "*M. Herrera",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 1,
+              "nome": "*Martí",
+              "minuto": 13,
+              "tipo": null
+            }
+          ]
         },
         {
           "id": 2244,
@@ -3119,7 +5863,27 @@
             ]
           ],
           "penaltis": null,
-          "video": "https://www.youtube.com/watch?v=rwmxdPai6W4"
+          "video": "https://www.youtube.com/watch?v=rwmxdPai6W4",
+          "gols": [
+            {
+              "lado": 1,
+              "nome": "*Hugo",
+              "minuto": 1,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Castillo",
+              "minuto": 21,
+              "tipo": null
+            },
+            {
+              "lado": 0,
+              "nome": "*Castillo",
+              "minuto": 23,
+              "tipo": "p"
+            }
+          ]
         },
         {
           "id": 2245,
