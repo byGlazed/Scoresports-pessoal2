@@ -248,6 +248,20 @@ async function inicioDesenhar(silencioso) {
     );
   }
 
+  // Kings League: os jogos do dia das competições e dos times favoritos
+  if (plano.kings && esporteObj("kings")) {
+    const pk = plano.kings;
+    tarefas.push(
+      api("/kings").then((comps) =>
+        Kings.doDia(comps, data).map((g) => {
+          const daLiga = pk.ligasInteiras.has(g.competicao.id);
+          const jogos = g.jogos.filter((j) => daLiga || (pk.ligasDosTimes.has(g.competicao.id) && (pk.times.has(String(j.casa.id)) || pk.times.has(String(j.fora.id)))));
+          return { jogos, desenhar: (visiveis) => grupoKings(g.competicao, visiveis) };
+        })
+      )
+    );
+  }
+
   // F1 e UFC: eventos no dia (ou o próximo)
   for (const esporte of ["f1", "ufc"]) {
     const p = plano[esporte];
@@ -314,8 +328,9 @@ async function inicioDesenhar(silencioso) {
   const respostas = await Promise.allSettled(tarefas);
   if (tk !== S.tkLista) return;
 
-  const grupos = respostas.filter((r) => r.status === "fulfilled").map((r) => r.value);
-  const falhas = respostas.length - grupos.length;
+  // uma tarefa pode trazer vários grupos (a Kings: um por competição)
+  const grupos = respostas.filter((r) => r.status === "fulfilled").flatMap((r) => (Array.isArray(r.value) ? r.value : [r.value]));
+  const falhas = respostas.filter((r) => r.status !== "fulfilled").length;
   const todosJogos = grupos.flatMap((g) => g.jogos || []);
   const aoVivo = todosJogos.some((j) => j.estado === 2) || grupos.some((g) => g.aoVivo);
 
@@ -485,7 +500,7 @@ function pesquisaRecentes(resultados) {
       h(
         "p",
         { class: "nota" },
-        "Procure em todos os esportes: jogadores da NBA (inclusive aposentados), jogadores e times de futebol, NFL, MLB e NHL, lutadores do UFC, boxeadores, pilotos e competições. As competições abrem a página delas."
+        "Procure em todos os esportes: jogadores da NBA (inclusive aposentados), jogadores e times de futebol, NFL, MLB e NHL, lutadores do UFC, boxeadores, pilotos, times de e-sports (CS2, Valorant e LoL), times da Kings League e competições. As competições abrem a página delas."
       )
     );
     return;

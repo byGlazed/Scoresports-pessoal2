@@ -128,8 +128,8 @@ async function kingsPartida(liga, id, silencioso, jogoLista) {
   // os autores dos gols (nos Mundiais, das súmulas da Wikipédia): embaixo de cada time, como no futebol
   const autores = Kings.autoresDosGols(j);
   const placar = placarGrande({
-    esquerda: { nome: j.casa.nome, logo: j.casa.logo, placar: j.casa.placar, gols: autores.casa },
-    direita: { nome: j.fora.nome, logo: j.fora.logo, placar: j.fora.placar, gols: autores.fora },
+    esquerda: { nome: j.casa.nome, logo: j.casa.logo, placar: j.casa.placar, gols: autores.casa, aoClicar: j.casa.id ? () => abrirTimeKings(liga, j.casa) : null },
+    direita: { nome: j.fora.nome, logo: j.fora.logo, placar: j.fora.placar, gols: autores.fora, aoClicar: j.fora.id ? () => abrirTimeKings(liga, j.fora) : null },
     estado: j.estado,
     status: j.estado === 1 ? hora(j.inicio) || "A definir" : j.status,
     info,
@@ -199,6 +199,55 @@ async function kingsJogosDaLiga(liga) {
   if (atual) requestAnimationFrame(() => atual.scrollIntoView({ block: "start" }));
 }
 
+function abrirTimeKings(liga, t) {
+  if (!t || !t.id) return;
+  Navegacao.abrir({ tipo: "time", params: { esporte: "kings", liga, id: String(t.id) }, nome: t.nome });
+}
+
+/** A tabela de um grupo (destaque: o time da página do time). O nome do time abre a página dele. */
+function tabelaGrupoKings(liga, g, destaqueId = null) {
+  return tabela(
+    [
+      { nome: "#", valor: (l, i) => h("span", { class: "posicao" }, i + 1) },
+      { nome: "Time", esq: true, valor: (l) => h("span", { class: "time-celula" }, imgLogo(l.logo), h("button", { class: "botao-link", type: "button", onclick: () => abrirTimeKings(liga, l) }, l.nome)) },
+      { nome: "J", valor: (l) => l.j },
+      { nome: "V", valor: (l) => h("strong", null, l.v), titulo: "Vitórias (cada uma vale um ponto, inclusive nos pênaltis)" },
+      { nome: "D", valor: (l) => l.d },
+      { nome: "SG", valor: (l) => (l.sg > 0 ? `+${l.sg}` : l.sg) },
+      { nome: "GP", valor: (l) => l.gp },
+    ],
+    g.linhas,
+    { classeLinha: (l) => (destaqueId && l.id === String(destaqueId) ? "linha-destaque" : null) }
+  );
+}
+
+/** A página de um time da Kings League: o grupo dele e os jogos da temporada. */
+async function desenharTimeKings(corpo, ativo, liga, id, nomeInicial) {
+  const comps = await api("/kings");
+  if (!ativo()) return;
+  const comp = comps.find((c) => c.id === liga);
+  const t = comp && (comp.times || {})[String(id)];
+  if (!t) {
+    corpo.replaceChildren(vazio("Time não encontrado."));
+    return;
+  }
+  if (!nomeInicial) definirTitulo(corpo, t.nome);
+  const jogos = Kings.jogosDoTime(comp, id);
+  const grupo = Kings.classificacao(comp).find((g) => g.linhas.some((l) => l.id === String(id)));
+  corpo.replaceChildren(
+    h(
+      "div",
+      { class: "perfil" },
+      imgLogo(t.logo, "perfil-foto"),
+      h("div", null, h("h3", { class: "perfil-nome" }, t.nome), h("div", { class: "perfil-sub" }, [t.sigla, comp.nome].filter(Boolean).join(" · ")))
+    ),
+    grupo ? cartao(grupo.nome, tabelaGrupoKings(liga, grupo, id)) : null,
+    jogos.length
+      ? h("section", { class: "cartao grupo-liga" }, cabecaGrupo({ titulo: "Jogos", sub: comp.temporada || null }), jogos.map((j) => linhaPartidaKings(j, () => abrirPartidaKings(j))))
+      : vazio("Sem jogos deste time na temporada.")
+  );
+}
+
 /** A aba Classificação: a tabela de cada grupo, pelo regulamento (cada vitória vale um ponto). */
 async function kingsClassificacao(liga) {
   const tk = novoTokenLista();
@@ -217,23 +266,7 @@ async function kingsClassificacao(liga) {
     lista().replaceChildren(vazio("Esta competição ainda não tem tabela de grupos."));
     return;
   }
-  const cartoes = grupos.map((g) =>
-    cartao(
-      g.nome,
-      tabela(
-        [
-          { nome: "#", valor: (l, i) => h("span", { class: "posicao" }, i + 1) },
-          { nome: "Time", esq: true, valor: (l) => h("span", { class: "time-celula" }, imgLogo(l.logo), l.nome) },
-          { nome: "J", valor: (l) => l.j },
-          { nome: "V", valor: (l) => h("strong", null, l.v), titulo: "Vitórias (cada uma vale um ponto, inclusive nos pênaltis)" },
-          { nome: "D", valor: (l) => l.d },
-          { nome: "SG", valor: (l) => (l.sg > 0 ? `+${l.sg}` : l.sg) },
-          { nome: "GP", valor: (l) => l.gp },
-        ],
-        g.linhas
-      )
-    )
-  );
+  const cartoes = grupos.map((g) => cartao(g.nome, tabelaGrupoKings(liga, g)));
   lista().replaceChildren(
     ...cartoes,
     h("p", { class: "nota" }, "Cada vitória vale um ponto, inclusive nos pênaltis (Shootouts). Os jogos do Challenger não contam. Desempate: o confronto direto, depois o saldo e os gols marcados.")

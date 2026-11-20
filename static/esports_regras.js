@@ -181,7 +181,18 @@ const Esports = (() => {
     return Array.from({ length: n }, (_, i) => [(a || [])[i] ?? null, (b || [])[i] ?? null]);
   }
 
-  return { JOGOS, jogoDoSlug, jogoDoId, intervaloDoDia, partida, entraNoDia, grupos, bolinhas, transmissoes, jogador, elencoLadoALado, encerradaDeVez, juntarAoVivo };
+  /** Os times da busca da PandaScore (/teams?search[name]=) que são dos três jogos do app. */
+  function timesDaBusca(lista) {
+    const saida = [];
+    for (const t of lista || []) {
+      const jogo = jogoDoSlug(((t && t.current_videogame) || {}).slug);
+      if (!jogo || !t.name) continue;
+      saida.push({ esporte: "esports", liga: jogo.id, id: String(t.id), nome: t.name, descricao: [jogo.nome, t.location].filter(Boolean).join(" · "), imagem: t.image_url || null });
+    }
+    return saida;
+  }
+
+  return { timesDaBusca, JOGOS, jogoDoSlug, jogoDoId, intervaloDoDia, partida, entraNoDia, grupos, bolinhas, transmissoes, jogador, elencoLadoALado, encerradaDeVez, juntarAoVivo };
 })();
 
 if (typeof module !== "undefined") module.exports = Esports;

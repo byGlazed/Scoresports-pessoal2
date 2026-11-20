@@ -347,6 +347,7 @@ registrarPagina("time", {
   titulo: (params, p) => p.nome || "Time",
   desenhar: (corpo, params, ativo, p) => {
     if (params.esporte === "esports") return desenharTimeEsports(corpo, ativo, params.liga, params.id, p.nome);
+    if (params.esporte === "kings") return desenharTimeKings(corpo, ativo, params.liga, params.id, p.nome);
     p.lembrar = p.lembrar || { aba: "geral" };
     return desenharTime(corpo, ativo, params.esporte, params.liga, params.id, p.nome, p.lembrar);
   },

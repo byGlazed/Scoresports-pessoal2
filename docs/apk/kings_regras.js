@@ -194,7 +194,33 @@ const Kings = (() => {
     return { casa: texto(lados[0]), fora: texto(lados[1]) };
   }
 
-  return { rodadaPt, dataBR, jogoDoApp, doDia, proximoJogo, classificacao, temJogoPerto, juntarAoVivo, autoresDosGols };
+  const normal = (t) => String(t || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+  /** Os times das competições que batem com a pesquisa (nome ou sigla), sem os "a definir". */
+  function timesDaBusca(comps, texto) {
+    const alvo = normal(texto);
+    if (alvo.length < 2) return [];
+    const saida = [];
+    for (const c of comps || []) {
+      for (const [id, t] of Object.entries(c.times || {})) {
+        if (aDefinir(t)) continue;
+        if (normal(t.nome).includes(alvo) || normal(t.sigla) === alvo) {
+          saida.push({ esporte: "kings", liga: c.id, id: String(id), nome: t.nome, descricao: c.nome, imagem: t.logo || null });
+        }
+      }
+    }
+    return saida;
+  }
+
+  /** Os jogos de um time na competição, na ordem do calendário. */
+  function jogosDoTime(comp, timeId) {
+    return (comp.jogos || [])
+      .filter((j) => String(j.casa) === String(timeId) || String(j.fora) === String(timeId))
+      .map((j) => jogoDoApp(comp, j))
+      .sort((a, b) => String(a.inicio).localeCompare(String(b.inicio)));
+  }
+
+  return { rodadaPt, dataBR, jogoDoApp, doDia, proximoJogo, classificacao, temJogoPerto, juntarAoVivo, autoresDosGols, timesDaBusca, jogosDoTime };
 })();
 
 if (typeof module !== "undefined") module.exports = Kings;

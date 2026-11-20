@@ -178,3 +178,15 @@ test("transmissões só com endereço http(s)", () => {
   ]);
   assert.deepEqual(t.map((x) => x.url), ["https://www.twitch.tv/blast"]);
 });
+
+test("pesquisa: times da PandaScore só dos três jogos do app, com o jogo e o país na descrição", () => {
+  const lista = [
+    { id: 124530, name: "FURIA", acronym: "FURIA", location: "BR", image_url: "f.png", current_videogame: { slug: "cs-go" } },
+    { id: 128477, name: "FURIA Esports", acronym: "FUR", location: "BR", image_url: null, current_videogame: { slug: "valorant" } },
+    { id: 127596, name: "FURIA Esports", acronym: "FURIA", location: "BR", current_videogame: { slug: "r6-siege" } },
+  ];
+  const r = Esports.timesDaBusca(lista);
+  assert.deepEqual(r.map((t) => [t.liga, t.id, t.nome, t.descricao]), [["cs2", "124530", "FURIA", "Counter-Strike 2 · BR"], ["valorant", "128477", "FURIA Esports", "Valorant · BR"]]);
+  assert.equal(r[0].imagem, "f.png");
+  assert.deepEqual(Esports.timesDaBusca(null), []);
+});

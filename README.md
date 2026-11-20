@@ -21,7 +21,7 @@ App pessoal de placares, feito para treinar programação. Cobre NBA, futebol, N
 
 ### Favoritos e Pesquisa
 - **Favoritos:** a estrela ☆ ao lado de times, jogadores e competições guarda o favorito no navegador. A aba **Favoritos** junta, no dia escolhido, os jogos de todos os favoritos (de qualquer esporte), com placar ao vivo e onde assistir. Os chips mostram só os esportes em que você tem favorito, e embaixo fica a lista **Seus favoritos**, com atalho para cada um e o × para tirar.
-- **Pesquisa:** procura jogadores (inclusive aposentados da NBA), times, seleções, lutadores do UFC, boxeadores (pela Wikipédia), pilotos e competições, com o nome certo primeiro. Filtros Todos, Times, Atletas e Competições; com o campo vazio aparecem as **buscas recentes** (com × para apagar). Cada competição é uma linha, como os times e os jogadores, e o toque abre a página dela.
+- **Pesquisa:** procura jogadores (inclusive aposentados da NBA), times, seleções, lutadores do UFC, boxeadores (pela Wikipédia), pilotos, times de e-sports (CS2, Valorant e LoL, pela PandaScore), times da Kings League e competições (inclusive os e-sports e as três da Kings), com o nome certo primeiro. Os times da Kings têm página própria, com o grupo e os jogos, e entram nos Favoritos. Filtros Todos, Times, Atletas e Competições; com o campo vazio aparecem as **buscas recentes** (com × para apagar). Cada competição é uma linha, como os times e os jogadores, e o toque abre a página dela.
 
 ### NBA
 - **Jogos por dia:** navegação por setas ou calendário, da primeira rodada ao fim da temporada.

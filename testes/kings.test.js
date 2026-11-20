@@ -96,3 +96,19 @@ test("autores dos gols embaixo de cada time, juntando os minutos do mesmo jogado
   });
   assert.deepEqual(Kings.autoresDosGols({}), { casa: [], fora: [] });
 });
+
+test("pesquisa: os times da Kings pelo nome ou pela sigla, sem os 'a definir'", () => {
+  const comps = [comp, { id: "world-cup", nome: "Mundial da Kings", times: { 50: { nome: "Furia FC", sigla: "FUR", logo: "f.png" }, 58: { nome: "TBD", sigla: "TBD" } }, jogos: [] }];
+  const r = Kings.timesDaBusca(comps, "furia");
+  assert.deepEqual(r.map((t) => [t.liga, t.id, t.nome, t.descricao]), [["brazil", "50", "Furia FC", "Kings League Brasil"], ["world-cup", "50", "Furia FC", "Mundial da Kings"]]);
+  assert.equal(Kings.timesDaBusca(comps, "dep")[0].nome, "DesimpaiN"); // pela sigla
+  assert.deepEqual(Kings.timesDaBusca(comps, "tbd"), []);
+  assert.deepEqual(Kings.timesDaBusca(comps, "x"), []); // curto demais
+});
+
+test("os jogos de um time, na ordem", () => {
+  const jogos = Kings.jogosDoTime(comp, "164");
+  assert.ok(jogos.length >= 5);
+  assert.ok(jogos.every((j) => j.casa.id === "164" || j.fora.id === "164"));
+  assert.deepEqual(jogos.map((j) => j.inicio), [...jogos.map((j) => j.inicio)].sort());
+});

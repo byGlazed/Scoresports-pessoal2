@@ -1842,6 +1842,8 @@ const APELIDOS = {
   "uefa.champions": ["champions", "liga dos campeoes"], "uefa.europa": ["liga europa", "europa league"], "eng.1": ["premier league", "inglaterra", "campeonato ingles"],
   "esp.1": ["la liga", "laliga", "espanha", "campeonato espanhol"], "ita.1": ["serie a", "italia", "calcio", "campeonato italiano"],
   "ger.1": ["bundesliga", "alemanha", "campeonato alemao"], "fra.1": ["ligue 1", "franca", "campeonato frances"], "por.1": ["liga portugal", "portugal"],
+  cs2: ["cs", "counter strike", "counter-strike", "csgo", "e-sports", "esports"], valorant: ["valorant", "vava", "e-sports", "esports"], lol: ["lol", "league of legends", "e-sports", "esports"],
+  brazil: ["kings", "kl", "kings league", "kings cup"], "world-cup": ["kings", "kl", "mundial", "kings world cup", "kwc"], "kwc-nations": ["kings", "kl", "mundial de selecoes", "nations"],
   "usa.1": ["mls", "estados unidos"], "fifa.world": ["copa do mundo", "mundial"], "conmebol.america": ["copa america"], "uefa.euro": ["eurocopa", "euro"],
   "uefa.nations": ["liga das nacoes", "nations league"], "fifa.friendly": ["amistosos", "selecoes"], nba: ["basquete"], nfl: ["futebol americano"],
   mlb: ["beisebol", "baseball", "liga de beisebol"], nhl: ["hoquei", "hockey", "hoquei no gelo"],
@@ -1870,6 +1872,9 @@ function procurarLigas(texto) {
   if (alvo.length < 2) return [];
   const candidatas = [{ esporte: "boxe", liga: "boxe", nome: "Boxe", tipo_esporte: "boxe" }];
   for (const [id, cfg] of Object.entries(D_ESPORTES)) for (const l of cfg.ligas) candidatas.push({ esporte: id, liga: l.id, nome: l.nome, tipo_esporte: cfg.tipo });
+  // e-sports (um por jogo) e as competições da Kings League
+  for (const j of Esports.JOGOS) candidatas.push({ esporte: "esports", liga: j.id, nome: j.nome, tipo_esporte: "esports" });
+  for (const l of KINGS_LIGAS) candidatas.push({ esporte: "kings", liga: l.id, nome: l.nome, tipo_esporte: "kings" });
   return candidatas.filter((c) => [c.nome, ...(APELIDOS[c.liga] || [])].some((n) => semAcento(n).includes(alvo)));
 }
 
@@ -2547,21 +2552,29 @@ const ROTAS = [
     }
     const jogadores = [];
     const times = [];
+    const falhas = [];
     const vistos = new Set();
     const juntar = (item, tipo) => {
       // no boxe o mesmo lutador vem da agenda e da Wikipédia com códigos diferentes: junta pelo nome
-      const k = item.esporte === "boxe" ? `${tipo}:boxe:${semAcento(item.nome)}` : `${tipo}:${item.esporte}:${item.id}`;
+      // na Kings o mesmo time (mesmo número) está em mais de uma competição: cada uma é um resultado
+      const k = item.esporte === "boxe" ? `${tipo}:boxe:${semAcento(item.nome)}` : item.esporte === "kings" ? `${tipo}:kings:${item.liga}:${item.id}` : `${tipo}:${item.esporte}:${item.id}`;
       if (vistos.has(k)) return;
       vistos.add(k);
       (tipo === "time" ? times : jogadores).push(item);
     };
     for (const i of await Indice.procurar(textoBusca)) juntar({ esporte: i.esporte, liga: i.liga, id: i.id, nome: i.nome, descricao: i.descricao, imagem: i.imagem }, i.tipo);
-    const falhas = [];
-    // ESPN e Wikipédia ao mesmo tempo: uma lenta não segura a outra
-    const [espn, boxe] = await Promise.allSettled([
+    // ESPN, Wikipédia, e-sports (PandaScore) e Kings League ao mesmo tempo: uma lenta não segura as outras
+    const [espn, boxe, esports, kings] = await Promise.allSettled([
       obter(`busca_espn_v2:${semAcento(textoBusca)}`, 6 * 3600, () => buscarEspn(textoBusca)),
       textoBusca.length >= 3 ? buscarBoxeadoresWiki(textoBusca) : Promise.resolve([]),
+      textoBusca.length >= 3
+        ? obter(`busca_esports_v1:${semAcento(textoBusca)}`, 6 * 3600, async () => Esports.timesDaBusca(await pandascore("teams", { "search[name]": textoBusca, per_page: 50 })))
+        : Promise.resolve([]),
+      kingsCompeticoes().then((comps) => Kings.timesDaBusca(comps, textoBusca)),
     ]);
+    if (esports.status === "fulfilled") esports.value.forEach((t) => juntar(t, "time"));
+    else falhas.push("PandaScore");
+    if (kings.status === "fulfilled") kings.value.forEach((t) => juntar(t, "time"));
     if (espn.status === "fulfilled") {
       espn.value.jogadores.forEach((j) => juntar(j, "jogador"));
       espn.value.times.forEach((t) => juntar(t, "time"));
