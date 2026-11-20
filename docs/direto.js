@@ -1382,21 +1382,7 @@ function perfilAtleta(a) {
 }
 
 function categoriasStats(st) {
-  let times = st.teams || {};
-  if (Array.isArray(times)) times = Object.fromEntries(times.map((t) => [String(t.id), t]));
-  return (st.categories || [])
-    .map((cat) => ({
-      nome: cat.displayName || cat.name || "",
-      rotulos: cat.labels || [],
-      descricoes: cat.displayNames || cat.names || [],
-      temporadas: (cat.statistics || []).map((s) => {
-        const temp = s.season || {};
-        const t = times[String(s.teamId)] || {};
-        return { temporada: String(temp.displayName || temp.year || ""), time: t.abbreviation || t.displayName || s.teamSlug || null, valores: s.stats || [] };
-      }),
-      totais: cat.totals || [],
-    }))
-    .filter((c) => c.temporadas.length || c.totais.length);
+  return categoriasCarreira(st); // regras_esportes.js (com teste)
 }
 
 async function buscarAtleta(esporte, liga, atletaId) {
@@ -2531,7 +2517,7 @@ const ROTAS = [
     if (cfg.esporte === "soccer") return viaEspn(`futebol_carreira_v1:${m[2]}:${m[3]}`, 12 * 3600, () => buscarCarreiraFutebol(m[2], m[3]));
     return { tipo: "nenhum" };
   }],
-  [/^\/e\/([^/]+)\/([^/]+)\/atletas\/([^/]+)$/, (m) => viaEspn(`espn_atleta_v2:${m[1]}:${m[2]}:${m[3]}`, 86400, () => buscarAtleta(m[1], m[2], m[3]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/atletas\/([^/]+)$/, (m) => viaEspn(`espn_atleta_v3:${m[1]}:${m[2]}:${m[3]}`, 86400, () => buscarAtleta(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/eventos$/, (m) => viaEspn(`espn_eventos_v1:${m[1]}:${m[2]}:atual`, 3600, () => buscarEventos(m[1], m[2]))],
   [/^\/e\/([^/]+)\/([^/]+)\/eventos\/([^/]+)$/, (m, q) => viaEspn(`espn_evento_v1:${m[1]}:${m[2]}:${m[3]}`, 30, () => buscarEvento(m[1], m[2], m[3], q.data))],
   // futebol: primeiro a artilharia rápida (/statistics); ?completo=1 traz também os cartões (Core API)

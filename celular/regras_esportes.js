@@ -203,6 +203,28 @@ function provavelDoTime(e) {
   };
 }
 
+/** As tabelas da carreira de um atleta (o /stats da ESPN). Os times vêm indexados pelo código ("cleveland-cavaliers")
+    ou numa lista: a temporada leva a sigla do time (CLE), achada pelo id ou pelo código. */
+function categoriasCarreira(st) {
+  const lista = Array.isArray(st.teams) ? st.teams : Object.entries(st.teams || {}).map(([codigo, t]) => ({ slug: codigo, ...t }));
+  const porId = new Map(lista.filter((t) => t.id !== undefined).map((t) => [String(t.id), t]));
+  const porCodigo = new Map(lista.filter((t) => t.slug).map((t) => [String(t.slug), t]));
+  const NOMES = [[/^Misc Total/i, "Outros números"], [/^Misc/i, "Outros números"]];
+  return (st.categories || [])
+    .map((cat) => ({
+      nome: NOMES.reduce((n, [re, pt]) => n.replace(re, pt), cat.displayName || cat.name || ""),
+      rotulos: cat.labels || [],
+      descricoes: cat.displayNames || cat.names || [],
+      temporadas: (cat.statistics || []).map((s) => {
+        const temp = s.season || {};
+        const t = porId.get(String(s.teamId)) || porCodigo.get(String(s.teamSlug)) || {};
+        return { temporada: String(temp.displayName || temp.year || ""), time: t.abbreviation || t.shortDisplayName || t.displayName || null, valores: s.stats || [] };
+      }),
+      totais: cat.totals || [],
+    }))
+    .filter((c) => c.temporadas.length || c.totais.length);
+}
+
 /** Os dias (AAAA-MM-DD, os da ESPN) que vale pedir: só os que o calendário da liga tem jogo. Sem calendário,
     ou com algum dia fora dele (outra temporada), pede todos, como antes: na dúvida, pede. */
 function diasParaPedir(dias, calendario) {
@@ -215,5 +237,5 @@ function diasParaPedir(dias, calendario) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol, diasParaPedir, resultadoDoJogo, valorDoLider, provavelDoTime };
+  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol, diasParaPedir, resultadoDoJogo, valorDoLider, provavelDoTime, categoriasCarreira };
 }

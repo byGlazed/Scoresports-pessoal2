@@ -172,3 +172,18 @@ test("provável escalação: o time titular do último jogo, sem os gols e cart�
   assert.equal(R.provavelDoTime(null), null);
   assert.equal(R.provavelDoTime({ ...e, titulares: [] }), null);
 });
+
+test("carreira: o time da temporada pela sigla (a ESPN indexa os times pelo código) e os nomes em português", () => {
+  const st = {
+    teams: { "cleveland-cavaliers": { id: "5", slug: "cleveland-cavaliers", abbreviation: "CLE", displayName: "Cleveland Cavaliers" } },
+    categories: [
+      { name: "averages", displayName: "Médias - Temporada regular", labels: ["J"], statistics: [{ teamId: "5", teamSlug: "cleveland-cavaliers", season: { displayName: "2003-04" }, stats: ["79"] }], totals: ["1634"] },
+      { name: "miscellaneous", displayName: "Misc Total - Temporada regular", labels: ["DD2"], statistics: [{ teamSlug: "cleveland-cavaliers", season: { displayName: "2003-04" }, stats: ["12"] }], totals: [] },
+    ],
+  };
+  const c = R.categoriasCarreira(st);
+  assert.equal(c[0].temporadas[0].time, "CLE");
+  assert.equal(c[1].temporadas[0].time, "CLE"); // só com o código, sem o id
+  assert.equal(c[1].nome, "Outros números - Temporada regular");
+  assert.equal(R.categoriasCarreira({ teams: [{ id: "5", abbreviation: "CLE" }], categories: [{ displayName: "Total", labels: [], statistics: [{ teamId: "5", season: { year: 2004 }, stats: [] }] }] })[0].temporadas[0].time, "CLE");
+});

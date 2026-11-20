@@ -98,3 +98,13 @@ test("imagem pequena pelo redimensionador da ESPN", () => {
   assert.equal(Visual.imagemPequena("https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg", 64), "https://cdn.nba.com/logos/nba/1610612738/global/L/logo.svg");
   assert.equal(Visual.imagemPequena(null, 64), null);
 });
+
+test("autores dos gols: o mesmo jogador numa linha só (Kaio 28', 60', 67')", () => {
+  const lances = [
+    { tempo: "28'", tipo: "gol", time_id: "1", jogadores: ["Kaio"], texto: "" },
+    { tempo: "34'", tipo: "gol", time_id: "1", jogadores: ["Memphis Depay"], texto: "" },
+    { tempo: "60'", tipo: "gol", time_id: "1", jogadores: ["Kaio"], texto: "Penalty" },
+    { tempo: "67'", tipo: "gol", time_id: "1", jogadores: ["Kaio"], texto: "" },
+  ];
+  assert.deepEqual(Visual.autoresDosGols(lances, ladoDe), { casa: ["Kaio 28', 60' (pên.), 67'", "Memphis Depay 34'"], fora: [] });
+});

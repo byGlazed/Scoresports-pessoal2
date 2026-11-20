@@ -513,7 +513,7 @@ async function desenharAtleta(corpo, ativo, esporte, liga, id, contexto = null) 
   if (p.resumo.length) {
     blocos.push(
       secao(
-        p.resumo_titulo || "Resumo",
+        p.resumo_titulo ? p.resumo_titulo.charAt(0).toUpperCase() + p.resumo_titulo.slice(1) : "Resumo",
         h("div", { class: "numeros" }, p.resumo.map((r) => h("div", { class: "numero-caixa" }, h("strong", null, r.valor), h("span", null, r.rotulo))))
       )
     );
@@ -1235,7 +1235,8 @@ function preJogoEspn(esp, liga, r) {
   if (r.lideres.length) {
     blocos.push(
       secao(
-        "Destaques da temporada",
+        // antes do jogo a ESPN manda os líderes da temporada; depois, os do próprio jogo
+        r.jogo && r.jogo.estado >= 2 ? "Destaques do jogo" : "Destaques da temporada",
         h(
           "div",
           { class: "duas-colunas" },

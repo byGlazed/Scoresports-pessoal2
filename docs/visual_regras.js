@@ -17,15 +17,19 @@ const Visual = (() => {
     return l.tipo === "gol_contra" ? (lado === "casa" ? "fora" : "casa") : lado;
   }
 
+  /** Os autores dos gols de cada lado; o mesmo jogador numa linha só, como no Sofascore ("Kaio 28', 60' (pên.), 67'"). */
   function autoresDosGols(lances, ladoDe) {
-    const saida = { casa: [], fora: [] };
+    const lados = { casa: new Map(), fora: new Map() };
     for (const l of lances || []) {
       if (!GOLS.includes(l.tipo)) continue;
       const nome = (l.jogadores || [])[0] || "Gol";
       const extra = l.tipo === "gol_contra" ? " (contra)" : /p[eê]nalt|penalty/i.test(l.texto || "") ? " (pên.)" : "";
-      saida[ladoDoGol(l, ladoDe)].push(`${nome}${l.tempo ? ` ${l.tempo}` : ""}${extra}`);
+      const mapa = lados[ladoDoGol(l, ladoDe)];
+      if (!mapa.has(nome)) mapa.set(nome, []);
+      mapa.get(nome).push(`${l.tempo || ""}${extra}`.trim());
     }
-    return saida;
+    const texto = (mapa) => [...mapa.entries()].map(([nome, marcas]) => [nome, marcas.filter(Boolean).join(", ")].filter(Boolean).join(" "));
+    return { casa: texto(lados.casa), fora: texto(lados.fora) };
   }
 
   /** Para cada lance, o placar "casa - fora" depois dele, se for gol (null nos outros). */

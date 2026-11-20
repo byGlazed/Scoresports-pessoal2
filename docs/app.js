@@ -368,7 +368,7 @@ function cartaoCampeoes(chave) {
     da partida, perfil, linhas, campinho). Só aparece depois de 150 ms (CSS): com o dado guardado, nada pisca.
     O texto fica para o leitor de tela. */
 function esqueleto(tipo = "lista", texto = "Carregando…") {
-  const barra = (classe) => h("i", { class: `esq ${classe}` });
+  const barra = (classe) => h("i", { class: `esq-barra ${classe}` });
   const linhaJogo = () => h("div", { class: "esq-jogo" }, barra("esq-hora"), h("div", { class: "esq-times" }, barra("esq-linha"), barra("esq-linha esq-curta")), barra("esq-placar"));
   const cartaoJogos = (n) => h("div", { class: "esq-cartao" }, h("div", { class: "esq-cabeca" }, barra("esq-escudo-p"), barra("esq-titulo")), ...Array.from({ length: n }, linhaJogo));
   const linhas = (n) => h("div", { class: "esq-cartao esq-linhas" }, ...Array.from({ length: n }, (_, i) => barra(i % 3 === 2 ? "esq-linha esq-curta" : "esq-linha")));
@@ -383,7 +383,7 @@ function esqueleto(tipo = "lista", texto = "Carregando…") {
     miolo = [h("div", { class: "esq-cartao esq-perfil" }, barra("esq-escudo esq-grande"), h("div", { class: "esq-times" }, barra("esq-linha"), barra("esq-linha esq-curta"))), h("div", { class: "esq-abas" }, barra("esq-aba"), barra("esq-aba"), barra("esq-aba")), linhas(6)];
   } else if (tipo === "linhas") miolo = linhas(3);
   else if (tipo === "grupo") miolo = cartaoJogos(2);
-  else if (tipo === "campinho") miolo = h("div", { class: "esq esq-campo" });
+  else if (tipo === "campinho") miolo = h("div", { class: "esq-barra esq-campo" });
   else miolo = [cartaoJogos(3), cartaoJogos(2)];
   return h("div", { class: `esqueleto esqueleto-${tipo}`, role: "status" }, h("span", { class: "visualmente-oculto" }, texto), miolo);
 }
