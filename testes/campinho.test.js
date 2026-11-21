@@ -94,3 +94,15 @@ test("substituições da amostra", () => {
   assert.equal(subs["102053"].entrou_aos, 91);
   assert.deepEqual(Campinho.substituicoes(null), {});
 });
+
+test("3-1-4-2 (Alavés x Deportivo, 21/11/2026): o campinho aparece, com os lados certos", () => {
+  const titulares = amostra("espn_formacao_3142.json")["3-1-4-2"];
+  const pos = Campinho.posicoes("3-1-4-2", titulares);
+  assert.ok(pos, "antes a formação não estava na tabela e o campinho do Alavés sumia");
+  const porPosicao = Object.fromEntries(pos.map((p) => [p.jogador.posicao, p]));
+  assert.equal(new Set(pos.map((p) => p.linha)).size, 5);
+  assert.equal(porPosicao.SW.linha, 2); // o volante sozinho na frente dos três zagueiros
+  assert.ok(porPosicao.LM.x > 0.5 && porPosicao.RM.x < 0.5); // espelhado
+  assert.ok(porPosicao["CD-L"].x > porPosicao.CD.x && porPosicao.CD.x > porPosicao["CD-R"].x);
+  assert.ok(porPosicao["CF-L"].x > 0.5 && porPosicao["CF-R"].x < 0.5);
+});

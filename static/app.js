@@ -669,9 +669,84 @@ function canalNaLista(t, mostrarPadrao = true) {
   );
 }
 
+/* ---------- Folha que sobe de baixo (o jogador na partida, como no Sofascore) ----------
+   Uma por vez: abrir de novo só troca o conteúdo (o carrossel dos outros jogadores). Fecha no ×, tocando
+   fora, no Esc e no botão voltar (do celular e do navegador: navegacao.js pergunta antes de voltar a página). */
+const Folha = {
+  atual: null,
+
+  abrir(conteudo, rotulo) {
+    if (!this.atual) {
+      const painel = h("section", { class: "folha", role: "dialog", "aria-modal": "true", tabindex: "-1" });
+      const fundo = h("div", { class: "folha-fundo", onclick: (e) => e.target === fundo && this.fechar() }, painel);
+      this.aoTecla = (e) => e.key === "Escape" && this.fechar();
+      document.addEventListener("keydown", this.aoTecla);
+      document.body.append(fundo);
+      document.body.classList.add("com-folha");
+      this.atual = { fundo, painel, foco: document.activeElement };
+      requestAnimationFrame(() => fundo.classList.add("aberta"));
+    }
+    const { painel } = this.atual;
+    painel.setAttribute("aria-label", rotulo);
+    painel.replaceChildren(h("div", { class: "folha-alca", "aria-hidden": "true" }), h("button", { class: "folha-fechar", type: "button", "aria-label": "Fechar", onclick: () => this.fechar() }, "×"), conteudo);
+    painel.scrollTop = 0;
+    painel.focus({ preventScroll: true });
+  },
+
+  /** Fecha a folha aberta; devolve true se havia uma (o voltar para nela e não troca de página). */
+  fechar() {
+    if (!this.atual) return false;
+    const { fundo, foco } = this.atual;
+    this.atual = null;
+    document.removeEventListener("keydown", this.aoTecla);
+    document.body.classList.remove("com-folha");
+    fundo.remove();
+    if (foco && foco.isConnected && foco.focus) foco.focus({ preventScroll: true });
+    return true;
+  },
+};
+
+/** O conteúdo da folha de um jogador no jogo: topo (foto, nome, time, nota, "Ver perfil"), os números e o carrossel.
+    jogador: { foto (elemento), nome, sub, nota, aoVerPerfil }; linhas: [rótulo, valor, recuada?]; outros: [{ foto, nome, nota, atual, aoTocar }]. */
+function conteudoFolhaJogador({ jogador, linhas, extra, outros }) {
+  const topo = h(
+    "div",
+    { class: "folha-topo" },
+    h("div", { class: "folha-foto" }, jogador.foto),
+    h("div", { class: "folha-quem" }, h("h2", { class: "folha-nome" }, jogador.nome), jogador.sub ? h("div", { class: "folha-sub" }, jogador.sub) : null),
+    jogador.nota !== null && jogador.nota !== undefined ? h("div", { class: "folha-nota" }, seloNota(jogador.nota)) : null
+  );
+  const perfil = jogador.aoVerPerfil ? h("button", { class: "folha-perfil", type: "button", onclick: jogador.aoVerPerfil }, "Ver perfil") : null;
+  const tabelaNumeros = h(
+    "dl",
+    { class: "folha-numeros" },
+    linhas
+      .filter(([, v]) => v !== null && v !== undefined && v !== "")
+      .map(([rotulo, valor, recuada]) => h("div", { class: `folha-linha${recuada ? " recuada" : ""}` }, h("dt", null, rotulo), h("dd", null, String(valor))))
+  );
+  const carrossel = outros && outros.length > 1
+    ? h(
+        "div",
+        { class: "folha-carrossel", role: "list", "aria-label": "Outros jogadores do jogo" },
+        outros.map((o) =>
+          h(
+            "button",
+            { class: "folha-outro", type: "button", role: "listitem", "aria-current": o.atual ? "true" : null, onclick: o.aoTocar },
+            h("span", { class: "folha-outro-foto" }, o.foto),
+            h("span", { class: "folha-outro-nome" }, o.nome),
+            seloNota(o.nota)
+          )
+        )
+      )
+    : null;
+  if (carrossel) requestAnimationFrame(() => { const a = carrossel.querySelector('[aria-current="true"]'); if (a) carrossel.scrollLeft = a.offsetLeft - (carrossel.clientWidth - a.offsetWidth) / 2; });
+  return h("div", { class: "folha-conteudo" }, topo, perfil, h("h3", { class: "folha-titulo" }, "No jogo"), tabelaNumeros, extra || null, carrossel);
+}
+
 /** Uma linha de jogo na lista. `times` vem na ordem em que deve aparecer. */
-function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoClicar, atual, aoPreparar }) {
-  const aoVivo = estado === 2;
+function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoClicar, atual, aoPreparar, atualizando }) {
+  // "atualizando": o jogo guardado já devia ter começado e o novo ainda não chegou — nem horário nem placar velho
+  const aoVivo = estado === 2 && !atualizando;
   let preparado = false;
   return h(
     "button",
@@ -691,11 +766,13 @@ function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoCl
           }
         : null,
     },
-    h(
-      "div",
-      { class: `jogo-status${aoVivo ? " ao-vivo" : ""}` },
-      status.map((linha, i) => h("div", { class: i === 0 && estado === 1 ? "hora" : null }, linha))
-    ),
+    atualizando
+      ? h("div", { class: "jogo-status" }, h("span", { class: "esq-barra jogo-atualizando", role: "img", "aria-label": "Atualizando" }))
+      : h(
+          "div",
+          { class: `jogo-status${aoVivo ? " ao-vivo" : ""}` },
+          status.map((linha, i) => h("div", { class: i === 0 && estado === 1 ? "hora" : null }, linha))
+        ),
     h(
       "div",
       { class: "jogo-times" },
@@ -705,7 +782,7 @@ function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoCl
           { class: `linha-time${t.perdeu ? " perdeu" : ""}` },
           imgLogo(t.logo),
           h("span", { class: "nome" }, t.nome),
-          h("span", { class: "placar" }, t.placar ?? "")
+          h("span", { class: "placar" }, atualizando ? "" : t.placar ?? "")
         )
       ),
       canalNaLista(transmissao, mostrarPadrao)

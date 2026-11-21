@@ -184,24 +184,43 @@ function buscarUmaVez(chave, ttl, buscar, estavel, salvo) {
   return emAndamento.get(chave);
 }
 
-/** opcoes.semVelho: nunca entrega dado vencido (o ao vivo dos e-sports, que corrige outras listas). */
+/** opcoes.semVelho: nunca entrega dado vencido (o ao vivo dos e-sports, que corrige outras listas).
+    opcoes.duvidoso(valor, agoraMs) e opcoes.marcar(valor, agoraMs): dado com jogo que já devia ter começado
+    não aparece como "vai começar" — espera a rede um pouco e, se ela demorar, entrega marcado "atualizando". */
 async function obter(chave, ttl, buscar, estavel, opcoes = {}) {
   const salvo = await Banco.ler("dados", chave);
   const decisao = CacheRegras.decidir(salvo, Date.now() / 1000, opcoes);
   if (decisao === "valido") return salvo.valor;
-  if (decisao === "velho") {
-    if (!emAndamento.has(chave)) {
-      const antes = JSON.stringify(salvo.valor);
-      buscarUmaVez(chave, ttl, buscar, estavel, salvo)
-        .then((novo) => {
-          if (JSON.stringify(novo) !== antes) avisarDadosNovos();
-        })
-        .catch(() => {});
+  if (decisao === "velho" || decisao === "conferir") {
+    const antes = JSON.stringify(salvo.valor);
+    const novo = buscarUmaVez(chave, ttl, buscar, estavel, salvo);
+    novo.then((v) => {
+      if (JSON.stringify(v) !== antes) avisarDadosNovos();
+    }).catch(() => {});
+    if (decisao === "conferir") {
+      const NADA = {};
+      const rapido = await Promise.race([novo.catch(() => NADA), new Promise((ok) => setTimeout(() => ok(NADA), CacheRegras.ESPERA_CONFERIR))]);
+      if (rapido !== NADA) return rapido;
+      return opcoes.marcar ? opcoes.marcar(salvo.valor, Date.now()) : salvo.valor;
     }
     return salvo.valor;
   }
   return buscarUmaVez(chave, ttl, buscar, estavel, salvo);
 }
+
+/** As opções de "conferir" para uma lista de jogos e para a página de um jogo. */
+const CONFERIR_LISTA = {
+  duvidoso: (lista, ms) => Array.isArray(lista) && lista.some((j) => CacheRegras.jogoTalvezMudou(j, ms)),
+  marcar: (lista, ms) => CacheRegras.marcarAtualizando(lista, ms),
+};
+// fim de semana de corrida: sessão que já devia ter começado espera a rede (a lista do dia mostra a sessão)
+const CONFERIR_EVENTO = {
+  duvidoso: (r, ms) => !!(r && (r.sessoes || []).some((x) => CacheRegras.jogoTalvezMudou(x, ms))),
+};
+const CONFERIR_JOGO = {
+  duvidoso: (r, ms) => !!(r && CacheRegras.jogoTalvezMudou(r.jogo, ms)),
+  marcar: (r, ms) => ({ ...r, jogo: CacheRegras.marcarAtualizando([r.jogo], ms)[0] }),
+};
 
 async function buscarEGuardar(chave, ttl, buscar, estavel, salvo) {
   const agora = Date.now() / 1000;
@@ -885,6 +904,9 @@ function estatisticasTimes(dados, jogo) {
     const lado = t.homeAway ? (t.homeAway === "home" ? "casa" : "fora") : String(time.id) === String(jogo.casa.id) ? "casa" : "fora";
     porLado[lado] = estatisticasJogoBeisebol(t.statistics) || t.statistics || []; // beisebol vem em grupos
   }
+  // futebol: seções e rótulos como no Sofascore (visual_regras.js)
+  const futebol = Visual.estatisticasFutebol(porLado.casa, porLado.fora);
+  if (futebol) return futebol;
   const linhas = [];
   const vistos = {};
   for (const lado of ["casa", "fora"]) {
@@ -953,7 +975,8 @@ function escalacoes(dados) {
         id: at.id,
         nome: at.displayName || at.shortName,
         camisa: p.jersey || at.jersey,
-        posicao: (p.position || {}).abbreviation,
+        // o banco vem com a posição "SUB" (não é posição): fica sem
+        posicao: /^SUB$/i.test((p.position || {}).abbreviation || "") ? null : (p.position || {}).abbreviation,
         titular: Boolean(p.starter),
         entrou: Boolean(p.subbedIn),
         saiu: Boolean(p.subbedOut),
@@ -1358,7 +1381,7 @@ function perfilAtleta(a) {
   ]
     .filter(([, v]) => v)
     .map(([rotulo, valor]) => ({ rotulo, valor }));
-  const sumario = a.statsSummary || {};
+  const sumario = resumoDoAtleta(a.statsSummary || {}, traduzEstatistica); // regras_esportes.js (com teste)
   return {
     id: a.id,
     nome: a.displayName || a.fullName,
@@ -1376,8 +1399,8 @@ function perfilAtleta(a) {
     altura: a.displayHeight || null,
     peso: a.displayWeight || null,
     extras,
-    resumo_titulo: sumario.displayName || null,
-    resumo: (sumario.statistics || []).map((st) => ({ rotulo: traduzEstatistica(st.displayName || st.name), valor: st.displayValue })),
+    resumo_titulo: sumario.titulo,
+    resumo: sumario.itens,
   };
 }
 
@@ -2137,9 +2160,9 @@ function motivo(erro) {
   return erro instanceof ErroESPN ? erro.message : `${erro.name || "Erro"}: ${erro.message}`;
 }
 
-async function viaEspn(chave, ttl, buscar, estavel) {
+async function viaEspn(chave, ttl, buscar, estavel, opcoes) {
   try {
-    return await obter(chave, ttl, buscar, estavel);
+    return await obter(chave, ttl, buscar, estavel, opcoes);
   } catch (erro) {
     if (erro instanceof ErroRota) throw erro;
     throw new Error(`Não foi possível obter dados da ESPN agora. Motivo: ${motivo(erro)}`);
@@ -2436,7 +2459,7 @@ const ROTAS = [
     const de = q.de || hojeEmBR();
     const hoje = hojeEmBR();
     const ttl = de === hoje ? 30 : de < hoje ? 3600 : 120;
-    let todas = await viaEsports(`esports_dia_v1:${de}`, ttl, () => esportsDoDia(de), (lista) => de < hoje && lista.every(Esports.encerradaDeVez));
+    let todas = await viaEsports(`esports_dia_v1:${de}`, ttl, () => esportsDoDia(de), (lista) => de < hoje && lista.every(Esports.encerradaDeVez), CONFERIR_LISTA);
     // com partida ao vivo, o placar vem de /running (fresco a cada 30 s), também no dia anterior depois da meia-noite
     if (todas.some((p) => p.estado === 2)) {
       try {
@@ -2492,7 +2515,7 @@ const ROTAS = [
     const ate = q.ate || de;
     const passado = ate < hojeEmBR();
     return viaEspn(`espn_jogos_v1:${m[1]}:${m[2]}:${de}:${ate}`, ttlPorData(de, ate), () => buscarPartidas(m[1], m[2], de, ate),
-      (jogos) => passado && jogos.every((j) => j.estado === 3 || ["Adiado", "Cancelado"].includes(j.status)));
+      (jogos) => passado && jogos.every((j) => j.estado === 3 || ["Adiado", "Cancelado"].includes(j.status)), CONFERIR_LISTA);
   }],
   [/^\/e\/([^/]+)\/([^/]+)\/datas$/, async (m) => {
     dConfig(m[1], m[2]);
@@ -2504,7 +2527,7 @@ const ROTAS = [
     }
     return { ...r, hoje: hojeEmBR() };
   }],
-  [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v3:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3)],
+  [/^\/e\/([^/]+)\/([^/]+)\/jogos\/([^/]+)$/, (m) => viaEspn(`espn_resumo_v4:${m[1]}:${m[2]}:${m[3]}`, TTL_AO_VIVO, () => buscarResumo(m[1], m[2], m[3]), (r) => r.jogo.estado === 3, CONFERIR_JOGO)],
   // a temporada "atual" nunca é guardada por muito tempo: quando o mata-mata novo começar, ela tem de trocar
   [/^\/e\/nba\/nba\/copa$/, (m, q) => viaEspn(`espn_copa_nba_v1:${q.temporada || "atual"}`, 120, () => buscarCopaNba(q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
   [/^\/e\/([^/]+)\/([^/]+)\/chave$/, (m, q) => viaEspn(`espn_chave_v1:${m[1]}:${m[2]}:${q.temporada || "atual"}`, 120, () => buscarChave(m[1], m[2], q.temporada ? Number(q.temporada) : null), q.temporada ? chaveEstavel : undefined)],
@@ -2522,9 +2545,9 @@ const ROTAS = [
     if (cfg.esporte === "soccer") return viaEspn(`futebol_carreira_v1:${m[2]}:${m[3]}`, 12 * 3600, () => buscarCarreiraFutebol(m[2], m[3]));
     return { tipo: "nenhum" };
   }],
-  [/^\/e\/([^/]+)\/([^/]+)\/atletas\/([^/]+)$/, (m) => viaEspn(`espn_atleta_v3:${m[1]}:${m[2]}:${m[3]}`, 86400, () => buscarAtleta(m[1], m[2], m[3]))],
+  [/^\/e\/([^/]+)\/([^/]+)\/atletas\/([^/]+)$/, (m) => viaEspn(`espn_atleta_v4:${m[1]}:${m[2]}:${m[3]}`, 86400, () => buscarAtleta(m[1], m[2], m[3]))],
   [/^\/e\/([^/]+)\/([^/]+)\/eventos$/, (m) => viaEspn(`espn_eventos_v1:${m[1]}:${m[2]}:atual`, 3600, () => buscarEventos(m[1], m[2]))],
-  [/^\/e\/([^/]+)\/([^/]+)\/eventos\/([^/]+)$/, (m, q) => viaEspn(`espn_evento_v1:${m[1]}:${m[2]}:${m[3]}`, 30, () => buscarEvento(m[1], m[2], m[3], q.data))],
+  [/^\/e\/([^/]+)\/([^/]+)\/eventos\/([^/]+)$/, (m, q) => viaEspn(`espn_evento_v1:${m[1]}:${m[2]}:${m[3]}`, 30, () => buscarEvento(m[1], m[2], m[3], q.data), undefined, CONFERIR_EVENTO)],
   // futebol: primeiro a artilharia rápida (/statistics); ?completo=1 traz também os cartões (Core API)
   [/^\/e\/([^/]+)\/([^/]+)\/lideres$/, (m, q) =>
     m[1] === "futebol" && !q.completo

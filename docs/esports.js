@@ -51,6 +51,7 @@ function linhaPartidaEsports(p, aoClicar) {
     id: p.id,
     estado: p.estado,
     status: statusEsportsLista(p),
+    atualizando: p.atualizando,
     atual: p.id === estadoDe("esports").jogoAtual,
     transmissao: null,
     mostrarPadrao: false,

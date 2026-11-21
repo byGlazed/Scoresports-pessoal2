@@ -54,7 +54,77 @@ function iconesJogador(j) {
   return icones;
 }
 
-function jogadorNoCampo(esp, liga, p, time) {
+/** A folha do jogador de futebol no jogo (como no Sofascore): foto, nota, "Ver perfil" (a carreira fica lá),
+    os números do jogo e o carrossel com os outros que jogaram pelo time. */
+function folhaJogadorFutebol(esp, liga, lista, indice, time) {
+  const j = lista[indice];
+  const goleiro = Notas.papel(j.posicao) === "goleiro";
+  const seTem = (n) => (Number(n) > 0 ? n : null);
+  const cartoes = [Number(j.amarelos) > 0 ? `${j.amarelos} amarelo${j.amarelos > 1 ? "s" : ""}` : null, Number(j.vermelhos) > 0 ? "vermelho" : null].filter(Boolean).join(", ");
+  const troca = j.entrou_aos !== null && j.entrou_aos !== undefined ? `Entrou aos ${j.entrou_aos}'` : j.saiu_aos !== null && j.saiu_aos !== undefined ? `Saiu aos ${j.saiu_aos}'` : null;
+  const conteudo = conteudoFolhaJogador({
+    jogador: {
+      foto: fotoJogador(j, time.nome, "folha-foto-img", "folha-foto-img numero"),
+      nome: j.nome,
+      sub: h("span", { class: "folha-time" }, imgLogo(time.logo, "logo logo-folha"), [time.nome, Visual.posicaoPorExtenso(j.posicao), j.camisa ? `nº ${j.camisa}` : null].filter(Boolean).join(" · ")),
+      nota: j.nota,
+      aoVerPerfil: () => {
+        Folha.fechar();
+        empilharAtleta(esp.id, liga, j.id, j.nome);
+      },
+    },
+    linhas: [
+      ["Minutos jogados", j.minutos !== null && j.minutos !== undefined ? `${j.minutos}'` : null],
+      ["Substituição", troca],
+      ["Gols", j.gols ?? 0],
+      ["Assistências", j.assistencias ?? 0],
+      ["Chutes no gol", j.chutes_no_gol ?? 0],
+      ["Defesas", goleiro ? j.defesas ?? 0 : seTem(j.defesas)],
+      ["Gols sofridos", goleiro ? j.gols_sofridos ?? 0 : null],
+      ["Faltas sofridas", j.faltas_sofridas ?? 0],
+      ["Faltas cometidas", j.faltas_cometidas ?? 0],
+      ["Cartões", cartoes || null],
+      ["Gols contra", seTem(j.gols_contra)],
+    ],
+    outros: lista.map((x, i) => ({
+      foto: fotoJogador(x, time.nome, "folha-outro-img", "folha-outro-img numero"),
+      nome: nomeCurtoJogador(x.nome),
+      nota: x.nota,
+      atual: i === indice,
+      aoTocar: () => folhaJogadorFutebol(esp, liga, lista, i, time),
+    })),
+  });
+  Folha.abrir(conteudo, `${j.nome} no jogo`);
+}
+
+/** Quem jogou pelo time, na ordem da folha do jogador: titulares na ordem do campo e quem entrou, pela hora. */
+function jogaramPeloTime(e, titulares, reservas) {
+  const posicoes = Campinho.posicoes(e.formacao, titulares);
+  const entraram = reservas.filter((j) => j.entrou_aos !== null && j.entrou_aos !== undefined).sort((a, b) => a.entrou_aos - b.entrou_aos);
+  return [...(posicoes ? posicoes.map((p) => p.jogador) : titulares), ...entraram];
+}
+
+/** O melhor em campo (a maior nota dos dois times), como o "Jogador da partida" do Sofascore. O toque abre a folha dele. */
+function melhorEmCampo(esp, liga, escalacoes, jogo) {
+  let melhor = null;
+  for (const e of escalacoes || []) {
+    if (!e.titulares.length) continue;
+    const { titulares, reservas } = comNotas(e, jogo);
+    const jogaram = jogaramPeloTime(e, titulares, reservas);
+    for (const j of jogaram) if (j.nota !== null && j.nota !== undefined && (!melhor || j.nota > melhor.j.nota)) melhor = { j, e, jogaram };
+  }
+  if (!melhor) return null;
+  const { j, e, jogaram } = melhor;
+  return h(
+    "button",
+    { class: "melhor-em-campo", type: "button", onclick: () => folhaJogadorFutebol(esp, liga, jogaram, jogaram.indexOf(j), e.time) },
+    fotoJogador(j, e.time.nome, "melhor-foto", "melhor-foto numero"),
+    h("span", { class: "melhor-quem" }, h("strong", null, j.nome), h("span", { class: "sub" }, imgLogo(e.time.logo, "logo logo-folha"), [e.time.nome, Visual.posicaoPorExtenso(j.posicao)].filter(Boolean).join(" · "))),
+    seloNota(j.nota)
+  );
+}
+
+function jogadorNoCampo(esp, liga, p, time, abrir) {
   const j = p.jogador;
   return h(
     "button",
@@ -63,7 +133,7 @@ function jogadorNoCampo(esp, liga, p, time) {
       type: "button",
       style: { left: `${(p.x * 100).toFixed(2)}%`, top: `${(p.y * 100).toFixed(2)}%` },
       "aria-label": [j.camisa, j.nome, j.nota !== null ? `nota ${Notas.formatar(j.nota)}` : null].filter(Boolean).join(", "),
-      onclick: () => abrirAtleta(esp.id, liga, j.id, j.nome),
+      onclick: () => (abrir ? abrir(j) : abrirAtleta(esp.id, liga, j.id, j.nome)),
     },
     h(
       "span",
@@ -78,7 +148,7 @@ function jogadorNoCampo(esp, liga, p, time) {
   );
 }
 
-function linhaReserva(esp, liga, j, time, nomes) {
+function linhaReserva(esp, liga, j, time, nomes, abrir) {
   const entrou = j.entrou_aos !== null && j.entrou_aos !== undefined;
   return h(
     "li",
@@ -87,7 +157,7 @@ function linhaReserva(esp, liga, j, time, nomes) {
     h(
       "span",
       { class: "reserva-nome" },
-      h("button", { class: "botao-link", type: "button", onclick: () => abrirAtleta(esp.id, liga, j.id, j.nome) }, j.nome),
+      h("button", { class: "botao-link", type: "button", onclick: () => (abrir ? abrir(j) : abrirAtleta(esp.id, liga, j.id, j.nome)) }, j.nome),
       entrou
         ? h("span", { class: "sub reserva-troca" }, `${j.entrou_aos}'`, j.no_lugar_de && nomes.get(String(j.no_lugar_de)) ? ` · Saiu: ${nomes.get(String(j.no_lugar_de))}` : "")
         : j.posicao
@@ -122,6 +192,16 @@ function cartaoCampinho(esp, liga, e, jogo, provavel = false) {
   if (!posicoes) return null;
   const media = provavel ? null : Notas.media([...titulares, ...reservas].map((j) => j.nota));
   const reservasEmOrdem = [...reservas].sort((a, b) => (a.entrou_aos ?? 999) - (b.entrou_aos ?? 999));
+  // tocar no jogador abre a folha dele no jogo (quem jogou: titulares na ordem do campo e quem entrou);
+  // na provável escalação e para quem não entrou, abre o perfil
+  const jogaram = jogaramPeloTime(e, titulares, reservas);
+  const abrir = provavel
+    ? null
+    : (j) => {
+        const i = jogaram.indexOf(j);
+        if (i < 0) abrirAtleta(esp.id, liga, j.id, j.nome);
+        else folhaJogadorFutebol(esp, liga, jogaram, i, e.time);
+      };
   return h(
     "div",
     { class: "secao campinho-time" },
@@ -142,10 +222,10 @@ function cartaoCampinho(esp, liga, e, jogo, provavel = false) {
       h("span", { class: "campo-area", "aria-hidden": "true" }),
       h("span", { class: "campo-pequena-area", "aria-hidden": "true" }),
       h("span", { class: "campo-meio", "aria-hidden": "true" }),
-      posicoes.map((p) => jogadorNoCampo(esp, liga, p, e.time.nome))
+      posicoes.map((p) => jogadorNoCampo(esp, liga, p, e.time.nome, abrir))
     ),
     linhaTecnico(esp, liga, e.time),
-    reservasEmOrdem.length ? [h("h3", { class: "campinho-reservas-titulo" }, "Reservas"), h("ul", { class: "campinho-reservas" }, reservasEmOrdem.map((j) => linhaReserva(esp, liga, j, e.time.nome, new Map([...titulares, ...reservas].map((t) => [String(t.id), nomeCurtoJogador(t.nome)])))))] : null
+    reservasEmOrdem.length ? [h("h3", { class: "campinho-reservas-titulo" }, "Reservas"), h("ul", { class: "campinho-reservas" }, reservasEmOrdem.map((j) => linhaReserva(esp, liga, j, e.time.nome, new Map([...titulares, ...reservas].map((t) => [String(t.id), nomeCurtoJogador(t.nome)])), abrir)))] : null
   );
 }
 

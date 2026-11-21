@@ -150,6 +150,7 @@ const Navegacao = {
 
   /** Voltar do topo da página, do navegador ou do Android. Devolve false só na raiz de Jogos (o app pode sair). */
   voltar() {
+    if (Folha.fechar()) return true; // a folha do jogador aberta: o voltar fecha só ela
     const acao = Rotas.acaoVoltar(this.pilhas);
     if (acao === "sair") return false;
     this.pilhas = Rotas.voltar(this.pilhas);
@@ -160,6 +161,12 @@ const Navegacao = {
 
   aoVoltarNoNavegador(e) {
     const passo = Rotas.passoHistorico(e.state);
+    if (passo.acao === "voltar" && Folha.fechar()) {
+      // o voltar fechou a folha do jogador: a página fica, e o histórico é rearmado
+      if (passo.rearmar) history.replaceState({ base: true }, "", this.endereco());
+      history.pushState({ app: true }, "", this.endereco()); // o endereço volta a ser o da página que ficou
+      return;
+    }
     if (passo.acao === "abrir") {
       // endereço digitado ou link com #: abre aquela página
       const pagina = Rotas.lerEndereco(location.hash);
@@ -198,6 +205,7 @@ const Navegacao = {
   },
 
   mostrar() {
+    Folha.fechar(); // trocar de página (aba de baixo, "Ver perfil") fecha a folha do jogador
     const p = this.topo();
     const def = PAGINAS[p.tipo] || PAGINAS.jogos;
     const anterior = this.mostrada;
@@ -570,12 +578,42 @@ function desenharChipJogos(silencioso) {
 
 /** Linha de um evento (corrida, noite de lutas) na lista do dia. */
 function linhaEventoDoDia(esp, ev, abrir) {
+  const sit = ev.situacao;
   return h(
     "button",
     { class: `evento${ev.estado === 3 ? " passado" : ""}`, type: "button", dataset: { id: ev.id }, onclick: abrir },
     caixaData(ev.inicio || `${ev.data}T15:00:00Z`),
-    h("div", null, h("div", { class: "evento-nome" }, ev.nome), h("div", { class: "evento-sub" }, ev.local || rotuloEstadoEvento(ev.estado))),
+    h(
+      "div",
+      null,
+      h("div", { class: "evento-nome" }, ev.nome),
+      sit ? h("div", { class: `evento-sub${sit.estado === 2 ? " ao-vivo" : ""}` }, textoSituacaoCorrida(sit)) : h("div", { class: "evento-sub" }, ev.local || rotuloEstadoEvento(ev.estado))
+    ),
     canalNaLista(ev.transmissao, true)
+  );
+}
+
+/** "Sprint: fim · Classificação às 17:00", "Classificação ao vivo", "Corrida: fim". */
+function textoSituacaoCorrida(sit) {
+  if (sit.estado === 2) return `${sit.aoVivo.nome} ao vivo`;
+  const hoje = hojeBR();
+  const fim = sit.ultima && (sit.estado === 3 || dataBR(sit.ultima.inicio) === hoje) ? `${sit.ultima.nome}: fim` : null;
+  const prox = sit.proxima ? `${sit.proxima.nome} ${dataBR(sit.proxima.inicio) === hoje ? `às ${hora(sit.proxima.inicio)}` : diaHora(sit.proxima.inicio)}` : null;
+  return [fim, prox].filter(Boolean).join(" · ") || "Encerrado";
+}
+
+/** Os fins de semana de corrida do dia com o estado das sessões (a lista não espera mais que 2,5 s por isso). */
+async function comSituacaoCorrida(esp, liga, eventos) {
+  return Promise.all(
+    eventos.map(async (ev) => {
+      try {
+        const det = await Promise.race([api(`/e/${esp.id}/${liga}/eventos/${ev.id}?data=${ev.data}`), new Promise((_, nao) => setTimeout(() => nao(new Error("demorou")), 2500))]);
+        const sit = Visual.situacaoCorrida(det.sessoes);
+        return sit ? { ...ev, estado: sit.estado, situacao: sit } : ev;
+      } catch (_) {
+        return ev;
+      }
+    })
   );
 }
 
@@ -672,6 +710,7 @@ async function gruposDeEventos(esp, data, vivo) {
     const liga = esp.ligas[0].id;
     const cal = await api(`/e/${esp.id}/${liga}/eventos`);
     eventos = cal.eventos.filter((ev) => Rotas.eventoNoDia(ev, data, dataBR));
+    if (esp.tipo === "corrida") eventos = await comSituacaoCorrida(esp, liga, eventos);
     abrir = (ev) => abrirEvento(esp, liga, ev);
   }
   if (!eventos.length) return [];

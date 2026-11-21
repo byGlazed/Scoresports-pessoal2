@@ -236,6 +236,24 @@ function diasParaPedir(dias, calendario) {
   return dias.filter((d) => tem.has(d));
 }
 
+/** O resumo da temporada no perfil (statsSummary da ESPN), como no Sofascore. A ESPN manda "Titular-Substitute
+    Appearances: 10 (1)" (10 como titular, 1 entrando): vira "Jogos 11" e "Como titular 10". traduzir(rótulo) para o resto.
+    O título "Estatísticas da Temporada 2026-27 Espanhol" vira "Temporada 2026-27". */
+function resumoDoAtleta(sumario, traduzir = (t) => t) {
+  const NOMES = { totalGoals: "Gols", goalAssists: "Assistências", totalTackles: "Desarmes", saves: "Defesas", cleanSheet: "Jogos sem sofrer gol", goalsConceded: "Gols sofridos" };
+  const itens = [];
+  for (const st of (sumario && sumario.statistics) || []) {
+    const m = st.name === "starts-subIns" && /^\s*(\d+)\s*\((\d+)\)/.exec(String(st.displayValue || ""));
+    if (m) {
+      itens.push({ rotulo: "Jogos", valor: String(Number(m[1]) + Number(m[2])) }, { rotulo: "Como titular", valor: m[1] });
+      continue;
+    }
+    itens.push({ rotulo: NOMES[st.name] || traduzir(st.displayName || st.name), valor: st.displayValue });
+  }
+  const ano = /(\d{4}(?:[-/]\d{2,4})?)/.exec(String((sumario && sumario.displayName) || ""));
+  return { titulo: ano ? `Temporada ${ano[1]}` : null, itens };
+}
+
 if (typeof module !== "undefined") {
-  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol, diasParaPedir, resultadoDoJogo, valorDoLider, provavelDoTime, categoriasCarreira };
+  module.exports = { statusAoVivo, notaDoJogo, nomeLiderEsporte, LIDERES_POR_ESPORTE, lancesPontuacao, diasDoCalendario, estatisticasJogoBeisebol, diasParaPedir, resultadoDoJogo, valorDoLider, provavelDoTime, categoriasCarreira, resumoDoAtleta };
 }

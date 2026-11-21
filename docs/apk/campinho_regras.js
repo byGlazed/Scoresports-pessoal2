@@ -9,7 +9,9 @@
 
 const Campinho = (() => {
   // as linhas do goleiro ao ataque; em cada linha, os lugares da esquerda para a direita DO TIME.
-  // Só entra formação conferida numa escalação real (testes/amostras/espn_formacoes.json).
+  // As 13 primeiras foram conferidas em escalações reais (testes/amostras/espn_formacoes.json); as outras
+  // saem da mesma numeração Opta (a tabela de posições do mplsoccer, que bate com as 13), e o 3-1-4-2 foi
+  // conferido no Alavés x Deportivo de 21/11/2026 (testes/amostras/espn_formacao_3142.json).
   const LINHAS = {
     "3-4-1-2": [[1], [4, 5, 6], [3, 8, 7, 2], [9], [11, 10]],
     "3-4-2-1": [[1], [4, 5, 6], [3, 8, 7, 2], [11, 10], [9]],
@@ -24,6 +26,17 @@ const Campinho = (() => {
     "4-5-1": [[1], [3, 6, 5, 2], [11, 8, 10, 4, 7], [9]],
     "5-3-2": [[1], [3, 4, 5, 6, 2], [11, 8, 7], [9, 10]],
     "5-4-1": [[1], [3, 4, 5, 6, 2], [11, 10, 8, 7], [9]],
+    "3-1-4-2": [[1], [6, 4, 5], [8], [3, 11, 7, 2], [10, 9]],
+    "3-2-4-1": [[1], [4, 5, 6], [3, 2], [11, 8, 7, 10], [9]],
+    "3-3-3-1": [[1], [4, 5, 6], [3, 8, 2], [11, 7, 10], [9]],
+    "3-5-1-1": [[1], [4, 6, 5], [3, 8, 11, 7, 2], [10], [9]],
+    "4-1-3-2": [[1], [3, 6, 5, 2], [4], [11, 8, 7], [10, 9]],
+    "4-2-4": [[1], [3, 6, 5, 2], [8, 4], [11, 10, 9, 7]],
+    "4-3-1-2": [[1], [3, 6, 5, 2], [11, 4, 7], [8], [10, 9]],
+    "4-4-1-1": [[1], [3, 6, 5, 2], [11, 8, 4, 7], [10], [9]],
+    "3-1-2-1-3": [[1], [4, 5, 6], [8], [3, 2], [7], [11, 9, 10]],
+    "3-1-3-1-2": [[1], [4, 5, 6], [7], [3, 8, 2], [9], [11, 10]],
+    "4-1-2-1-2": [[1], [3, 6, 5, 2], [4], [11, 7], [8], [9, 10]],
   };
 
   const Y_TOPO = 0.08;

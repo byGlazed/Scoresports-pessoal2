@@ -11,10 +11,10 @@
 const Visual = (() => {
   const GOLS = ["gol", "gol_contra"];
 
-  /** De que lado é o gol: o gol contra conta para o outro time. */
+  /** De que lado é o gol. No gol contra a ESPN já marca o time que ganhou o gol (conferido em 7 jogos de
+      5 ligas, novembro de 2026: Tenaglia, do Alavés, contra no Alavés x Deportivo vem com o time do Deportivo). */
   function ladoDoGol(l, ladoDe) {
-    const lado = ladoDe(l.time_id);
-    return l.tipo === "gol_contra" ? (lado === "casa" ? "fora" : "casa") : lado;
+    return ladoDe(l.time_id);
   }
 
   /** Os autores dos gols de cada lado; o mesmo jogador numa linha só, como no Sofascore ("Kaio 28', 60' (pên.), 67'"). */
@@ -30,6 +30,29 @@ const Visual = (() => {
     }
     const texto = (mapa) => [...mapa.entries()].map(([nome, marcas]) => [nome, marcas.filter(Boolean).join(", ")].filter(Boolean).join(" "));
     return { casa: texto(lados.casa), fora: texto(lados.fora) };
+  }
+
+  /** Onde entra o "Intervalo" na linha do tempo do futebol (antes do 1º lance do 2º tempo; "45'+2'" ainda é do 1º)
+      e o placar dele. Sem lance no 2º tempo, só no jogo encerrado (aí fica no fim). → { antesDe, placar } ou null. */
+  function intervaloDoJogo(lances, ladoDe, encerrado) {
+    const lista = lances || [];
+    const minuto = (t) => {
+      const m = /^\s*(\d+)/.exec(String(t || ""));
+      return m ? Number(m[1]) : 0;
+    };
+    let i = lista.findIndex((l) => minuto(l.tempo) > 45);
+    if (i < 0) {
+      if (!encerrado) return null;
+      i = lista.length;
+    }
+    let casa = 0;
+    let fora = 0;
+    for (const l of lista.slice(0, i)) {
+      if (!GOLS.includes(l.tipo)) continue;
+      if (ladoDoGol(l, ladoDe) === "casa") casa++;
+      else fora++;
+    }
+    return { antesDe: i, placar: `${casa} - ${fora}` };
   }
 
   /** Para cada lance, o placar "casa - fora" depois dele, se for gol (null nos outros). */
@@ -104,7 +127,86 @@ const Visual = (() => {
     return { pct, inicio, fim };
   }
 
-  return { autoresDosGols, placarCorrido, formaRecente, proximoJogo, miniClassificacao, imagemPequena, progressoTemporada };
+  /** Fim de semana de corrida na lista do dia: a sessão ao vivo, senão a próxima (e a última que acabou),
+      senão encerrado. O estado do fim de semana inteiro (sexta a domingo) deixava "em andamento" o dia todo.
+      → { estado: 1|2|3, aoVivo, proxima, ultima } ou null sem sessões com horário. */
+  function situacaoCorrida(sessoes) {
+    const lista = (sessoes || []).filter((x) => x && x.inicio).sort((a, b) => a.inicio.localeCompare(b.inicio));
+    if (!lista.length) return null;
+    const aoVivo = lista.find((x) => x.estado === 2) || null;
+    const ultima = [...lista].reverse().find((x) => x.estado === 3) || null;
+    const proxima = lista.find((x) => x.estado === 1) || null;
+    if (aoVivo) return { estado: 2, aoVivo, proxima: null, ultima };
+    if (proxima) return { estado: 1, aoVivo: null, proxima, ultima };
+    return { estado: 3, aoVivo: null, proxima: null, ultima };
+  }
+
+  // as siglas de posição da ESPN no futebol (em português: G, ZC, ZCD, LD, MC, MCE, MA, ACI, ATCD...; às
+  // vezes em inglês mesmo com lang=pt: RB, LB, CD-L, DM, AM, CF-R...) por extenso, como no Sofascore
+  const POSICOES = [
+    [/^(G|GK|GOL)$/, "Goleiro"],
+    [/^(LD|LE|RB|LB|RWB|LWB|WB|AL[DE]?)(-[LR])?$/, "Lateral"],
+    [/^(Z[A-Z]*|CD|CB|SW|L)(-[LR])?$/, "Zagueiro"],
+    [/^(V[A-Z]*|DM|CDM)(-[LR])?$/, "Volante"],
+    [/^(M[A-Z]*|CM|LM|RM|AM|CAM)(-[LR])?$/, "Meio-campista"],
+    [/^(A[A-Z]*|F|CF|ST|SS|LF|RF|LW|RW)(-[LR])?$/, "Atacante"],
+  ];
+  function posicaoPorExtenso(sigla) {
+    const p = String(sigla || "").trim().toUpperCase();
+    if (!p) return null;
+    for (const [re, nome] of POSICOES) if (re.test(p)) return nome;
+    return sigla;
+  }
+
+  /* Estatísticas do jogo de futebol como no Sofascore: seções, rótulos em português e porcentagens de verdade.
+     A ESPN manda rótulos meio em inglês ("On Target %", "Tackle %"), as porcentagens como fração arredondada
+     (0.4) e dois "Desarmes" (o segundo são os cortes). Aqui tudo sai dos nomes fixos (possessionPct, totalShots...)
+     e as porcentagens saem das contagens. → [{ secao, rotulo, casa, fora }] ou null se não for futebol. */
+  function estatisticasFutebol(casa, fora) {
+    const mapa = (lista) => Object.fromEntries((lista || []).filter((x) => x && x.name).map((x) => [x.name, Number(x.value ?? x.displayValue)]));
+    const lados = [mapa(casa), mapa(fora)];
+    if (!lados.some((m) => "possessionPct" in m || "totalShots" in m)) return null;
+    const n = (m, k) => (Number.isFinite(m[k]) ? m[k] : null);
+    const pct = (a, b) => (a !== null && b ? `${Math.round((100 * a) / b)}%` : null);
+    const certos = (m, ok, total) => {
+      const a = n(m, ok);
+      const b = n(m, total);
+      return a === null || b === null ? null : `${a}/${b}${b ? ` (${Math.round((100 * a) / b)}%)` : ""}`;
+    };
+    const fora_ = (m) => {
+      const t = n(m, "totalShots");
+      const g = n(m, "shotsOnTarget");
+      const bl = n(m, "blockedShots");
+      return t === null || g === null ? null : Math.max(0, t - g - (bl || 0));
+    };
+    const LINHAS = [
+      ["Visão geral", "Posse de bola", (m) => (n(m, "possessionPct") === null ? null : `${Math.round(n(m, "possessionPct"))}%`)],
+      ["Visão geral", "Finalizações", (m) => n(m, "totalShots")],
+      ["Visão geral", "Finalizações no gol", (m) => n(m, "shotsOnTarget")],
+      ["Visão geral", "Escanteios", (m) => n(m, "wonCorners")],
+      ["Visão geral", "Faltas", (m) => n(m, "foulsCommitted")],
+      ["Visão geral", "Impedimentos", (m) => n(m, "offsides")],
+      ["Visão geral", "Cartões amarelos", (m) => n(m, "yellowCards")],
+      ["Visão geral", "Cartões vermelhos", (m) => n(m, "redCards")],
+      ["Finalizações", "No gol", (m) => n(m, "shotsOnTarget")],
+      ["Finalizações", "Para fora", fora_],
+      ["Finalizações", "Bloqueadas", (m) => n(m, "blockedShots")],
+      ["Finalizações", "Pontaria", (m) => pct(n(m, "shotsOnTarget"), n(m, "totalShots"))],
+      ["Finalizações", "Pênaltis", (m) => (n(m, "penaltyKickShots") ? `${n(m, "penaltyKickGoals") ?? 0}/${n(m, "penaltyKickShots")}` : null)],
+      ["Passes", "Passes certos", (m) => certos(m, "accuratePasses", "totalPasses")],
+      ["Passes", "Cruzamentos certos", (m) => certos(m, "accurateCrosses", "totalCrosses")],
+      ["Passes", "Bolas longas certas", (m) => certos(m, "accurateLongBalls", "totalLongBalls")],
+      ["Defesa", "Desarmes certos", (m) => certos(m, "effectiveTackles", "totalTackles")],
+      ["Defesa", "Interceptações", (m) => n(m, "interceptions")],
+      ["Defesa", "Cortes", (m) => n(m, "totalClearance")],
+      ["Goleiro", "Defesas", (m) => n(m, "saves")],
+    ];
+    return LINHAS.map(([secao, rotulo, f]) => ({ secao, rotulo, casa: f(lados[0]), fora: f(lados[1]) }))
+      .filter((l) => l.casa !== null || l.fora !== null)
+      .map((l) => ({ ...l, casa: l.casa === null ? null : String(l.casa), fora: l.fora === null ? null : String(l.fora) }));
+  }
+
+  return { autoresDosGols, placarCorrido, intervaloDoJogo, formaRecente, proximoJogo, miniClassificacao, imagemPequena, progressoTemporada, situacaoCorrida, posicaoPorExtenso, estatisticasFutebol };
 })();
 
 if (typeof module !== "undefined") module.exports = Visual;

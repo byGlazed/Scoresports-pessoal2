@@ -22,9 +22,11 @@ test("autores dos gols embaixo de cada time", () => {
     casa: ["Eddie Nketiah 90'+5' (pên.)"],
     fora: ["Alexis Mac Allister 40'", "Florian Wirtz 54'", "Alexander Isak 89'"],
   });
-  // gol contra conta para o outro lado
-  const contra = [{ tempo: "10'", tipo: "gol_contra", time_id: "1", jogadores: ["Zagueiro"], texto: "Own goal" }];
-  assert.deepEqual(Visual.autoresDosGols(contra, ladoDe), { casa: [], fora: ["Zagueiro 10' (contra)"] });
+  // gol contra: a ESPN já manda o time que ganhou o gol (Tenaglia, do Alavés, contra no 3 x 1 sobre o
+  // Deportivo de 21/11/2026 vem com o time do Deportivo), então fica embaixo dele, como no Sofascore
+  const contra = [{ tempo: "41'", tipo: "gol_contra", time_id: "2", jogadores: ["Nahuel Tenaglia"], texto: "Own Goal by Nahuel Tenaglia, Alaves." }];
+  assert.deepEqual(Visual.autoresDosGols(contra, ladoDe), { casa: [], fora: ["Nahuel Tenaglia 41' (contra)"] });
+  assert.deepEqual(Visual.placarCorrido(contra, ladoDe), ["0 - 1"]);
   assert.deepEqual(Visual.autoresDosGols(null, ladoDe), { casa: [], fora: [] });
 });
 
@@ -107,4 +109,65 @@ test("autores dos gols: o mesmo jogador numa linha só (Kaio 28', 60', 67')", ()
     { tempo: "67'", tipo: "gol", time_id: "1", jogadores: ["Kaio"], texto: "" },
   ];
   assert.deepEqual(Visual.autoresDosGols(lances, ladoDe), { casa: ["Kaio 28', 60' (pên.), 67'", "Memphis Depay 34'"], fora: [] });
+});
+
+test("F1 na lista do dia: a sessão, e não o fim de semana inteiro 'em andamento'", () => {
+  const sessoes = [
+    { nome: "Treino livre 1", inicio: "2026-11-20T16:30:00Z", estado: 3 },
+    { nome: "Classificação sprint", inicio: "2026-11-20T20:30:00Z", estado: 3 },
+    { nome: "Sprint", inicio: "2026-11-21T16:00:00Z", estado: 3 },
+    { nome: "Classificação", inicio: "2026-11-21T20:00:00Z", estado: 1 },
+    { nome: "Corrida", inicio: "2026-11-22T18:00:00Z", estado: 1 },
+  ];
+  const entre = Visual.situacaoCorrida(sessoes); // sábado, depois da sprint
+  assert.equal(entre.estado, 1);
+  assert.equal(entre.ultima.nome, "Sprint");
+  assert.equal(entre.proxima.nome, "Classificação");
+  const vivo = Visual.situacaoCorrida(sessoes.map((x) => (x.nome === "Classificação" ? { ...x, estado: 2 } : x)));
+  assert.equal(vivo.estado, 2);
+  assert.equal(vivo.aoVivo.nome, "Classificação");
+  const fim = Visual.situacaoCorrida(sessoes.map((x) => ({ ...x, estado: 3 })));
+  assert.equal(fim.estado, 3);
+  assert.equal(fim.ultima.nome, "Corrida");
+  assert.equal(Visual.situacaoCorrida([]), null);
+});
+
+test("posição do futebol por extenso (siglas da ESPN em português e em inglês)", () => {
+  // as do Alavés x Deportivo de 21/11/2026 (lang=pt) e as mesmas em inglês
+  const casos = { G: "Goleiro", ZC: "Zagueiro", ZCD: "Zagueiro", ZE: "Zagueiro", L: "Zagueiro", "CD-R": "Zagueiro", RB: "Lateral", LB: "Lateral",
+    MD: "Meio-campista", ME: "Meio-campista", MC: "Meio-campista", MCE: "Meio-campista", MA: "Meio-campista", AM: "Meio-campista", "CM-L": "Meio-campista",
+    DM: "Volante", A: "Atacante", ACI: "Atacante", ATCD: "Atacante", "CF-R": "Atacante", F: "Atacante" };
+  for (const [sigla, nome] of Object.entries(casos)) assert.equal(Visual.posicaoPorExtenso(sigla), nome, sigla);
+  assert.equal(Visual.posicaoPorExtenso(""), null);
+  assert.equal(Visual.posicaoPorExtenso("XYZ1"), "XYZ1");
+});
+
+test("estatísticas do futebol como no Sofascore: seções, português e porcentagens das contagens", () => {
+  // Alavés 3 x 1 Deportivo (21/11/2026), boxscore.teams da ESPN com lang=pt
+  const amostra = JSON.parse(require("node:fs").readFileSync(require("node:path").join(__dirname, "amostras", "espn_estatisticas_futebol.json"), "utf8"));
+  const linhas = Visual.estatisticasFutebol(amostra.home, amostra.away);
+  const de = (rotulo) => linhas.find((l) => l.rotulo === rotulo);
+  assert.deepEqual([...new Set(linhas.map((l) => l.secao))], ["Visão geral", "Finalizações", "Passes", "Defesa", "Goleiro"]);
+  assert.deepEqual([de("Posse de bola").casa, de("Posse de bola").fora], ["48%", "52%"]);
+  assert.deepEqual([de("Finalizações").casa, de("Finalizações no gol").casa, de("Para fora").casa], ["21", "8", "8"]); // 21 - 8 no gol - 5 bloqueadas
+  assert.equal(de("Pontaria").casa, "38%"); // 8 de 21 (a ESPN manda 0.4)
+  assert.equal(de("Passes certos").casa, "292/358 (82%)");
+  assert.equal(de("Cortes").fora, "32");
+  assert.equal(de("Pênaltis").casa, "0/1");
+  assert.equal(de("Pênaltis").fora, null); // o Deportivo não bateu pênalti
+  // nada em inglês nem repetido
+  assert.ok(linhas.every((l) => !/[A-Z][a-z]+ [A-Z]|%$|Tackle|Cross|Long|Target|Penalty/.test(l.rotulo)), linhas.map((l) => l.rotulo).join(", "));
+  const chaves = linhas.map((l) => `${l.secao}:${l.rotulo}`);
+  assert.equal(new Set(chaves).size, chaves.length);
+  assert.equal(Visual.estatisticasFutebol([{ name: "points", value: 100 }], []), null); // NBA etc. ficam como estão
+});
+
+test("intervalo na linha do tempo: antes do 1º lance do 2º tempo, com o placar do 1º tempo", () => {
+  const i = Visual.intervaloDoJogo(LANCES, ladoDe, true);
+  assert.equal(LANCES[i.antesDe].tempo, "54'");
+  assert.equal(i.placar, "0 - 1");
+  const acrescimo = [{ tempo: "45'+2'", tipo: "gol", time_id: "1", jogadores: ["A"] }, { tempo: "46'", tipo: "amarelo", time_id: "2", jogadores: ["B"] }];
+  assert.deepEqual(Visual.intervaloDoJogo(acrescimo, ladoDe, false), { antesDe: 1, placar: "1 - 0" }); // 45'+2' ainda é do 1º tempo
+  assert.equal(Visual.intervaloDoJogo(acrescimo.slice(0, 1), ladoDe, false), null); // ainda no 1º tempo
+  assert.deepEqual(Visual.intervaloDoJogo(acrescimo.slice(0, 1), ladoDe, true), { antesDe: 1, placar: "1 - 0" }); // acabou sem lance no 2º
 });

@@ -187,3 +187,18 @@ test("carreira: o time da temporada pela sigla (a ESPN indexa os times pelo cód
   assert.equal(c[1].nome, "Outros números - Temporada regular");
   assert.equal(R.categoriasCarreira({ teams: [{ id: "5", abbreviation: "CLE" }], categories: [{ displayName: "Total", labels: [], statistics: [{ teamId: "5", season: { year: 2004 }, stats: [] }] }] })[0].temporadas[0].time, "CLE");
 });
+
+test("resumo da temporada no perfil: jogos e titular separados, título curto", () => {
+  // Ángel Pérez (Alavés), statsSummary da ESPN com lang=pt em 21/11/2026
+  const sumario = { displayName: "Estatísticas da Temporada 2026-27 Espanhol", statistics: [
+    { name: "starts-subIns", displayName: "Titular-Substitute Appearances", displayValue: "10 (1)" },
+    { name: "totalGoals", displayName: "Total de gols", displayValue: "0" },
+    { name: "goalAssists", displayName: "Assistências", displayValue: "3" },
+    { name: "totalTackles", displayName: "Tackles", displayValue: "13" },
+    { name: "points", displayName: "Points", displayValue: "20.1" },
+  ] };
+  const r = R.resumoDoAtleta(sumario, (t) => (t === "Points" ? "Pontos" : t));
+  assert.equal(r.titulo, "Temporada 2026-27");
+  assert.deepEqual(r.itens.map((i) => `${i.rotulo}: ${i.valor}`), ["Jogos: 11", "Como titular: 10", "Gols: 0", "Assistências: 3", "Desarmes: 13", "Pontos: 20.1"]);
+  assert.deepEqual(R.resumoDoAtleta({}), { titulo: null, itens: [] });
+});

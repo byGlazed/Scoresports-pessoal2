@@ -1,0 +1,286 @@
+{
+"home": [
+{
+"name": "foulsCommitted",
+"label": "faltas",
+"displayValue": "20"
+},
+{
+"name": "yellowCards",
+"label": "Cartões amarelos",
+"displayValue": "4"
+},
+{
+"name": "redCards",
+"label": "Cartões Vermelhos",
+"displayValue": "0"
+},
+{
+"name": "offsides",
+"label": "Impedimentos",
+"displayValue": "1"
+},
+{
+"name": "wonCorners",
+"label": "Escanteios",
+"displayValue": "8"
+},
+{
+"name": "saves",
+"label": "defesas",
+"displayValue": "2"
+},
+{
+"name": "possessionPct",
+"label": "Possession",
+"displayValue": "48.4"
+},
+{
+"name": "totalShots",
+"label": "chutes",
+"displayValue": "21"
+},
+{
+"name": "shotsOnTarget",
+"label": "Fin. certas",
+"displayValue": "8"
+},
+{
+"name": "shotPct",
+"label": "On Target %",
+"displayValue": "0.4"
+},
+{
+"name": "penaltyKickGoals",
+"label": "Penalty Goals",
+"displayValue": "0"
+},
+{
+"name": "penaltyKickShots",
+"label": "Penalty Kicks Taken",
+"displayValue": "1"
+},
+{
+"name": "accuratePasses",
+"label": "Accurate Passes",
+"displayValue": "292"
+},
+{
+"name": "totalPasses",
+"label": "Passes",
+"displayValue": "358"
+},
+{
+"name": "passPct",
+"label": "Pass Completion %",
+"displayValue": "0.8"
+},
+{
+"name": "accurateCrosses",
+"label": "Accurate Crosses",
+"displayValue": "5"
+},
+{
+"name": "totalCrosses",
+"label": "Crosses",
+"displayValue": "21"
+},
+{
+"name": "crossPct",
+"label": "Cross %",
+"displayValue": "0.2"
+},
+{
+"name": "totalLongBalls",
+"label": "Long Balls",
+"displayValue": "67"
+},
+{
+"name": "accurateLongBalls",
+"label": "Accurate Long Balls",
+"displayValue": "39"
+},
+{
+"name": "longballPct",
+"label": "Long Balls %",
+"displayValue": "0.6"
+},
+{
+"name": "blockedShots",
+"label": "Blocked Shots",
+"displayValue": "5"
+},
+{
+"name": "effectiveTackles",
+"label": "Effective Tackles",
+"displayValue": "10"
+},
+{
+"name": "totalTackles",
+"label": "Tackles",
+"displayValue": "17"
+},
+{
+"name": "tacklePct",
+"label": "Tackle %",
+"displayValue": "0.6"
+},
+{
+"name": "interceptions",
+"label": "Interceptions",
+"displayValue": "12"
+},
+{
+"name": "effectiveClearance",
+"label": "Effective Clearances",
+"displayValue": "19"
+},
+{
+"name": "totalClearance",
+"label": "Desarmes",
+"displayValue": "19"
+}
+],
+"away": [
+{
+"name": "foulsCommitted",
+"label": "faltas",
+"displayValue": "15"
+},
+{
+"name": "yellowCards",
+"label": "Cartões amarelos",
+"displayValue": "4"
+},
+{
+"name": "redCards",
+"label": "Cartões Vermelhos",
+"displayValue": "0"
+},
+{
+"name": "offsides",
+"label": "Impedimentos",
+"displayValue": "1"
+},
+{
+"name": "wonCorners",
+"label": "Escanteios",
+"displayValue": "2"
+},
+{
+"name": "saves",
+"label": "defesas",
+"displayValue": "5"
+},
+{
+"name": "possessionPct",
+"label": "Possession",
+"displayValue": "51.6"
+},
+{
+"name": "totalShots",
+"label": "chutes",
+"displayValue": "7"
+},
+{
+"name": "shotsOnTarget",
+"label": "Fin. certas",
+"displayValue": "2"
+},
+{
+"name": "shotPct",
+"label": "On Target %",
+"displayValue": "0.3"
+},
+{
+"name": "penaltyKickGoals",
+"label": "Penalty Goals",
+"displayValue": "0"
+},
+{
+"name": "penaltyKickShots",
+"label": "Penalty Kicks Taken",
+"displayValue": "0"
+},
+{
+"name": "accuratePasses",
+"label": "Accurate Passes",
+"displayValue": "306"
+},
+{
+"name": "totalPasses",
+"label": "Passes",
+"displayValue": "391"
+},
+{
+"name": "passPct",
+"label": "Pass Completion %",
+"displayValue": "0.8"
+},
+{
+"name": "accurateCrosses",
+"label": "Accurate Crosses",
+"displayValue": "4"
+},
+{
+"name": "totalCrosses",
+"label": "Crosses",
+"displayValue": "14"
+},
+{
+"name": "crossPct",
+"label": "Cross %",
+"displayValue": "0.3"
+},
+{
+"name": "totalLongBalls",
+"label": "Long Balls",
+"displayValue": "58"
+},
+{
+"name": "accurateLongBalls",
+"label": "Accurate Long Balls",
+"displayValue": "24"
+},
+{
+"name": "longballPct",
+"label": "Long Balls %",
+"displayValue": "0.4"
+},
+{
+"name": "blockedShots",
+"label": "Blocked Shots",
+"displayValue": "4"
+},
+{
+"name": "effectiveTackles",
+"label": "Effective Tackles",
+"displayValue": "12"
+},
+{
+"name": "totalTackles",
+"label": "Tackles",
+"displayValue": "21"
+},
+{
+"name": "tacklePct",
+"label": "Tackle %",
+"displayValue": "0.6"
+},
+{
+"name": "interceptions",
+"label": "Interceptions",
+"displayValue": "6"
+},
+{
+"name": "effectiveClearance",
+"label": "Effective Clearances",
+"displayValue": "32"
+},
+{
+"name": "totalClearance",
+"label": "Desarmes",
+"displayValue": "32"
+}
+]
+}
