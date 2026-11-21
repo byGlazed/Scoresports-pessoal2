@@ -35,19 +35,9 @@ jobs:
       - name: Gerar a versão do celular
         run: python gerar_celular.py
 
+      # se o main andou durante o robô (código publicado no meio), o script refaz em cima dele e tenta de novo
       - name: Guardar e publicar se algo mudou
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if ! git diff --quiet -- campeoes.json boxe_eventos.json transmissoes.json fotos.json kings.json; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            # a pasta www do APK é ignorada pelo git de propósito (o workflow do APK copia docs/apk/)
-            git add campeoes.json boxe_eventos.json transmissoes.json fotos.json kings.json docs
-            git commit -m "Robô: dados atualizados ($(date -u +%Y-%m-%d))"
-            git push
-            # pede ao Pages para publicar de novo (um push feito pelo robô pode não disparar a publicação)
-            gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "aviso: não consegui pedir a publicação do Pages"
-          else
-            echo "Nada novo hoje."
-          fi
+          bash .github/scripts/publicar.sh "Robô: dados atualizados ($(date -u +%Y-%m-%d))" campeoes.json boxe_eventos.json transmissoes.json fotos.json kings.json

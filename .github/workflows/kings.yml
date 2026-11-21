@@ -37,16 +37,8 @@ jobs:
       - name: Publicar se o placar mudou
         env:
           GH_TOKEN: ${{ github.token }}
+        # o "git pull --rebase" daqui parava no conflito do sw.js/versao.txt (mudam a cada geração);
+        # o script refaz em cima do main novo e gera a pasta docs de novo
         run: |
-          if ! git diff --quiet -- kings.json; then
-            python gerar_celular.py
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add kings.json docs
-            git commit -m "Robô: Kings League ($(date -u +%Y-%m-%d\ %H:%M))"
-            git pull --rebase -q || true
-            git push
-            gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "aviso: não consegui pedir a publicação do Pages"
-          else
-            echo "Nada novo."
-          fi
+          if ! git diff --quiet -- kings.json; then python gerar_celular.py; fi
+          bash .github/scripts/publicar.sh "Robô: Kings League ($(date -u '+%Y-%m-%d %H:%M'))" kings.json
