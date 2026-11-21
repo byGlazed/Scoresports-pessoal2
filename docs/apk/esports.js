@@ -39,9 +39,9 @@ function mapaAtual(p) {
 function statusEsportsLista(p) {
   const md = p.melhor_de ? `MD${p.melhor_de}` : null;
   if (p.estado === 1) return [hora(p.inicio) || "A definir", md].filter(Boolean);
-  if (p.estado === 2) return ["Ao vivo", mapaAtual(p) || md].filter(Boolean);
+  if (p.estado === 2) return ["Vivo", mapaAtual(p) || md].filter(Boolean);
   if (p.status === "Encerrado") return ["Fim", md].filter(Boolean);
-  return [p.status];
+  return Visual.statusCurto(p.status);
 }
 
 /** Linha da partida na lista: os dois times, o placar da série e o estado (com "MD3"). */

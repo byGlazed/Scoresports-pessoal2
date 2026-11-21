@@ -367,7 +367,7 @@ function cartaoCampeoes(chave) {
 /** O esqueleto (skeleton) no lugar do "Carregando…": blocos no formato do que vai chegar (lista de jogos, placar
     da partida, perfil, linhas, campinho). Só aparece depois de 150 ms (CSS): com o dado guardado, nada pisca.
     O texto fica para o leitor de tela. */
-function esqueleto(tipo = "lista", texto = "Carregando…") {
+function esqueleto(tipo = "lista", texto = "Carregando…", conhecido = null) {
   const barra = (classe) => h("i", { class: `esq-barra ${classe}` });
   const linhaJogo = () => h("div", { class: "esq-jogo" }, barra("esq-hora"), h("div", { class: "esq-times" }, barra("esq-linha"), barra("esq-linha esq-curta")), barra("esq-placar"));
   const cartaoJogos = (n) => h("div", { class: "esq-cartao" }, h("div", { class: "esq-cabeca" }, barra("esq-escudo-p"), barra("esq-titulo")), ...Array.from({ length: n }, linhaJogo));
@@ -380,7 +380,9 @@ function esqueleto(tipo = "lista", texto = "Carregando…") {
       linhas(5),
     ];
   } else if (tipo === "perfil") {
-    miolo = [h("div", { class: "esq-cartao esq-perfil" }, barra("esq-escudo esq-grande"), h("div", { class: "esq-times" }, barra("esq-linha"), barra("esq-linha esq-curta"))), h("div", { class: "esq-abas" }, barra("esq-aba"), barra("esq-aba"), barra("esq-aba")), linhas(6)];
+    // com o nome conhecido (veio da lista, do campinho, da pesquisa), ele aparece na hora no lugar da barra
+    const nome = conhecido && conhecido.nome ? h("strong", { class: "esq-nome" }, conhecido.nome) : barra("esq-linha");
+    miolo = [h("div", { class: "esq-cartao esq-perfil" }, barra("esq-escudo esq-grande"), h("div", { class: "esq-times" }, nome, barra("esq-linha esq-curta"))), h("div", { class: "esq-abas" }, barra("esq-aba"), barra("esq-aba"), barra("esq-aba")), linhas(6)];
   } else if (tipo === "linhas") miolo = linhas(3);
   else if (tipo === "grupo") miolo = cartaoJogos(2);
   else if (tipo === "campinho") miolo = h("div", { class: "esq-barra esq-campo" });
@@ -744,7 +746,7 @@ function conteudoFolhaJogador({ jogador, linhas, extra, outros }) {
 }
 
 /** Uma linha de jogo na lista. `times` vem na ordem em que deve aparecer. */
-function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoClicar, atual, aoPreparar, atualizando }) {
+function botaoJogo({ id, estado, status, statusCompleto, times, transmissao, mostrarPadrao, aoClicar, atual, aoPreparar, atualizando }) {
   // "atualizando": o jogo guardado já devia ter começado e o novo ainda não chegou — nem horário nem placar velho
   const aoVivo = estado === 2 && !atualizando;
   let preparado = false;
@@ -770,8 +772,8 @@ function botaoJogo({ id, estado, status, times, transmissao, mostrarPadrao, aoCl
       ? h("div", { class: "jogo-status" }, h("span", { class: "esq-barra jogo-atualizando", role: "img", "aria-label": "Atualizando" }))
       : h(
           "div",
-          { class: `jogo-status${aoVivo ? " ao-vivo" : ""}` },
-          status.map((linha, i) => h("div", { class: i === 0 && estado === 1 ? "hora" : null }, linha))
+          { class: `jogo-status${aoVivo ? " ao-vivo" : ""}`, title: statusCompleto || null, "aria-label": statusCompleto || null },
+          status.map((linha, i) => h("div", { class: i === 0 && estado === 1 && /^\d/.test(linha) ? "hora" : null }, linha))
         ),
     h(
       "div",
@@ -986,7 +988,7 @@ async function nbaDia(silencioso) {
 
 function nbaStatusLista(j) {
   if (j.estado === 1) return [hora(j.inicio) || "A definir"];
-  if (j.estado === 2) return [j.status || "Ao vivo"];
+  if (j.estado === 2) return Visual.statusCurto(j.status || "Ao vivo");
   return ["Fim"];
 }
 

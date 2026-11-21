@@ -206,7 +206,40 @@ const Visual = (() => {
       .map((l) => ({ ...l, casa: l.casa === null ? null : String(l.casa), fora: l.fora === null ? null : String(l.fora) }));
   }
 
-  return { autoresDosGols, placarCorrido, intervaloDoJogo, formaRecente, proximoJogo, miniClassificacao, imagemPequena, progressoTemporada, situacaoCorrida, posicaoPorExtenso, estatisticasFutebol };
+  /* O estado do jogo na coluna estreita da lista (50 px): no máximo duas linhas curtas, como os códigos do
+     Sofascore. "Intervalo" numa linha só saía da coluna; o texto inteiro continua no rótulo de leitura. */
+  const CURTOS = [
+    [/^intervalo$/i, () => ["Int."]],
+    [/^intervalo da (\d+)ª$/i, (m) => ["Int.", `${m[1]}ª`]],
+    [/^fim do tempo normal$/i, () => ["Fim", "90'"]],
+    [/^fim do (\d+)º quarto$/i, (m) => ["Fim", `${m[1]}ºQ`]],
+    [/^fim do (\d+)º período$/i, (m) => ["Fim", `${m[1]}ºP`]],
+    [/^fim da (\d+)ª$/i, (m) => ["Fim", `${m[1]}ª`]],
+    [/^(\d+)º quarto(?:, (.+))?$/i, (m) => [`${m[1]}ºQ`, m[2]]],
+    [/^(\d+)º período(?: · (.+))?$/i, (m) => [`${m[1]}ºP`, m[2]]],
+    [/^(\d+)ª prorrogação(?: · (.+))?$/i, (m) => [`${m[1]}ª pr.`, m[2]]],
+    [/^prorrogação\s*(?:[,·]\s*(.+))?$/i, (m) => ["Prorr.", m[1]]],
+    [/^([▲▼]) (\d+)ª entrada$/, (m) => [`${m[1]} ${m[2]}ª`]],
+    [/^(\d+)ª entrada$/i, (m) => [`${m[1]}ª`]],
+    [/^pênaltis$/i, () => ["Pên."]],
+    [/^fim \(pên\.\)$/i, () => ["Fim", "pên."]],
+    [/^cancelad[oa]$/i, () => ["Canc."]],
+    [/^suspens[oa]$/i, () => ["Susp."]],
+    [/^abandonad[oa]$/i, () => ["Aband."]],
+    [/^atrasad[oa]$/i, () => ["Atras."]],
+    [/^adiad[oa]$/i, () => ["Adiado"]],
+    [/^ao vivo$/i, () => ["Ao", "vivo"]],
+  ];
+  function statusCurto(texto) {
+    const t = String(texto || "").trim();
+    for (const [re, f] of CURTOS) {
+      const m = re.exec(t);
+      if (m) return f(m).filter(Boolean);
+    }
+    return [t];
+  }
+
+  return { autoresDosGols, placarCorrido, intervaloDoJogo, statusCurto, formaRecente, proximoJogo, miniClassificacao, imagemPequena, progressoTemporada, situacaoCorrida, posicaoPorExtenso, estatisticasFutebol };
 })();
 
 if (typeof module !== "undefined") module.exports = Visual;

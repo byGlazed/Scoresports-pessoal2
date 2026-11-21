@@ -152,7 +152,8 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
 
   const carregar = {
     geral: async () => {
-      const [r, c] = await Promise.all([api(`${base}/jogos`), api(`/e/${esporte}/${liga}/classificacao`).catch(() => null)]);
+      const pedidoClassificacao = api(`/e/${esporte}/${liga}/classificacao`).catch(() => null);
+      const r = await api(`${base}/jogos`);
       const blocos = [];
       const proximo = Visual.proximoJogo(r.proximos, hojeBR());
       if (proximo) blocos.push(secao("Próximo jogo", linhaJogoDoTime(esporte, liga, id, proximo)));
@@ -175,16 +176,23 @@ async function desenharTime(corpo, ativo, esporte, liga, timeId, nomeInicial, le
             )
           )
         );
-      const grupo = c && (c.grupos || []).find((g) => g.linhas.some((l) => String(l.id) === id));
-      if (grupo) blocos.push(...cartoesClassificacao(esporteObj(esporte), liga, { grupos: [{ ...grupo, linhas: Visual.miniClassificacao(grupo.linhas, id) }] }, id));
-      // o resumo da temporada (como o do Sofascore), com os números da linha da classificação
-      const linha = esporte === "futebol" && grupo ? grupo.linhas.find((l) => String(l.id) === id) : null;
-      if (linha && linha.stats) {
-        const st = linha.stats;
-        const itens = [["Jogos", st.gamesPlayed], ["Vitórias", st.wins], ["Empates", st.ties], ["Derrotas", st.losses], ["Gols marcados", st.pointsFor], ["Gols sofridos", st.pointsAgainst]].filter(([, v]) => v !== undefined && v !== null && v !== "");
-        if (itens.length) blocos.push(secao("Resumo da temporada", h("div", { class: "numeros" }, itens.map(([rotulo, v]) => h("div", { class: "numero-caixa" }, h("strong", null, v), h("span", null, rotulo))))));
-      }
-      return blocos.length ? blocos : [vazio("Sem jogos nem classificação deste time por enquanto.")];
+      // a classificação (e o resumo da temporada, que sai da linha dela) entra depois, sem segurar os jogos
+      const lugar = h("div", { class: "lugar-classificacao" }, esqueleto("linhas"));
+      pedidoClassificacao.then((c) => {
+        const grupo = c && (c.grupos || []).find((g) => g.linhas.some((l) => String(l.id) === id));
+        const partes = grupo ? cartoesClassificacao(esporteObj(esporte), liga, { grupos: [{ ...grupo, linhas: Visual.miniClassificacao(grupo.linhas, id) }] }, id) : [];
+        // o resumo da temporada (como o do Sofascore), com os números da linha da classificação
+        const linha = esporte === "futebol" && grupo ? grupo.linhas.find((l) => String(l.id) === id) : null;
+        if (linha && linha.stats) {
+          const st = linha.stats;
+          const itens = [["Jogos", st.gamesPlayed], ["Vitórias", st.wins], ["Empates", st.ties], ["Derrotas", st.losses], ["Gols marcados", st.pointsFor], ["Gols sofridos", st.pointsAgainst]].filter(([, v]) => v !== undefined && v !== null && v !== "");
+          if (itens.length) partes.push(secao("Resumo da temporada", h("div", { class: "numeros" }, itens.map(([rotulo, v]) => h("div", { class: "numero-caixa" }, h("strong", null, v), h("span", null, rotulo))))));
+        }
+        if (!partes.length && !blocos.length) lugar.replaceChildren(vazio("Sem jogos nem classificação deste time por enquanto."));
+        else lugar.replaceChildren(...partes);
+      });
+      blocos.push(lugar);
+      return blocos;
     },
     jogos: async () => {
       const r = await api(`${base}/jogos`);
@@ -726,8 +734,8 @@ function ordemTimes(esporteId, jogo) {
 }
 
 function statusPartidaLista(j) {
-  if (j.estado === 1) return j.status ? [j.status] : [hora(j.inicio) || "A definir"];
-  if (j.estado === 2) return [j.status || "Ao vivo"];
+  if (j.estado === 1) return j.status ? Visual.statusCurto(j.status) : [hora(j.inicio) || "A definir"];
+  if (j.estado === 2) return Visual.statusCurto(j.status || "Ao vivo");
   if (j.status && j.status.includes("pênaltis")) return ["Fim", "pên."];
   if (j.status && j.status.includes("prorrogação")) return ["Fim", "prorr."];
   return [j.status === "Encerrado" ? "Fim" : j.status || "Fim"];
@@ -747,6 +755,7 @@ function linhaPartida(esp, j, aoClicar, liga) {
     id: j.id,
     estado: j.estado,
     status: statusPartidaLista(j),
+    statusCompleto: j.estado === 2 || (j.estado === 1 && j.status) ? j.status : null,
     atualizando: j.atualizando,
     atual: j.id === st.jogoAtual,
     transmissao: j.transmissao,

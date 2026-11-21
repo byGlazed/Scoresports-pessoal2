@@ -12,7 +12,7 @@
 const CacheRegras = (() => {
   const VELHO_MAXIMO = 6 * 3600; // segundos
   const INTERVALO_AVISOS = 10000; // milissegundos
-  const ESPERA_CONFERIR = 2500; // milissegundos: quanto a tela espera a rede antes de mostrar "atualizando"
+  const ESPERA_CONFERIR = 800; // milissegundos: quanto a tela espera a rede antes de mostrar "atualizando"
   const JANELA_JOGO = 12 * 3600000; // jogo "a jogar" com horário passado há mais que isso é adiado, não atrasado
   const PARADO = /adiad|cancel|suspens|interromp|a definir/i;
 

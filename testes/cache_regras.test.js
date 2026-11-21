@@ -48,3 +48,7 @@ test("jogo guardado que já devia ter começado não passa por 'vai começar'", 
   assert.equal(C.decidir({ ...salvo, valor: [jogos[1], jogos[3]] }, agora / 1000, { duvidoso }), "velho");
   assert.equal(C.decidir({ ...salvo, vale_ate: agora / 1000 + 5 }, agora / 1000, { duvidoso }), "valido");
 });
+
+test("a tela espera a rede no máximo 0,8 s antes de mostrar o 'atualizando'", () => {
+  assert.ok(C.ESPERA_CONFERIR <= 1000, `espera de ${C.ESPERA_CONFERIR} ms deixa a tela lenta`);
+});

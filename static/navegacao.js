@@ -238,7 +238,7 @@ const Navegacao = {
     area.replaceChildren(corpo);
     window.scrollTo({ top: 0 });
     const ativo = () => p.corpo === corpo && this.estaNaPilha(p);
-    corpo.replaceChildren(esqueleto(ESQUELETO_DA_PAGINA[p.tipo] || "lista"));
+    corpo.replaceChildren(esqueleto(ESQUELETO_DA_PAGINA[p.tipo] || "lista", undefined, { nome: p.nome || (p.params && p.params.nome) || null }));
     this.acompanhar(
       p,
       Promise.resolve().then(() => def.desenhar(corpo, p.params, ativo, p)),
@@ -602,12 +602,12 @@ function textoSituacaoCorrida(sit) {
   return [fim, prox].filter(Boolean).join(" · ") || "Encerrado";
 }
 
-/** Os fins de semana de corrida do dia com o estado das sessões (a lista não espera mais que 2,5 s por isso). */
+/** Os fins de semana de corrida do dia com o estado das sessões (a lista não espera mais que 1,2 s por isso). */
 async function comSituacaoCorrida(esp, liga, eventos) {
   return Promise.all(
     eventos.map(async (ev) => {
       try {
-        const det = await Promise.race([api(`/e/${esp.id}/${liga}/eventos/${ev.id}?data=${ev.data}`), new Promise((_, nao) => setTimeout(() => nao(new Error("demorou")), 2500))]);
+        const det = await Promise.race([api(`/e/${esp.id}/${liga}/eventos/${ev.id}?data=${ev.data}`), new Promise((_, nao) => setTimeout(() => nao(new Error("demorou")), 1200))]);
         const sit = Visual.situacaoCorrida(det.sessoes);
         return sit ? { ...ev, estado: sit.estado, situacao: sit } : ev;
       } catch (_) {

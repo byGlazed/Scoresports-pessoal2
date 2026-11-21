@@ -171,3 +171,32 @@ test("intervalo na linha do tempo: antes do 1º lance do 2º tempo, com o placar
   assert.equal(Visual.intervaloDoJogo(acrescimo.slice(0, 1), ladoDe, false), null); // ainda no 1º tempo
   assert.deepEqual(Visual.intervaloDoJogo(acrescimo.slice(0, 1), ladoDe, true), { antesDe: 1, placar: "1 - 0" }); // acabou sem lance no 2º
 });
+
+test("estado curto na coluna da lista: nada de palavra que não cabe nos 50 px", () => {
+  const casos = {
+    Intervalo: ["Int."], // o do print: Nice x PSG saía da coluna
+    "Intervalo da 5ª": ["Int.", "5ª"],
+    "Fim do tempo normal": ["Fim", "90'"],
+    "3º quarto, 5:12": ["3ºQ", "5:12"],
+    "Fim do 2º quarto": ["Fim", "2ºQ"],
+    "1º período · 12:30": ["1ºP", "12:30"],
+    "Fim do 1º período": ["Fim", "1ºP"],
+    "Prorrogação, 2:10": ["Prorr.", "2:10"],
+    "Prorrogação · 3:00": ["Prorr.", "3:00"],
+    Prorrogação: ["Prorr."],
+    "2ª prorrogação · 4:00": ["2ª pr.", "4:00"],
+    "▲ 5ª entrada": ["▲ 5ª"],
+    "Fim da 7ª": ["Fim", "7ª"],
+    Pênaltis: ["Pên."],
+    "Fim (pên.)": ["Fim", "pên."],
+    Cancelado: ["Canc."],
+    Suspenso: ["Susp."],
+    Abandonado: ["Aband."],
+    "Ao vivo": ["Ao", "vivo"],
+    "83'": ["83'"],
+    "45'+2'": ["45'+2'"],
+  };
+  for (const [texto, linhas] of Object.entries(casos)) assert.deepEqual(Visual.statusCurto(texto), linhas, texto);
+  // cada linha cabe: no máximo 6 caracteres (ou um minuto com acréscimo)
+  for (const linhas of Object.values(casos)) for (const l of linhas) assert.ok(l.length <= 6, l);
+});

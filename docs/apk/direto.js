@@ -167,9 +167,11 @@ const emAndamento = new Map();
 let avisoDadosNovos = null;
 let ultimoAviso = null;
 
-function avisarDadosNovos() {
-  if (avisoDadosNovos) return; // já tem um aviso marcado
-  const espera = Math.max(300, CacheRegras.esperaParaAvisar(ultimoAviso, Date.now()));
+/** urgente: o dado novo corrige um jogo marcado "atualizando" — a tela redesenha já, sem o espaçamento dos avisos. */
+function avisarDadosNovos(urgente = false) {
+  if (avisoDadosNovos && !urgente) return; // já tem um aviso marcado
+  if (avisoDadosNovos) clearTimeout(avisoDadosNovos);
+  const espera = urgente ? 0 : Math.max(300, CacheRegras.esperaParaAvisar(ultimoAviso, Date.now()));
   avisoDadosNovos = setTimeout(() => {
     avisoDadosNovos = null;
     ultimoAviso = Date.now();
@@ -194,13 +196,15 @@ async function obter(chave, ttl, buscar, estavel, opcoes = {}) {
   if (decisao === "velho" || decisao === "conferir") {
     const antes = JSON.stringify(salvo.valor);
     const novo = buscarUmaVez(chave, ttl, buscar, estavel, salvo);
+    let marcado = false;
     novo.then((v) => {
-      if (JSON.stringify(v) !== antes) avisarDadosNovos();
+      if (JSON.stringify(v) !== antes) avisarDadosNovos(marcado);
     }).catch(() => {});
     if (decisao === "conferir") {
       const NADA = {};
       const rapido = await Promise.race([novo.catch(() => NADA), new Promise((ok) => setTimeout(() => ok(NADA), CacheRegras.ESPERA_CONFERIR))]);
       if (rapido !== NADA) return rapido;
+      marcado = true;
       return opcoes.marcar ? opcoes.marcar(salvo.valor, Date.now()) : salvo.valor;
     }
     return salvo.valor;

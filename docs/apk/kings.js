@@ -21,7 +21,7 @@ function linhaPartidaKings(j, aoClicar) {
   return botaoJogo({
     id: j.id,
     estado: j.estado,
-    status: j.estado === 1 ? [hora(j.inicio) || "A definir"] : [j.status],
+    status: j.estado === 1 ? [hora(j.inicio) || "A definir"] : Visual.statusCurto(j.status),
     atual: j.id === estadoDe("kings").jogoAtual,
     transmissao: j.video || j.estado === 1 ? { canais: [KINGS_TRANSMISSAO], confirmado: Boolean(j.video) } : null,
     mostrarPadrao: true,
