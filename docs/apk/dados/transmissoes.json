@@ -653,20 +653,6 @@
       "fonte": "guia de TV"
     },
     {
-      "esporte": "nfl",
-      "data": "2026-11-22",
-      "times": [
-        "DET",
-        "TB"
-      ],
-      "canais": [
-        "ESPN 3",
-        "Disney+ Premium"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
       "esporte": "nhl",
       "data": "2026-11-22",
       "times": [
@@ -757,19 +743,6 @@
       "times": [
         "HOU",
         "IND"
-      ],
-      "canais": [
-        "SporTV 2"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "nfl",
-      "data": "2026-11-22",
-      "times": [
-        "KC",
-        "ARI"
       ],
       "canais": [
         "SporTV 2"
