@@ -761,12 +761,24 @@
           "rodada": "Quarter-Finals",
           "grupo": "Playoffs",
           "inicio": "2026-11-23T21:00:00.000Z",
-          "status": null,
-          "minuto": null,
+          "status": "ended",
+          "minuto": 44,
           "casa": "164",
           "fora": "168",
-          "placar": null,
-          "tempos": [],
+          "placar": [
+            9,
+            4
+          ],
+          "tempos": [
+            [
+              3,
+              1
+            ],
+            [
+              6,
+              3
+            ]
+          ],
           "penaltis": null,
           "video": null
         },
@@ -819,7 +831,7 @@
           "inicio": "2026-11-30T15:01:00.000Z",
           "status": null,
           "minuto": null,
-          "casa": "58",
+          "casa": "164",
           "fora": "219",
           "placar": null,
           "tempos": [],
