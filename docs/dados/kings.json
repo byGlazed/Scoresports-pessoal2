@@ -787,13 +787,28 @@
           "rodada": "Quarter-Finals",
           "grupo": "Playoffs",
           "inicio": "2026-11-23T22:00:00.000Z",
-          "status": null,
-          "minuto": null,
+          "status": "ended",
+          "minuto": 43,
           "casa": "167",
           "fora": "50",
-          "placar": null,
-          "tempos": [],
-          "penaltis": null,
+          "placar": [
+            5,
+            5
+          ],
+          "tempos": [
+            [
+              1,
+              1
+            ],
+            [
+              4,
+              4
+            ]
+          ],
+          "penaltis": [
+            1,
+            2
+          ],
           "video": null
         },
         {
@@ -801,10 +816,36 @@
           "rodada": "Quarter-Finals",
           "grupo": "Playoffs",
           "inicio": "2026-11-23T23:00:00.000Z",
-          "status": null,
-          "minuto": null,
+          "status": "ended",
+          "minuto": 39,
           "casa": "160",
           "fora": "161",
+          "placar": [
+            4,
+            9
+          ],
+          "tempos": [
+            [
+              1,
+              3
+            ],
+            [
+              3,
+              6
+            ]
+          ],
+          "penaltis": null,
+          "video": null
+        },
+        {
+          "id": 2893,
+          "rodada": "Semi-Finals",
+          "grupo": "Playoffs",
+          "inicio": "2026-11-30T21:00:00.000Z",
+          "status": null,
+          "minuto": null,
+          "casa": "164",
+          "fora": "50",
           "placar": null,
           "tempos": [],
           "penaltis": null,
@@ -814,25 +855,11 @@
           "id": 2892,
           "rodada": "Semi-Finals",
           "grupo": "Playoffs",
-          "inicio": "2026-11-30T14:01:00.000Z",
+          "inicio": "2026-11-30T22:00:00.000Z",
           "status": null,
           "minuto": null,
           "casa": "162",
-          "fora": "219",
-          "placar": null,
-          "tempos": [],
-          "penaltis": null,
-          "video": null
-        },
-        {
-          "id": 2893,
-          "rodada": "Semi-Finals",
-          "grupo": "Playoffs",
-          "inicio": "2026-11-30T15:01:00.000Z",
-          "status": null,
-          "minuto": null,
-          "casa": "164",
-          "fora": "219",
+          "fora": "161",
           "placar": null,
           "tempos": [],
           "penaltis": null,
@@ -842,7 +869,7 @@
           "id": 2894,
           "rodada": "Final",
           "grupo": "Playoffs",
-          "inicio": "2026-11-30T17:01:00.000Z",
+          "inicio": "2026-12-01T00:00:00.000Z",
           "status": null,
           "minuto": null,
           "casa": "58",
@@ -862,22 +889,22 @@
               "nome": "Lucas 'L7'",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/8df12a8f-2da2-4dda-a27e-a7e9b5f579a2/323585831.png",
               "time": "161",
-              "total": 11,
-              "jogos": 5
+              "total": 13,
+              "jogos": 6
             },
             {
               "nome": "Leleti Garcia",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/6787dbc2-03cf-4eac-ba78-140a451be856/112058223.png",
               "time": "50",
-              "total": 9,
-              "jogos": 4
+              "total": 10,
+              "jogos": 5
             },
             {
-              "nome": "Well Andrade",
-              "foto": "https://kingsleague-cdn.kama.football/account/production/player/82a9a377-242b-404a-995c-f032c69e7d7b/792416858.png",
-              "time": "220",
-              "total": 6,
-              "jogos": 5
+              "nome": "Matheus 'Chaveirinho'",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/27a98cb5-c75e-4af0-b18a-a32dfd3d8125/467148697.png",
+              "time": "160",
+              "total": 7,
+              "jogos": 6
             }
           ]
         },
@@ -890,14 +917,14 @@
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/220bb879-7140-4d7b-a870-0e284a586d8a/56820528.png",
               "time": "50",
               "total": 5,
-              "jogos": 5
+              "jogos": 6
             },
             {
               "nome": "Yan 'Coringa'",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/91afd4a8-a36c-4e04-a715-7efb690ef393/791842229.png",
               "time": "164",
               "total": 5,
-              "jogos": 5
+              "jogos": 6
             },
             {
               "nome": "Cristhian 'Canhoto'",
@@ -916,15 +943,15 @@
               "nome": "Marcos 'Bolivia'",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/aba41a19-155a-4160-ad93-3b3c21a54c84/438979329.png",
               "time": "167",
-              "total": 51,
-              "jogos": 5
+              "total": 61,
+              "jogos": 6
             },
             {
               "nome": "Clebinho Silva",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/cc327d38-3d28-4d98-876e-5564c64a93eb/876329434.png",
               "time": "50",
-              "total": 48,
-              "jogos": 5
+              "total": 57,
+              "jogos": 6
             },
             {
               "nome": "Esaú Assunção",
@@ -943,6 +970,13 @@
               "nome": "Lucas 'L7'",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/8df12a8f-2da2-4dda-a27e-a7e9b5f579a2/323585831.png",
               "time": "161",
+              "total": 4,
+              "jogos": 6
+            },
+            {
+              "nome": "Leleti Garcia",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/6787dbc2-03cf-4eac-ba78-140a451be856/112058223.png",
+              "time": "50",
               "total": 3,
               "jogos": 5
             },
@@ -950,13 +984,6 @@
               "nome": "Aleix Martí",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/873ec32b-c5ff-4941-a668-89ccb16cf395/708337043.png",
               "time": "49",
-              "total": 2,
-              "jogos": 5
-            },
-            {
-              "nome": "Lipão Pinheiro",
-              "foto": "https://kingsleague-cdn.kama.football/account/production/player/220bb879-7140-4d7b-a870-0e284a586d8a/56820528.png",
-              "time": "50",
               "total": 2,
               "jogos": 5
             }
@@ -970,22 +997,22 @@
               "nome": "Caio Henrique",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/30cfd511-1d50-4071-847a-46dfa3698ff0/401072714.png",
               "time": "167",
-              "total": 35,
-              "jogos": 5
+              "total": 39,
+              "jogos": 6
             },
             {
               "nome": "Lucas 'L7'",
               "foto": "https://kingsleague-cdn.kama.football/account/production/player/8df12a8f-2da2-4dda-a27e-a7e9b5f579a2/323585831.png",
               "time": "161",
-              "total": 23,
-              "jogos": 5
+              "total": 25,
+              "jogos": 6
             },
             {
-              "nome": "Ton 'Spider'",
-              "foto": "https://kingsleague-cdn.kama.football/account/production/player/65705fc1-cc5c-4370-abee-8bfeae7145dc/188729806.png",
-              "time": "220",
-              "total": 20,
-              "jogos": 5
+              "nome": "Welitim Gomes",
+              "foto": "https://kingsleague-cdn.kama.football/account/production/player/49a99ed1-1c74-4523-b673-815266024095/692538881.png",
+              "time": "167",
+              "total": 24,
+              "jogos": 6
             }
           ]
         }
