@@ -818,20 +818,6 @@
     },
     {
       "esporte": "futebol",
-      "data": "2026-11-24",
-      "times": [
-        "WOL",
-        "DER"
-      ],
-      "canais": [
-        "ESPN",
-        "Disney+ Premium"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
       "data": "2026-11-22",
       "times": [
         "AJA",
@@ -895,25 +881,10 @@
       ],
       "canais": [
         "ESPN 2",
-        "ESPN 4",
         "Disney+ Premium",
         "NBA League Pass"
       ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
-      "data": "2026-11-24",
-      "times": [
-        "NSR",
-        "ALS"
-      ],
-      "canais": [
-        "ESPN 4",
-        "Disney+ Premium"
-      ],
-      "conferido_em": "2026-11-19",
+      "conferido_em": "2026-11-24",
       "fonte": "guia de TV"
     },
     {
@@ -1059,9 +1030,10 @@
         "Barcelona"
       ],
       "canais": [
+        "TNT",
         "HBO Max"
       ],
-      "conferido_em": "2026-11-19",
+      "conferido_em": "2026-11-24",
       "fonte": "guia de TV"
     },
     {
@@ -2822,9 +2794,10 @@
         "Vasco da Gama"
       ],
       "canais": [
+        "SporTV",
         "Premiere"
       ],
-      "conferido_em": "2026-11-23",
+      "conferido_em": "2026-11-24",
       "fonte": "guia de TV"
     },
     {
@@ -2976,7 +2949,9 @@
         "Bayern Munich"
       ],
       "canais": [
-        "HBO Max"
+        "Space",
+        "HBO Max",
+        "YouTube"
       ],
       "conferido_em": "2026-11-24",
       "fonte": "guia de TV"
@@ -2989,6 +2964,7 @@
         "AS Roma"
       ],
       "canais": [
+        "TNT",
         "HBO Max"
       ],
       "conferido_em": "2026-11-24",
@@ -3317,6 +3293,20 @@
       ],
       "canais": [
         "Apple TV"
+      ],
+      "conferido_em": "2026-11-24",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-28",
+      "times": [
+        "WHU",
+        "STK"
+      ],
+      "canais": [
+        "ESPN 4",
+        "Disney+ Premium"
       ],
       "conferido_em": "2026-11-24",
       "fonte": "guia de TV"
