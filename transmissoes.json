@@ -379,35 +379,6 @@
       "fonte": "grade da ESPN/Disney+"
     },
     {
-      "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "Brentford",
-        "Everton"
-      ],
-      "canais": [
-        "ESPN",
-        "Disney+ Premium"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "nfl",
-      "data": "2026-11-23",
-      "times": [
-        "WSH",
-        "CIN"
-      ],
-      "canais": [
-        "ESPN 2",
-        "ESPN 3",
-        "Disney+ Premium"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
       "esporte": "nhl",
       "data": "2026-11-24",
       "times": [
@@ -466,48 +437,6 @@
       "fonte": "guia de TV"
     },
     {
-      "esporte": "nba",
-      "data": "2026-11-23",
-      "times": [
-        "MIN",
-        "BKN"
-      ],
-      "canais": [
-        "ESPN 4",
-        "Disney+ Premium",
-        "NBA League Pass"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "Santos",
-        "Grêmio"
-      ],
-      "canais": [
-        "SporTV",
-        "Premiere 3"
-      ],
-      "conferido_em": "2026-11-20",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "Internacional",
-        "Vitória"
-      ],
-      "canais": [
-        "Premiere 2"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
       "esporte": "futebol",
       "data": "2026-11-24",
       "times": [
@@ -531,20 +460,6 @@
       ],
       "canais": [
         "Premiere"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "NEF",
-        "HIL"
-      ],
-      "canais": [
-        "ESPN 4",
-        "Disney+ Premium"
       ],
       "conferido_em": "2026-11-19",
       "fonte": "guia de TV"
@@ -702,19 +617,6 @@
     },
     {
       "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "Levante",
-        "Elche"
-      ],
-      "canais": [
-        "CazéTV"
-      ],
-      "conferido_em": "2026-11-19",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
       "data": "2026-11-25",
       "times": [
         "SJ",
@@ -794,34 +696,6 @@
         "Premiere"
       ],
       "conferido_em": "2026-11-20",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "Botafogo",
-        "São Paulo"
-      ],
-      "canais": [
-        "Prime Video"
-      ],
-      "conferido_em": "2026-11-20",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "Monza",
-        "Fiorentina"
-      ],
-      "canais": [
-        "Disney+ Premium",
-        "SportyNet",
-        "YouTube"
-      ],
-      "conferido_em": "2026-11-22",
       "fonte": "guia de TV"
     },
     {
@@ -1116,9 +990,10 @@
         "Bahia"
       ],
       "canais": [
+        "SporTV",
         "Premiere"
       ],
-      "conferido_em": "2026-11-22",
+      "conferido_em": "2026-11-27",
       "fonte": "guia de TV"
     },
     {
@@ -1159,32 +1034,6 @@
       ],
       "canais": [
         "BandSports"
-      ],
-      "conferido_em": "2026-11-22",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "JUV",
-        "DSC"
-      ],
-      "canais": [
-        "Disney+ Premium"
-      ],
-      "conferido_em": "2026-11-22",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "futebol",
-      "data": "2026-11-23",
-      "times": [
-        "ALB",
-        "DAN"
-      ],
-      "canais": [
-        "Disney+ Premium"
       ],
       "conferido_em": "2026-11-22",
       "fonte": "guia de TV"
@@ -1550,9 +1399,10 @@
         "FCK"
       ],
       "canais": [
+        "Xsports",
         "BandSports"
       ],
-      "conferido_em": "2026-11-23",
+      "conferido_em": "2026-11-27",
       "fonte": "guia de TV"
     },
     {
@@ -1813,9 +1663,10 @@
         "Red Bull Bragantino"
       ],
       "canais": [
+        "SporTV",
         "Premiere 2"
       ],
-      "conferido_em": "2026-11-24",
+      "conferido_em": "2026-11-27",
       "fonte": "guia de TV"
     },
     {
@@ -1964,9 +1815,10 @@
       ],
       "canais": [
         "GOAT",
-        "OneFootball"
+        "OneFootball",
+        "YouTube"
       ],
-      "conferido_em": "2026-11-26",
+      "conferido_em": "2026-11-27",
       "fonte": "guia de TV"
     },
     {
@@ -1992,9 +1844,10 @@
         "Marseille"
       ],
       "canais": [
-        "CazéTV"
+        "CazéTV",
+        "YouTube"
       ],
-      "conferido_em": "2026-11-24",
+      "conferido_em": "2026-11-27",
       "fonte": "guia de TV"
     },
     {
@@ -2018,9 +1871,10 @@
         "AS Mônaco"
       ],
       "canais": [
+        "Xsports",
         "CazéTV"
       ],
-      "conferido_em": "2026-11-24",
+      "conferido_em": "2026-11-27",
       "fonte": "guia de TV"
     },
     {
@@ -2973,6 +2827,165 @@
         "Disney+ Premium"
       ],
       "conferido_em": "2026-11-26",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-12-03",
+      "times": [
+        "Tottenham Hotspur",
+        "Fulham"
+      ],
+      "canais": [
+        "ESPN",
+        "Disney+ Premium"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "nhl",
+      "data": "2026-12-03",
+      "times": [
+        "PHI",
+        "NYI"
+      ],
+      "canais": [
+        "ESPN 2",
+        "Disney+ Premium"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "nfl",
+      "data": "2026-11-29",
+      "times": [
+        "CIN",
+        "NO"
+      ],
+      "canais": [
+        "SporTV 2"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "nfl",
+      "data": "2026-11-29",
+      "times": [
+        "ARI",
+        "WSH"
+      ],
+      "canais": [
+        "SporTV 2"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-28",
+      "times": [
+        "VEL",
+        "IND"
+      ],
+      "canais": [
+        "Disney+ Premium"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-28",
+      "times": [
+        "IACC",
+        "RIV"
+      ],
+      "canais": [
+        "Disney+ Premium"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-28",
+      "times": [
+        "PSV",
+        "GAE"
+      ],
+      "canais": [
+        "Disney+ Premium"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-28",
+      "times": [
+        "AUS",
+        "COL"
+      ],
+      "canais": [
+        "YouTube"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-28",
+      "times": [
+        "ATS",
+        "TOL"
+      ],
+      "canais": [
+        "SportyNet",
+        "YouTube"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-28",
+      "times": [
+        "CSK",
+        "ZEN"
+      ],
+      "canais": [
+        "Xsports"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-29",
+      "times": [
+        "PEC",
+        "AZ"
+      ],
+      "canais": [
+        "Disney+ Premium"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-29",
+      "times": [
+        "NEC",
+        "TWE"
+      ],
+      "canais": [
+        "Disney+ Premium"
+      ],
+      "conferido_em": "2026-11-27",
       "fonte": "guia de TV"
     }
   ]
