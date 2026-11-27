@@ -1852,9 +1852,10 @@
         "Newcastle United"
       ],
       "canais": [
-        "Disney+ Premium"
+        "Disney+ Premium",
+        "YouTube"
       ],
-      "conferido_em": "2026-11-24",
+      "conferido_em": "2026-11-26",
       "fonte": "guia de TV"
     },
     {
@@ -1917,9 +1918,11 @@
         "Sevilla FC"
       ],
       "canais": [
-        "CazéTV"
+        "CazéTV",
+        "SportyNet",
+        "YouTube"
       ],
-      "conferido_em": "2026-11-24",
+      "conferido_em": "2026-11-26",
       "fonte": "guia de TV"
     },
     {
@@ -1943,9 +1946,13 @@
         "RB Leipzig"
       ],
       "canais": [
-        "OneFootball"
+        "Xsports",
+        "SporTV",
+        "GOAT",
+        "OneFootball",
+        "YouTube"
       ],
-      "conferido_em": "2026-11-24",
+      "conferido_em": "2026-11-26",
       "fonte": "guia de TV"
     },
     {
@@ -1956,9 +1963,10 @@
         "Augsburg"
       ],
       "canais": [
+        "GOAT",
         "OneFootball"
       ],
-      "conferido_em": "2026-11-24",
+      "conferido_em": "2026-11-26",
       "fonte": "guia de TV"
     },
     {
@@ -1969,9 +1977,11 @@
         "Bayer Leverkusen"
       ],
       "canais": [
+        "SporTV",
+        "CazéTV",
         "OneFootball"
       ],
-      "conferido_em": "2026-11-24",
+      "conferido_em": "2026-11-26",
       "fonte": "guia de TV"
     },
     {
@@ -2120,32 +2130,6 @@
       "canais": [
         "ESPN 4",
         "Disney+ Premium"
-      ],
-      "conferido_em": "2026-11-25",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "nfl",
-      "data": "2026-11-26",
-      "times": [
-        "DET",
-        "CHI"
-      ],
-      "canais": [
-        "SporTV 2"
-      ],
-      "conferido_em": "2026-11-25",
-      "fonte": "guia de TV"
-    },
-    {
-      "esporte": "nfl",
-      "data": "2026-11-26",
-      "times": [
-        "DAL",
-        "PHI"
-      ],
-      "canais": [
-        "SporTV 2"
       ],
       "conferido_em": "2026-11-25",
       "fonte": "guia de TV"
@@ -2708,7 +2692,9 @@
         "Napoli"
       ],
       "canais": [
-        "Disney+ Premium"
+        "Disney+ Premium",
+        "SportyNet",
+        "YouTube"
       ],
       "conferido_em": "2026-11-26",
       "fonte": "guia de TV"
@@ -2721,7 +2707,9 @@
         "Monza"
       ],
       "canais": [
-        "Disney+ Premium"
+        "Disney+ Premium",
+        "SportyNet",
+        "YouTube"
       ],
       "conferido_em": "2026-11-26",
       "fonte": "guia de TV"
@@ -2838,6 +2826,7 @@
         "WOB"
       ],
       "canais": [
+        "GOAT",
         "OneFootball"
       ],
       "conferido_em": "2026-11-26",
@@ -2943,6 +2932,45 @@
       ],
       "canais": [
         "OneFootball"
+      ],
+      "conferido_em": "2026-11-26",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-26",
+      "times": [
+        "BHA",
+        "CRA"
+      ],
+      "canais": [
+        "CazéTV"
+      ],
+      "conferido_em": "2026-11-26",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-12-02",
+      "times": [
+        "Santos",
+        "Botafogo"
+      ],
+      "canais": [
+        "Premiere"
+      ],
+      "conferido_em": "2026-11-26",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-11-29",
+      "times": [
+        "FC Porto",
+        "Sporting CP"
+      ],
+      "canais": [
+        "Disney+ Premium"
       ],
       "conferido_em": "2026-11-26",
       "fonte": "guia de TV"
