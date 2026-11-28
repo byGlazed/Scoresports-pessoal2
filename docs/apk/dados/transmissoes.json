@@ -729,20 +729,6 @@
       "fonte": "guia de TV"
     },
     {
-      "esporte": "nhl",
-      "data": "2026-11-27",
-      "times": [
-        "BOS",
-        "TOR"
-      ],
-      "canais": [
-        "ESPN 2",
-        "Disney+ Premium"
-      ],
-      "conferido_em": "2026-11-21",
-      "fonte": "guia de TV"
-    },
-    {
       "esporte": "futebol",
       "data": "2026-11-27",
       "times": [
@@ -2984,6 +2970,32 @@
       ],
       "canais": [
         "Disney+ Premium"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-12-02",
+      "times": [
+        "Remo",
+        "Corinthians"
+      ],
+      "canais": [
+        "Premiere"
+      ],
+      "conferido_em": "2026-11-27",
+      "fonte": "guia de TV"
+    },
+    {
+      "esporte": "futebol",
+      "data": "2026-12-02",
+      "times": [
+        "Real Sociedad",
+        "Real Madrid"
+      ],
+      "canais": [
+        "CazéTV"
       ],
       "conferido_em": "2026-11-27",
       "fonte": "guia de TV"
